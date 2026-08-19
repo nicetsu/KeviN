@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, currentUserId } from '@/lib/supabase/server'
 
 export type Result = { ok: true } | { ok: false; error: string }
 
@@ -12,13 +12,13 @@ export async function saveSubscription(sub: {
   deviceLabel: string
 }): Promise<Result> {
   const supabase = await createClient()
-  const { data: authUser } = await supabase.auth.getUser()
-  if (!authUser.user) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
+  const userId = await currentUserId(supabase)   // upsert ต้องระบุเจ้าของ
+  if (!userId) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
 
   // endpoint เป็น unique — เครื่องเดิมกดซ้ำให้ทับของเดิม ไม่สร้างแถวใหม่
   const { error } = await supabase.from('push_subscriptions').upsert(
     {
-      user_id: authUser.user.id,
+      user_id: userId,
       endpoint: sub.endpoint,
       p256dh: sub.p256dh,
       auth: sub.auth,
@@ -35,8 +35,6 @@ export async function saveSubscription(sub: {
 
 export async function removeSubscription(endpoint: string): Promise<Result> {
   const supabase = await createClient()
-  const { data: authUser } = await supabase.auth.getUser()
-  if (!authUser.user) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
 
   const { error } = await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint)
   if (error) return { ok: false, error: error.message }
@@ -51,8 +49,8 @@ export async function removeSubscription(endpoint: string): Promise<Result> {
  */
 export async function sendTestReminder(): Promise<Result> {
   const supabase = await createClient()
-  const { data: authUser } = await supabase.auth.getUser()
-  if (!authUser.user) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
+  const userId = await currentUserId(supabase)   // insert reminder ต้องระบุเจ้าของ
+  if (!userId) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
 
   const { data: project } = await supabase
     .from('projects')
@@ -64,7 +62,7 @@ export async function sendTestReminder(): Promise<Result> {
   if (!project) return { ok: false, error: 'ยังไม่มีโปรเจกต์ให้ผูกการเตือนทดสอบ' }
 
   const { error } = await supabase.from('items').insert({
-    user_id: authUser.user.id,
+    user_id: userId,
     project_id: project.id,
     type: 'reminder',
     title: 'ทดสอบการแจ้งเตือนจาก KeviN',

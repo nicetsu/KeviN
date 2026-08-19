@@ -130,9 +130,9 @@ export default function ItemList({ rows }: { rows: Row[] }) {
       if (!res.ok) {
         setMoveOrder(null) // เด้งกลับลำดับเดิมถ้าเขียนไม่สำเร็จ
         setError(res.error)
-        return
       }
-      router.refresh()
+      // ไม่ต้อง router.refresh() — จอแสดงลำดับใหม่อยู่แล้วและ DB ตรงกันแล้ว
+      // การ refetch ทั้งหน้าเพื่อข้อมูลชุดเดิมคือค่า round trip ที่จ่ายฟรี
     })
   }
 

@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, currentUserId } from '@/lib/supabase/server'
 import { snapToMonday } from '@/lib/weeks'
 
 export type SlotInput = {
@@ -20,8 +20,8 @@ export async function saveSchedules(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = await createClient()
 
-  const { data: auth } = await supabase.auth.getUser()
-  if (!auth.user) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
+  const userId = await currentUserId(supabase)   // insert ต้องระบุเจ้าของ
+  if (!userId) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
 
   // ปัดเป็นวันจันทร์ก่อนส่ง — DB มี CHECK sched_start_is_mon กันอีกชั้น
   const monday = snapToMonday(startDate)
@@ -44,7 +44,7 @@ export async function saveSchedules(
   if (slots.length > 0) {
     const { error: insErr } = await supabase.from('project_schedules').insert(
       slots.map((s) => ({
-        user_id: auth.user!.id,
+        user_id: userId,
         project_id: projectId,
         day_of_week: s.day_of_week,
         start_time: s.start_time,
