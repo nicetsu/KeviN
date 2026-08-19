@@ -31,7 +31,8 @@ export default async function CalendarPage({
 }) {
   const sp = await searchParams
   const today = bangkokToday().dateKey
-  const mode = sp.mode === 'month' ? 'month' : 'week'
+  // เปิดมาเป็นโหมดเดือน · ลิงก์เก่าที่ระบุ ?mode=week ยังใช้ได้เหมือนเดิม
+  const mode = sp.mode === 'week' ? 'week' : 'month'
   const anchor = /^\d{4}-\d{2}-\d{2}$/.test(sp.d ?? '') ? sp.d! : today
 
   const from = mode === 'week' ? mondayOf(anchor) : `${anchor.slice(0, 8)}01`

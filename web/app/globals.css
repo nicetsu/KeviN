@@ -578,3 +578,44 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 }
 .hero__big small { font-size: 0.9rem; font-weight: 400; color: var(--muted); letter-spacing: -0.01em; }
 .hero__sub { font-size: var(--s--1); color: var(--muted); }
+
+/* =====================================================================
+   คลัง · dropdown สองชั้น (ux.html S4)
+   "Area แตะเพื่อกางรายการ project ข้างใต้ ในหน้าเดิม ไม่เปลี่ยนหน้า"
+   ===================================================================== */
+.acc { border-top: 1px solid var(--line-soft); scroll-margin-top: 1rem; }
+
+.acc__head {
+  display: flex; align-items: center; gap: 0.6rem; width: 100%;
+  background: none; border: none; color: inherit; font: inherit;
+  text-align: left; padding: 0.85rem 0; cursor: pointer;
+}
+.acc__name { flex: 1; font-size: var(--s-0); font-weight: 600; }
+.acc__count { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
+.acc__caret {
+  background: none; border: none; color: var(--faint); cursor: pointer;
+  font-size: 1rem; line-height: 1; padding: 0.15rem 0.25rem; flex: none;
+  transition: transform 0.16s ease, color 0.16s ease;
+  display: inline-block;
+}
+.acc__caret--open { transform: rotate(90deg); color: var(--brand); }
+@media (prefers-reduced-motion: reduce) { .acc__caret { transition: none; } }
+
+.acc__body { padding: 0 0 0.6rem 0.4rem; }
+
+.pnode { border-top: 1px solid var(--line-soft); }
+.pnode--archived { opacity: 0.42; }
+.pnode__head { display: flex; align-items: center; gap: 0.45rem; padding: 0.55rem 0; }
+.pnode__name {
+  flex: 1; min-width: 0; font-size: var(--s-0); text-decoration: none; color: inherit;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pnode__name:hover { color: var(--brand); }
+.pnode__when {
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pnode__body { padding: 0 0 0.7rem 1.5rem; }
+.pnode__body .row { padding: 0.5rem 0; }
+.pnode__body .back { margin-top: 0.35rem; }

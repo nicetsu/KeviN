@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { bangkokToday } from '@/lib/time'
+import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
 import { summarize, type Slot } from '@/lib/schedule'
+import LibraryTree, { type TreeArea, type TreeItem } from './LibraryTree'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +22,23 @@ type Project = {
   archived_at: string | null
   sort_order: number
 }
+type Item = {
+  id: string
+  project_id: string
+  type: 'task' | 'reminder' | 'shortnote'
+  title: string
+  body: string | null
+  due_at: string | null
+  remind_at: string | null
+  done_at: string | null
+  sort_order: number
+}
+
+/** "22 ส.ค. 14:30" */
+function stamp(iso: string) {
+  const key = new Date(new Date(iso).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10)
+  return `${thaiDateLabel(key).split(' ').slice(1).join(' ')} ${bangkokTime(iso)}`
+}
 
 export default async function LibraryPage() {
   const supabase = await createClient()
@@ -33,14 +50,10 @@ export default async function LibraryPage() {
     supabase
       .from('project_schedules')
       .select('project_id, day_of_week, start_time, end_time, location, label, week_offsets'),
-    // ตัวเลขนับเฉพาะของที่ "ต้องสนใจ" — เลยกำหนด + ครบวันนี้ (doc/ux.html)
     supabase
       .from('items')
-      .select('project_id')
-      .is('archived_at', null)
-      .is('done_at', null)
-      .in('type', ['task', 'reminder'])
-      .or(`due_at.lt.${end.toISOString()},remind_at.lt.${end.toISOString()}`),
+      .select('id, project_id, type, title, body, due_at, remind_at, done_at, sort_order')
+      .is('archived_at', null),
   ])
 
   const err = areaRes.error ?? projRes.error ?? schedRes.error ?? itemRes.error
@@ -56,80 +69,80 @@ export default async function LibraryPage() {
   const areas = (areaRes.data ?? []) as Area[]
   const projects = (projRes.data ?? []) as Project[]
   const slots = (schedRes.data ?? []) as (Slot & { project_id: string })[]
+  const items = (itemRes.data ?? []) as Item[]
 
-  const attention = new Map<string, number>()
-  for (const r of (itemRes.data ?? []) as { project_id: string }[]) {
-    attention.set(r.project_id, (attention.get(r.project_id) ?? 0) + 1)
+  const isArchived = (p: Project) => p.archived_at !== null || p.status === 'archived'
+  const cutoff = end.toISOString()
+
+  /** "ต้องสนใจ" = เลยกำหนด + ครบวันนี้ และยังไม่เสร็จ */
+  const needsAttention = (i: Item) => {
+    if (i.done_at || i.type === 'shortnote') return false
+    const at = i.type === 'reminder' ? i.remind_at : i.due_at
+    return at !== null && at < cutoff
   }
 
-  const slotsOf = (pid: string) => slots.filter((s) => s.project_id === pid)
-  const isArchived = (p: Project) => p.archived_at !== null || p.status === 'archived'
+  const tree: TreeArea[] = areas.map((area) => {
+    const kids = projects
+      .filter((p) => p.area_id === area.id)
+      .sort(
+        (a, b) => Number(isArchived(a)) - Number(isArchived(b)) || a.sort_order - b.sort_order
+      )
+
+    const treeProjects = kids.map((p) => {
+      const own = items.filter((i) => i.project_id === p.id)
+
+      const toItem = (i: Item): TreeItem => ({
+        id: i.id,
+        kind: i.type === 'shortnote' ? 'note' : i.type,
+        title: i.title,
+        meta:
+          i.type === 'shortnote'
+            ? (i.body ?? '')
+            : i.done_at
+              ? `เสร็จ ${stamp(i.done_at)}`
+              : i.type === 'reminder'
+                ? (i.remind_at ? stamp(i.remind_at) : '')
+                : i.due_at
+                  ? stamp(i.due_at)
+                  : 'ยังไม่กำหนดวัน',
+        done: i.done_at !== null,
+      })
+
+      // งานยังไม่เสร็จก่อน · เสร็จแล้วร่วงท้าย · โน้ตอยู่ล่างสุด
+      const rank = (i: Item) =>
+        i.type === 'shortnote' ? 2 : i.done_at ? 1 : 0
+
+      return {
+        id: p.id,
+        name: p.name,
+        archived: isArchived(p),
+        when: summarize(slots.filter((s) => s.project_id === p.id)),
+        attention: own.filter(needsAttention).length,
+        items: own
+          .sort((a, b) => rank(a) - rank(b) || a.sort_order - b.sort_order)
+          .map(toItem),
+      }
+    })
+
+    return {
+      id: area.id,
+      name: area.name,
+      colorClass: AREA_CLASS[area.color ?? ''] ?? '',
+      label: area.name === 'Class' ? 'วิชา' : 'โปรเจกต์',
+      openCount: kids.filter((p) => !isArchived(p)).length,
+      attention: treeProjects.reduce((n, p) => n + p.attention, 0),
+      projects: treeProjects,
+    }
+  })
 
   return (
     <main className="wrap">
       <div className="page-head">
         <h1>คลัง</h1>
-        <div className="sub">Area › โปรเจกต์</div>
+        <div className="sub">Area › โปรเจกต์ › งาน</div>
       </div>
 
-      <div className="areas">
-        {areas.map((area) => {
-          const kids = projects.filter((p) => p.area_id === area.id)
-          const open = kids.filter((p) => !isArchived(p))
-          const count = kids.reduce((n, p) => n + (attention.get(p.id) ?? 0), 0)
-          const label = area.name === 'Class' ? 'วิชา' : 'โปรเจกต์'
-          return (
-            <a
-              key={area.id}
-              href={`#area-${area.id}`}
-              className={`acard ${AREA_CLASS[area.color ?? ''] ?? ''}`}
-            >
-              <span className="acard__nm">{area.name}</span>
-              <span className="acard__ct">
-                {open.length > 0 ? `${open.length} ${label}` : 'ว่าง'}
-              </span>
-              {count > 0 && <span className="acard__badge">{count}</span>}
-            </a>
-          )
-        })}
-      </div>
-
-      {areas.map((area) => {
-        // archived ร่วงท้าย จางลง แต่ไม่ซ่อน
-        const kids = projects
-          .filter((p) => p.area_id === area.id)
-          .sort(
-            (a, b) =>
-              Number(isArchived(a)) - Number(isArchived(b)) || a.sort_order - b.sort_order
-          )
-
-        if (kids.length === 0) return null
-
-        return (
-          <section key={area.id} id={`area-${area.id}`}>
-            <div className="sec">
-              <span>{area.name}</span>
-              <span>{kids.length}</span>
-            </div>
-            {kids.map((p) => {
-              const archived = isArchived(p)
-              const when = summarize(slotsOf(p.id))
-              const n = attention.get(p.id) ?? 0
-              return (
-                <Link
-                  key={p.id}
-                  href={`/project/${p.id}`}
-                  className={`proj${archived ? ' proj--archived' : ''}`}
-                >
-                  <span className="proj__name">{p.name}</span>
-                  <span className="proj__when">{archived ? 'เก็บเข้าคลังแล้ว' : when}</span>
-                  {n > 0 && <span className="tag tag--late">{n}</span>}
-                </Link>
-              )
-            })}
-          </section>
-        )
-      })}
+      <LibraryTree areas={tree} />
     </main>
   )
 }
