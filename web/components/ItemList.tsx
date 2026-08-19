@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { toggleDone, archiveItem, restoreItem } from '@/app/actions/items'
+import { toggleDone, archiveItem, restoreItem, reorderItems } from '@/app/actions/items'
 import ItemPanel, { type PanelItem } from './ItemPanel'
 
 export type Row = {
@@ -17,6 +17,12 @@ export type Row = {
   tag?: { text: string; kind: 'late' | 'soon' } | null
   /** ข้อมูลสำหรับแผงรายละเอียด · ไม่มี = แถวนี้เปิดแผงไม่ได้ (เช่น คาบเรียน) */
   panel?: PanelItem
+  /**
+   * ลากจัดลำดับได้ไหม — ตั้ง true เฉพาะแถวที่ `sort_order` เป็นตัวตัดสินลำดับจริง
+   * ถ้าตั้งกับแถวที่เรียงด้วย due_at/remind_at ลากแล้วจะเด้งกลับตอนโหลดใหม่
+   * แถวที่ลากได้ต้องอยู่ติดกันเป็นบล็อกเดียว (ตัวลากสลับกันเองภายในบล็อก)
+   */
+  movable?: boolean
 }
 
 const UNDO_MS = 8000
@@ -31,6 +37,12 @@ export default function ItemList({ rows }: { rows: Row[] }) {
   const [undo, setUndo] = useState<{ id: string; title: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [panel, setPanel] = useState<PanelItem | null>(null)
+
+  // ลำดับที่ผู้ใช้ลากไว้ · null = ใช้ลำดับจากเซิร์ฟเวอร์
+  const [moveOrder, setMoveOrder] = useState<string[] | null>(null)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [say, setSay] = useState('')
+  const dragging = useRef(false)
 
   const isDone = (r: Row) => (r.id && r.id in optimistic ? optimistic[r.id] : r.done)
 
@@ -85,66 +97,189 @@ export default function ItemList({ rows }: { rows: Row[] }) {
 
   const visible = rows.filter((r) => !(r.id && hidden.has(r.id)))
 
+  // ---- ลากจัดลำดับ ----------------------------------------------------
+  // แถวที่ลากได้อยู่ติดกันเป็นบล็อกเดียว จึงสลับกันเองได้โดยไม่กระทบแถวอื่น
+  const serverOrder = useMemo(
+    () => visible.filter((r) => r.movable && r.id).map((r) => r.id!),
+    [visible]
+  )
+
+  // ถ้าชุด id เปลี่ยน (เพิ่ม/เก็บเข้าคลัง) ลำดับที่ลากไว้ใช้ไม่ได้แล้ว กลับไปใช้ของเซิร์ฟเวอร์
+  const order = useMemo(() => {
+    if (!moveOrder) return serverOrder
+    const live = new Set(serverOrder)
+    const kept = moveOrder.filter((id) => live.has(id))
+    return kept.length === serverOrder.length ? kept : serverOrder
+  }, [moveOrder, serverOrder])
+
+  // เอาลำดับที่ลากไว้ไปวางทับ โดยแถวที่ลากไม่ได้อยู่ที่เดิมทุกแถว
+  const shown = useMemo(() => {
+    if (order === serverOrder) return visible
+    const byId = new Map(visible.filter((r) => r.id).map((r) => [r.id!, r]))
+    let k = 0
+    return visible.map((r) => (r.movable && r.id ? byId.get(order[k++]) ?? r : r))
+  }, [visible, order, serverOrder])
+
+  const canMove = order.length > 1
+
+  function commit(next: string[], moved: string, title: string) {
+    setMoveOrder(next)
+    setSay(`ย้าย ${title} ไปตำแหน่งที่ ${next.indexOf(moved) + 1} จาก ${next.length}`)
+    startTransition(async () => {
+      const res = await reorderItems(next)
+      if (!res.ok) {
+        setMoveOrder(null) // เด้งกลับลำดับเดิมถ้าเขียนไม่สำเร็จ
+        setError(res.error)
+        return
+      }
+      router.refresh()
+    })
+  }
+
+  /** ย้ายทีละขั้นด้วยแป้นพิมพ์ · ที่จับเป็นปุ่มจึงโฟกัสได้อยู่แล้ว */
+  function nudge(id: string, title: string, step: -1 | 1) {
+    const from = order.indexOf(id)
+    const to = from + step
+    if (from < 0 || to < 0 || to >= order.length) return
+    const next = order.slice()
+    next.splice(to, 0, ...next.splice(from, 1))
+    commit(next, id, title)
+  }
+
+  function onGripDown(e: React.PointerEvent<HTMLButtonElement>, id: string) {
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    dragging.current = true
+    setDragId(id)
+  }
+
+  function onGripMove(e: React.PointerEvent<HTMLButtonElement>) {
+    if (!dragging.current || !dragId) return
+
+    // หาแถวที่ปลายนิ้วอยู่ตรงนั้น แล้วสลับเข้าไปเลย — ไม่ต้องขยับด้วย transform
+    const list = e.currentTarget.closest('[data-list]')
+    if (!list) return
+    const nodes = Array.from(list.querySelectorAll<HTMLElement>('[data-movable="true"]'))
+    const over = nodes.find((n) => {
+      const box = n.getBoundingClientRect()
+      return e.clientY >= box.top && e.clientY <= box.bottom
+    })
+    if (!over?.dataset.id) return
+
+    const from = order.indexOf(dragId)
+    const to = order.indexOf(over.dataset.id)
+    if (from < 0 || to < 0 || from === to) return
+
+    const next = order.slice()
+    next.splice(to, 0, ...next.splice(from, 1))
+    setMoveOrder(next)
+  }
+
+  function onGripUp(id: string, title: string) {
+    if (!dragging.current) return
+    dragging.current = false
+    setDragId(null)
+    if (order.join() === serverOrder.join()) return // ไม่ได้ขยับ ไม่ต้องเขียน
+    commit(order.slice(), id, title)
+  }
+  // ---------------------------------------------------------------------
+
   return (
     <>
       {error && <p className="alert alert--gap" role="alert">{error}</p>}
 
-      {visible.map((r, i) => {
-        const done = isDone(r)
-        return (
-          <div className={`row${done ? ' row--done' : ''}`} key={r.id ?? `x${i}`}>
-            <span className="row__stripe" style={{ background: r.color }} />
+      <div data-list>
+        {shown.map((r, i) => {
+          const done = isDone(r)
+          const movable = Boolean(canMove && r.movable && r.id)
+          return (
+            <div
+              className={`row${done ? ' row--done' : ''}${dragId && dragId === r.id ? ' row--drag' : ''}`}
+              key={r.id ?? `x${i}`}
+              data-movable={movable ? 'true' : undefined}
+              data-id={r.id ?? undefined}
+            >
+              <span className="row__stripe" style={{ background: r.color }} />
 
-            {r.checkable && r.id ? (
-              <button
-                type="button"
-                className="cb"
-                data-on={done}
-                aria-pressed={done}
-                aria-label={done ? `เอาติ๊กออก ${r.title}` : `ติ๊กว่าเสร็จ ${r.title}`}
-                onClick={() => onToggle(r)}
-              >
-                {done && (
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <path d="M2.5 6.2 4.8 8.5 9.5 3.8" stroke="#0A0912" strokeWidth="2"
-                      strokeLinecap="round" strokeLinejoin="round" />
+              {r.checkable && r.id ? (
+                <button
+                  type="button"
+                  className="cb"
+                  data-on={done}
+                  aria-pressed={done}
+                  aria-label={done ? `เอาติ๊กออก ${r.title}` : `ติ๊กว่าเสร็จ ${r.title}`}
+                  onClick={() => onToggle(r)}
+                >
+                  {done && (
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M2.5 6.2 4.8 8.5 9.5 3.8" stroke="#0A0912" strokeWidth="2"
+                        strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+              ) : r.checkable ? (
+                <span className="cb" aria-hidden="true" />
+              ) : null}
+
+              {r.panel ? (
+                <button type="button" className="row__body row__body--tap"
+                  onClick={() => setPanel(r.panel!)}
+                  aria-label={`เปิดรายละเอียด ${r.title}`}>
+                  <span className="row__title">{r.title}</span>
+                  {r.meta && <span className="row__meta">{r.meta}</span>}
+                </button>
+              ) : (
+                <div className="row__body">
+                  <div className="row__title">{r.title}</div>
+                  {r.meta && <div className="row__meta">{r.meta}</div>}
+                </div>
+              )}
+
+              {r.tag && <span className={`tag tag--${r.tag.kind}`}>{r.tag.text}</span>}
+
+              {movable && (
+                <button
+                  type="button"
+                  className="grip"
+                  aria-label={`จัดลำดับ ${r.title} · ตำแหน่งที่ ${order.indexOf(r.id!) + 1} จาก ${order.length} · ใช้ลูกศรขึ้นลงเพื่อย้าย`}
+                  title="ลากเพื่อจัดลำดับ"
+                  onPointerDown={(e) => onGripDown(e, r.id!)}
+                  onPointerMove={onGripMove}
+                  onPointerUp={() => onGripUp(r.id!, r.title)}
+                  onPointerCancel={() => onGripUp(r.id!, r.title)}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+                    e.preventDefault()
+                    nudge(r.id!, r.title, e.key === 'ArrowUp' ? -1 : 1)
+                  }}
+                >
+                  <svg width="10" height="14" viewBox="0 0 10 14" aria-hidden="true">
+                    <g fill="currentColor">
+                      <circle cx="2.5" cy="3" r="1.15" /><circle cx="7.5" cy="3" r="1.15" />
+                      <circle cx="2.5" cy="7" r="1.15" /><circle cx="7.5" cy="7" r="1.15" />
+                      <circle cx="2.5" cy="11" r="1.15" /><circle cx="7.5" cy="11" r="1.15" />
+                    </g>
                   </svg>
-                )}
-              </button>
-            ) : r.checkable ? (
-              <span className="cb" aria-hidden="true" />
-            ) : null}
+                </button>
+              )}
 
-            {r.panel ? (
-              <button type="button" className="row__body row__body--tap"
-                onClick={() => setPanel(r.panel!)}
-                aria-label={`เปิดรายละเอียด ${r.title}`}>
-                <span className="row__title">{r.title}</span>
-                {r.meta && <span className="row__meta">{r.meta}</span>}
-              </button>
-            ) : (
-              <div className="row__body">
-                <div className="row__title">{r.title}</div>
-                {r.meta && <div className="row__meta">{r.meta}</div>}
-              </div>
-            )}
+              {r.id && (
+                <button
+                  type="button"
+                  className="rowbtn"
+                  aria-label={`เก็บเข้าคลัง ${r.title}`}
+                  title="เก็บเข้าคลัง"
+                  onClick={() => onArchive(r)}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
 
-            {r.tag && <span className={`tag tag--${r.tag.kind}`}>{r.tag.text}</span>}
-
-            {r.id && (
-              <button
-                type="button"
-                className="rowbtn"
-                aria-label={`เก็บเข้าคลัง ${r.title}`}
-                title="เก็บเข้าคลัง"
-                onClick={() => onArchive(r)}
-              >
-                ×
-              </button>
-            )}
-          </div>
-        )
-      })}
+      <span className="sr-only" role="status" aria-live="polite">{say}</span>
 
       {panel && <ItemPanel item={panel} onClose={() => setPanel(null)} />}
 

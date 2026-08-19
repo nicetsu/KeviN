@@ -454,6 +454,31 @@ html, body { margin: 0; padding: 0; }
 /* จอสัมผัสไม่มี hover — ให้เห็นตลอด */
 @media (hover: none) { .rowbtn { opacity: 0.55; } }
 
+/* ---- ที่จับสำหรับลากจัดลำดับ ----
+   โผล่เฉพาะแถวที่ sort_order เป็นตัวตัดสินลำดับจริง (โน้ต · งานที่ยังไม่มีวันกำหนด)
+   touch-action:none จำเป็น ไม่งั้นนิ้วลากแล้วหน้าเลื่อนแทนที่จะย้ายแถว */
+.grip {
+  width: 1.15rem; height: 1.4rem; flex: none; align-self: center;
+  display: grid; place-items: center; padding: 0;
+  background: none; border: none; color: var(--faint);
+  cursor: grab; touch-action: none; opacity: 0.45;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+.row:hover .grip, .grip:focus-visible { opacity: 1; color: var(--brand); }
+.grip:active { cursor: grabbing; }
+.grip svg { display: block; }
+@media (hover: none) { .grip { opacity: 0.6; } }
+
+/* แถวที่กำลังลาก — ยกขึ้นจากพื้นเล็กน้อย ไม่ใส่เงาตามกติกาใน DECISIONS */
+.row--drag { background: var(--raised); border-radius: var(--r-tile); }
+.row--drag .grip { color: var(--brand); opacity: 1; }
+
+/* ข้อความสำหรับโปรแกรมอ่านหน้าจอ · ใช้ประกาศตำแหน่งใหม่ตอนย้ายด้วยแป้นพิมพ์ */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
 .undo {
   position: fixed; z-index: 30; left: 50%; transform: translateX(-50%);
   bottom: calc(4.2rem + env(safe-area-inset-bottom));

@@ -170,3 +170,41 @@ export async function createProject(areaId: string, name: string): Promise<Resul
   refresh()
   return { ok: true, id: data.id }
 }
+
+/**
+ * จัดลำดับใหม่ · `ids` เรียงตามลำดับที่ต้องการแล้ว เขียน sort_order = ตำแหน่ง
+ *
+ * เรียกได้เฉพาะกับชุดแถวที่ sort_order เป็นตัวตัดสินลำดับจริง
+ * (โน้ตทั้งกลุ่ม · งานที่ยังไม่เสร็จและไม่มีวันกำหนด) — ที่อื่นลากแล้วจะเด้งกลับ
+ * เพราะ due_at/remind_at มาก่อนใน comparator
+ */
+export async function reorderItems(ids: string[]): Promise<Result> {
+  const { supabase, user } = await client()
+  if (!user) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
+
+  if (ids.length === 0) return { ok: true }
+  if (ids.length > 200) return { ok: false, error: 'รายการยาวเกินไป' }
+  if (new Set(ids).size !== ids.length) return { ok: false, error: 'รายการซ้ำ' }
+
+  // RLS กันไม่ให้แตะแถวของคนอื่นอยู่แล้ว ที่นี่จึงไม่ต้องเช็ก user_id ซ้ำ
+  //
+  // ⚠️ ต้องมี .select() — update ที่ไม่โดนสักแถวจะ "สำเร็จ" เงียบ ๆ ไม่มี error
+  //    ตอนทำครั้งแรกพลาดข้อนี้ ลากแล้วดูเหมือนได้ แต่กด F5 ลำดับเด้งกลับหมด
+  const results = await Promise.all(
+    ids.map((id, i) =>
+      supabase.from('items').update({ sort_order: i }).eq('id', id).select('id')
+    )
+  )
+
+  const failed = results.find((r) => r.error)
+  if (failed?.error) return { ok: false, error: failed.error.message }
+
+  const missed = results.filter((r) => (r.data?.length ?? 0) === 0).length
+  if (missed > 0) {
+    console.error('[reorderItems] ไม่โดนสักแถว', { ids, missed })
+    return { ok: false, error: `บันทึกลำดับไม่สำเร็จ (${missed} รายการไม่ถูกเขียน)` }
+  }
+
+  refresh()
+  return { ok: true }
+}

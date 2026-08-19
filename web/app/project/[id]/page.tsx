@@ -123,6 +123,8 @@ export default async function ProjectPage({
                   : 'ยังไม่กำหนดวัน',
               done: t.done_at !== null,
               checkable: true,
+              // due_at มาก่อน sort_order ใน sink() งานที่มีวันกำหนดจึงลากไม่ได้
+              movable: t.done_at === null && t.due_at === null,
               panel: {
                 id: t.id, projectId: id, type: 'task' as const, title: t.title,
                 body: t.body, at: t.due_at, done: t.done_at !== null,
@@ -163,6 +165,7 @@ export default async function ProjectPage({
               meta: n.body ?? '',
               done: false,
               checkable: false,
+              movable: true,
               panel: {
                 id: n.id, projectId: id, type: 'shortnote' as const, title: n.title,
                 body: n.body, at: null, done: false,
