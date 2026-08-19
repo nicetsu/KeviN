@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createProject } from '@/app/actions/items'
+import { LIBRARY_OPEN_COOKIE, encodeOpen } from '@/lib/libraryOpen'
 
 export type TreeItem = {
   id: string
@@ -38,7 +39,12 @@ const COLOR: Record<TreeItem['kind'], string> = {
   note: 'var(--note)',
 }
 
-const STORE = 'kevin.library.open'
+/** จำไว้หนึ่งปี · ไม่ใช่ความลับอะไร JavaScript จึงเขียนเองได้ (ตั้ง HttpOnly ไม่ได้) */
+function saveOpen(ids: Iterable<string>) {
+  const secure = location.protocol === 'https:' ? '; secure' : ''
+  document.cookie =
+    `${LIBRARY_OPEN_COOKIE}=${encodeOpen(ids)}; path=/; max-age=31536000; samesite=lax${secure}`
+}
 
 /**
  * หน้าคลัง (S4)
@@ -47,38 +53,25 @@ const STORE = 'kevin.library.open'
  * — ทำให้เทียบข้าม Area ได้" · การ์ดด้านบนทำหน้าที่เป็นสารบัญ กดแล้วกาง
  * พร้อมเลื่อนไปหา
  */
-export default function LibraryTree({ areas }: { areas: TreeArea[] }) {
-  const [openAreas, setOpenAreas] = useState<Set<string>>(new Set())
+export default function LibraryTree({
+  areas,
+  initialOpen,
+}: {
+  areas: TreeArea[]
+  /** `null` = ยังไม่เคยบันทึก → ปิดหมด · `[]` = เคยบันทึกว่าปิดหมด (ดู lib/libraryOpen.ts) */
+  initialOpen: string[] | null
+}) {
+  // ค่าตั้งต้นมาจากเซิร์ฟเวอร์แล้ว เฟรมแรกจึงถูกเลย ไม่ต้องอ่านอะไรใน effect
+  // และไม่มี setState ใน effect ให้วาดซ้ำรอบสอง = ไม่กระพริบ
+  const [openAreas, setOpenAreas] = useState<Set<string>>(() => new Set(initialOpen ?? []))
   const [openProjects, setOpenProjects] = useState<Set<string>>(new Set())
-  const [ready, setReady] = useState(false)
   const refs = useRef<Record<string, HTMLElement | null>>({})
 
-  // จำไว้ว่ากางอะไรค้างไว้ · เปิดกลับมาครั้งหน้าจะอยู่ที่เดิม
-  //
-  // ต้องแยก "ยังไม่เคยบันทึก" ออกจาก "บันทึกไว้ว่าไม่เปิดอะไรเลย" —
-  // ถ้าเช็กแค่ความยาว การปิดทุกอันจะถูกมองว่ายังไม่เคยบันทึก แล้วเด้งกลับมาเปิดเอง
+  // เขียนกลับลง cookie เมื่อสถานะเปลี่ยน — effect ทำหน้าที่ sync กับของนอก React
+  // ซึ่งเป็นสิ่งที่ effect มีไว้ทำจริง ๆ (ต่างจากการ setState ในนั้น)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORE)
-      if (raw !== null) {
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed)) setOpenAreas(new Set(parsed as string[]))
-      }
-      // ยังไม่เคยบันทึก = ปิดทุกอัน ให้เห็นภาพรวมทั้ง 4 Area ก่อน
-    } catch {
-      // อ่านไม่ได้ก็ถือว่าปิดทุกอัน
-    }
-    setReady(true)
-  }, [])
-
-  useEffect(() => {
-    if (!ready) return
-    try {
-      localStorage.setItem(STORE, JSON.stringify([...openAreas]))
-    } catch {
-      // โหมดส่วนตัวบางเบราว์เซอร์เขียนไม่ได้ · ไม่ใช่เรื่องคอขาดบาดตาย
-    }
-  }, [openAreas, ready])
+    saveOpen(openAreas)
+  }, [openAreas])
 
   const toggleArea = (id: string) =>
     setOpenAreas((p) => {

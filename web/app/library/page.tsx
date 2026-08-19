@@ -1,4 +1,6 @@
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { LIBRARY_OPEN_COOKIE, decodeOpen } from '@/lib/libraryOpen'
 import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
 import { summarize, type Slot } from '@/lib/schedule'
 import LibraryTree, { type TreeArea, type TreeItem } from './LibraryTree'
@@ -43,6 +45,10 @@ function stamp(iso: string) {
 export default async function LibraryPage() {
   const supabase = await createClient()
   const { end } = bangkokToday()
+
+  // อ่านตรงนี้ เซิร์ฟเวอร์จึงวาดสถานะกาง/หุบถูกตั้งแต่เฟรมแรก ไม่ต้องรอ effect
+  const jar = await cookies()
+  const initialOpen = decodeOpen(jar.get(LIBRARY_OPEN_COOKIE)?.value)
 
   const [areaRes, projRes, schedRes, itemRes] = await Promise.all([
     supabase.from('areas').select('id, name, color, sort_order').is('archived_at', null).order('sort_order'),
@@ -142,7 +148,7 @@ export default async function LibraryPage() {
         <div className="sub">Area › โปรเจกต์ › งาน</div>
       </div>
 
-      <LibraryTree areas={tree} />
+      <LibraryTree areas={tree} initialOpen={initialOpen} />
     </main>
   )
 }

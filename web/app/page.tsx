@@ -1,3 +1,4 @@
+import { connection } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import {
   bangkokToday,
@@ -37,6 +38,23 @@ type Item = {
 
 type Line = Row & { sortAt: number }
 
+/**
+ * เวลาปัจจุบัน ณ ตอนที่ request เข้ามา
+ *
+ * `await connection()` ประกาศชัดว่าหน้านี้ขึ้นกับ request จริง จึง prerender
+ * ตอน build ไม่ได้ · ถ้าเรียก `Date.now()` เปล่า ๆ มันจะถูกต้องอยู่ก็เพราะบังเอิญ
+ * มี `force-dynamic` กำกับ — วันไหนมีคนถอดบรรทัดนั้นออกเพราะคิดว่าเป็นตัวถ่วง
+ * เวลาจะถูกตรึงไว้ที่ตอน build แล้ว "เลยกำหนด" กับ "อีก 30 นาที" จะคำนวณจากอดีต
+ * **ผิดเงียบ ๆ ไม่มี error ให้เห็น**
+ *
+ * ที่แยกออกมาเป็นฟังก์ชันเพราะการเรียกอะไรที่ให้ค่าไม่คงที่กลางตัว component
+ * ผิดกฎ React และ eslint จับ — แม้ที่นี่จะเป็น Server Component ที่ render รอบเดียวจบ
+ */
+async function requestNow() {
+  await connection()
+  return Date.now()
+}
+
 export default async function TodayPage() {
   const supabase = await createClient()
   const { start, end, dateKey } = bangkokToday()
@@ -67,7 +85,7 @@ export default async function TodayPage() {
 
   const occurrences = (occRes.data ?? []) as Occurrence[]
   const items = (itemRes.data ?? []) as unknown as Item[]
-  const now = Date.now()
+  const now = await requestNow()
 
   // คาบเรียนไม่ใช่ item — ติ๊กไม่ได้ เก็บเข้าคลังไม่ได้ แก้ที่หน้าวิชา
   const classLines: Line[] = occurrences.map((o) => ({
