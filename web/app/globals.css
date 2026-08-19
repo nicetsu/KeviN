@@ -619,3 +619,14 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 .pnode__body { padding: 0 0 0.7rem 1.5rem; }
 .pnode__body .row { padding: 0.5rem 0; }
 .pnode__body .back { margin-top: 0.35rem; }
+
+/* ปุ่มสร้างในตัว Area · Area ที่ว่างต้องมีทางไปต่อ ไม่ใช่ทางตัน (doc/DESIGN.md) */
+.newproj {
+  display: block; width: 100%; text-align: left;
+  background: none; border: 1px dashed var(--line); border-radius: var(--r-tile);
+  color: var(--brand); font: inherit; font-size: var(--s--1);
+  padding: 0.55rem 0.75rem; margin-top: 0.5rem; cursor: pointer;
+}
+.newproj:hover { border-color: var(--brand); background: var(--brand-soft); }
+.newproj__form { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.5rem; align-items: center; }
+.newproj__form .input { flex: 1; min-width: 10rem; }

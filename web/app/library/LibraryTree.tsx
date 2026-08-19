@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createProject } from '@/app/actions/items'
 
 export type TreeItem = {
   id: string
@@ -121,7 +123,6 @@ export default function LibraryTree({ areas }: { areas: TreeArea[] }) {
       </div>
 
       {areas.map((a) => {
-        if (a.projects.length === 0) return null
         const open = openAreas.has(a.id)
         return (
           <section
@@ -142,6 +143,7 @@ export default function LibraryTree({ areas }: { areas: TreeArea[] }) {
 
             {open && (
               <div className="acc__body">
+                {a.projects.length === 0 && <NewProject areaId={a.id} label={a.label} />}
                 {a.projects.map((p) => {
                   const pOpen = openProjects.has(p.id)
                   return (
@@ -186,11 +188,68 @@ export default function LibraryTree({ areas }: { areas: TreeArea[] }) {
                     </div>
                   )
                 })}
+                {a.projects.length > 0 && <NewProject areaId={a.id} label={a.label} />}
               </div>
             )}
           </section>
         )
       })}
     </>
+  )
+}
+
+/**
+ * ปุ่มสร้างอยู่ในตัว Area นั้น ไม่ใช่ข้อความว่าง (doc/DESIGN.md)
+ * Area ที่ยังไม่มีอะไรจึงยังมีทางไปต่อ ไม่ใช่ทางตัน
+ */
+function NewProject({ areaId, label }: { areaId: string; label: string }) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function save() {
+    setError(null)
+    if (!name.trim()) { setError('ต้องมีชื่อ'); return }
+    setBusy(true)
+    const res = await createProject(areaId, name)
+    setBusy(false)
+    if (!res.ok) { setError(res.error); return }
+    setName('')
+    setOpen(false)
+    router.refresh()
+  }
+
+  if (!open) {
+    return (
+      <button type="button" className="newproj" onClick={() => setOpen(true)}>
+        + {label}ใหม่
+      </button>
+    )
+  }
+
+  return (
+    <div className="newproj__form">
+      <input
+        className="input"
+        autoFocus
+        placeholder={`ชื่อ${label}`}
+        value={name}
+        maxLength={120}
+        onChange={(e) => { setName(e.target.value); setError(null) }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') save()
+          if (e.key === 'Escape') { setOpen(false); setName(''); setError(null) }
+        }}
+      />
+      <button className="btn" disabled={busy} onClick={save}>
+        {busy ? 'กำลังบันทึก…' : 'สร้าง'}
+      </button>
+      <button className="btn btn--quiet" onClick={() => { setOpen(false); setName(''); setError(null) }}>
+        ยกเลิก
+      </button>
+      {error && <p className="alert" style={{ flexBasis: '100%' }} role="alert">{error}</p>}
+    </div>
   )
 }

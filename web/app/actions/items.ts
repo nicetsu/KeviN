@@ -136,3 +136,37 @@ export async function archiveProject(projectId: string, archived: boolean): Prom
   revalidatePath(`/project/${projectId}`)
   return { ok: true }
 }
+
+/** สร้าง project ใหม่ในกลุ่มที่ระบุ · ใช้จากปุ่มในกล่อง Area ที่ยังว่าง */
+export async function createProject(areaId: string, name: string): Promise<Result & { id?: string }> {
+  const { supabase, user } = await client()
+  if (!user) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
+
+  const clean = name.trim()
+  if (!clean) return { ok: false, error: 'ต้องมีชื่อ' }
+  if (clean.length > 120) return { ok: false, error: 'ชื่อยาวเกิน 120 ตัวอักษร' }
+
+  // ต่อท้ายเสมอ ไม่แทรกกลาง
+  const { data: last } = await supabase
+    .from('projects')
+    .select('sort_order')
+    .eq('area_id', areaId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const { data, error } = await supabase
+    .from('projects')
+    .insert({
+      user_id: user.id,
+      area_id: areaId,
+      name: clean,
+      sort_order: (last?.sort_order ?? -1) + 1,
+    })
+    .select('id')
+    .single()
+
+  if (error) return { ok: false, error: error.message }
+  refresh()
+  return { ok: true, id: data.id }
+}
