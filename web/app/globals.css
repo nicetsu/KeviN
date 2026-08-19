@@ -335,37 +335,56 @@ html, body { margin: 0; padding: 0; }
 .wk__now { width: 2px; background: var(--brand); justify-self: start; z-index: 3; margin-left: -1px; }
 
 /* =====================================================================
-   ปฏิทิน · โหมดเดือน (S2)
+   ปฏิทิน · โหมดเดือน (S2) · ช่องวันเป็นจุดสี ไม่ใช่ข้อความ (ui-kit.html)
+   ทำให้ทั้งเดือนพอดีจอมือถือโดยไม่ต้องเลื่อน
    ===================================================================== */
-/* minmax(0,1fr) ไม่ใช่ 1fr — เพราะ 1fr มี min-width:auto ทำให้ชื่อวิชายาว ๆ
-   ที่ตั้ง nowrap ดันคอลัมน์จนตารางล้นออกนอกจอ */
 .mo { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
-.mo__hd { text-align: center; padding: 0 0 0.35rem;
-          font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
-.mo__day { background: var(--surface); border-radius: 8px; min-height: 74px;
-            padding: 0.3rem; min-width: 0; overflow: hidden; }
-.mo__day--out { opacity: 0.28; }
-.mo__n { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
-/* วันนี้ไฮไลต์ทั้งช่อง ไม่ใช่แค่ตัวเลข (ui-kit.html) */
-.mo__day--today { background: var(--brand-soft); }
-.mo__day--today .mo__n { color: var(--brand); font-weight: 600; }
-.mo__ev { min-width: 0; font-size: 0.63rem; line-height: 1.35; margin-top: 0.12rem;
-          padding-left: 0.28rem; border-left: 2px solid var(--sched);
-          overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); }
-.mo__more { font-family: var(--f-mono); font-size: 0.58rem; color: var(--faint); margin-top: 0.1rem; }
 
-@media (min-width: 768px) { .mo__day { min-height: 104px; } }
+.mo__hd {
+  text-align: center; padding: 0 0 0.4rem;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+}
+
+.mo__day {
+  background: var(--surface); border: 1px solid transparent; border-radius: 8px;
+  min-height: 46px; padding: 0.3rem 0.25rem 0.35rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.22rem;
+  font: inherit; color: inherit; cursor: pointer;
+}
+.mo__day--out { opacity: 0.28; }
+.mo__day--today .mo__n { color: var(--brand); font-weight: 600; }
+.mo__day--picked { background: var(--brand-soft); border-color: var(--brand); }
+
+.mo__n { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); line-height: 1; }
+.mo__dots { display: flex; gap: 3px; min-height: 5px; }
+.mo__dots i { width: 5px; height: 5px; border-radius: 50%; display: block; }
+
+@media (min-width: 768px) { .mo__day { min-height: 58px; } }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: 0.9rem;
+  margin: 0.9rem 0 0.4rem;
+  font-size: var(--s--2); color: var(--muted);
+}
+.legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.legend i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+
+/* หัวปฏิทิน · ชื่อเดือนกับปุ่มสลับโหมดอยู่แถวเดียวกัน */
+.cal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap;
+}
+.cal-head h1 { font-size: var(--s-2); font-weight: 600; letter-spacing: -0.025em; margin: 0; }
 
 /* ตัวสลับโหมด */
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-pill); overflow: hidden; }
 .seg a { text-decoration: none; color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem; }
 .seg a[data-on="true"] { background: var(--brand); color: #12102A; font-weight: 600; }
 
-.cal-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.9rem; }
-.cal-nav { display: flex; gap: 0.35rem; }
+.cal-nav { display: flex; gap: 0.35rem; margin-bottom: 0.9rem; }
 .cal-nav a {
   text-decoration: none; color: var(--muted); border: 1px solid var(--line);
-  border-radius: var(--r-pill); width: 1.9rem; height: 1.9rem;
+  border-radius: var(--r-pill); min-width: 1.9rem; height: 1.9rem; padding: 0 0.7rem;
   display: grid; place-items: center; font-size: var(--s--1);
 }
 .cal-nav a:hover { color: var(--brand); border-color: var(--brand); }
@@ -513,7 +532,7 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 /* =====================================================================
    การ์ด Area · gradient แทนภาพประกอบ ความทึบ 11% (doc/DESIGN.md)
    ===================================================================== */
-.areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1.6rem; }
 @media (min-width: 768px) { .areas { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .acard {

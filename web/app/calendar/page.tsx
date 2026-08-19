@@ -2,12 +2,27 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import {
   bangkokToday, mondayOf, addDays, addMonths,
-  thaiMonthLabel, thaiRangeLabel,
+  thaiMonthLabel, thaiRangeLabel, bangkokTime, clockLabel,
 } from '@/lib/time'
 import WeekGrid, { type Occ } from './WeekGrid'
-import MonthGrid from './MonthGrid'
+import MonthGrid, { type DayEntry } from './MonthGrid'
 
 export const dynamic = 'force-dynamic'
+
+type Item = {
+  id: string
+  type: 'task' | 'reminder' | 'shortnote'
+  title: string
+  due_at: string | null
+  remind_at: string | null
+  done_at: string | null
+  projects: { name: string } | null
+}
+
+/** ISO -> YYYY-MM-DD ตามวันไทย */
+function dayKeyOf(iso: string) {
+  return new Date(new Date(iso).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10)
+}
 
 export default async function CalendarPage({
   searchParams,
@@ -27,13 +42,58 @@ export default async function CalendarPage({
   const rangeTo = mode === 'week' ? addDays(from, 6) : addDays(monthStart, 41)
 
   const supabase = await createClient()
-  const { data, error } = await supabase.rpc('schedule_occurrences', {
-    p_from: rangeFrom,
-    p_to: rangeTo,
-  })
 
-  const occurrences = (data ?? []) as Occ[]
+  const [occRes, itemRes] = await Promise.all([
+    supabase.rpc('schedule_occurrences', { p_from: rangeFrom, p_to: rangeTo }),
+    // โหมดเดือนต้องมีจุดของงานและการเตือนด้วย ไม่ใช่แค่คาบเรียน
+    mode === 'month'
+      ? supabase
+          .from('items')
+          .select('id, type, title, due_at, remind_at, done_at, projects(name)')
+          .is('archived_at', null)
+          .in('type', ['task', 'reminder'])
+          .or(
+            `and(due_at.gte.${rangeFrom},due_at.lte.${rangeTo}),` +
+              `and(remind_at.gte.${rangeFrom},remind_at.lte.${rangeTo})`
+          )
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  const error = occRes.error ?? itemRes.error
+  const occurrences = (occRes.data ?? []) as Occ[]
+  const items = (itemRes.data ?? []) as unknown as Item[]
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i))
+
+  // รวมทุกอย่างของเดือนเป็นรายวัน
+  const byDay: Record<string, DayEntry[]> = {}
+  const push = (day: string, e: DayEntry) => {
+    ;(byDay[day] ??= []).push(e)
+  }
+
+  if (mode === 'month') {
+    for (const o of occurrences) {
+      push(o.occurs_on, {
+        kind: 'class',
+        title: o.project_name,
+        time: `${clockLabel(o.start_time)}–${clockLabel(o.end_time)}`,
+        detail: [o.location, o.label].filter(Boolean).join(' · '),
+      })
+    }
+    for (const it of items) {
+      const at = it.type === 'reminder' ? it.remind_at : it.due_at
+      if (!at) continue
+      push(dayKeyOf(at), {
+        // เสร็จแล้วเป็นเขียว ยังไม่เสร็จเป็นส้ม — เห็นความคืบหน้าได้จากปฏิทินเลย
+        kind: it.done_at ? 'done' : 'due',
+        title: it.title,
+        time: bangkokTime(at),
+        detail: it.projects?.name ?? '',
+      })
+    }
+    for (const list of Object.values(byDay)) {
+      list.sort((a, b) => (a.time ?? '').localeCompare(b.time ?? ''))
+    }
+  }
 
   const prev = mode === 'week' ? addDays(from, -7) : addMonths(monthStart, -1)
   const next = mode === 'week' ? addDays(from, 7) : addMonths(monthStart, 1)
@@ -41,36 +101,32 @@ export default async function CalendarPage({
 
   return (
     <main className="wrap wrap--wide">
-      <div className="page-head">
-        <h1>ปฏิทิน</h1>
-        <div className="sub">
+      <div className="cal-head">
+        <h1>
           {mode === 'week' ? thaiRangeLabel(from, addDays(from, 6)) : thaiMonthLabel(monthStart)}
+        </h1>
+        <div className="seg">
+          <Link href={`/calendar?mode=month&d=${anchor}`} data-on={mode === 'month'}>เดือน</Link>
+          <Link href={`/calendar?mode=week&d=${anchor}`} data-on={mode === 'week'}>สัปดาห์</Link>
         </div>
       </div>
 
-      <div className="cal-bar">
-        <div className="seg">
-          <Link href={`/calendar?mode=week&d=${anchor}`} data-on={mode === 'week'}>สัปดาห์</Link>
-          <Link href={`/calendar?mode=month&d=${anchor}`} data-on={mode === 'month'}>เดือน</Link>
-        </div>
-        <div className="cal-nav">
-          <Link href={q(prev)} aria-label="ก่อนหน้า">‹</Link>
-          <Link href={q(today)} aria-label="วันนี้">•</Link>
-          <Link href={q(next)} aria-label="ถัดไป">›</Link>
-        </div>
+      <div className="cal-nav">
+        <Link href={q(prev)} aria-label="ก่อนหน้า">‹</Link>
+        <Link href={q(today)} aria-label="วันนี้">วันนี้</Link>
+        <Link href={q(next)} aria-label="ถัดไป">›</Link>
       </div>
 
       {error ? (
         <p className="alert" role="alert">โหลดปฏิทินไม่สำเร็จ · {error.message}</p>
       ) : mode === 'week' ? (
-        <WeekGrid occurrences={occurrences} days={days} />
+        <>
+          <WeekGrid occurrences={occurrences} days={days} />
+          <p className="none" style={{ marginTop: '1rem' }}>ปฏิทินไว้ดู · แก้ที่หน้าคลัง</p>
+        </>
       ) : (
-        <MonthGrid monthKey={monthStart} occurrences={occurrences} today={today} />
+        <MonthGrid monthKey={monthStart} today={today} byDay={byDay} />
       )}
-
-      <p style={{ color: 'var(--faint)', fontSize: 'var(--s--2)', marginTop: '1rem' }}>
-        ปฏิทินไว้ดู · แก้ที่หน้าคลัง
-      </p>
     </main>
   )
 }

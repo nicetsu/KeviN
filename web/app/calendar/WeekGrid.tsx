@@ -9,6 +9,8 @@ export type Occ = {
   start_time: string
   end_time: string
   location: string | null
+  /** "บรรยาย" / "ปฏิบัติ" / "ติว" · ใช้ในรายละเอียดของโหมดเดือน */
+  label: string | null
 }
 
 const SLOT = 0.5 // คอลัมน์ละ 30 นาที — ตารางจริงมีคาบจบ 17:30 และ 19:30

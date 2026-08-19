@@ -191,10 +191,10 @@ export default async function TodayPage() {
 }
 
 function Head({ dateKey }: { dateKey: string }) {
+  // วันที่คือหัวข้อของหน้านี้ · คำว่า "วันนี้" อยู่ในแถบนำทางแล้ว ไม่ต้องซ้ำ
   return (
     <div className="page-head">
-      <h1>วันนี้</h1>
-      <div className="sub">{thaiDateLabel(dateKey)}</div>
+      <h1>{thaiDateLabel(dateKey)}</h1>
     </div>
   )
 }
