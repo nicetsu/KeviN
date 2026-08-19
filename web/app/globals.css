@@ -161,13 +161,17 @@ html, body { margin: 0; padding: 0; }
 .cb svg { display: block; }
 
 /* ---- ป้ายขวา · โผล่เฉพาะตอนผิดปกติ ---- */
+/* ขอบจางกว่าตัวอักษร ป้ายจึงไม่แย่งความสนใจจากเนื้อหา (ui-kit.html) */
 .tag {
   font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.06em;
-  padding: 0.05rem 0.45rem; border-radius: var(--r-pill);
-  border: 1px solid currentColor; flex: none; align-self: center;
+  padding: 0.05rem 0.5rem; border-radius: var(--r-pill);
+  border: 1px solid transparent; flex: none; align-self: center; white-space: nowrap;
 }
-.tag--late { color: var(--due); }
-.tag--soon { color: var(--due); }
+.tag--late { color: var(--due); border-color: rgba(224, 137, 126, 0.32); }
+.tag--soon { color: var(--due); border-color: rgba(224, 137, 126, 0.32); }
+.tag--sched { color: var(--sched); border-color: rgba(121, 194, 208, 0.32); }
+.tag--task { color: var(--task); border-color: rgba(116, 198, 164, 0.32); }
+.tag--brand { color: var(--brand); border-color: rgba(165, 148, 255, 0.38); }
 
 /* ---- สถานะว่าง ---- */
 .empty {
@@ -315,7 +319,8 @@ html, body { margin: 0; padding: 0; }
 .wk__day--today { color: var(--brand); font-weight: 600; }
 
 .wk__blk {
-  border-radius: 6px; padding: 0 0.35rem;
+  align-self: center; margin: 3px 3px 3px 4px;
+  border-radius: 7px; padding: 0.1rem 0.4rem;
   font-size: var(--s--2); line-height: 1.25;
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
   display: flex; flex-direction: column; justify-content: center;
@@ -334,18 +339,16 @@ html, body { margin: 0; padding: 0; }
    ===================================================================== */
 /* minmax(0,1fr) ไม่ใช่ 1fr — เพราะ 1fr มี min-width:auto ทำให้ชื่อวิชายาว ๆ
    ที่ตั้ง nowrap ดันคอลัมน์จนตารางล้นออกนอกจอ */
-.mo { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px;
-      background: var(--line-soft); border: 1px solid var(--line-soft);
-      border-radius: var(--r-tile); overflow: hidden; }
-.mo__hd { background: var(--surface); text-align: center; padding: 0.35rem 0;
+.mo { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.mo__hd { text-align: center; padding: 0 0 0.35rem;
           font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
-.mo__day { background: var(--bg); min-height: 74px; padding: 0.25rem 0.3rem; min-width: 0; overflow: hidden; }
-.mo__day--out { opacity: 0.35; }
+.mo__day { background: var(--surface); border-radius: 8px; min-height: 74px;
+            padding: 0.3rem; min-width: 0; overflow: hidden; }
+.mo__day--out { opacity: 0.28; }
 .mo__n { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
-.mo__day--today .mo__n {
-  color: #0A0912; background: var(--brand); border-radius: var(--r-pill);
-  padding: 0 0.34rem; font-weight: 600;
-}
+/* วันนี้ไฮไลต์ทั้งช่อง ไม่ใช่แค่ตัวเลข (ui-kit.html) */
+.mo__day--today { background: var(--brand-soft); }
+.mo__day--today .mo__n { color: var(--brand); font-weight: 600; }
 .mo__ev { min-width: 0; font-size: 0.63rem; line-height: 1.35; margin-top: 0.12rem;
           padding-left: 0.28rem; border-left: 2px solid var(--sched);
           overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); }
@@ -506,3 +509,53 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 .actions--end { margin-top: 2.4rem; padding-top: 1.2rem; border-top: 1px solid var(--line-soft); }
 .steps { margin: 0.6rem 0 0; padding-left: 1.1rem; color: var(--muted); font-size: var(--s--1); line-height: 1.9; }
 .steps strong { color: var(--ink); }
+
+/* =====================================================================
+   การ์ด Area · gradient แทนภาพประกอบ ความทึบ 11% (doc/DESIGN.md)
+   ===================================================================== */
+.areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+@media (min-width: 768px) { .areas { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.acard {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--r-card);
+  background: var(--surface); padding: 0.9rem;
+  min-height: 92px; display: flex; flex-direction: column; justify-content: space-between;
+  text-decoration: none; color: inherit;
+}
+.acard::before { content: ""; position: absolute; inset: 0; opacity: 0.11; }
+.acard--class::before { background: var(--g-class); }
+.acard--hack::before  { background: var(--g-hack); }
+.acard--fin::before   { background: var(--g-fin); }
+.acard--pers::before  { background: var(--g-pers); }
+.acard > * { position: relative; }
+.acard__nm {
+  font-weight: 600; font-size: var(--s-0);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.acard__ct { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
+.acard__badge {
+  position: absolute; top: 0.7rem; right: 0.7rem;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--due);
+  border: 1px solid rgba(224,137,126,0.32); border-radius: var(--r-pill);
+  padding: 0 0.4rem;
+}
+
+/* =====================================================================
+   hero · คาบถัดไป (ui-kit.html)
+   ตอบหลักการ UX ข้อ 1 — เปิดมาต้องรู้ทันทีว่าตอนนี้ต้องทำอะไร
+   ===================================================================== */
+.hero {
+  border: 1px solid var(--line); background: var(--surface);
+  border-radius: var(--r-card); padding: 1.05rem 1.1rem; margin-bottom: 1.1rem;
+}
+.hero__kick {
+  font-family: var(--f-mono); font-size: var(--s--2);
+  letter-spacing: 0.08em; color: var(--brand);
+}
+.hero__big {
+  font-size: 2rem; font-weight: 600; line-height: 1;
+  letter-spacing: -0.045em; margin: 0.5rem 0 0.3rem;
+}
+.hero__big small { font-size: 0.9rem; font-weight: 400; color: var(--muted); letter-spacing: -0.01em; }
+.hero__sub { font-size: var(--s--1); color: var(--muted); }

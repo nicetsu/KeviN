@@ -8,6 +8,7 @@ import {
   soonLabel,
 } from '@/lib/time'
 import ItemList, { type Row } from '@/components/ItemList'
+import NextClass, { type NextClassInfo } from '@/components/NextClass'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,6 +83,28 @@ export default async function TodayPage() {
     tag: null,
   }))
 
+  // คาบถัดไป = คาบแรกของวันนี้ที่ยังไม่จบ · ถ้าเลิกหมดแล้วไม่ต้องโชว์ hero
+  const upcoming = occurrences
+    .map((o) => ({
+      o,
+      start: new Date(`${dateKey}T${o.start_time}+07:00`).getTime(),
+      end: new Date(`${dateKey}T${o.end_time}+07:00`).getTime(),
+    }))
+    .filter((x) => x.end > now)
+    .sort((a, b) => a.start - b.start)[0]
+
+  const nextClass: NextClassInfo | null = upcoming
+    ? {
+        projectName: upcoming.o.project_name,
+        location: upcoming.o.location,
+        label: upcoming.o.label,
+        startsAt: new Date(upcoming.start).toISOString(),
+        endsAt: new Date(upcoming.end).toISOString(),
+        startLabel: clockLabel(upcoming.o.start_time),
+        endLabel: clockLabel(upcoming.o.end_time),
+      }
+    : null
+
   const overdue: Line[] = []
   const today: Line[] = []
 
@@ -134,6 +157,8 @@ export default async function TodayPage() {
   return (
     <main className="wrap">
       <Head dateKey={dateKey} />
+
+      {nextClass && <NextClass info={nextClass} />}
 
       {nothing && (
         <div className="empty">
