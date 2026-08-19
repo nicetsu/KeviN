@@ -1,0 +1,821 @@
+<title>KeviN Screens</title>
+<style>
+  :root {
+    --paper:#0A0912; --surface:#14131F; --sunk:#1C1B2B; --ink:#F1F0F7;
+    --muted:#A5A2B8; --faint:#87849D; --line:#26253A; --line-soft:#1E1D2E;
+    --brand:#A594FF; --brand-soft:#251F45;
+    --signal:#E0897E; --signal-soft:#332320;
+    --sched:#79C2D0; --sched-soft:#17282C;
+    --task:#74C6A4; --task-soft:#16281F;
+    --note:#8E88A8; --note-soft:#201F2E;
+    --shadow: none;
+
+    --f-display: Bahnschrift, "DIN Alternate", "Segoe UI Variable Display", "Leelawadee UI", "Noto Sans Thai", "Segoe UI", sans-serif;
+    --f-body: "Segoe UI", "Leelawadee UI", "Noto Sans Thai", system-ui, -apple-system, sans-serif;
+    --f-mono: Consolas, "Cascadia Mono", ui-monospace, "Leelawadee UI", monospace;
+
+    --step--2: .71rem;
+    --step--1: clamp(.78rem, .76rem + .1vw, .84rem);
+    --step-0:  clamp(.98rem, .95rem + .15vw, 1.06rem);
+    --step-1:  clamp(1.16rem, 1.1rem + .3vw, 1.3rem);
+    --step-2:  clamp(1.45rem, 1.25rem + .7vw, 1.9rem);
+    --step-3:  clamp(1.9rem, 1.4rem + 2vw, 3.1rem);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0A0912; --surface:#14131F; --sunk:#1C1B2B; --ink:#F1F0F7;
+    --muted:#A5A2B8; --faint:#87849D; --line:#26253A; --line-soft:#1E1D2E;
+    --brand:#A594FF; --brand-soft:#251F45;
+    --signal:#E0897E; --signal-soft:#332320;
+    --sched:#79C2D0; --sched-soft:#17282C;
+    --task:#74C6A4; --task-soft:#16281F;
+    --note:#8E88A8; --note-soft:#201F2E;
+    --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0A0912; --surface:#14131F; --sunk:#1C1B2B; --ink:#F1F0F7;
+    --muted:#A5A2B8; --faint:#87849D; --line:#26253A; --line-soft:#1E1D2E;
+    --brand:#A594FF; --brand-soft:#251F45;
+    --signal:#E0897E; --signal-soft:#332320;
+    --sched:#79C2D0; --sched-soft:#17282C;
+    --task:#74C6A4; --task-soft:#16281F;
+    --note:#8E88A8; --note-soft:#201F2E;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--f-body);
+    font-size:var(--step-0); line-height:1.7; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(1.1rem,4vw,3rem); }
+  .col { max-width:68ch; }
+
+  .mast { border-bottom:1px solid var(--line); padding:clamp(2.2rem,5vw,4rem) 0 clamp(1.6rem,3vw,2.4rem); }
+  .kicker { font-family:var(--f-mono); font-size:var(--step--1); letter-spacing:.16em; text-transform:uppercase;
+    color:var(--faint); display:flex; gap:.9rem; flex-wrap:wrap; align-items:center; margin-bottom:1.4rem; }
+  .kicker b { color:var(--brand); font-weight:600; }
+  h1 { font-family:var(--f-display); font-size:var(--step-3); line-height:1; font-weight:600; margin:0 0 1rem; letter-spacing:-.01em; }
+  h1 .n { color:var(--brand); }
+  .thesis { font-size:var(--step-1); color:var(--muted); max-width:50ch; margin:0; text-wrap:balance; }
+
+  section { padding:clamp(2.4rem,5vw,4rem) 0; border-bottom:1px solid var(--line-soft); }
+  .eyebrow { font-family:var(--f-mono); font-size:var(--step--1); letter-spacing:.18em; text-transform:uppercase;
+    color:var(--brand); margin:0 0 .7rem; display:flex; align-items:baseline; gap:.7rem; }
+  .eyebrow::after { content:""; flex:1; height:1px; background:var(--line); }
+  h2 { font-family:var(--f-display); font-size:var(--step-2); font-weight:600; line-height:1.15; margin:0 0 1rem; text-wrap:balance; }
+  h3 { font-family:var(--f-display); font-size:var(--step-1); font-weight:600; margin:0 0 .5rem; }
+  h4 { font-family:var(--f-mono); font-size:var(--step--1); letter-spacing:.12em; text-transform:uppercase;
+    color:var(--faint); font-weight:500; margin:1.4rem 0 .5rem; }
+  p { margin:0 0 1rem; }
+  .lead { font-size:var(--step-1); color:var(--muted); max-width:54ch; }
+  code { font-family:var(--f-mono); font-size:.88em; background:var(--sunk); padding:.1em .38em; border-radius:2px; }
+  a { color:var(--brand); }
+  ul { margin:0 0 1rem; padding-left:1.1rem; }
+  li { margin-bottom:.35rem; }
+  li::marker { color:var(--faint); }
+
+  /* ---- screen spec block ---- */
+  .spec { display:grid; gap:1.4rem; grid-template-columns:1fr; margin:1.4rem 0 0;
+    padding-top:1.6rem; border-top:1px solid var(--line-soft); }
+  .spec:first-of-type { border-top:0; padding-top:0; }
+  @media (min-width:940px) { .spec { grid-template-columns: minmax(0,340px) minmax(0,1fr); gap:2rem; align-items:start; } }
+  @media (min-width:940px) { .spec.wide { grid-template-columns: minmax(0,460px) minmax(0,1fr); } }
+  .spec-id { font-family:var(--f-mono); font-size:var(--step--2); letter-spacing:.14em; color:var(--brand);
+    display:block; margin-bottom:.25rem; }
+
+  .frame { border:1px solid var(--line); border-radius:4px; background:var(--surface); overflow:hidden; box-shadow:var(--shadow); }
+  .frame + .frame { margin-top:1rem; }
+  .frame-head { font-family:var(--f-mono); font-size:var(--step--2); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--faint); padding:.45rem .8rem; border-bottom:1px solid var(--line); background:var(--sunk);
+    display:flex; justify-content:space-between; gap:1rem; }
+  .screen { padding:.8rem; display:flex; flex-direction:column; gap:.5rem; font-size:var(--step--1); }
+  .bar-row { display:flex; align-items:center; gap:.5rem; }
+  .card { border:1px solid var(--line-soft); border-radius:3px; padding:.5rem .65rem;
+    display:flex; gap:.55rem; align-items:flex-start; background:var(--paper); }
+  .card .stripe { width:3px; align-self:stretch; border-radius:2px; background:var(--task); flex:none; }
+  .card.due .stripe { background:var(--signal); }
+  .card.note .stripe { background:var(--note); }
+  .card.sch .stripe { background:var(--sched); }
+  .card.done { opacity:.45; }
+  .card .body { flex:1; min-width:0; }
+  .card .meta { font-family:var(--f-mono); font-size:var(--step--2); color:var(--faint); letter-spacing:.03em; }
+  .cb { width:.85rem; height:.85rem; border:1px solid var(--line); border-radius:2px; flex:none; margin-top:.15rem; }
+  .cb.on { background:var(--task); border-color:var(--task); }
+  .pill { font-family:var(--f-mono); font-size:.66rem; letter-spacing:.08em; text-transform:uppercase;
+    padding:.08rem .38rem; border-radius:2px; border:1px solid var(--line); color:var(--muted); flex:none; white-space:nowrap; }
+  .pill.hot { color:var(--signal); border-color:var(--signal); background:var(--signal-soft); }
+  .pill.ok { color:var(--task); border-color:var(--task); background:var(--task-soft); }
+  .pill.sch { color:var(--sched); border-color:var(--sched); background:var(--sched-soft); }
+  .pill.nt { color:var(--note); border-color:var(--note); background:var(--note-soft); }
+  .sec-label { font-family:var(--f-mono); font-size:var(--step--2); letter-spacing:.12em; text-transform:uppercase;
+    color:var(--faint); margin-top:.25rem; display:flex; justify-content:space-between; gap:.5rem; }
+  .fab { border:1px dashed var(--brand); color:var(--brand); border-radius:3px; text-align:center; padding:.35rem;
+    font-family:var(--f-mono); font-size:var(--step--2); letter-spacing:.06em; }
+  .toggle { display:inline-flex; border:1px solid var(--line); border-radius:3px; overflow:hidden;
+    font-family:var(--f-mono); font-size:var(--step--2); }
+  .toggle span { padding:.18rem .55rem; color:var(--muted); }
+  .toggle span.on { background:var(--brand); color:var(--surface); }
+  .nav { display:flex; border-top:1px solid var(--line); background:var(--sunk); }
+  .nav span { flex:1; text-align:center; padding:.4rem 0; font-family:var(--f-mono); font-size:var(--step--2);
+    color:var(--faint); letter-spacing:.06em; }
+  .nav span.on { color:var(--brand); box-shadow:inset 0 2px 0 var(--brand); }
+  .input { border:1px solid var(--line); border-radius:3px; padding:.32rem .5rem; background:var(--paper);
+    font-family:var(--f-mono); font-size:var(--step--2); color:var(--ink); flex:1; min-width:0; }
+  .input.ph { color:var(--faint); }
+  .btn { border:1px solid var(--brand); background:var(--brand); color:var(--surface); border-radius:3px;
+    padding:.3rem .7rem; font-family:var(--f-mono); font-size:var(--step--2); letter-spacing:.06em; }
+  .btn.ghost { background:transparent; color:var(--muted); border-color:var(--line); }
+  .radio { width:.8rem; height:.8rem; border:1px solid var(--line); border-radius:50%; flex:none; margin-top:.2rem; }
+  .radio.on { border:4px solid var(--brand); }
+  .weeks { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; }
+  .weeks span { border:1px solid var(--line); border-radius:2px; text-align:center; padding:.12rem 0;
+    font-family:var(--f-mono); font-size:.62rem; color:var(--faint); }
+  .weeks span.on { background:var(--sched-soft); border-color:var(--sched); color:var(--sched); }
+
+  /* month + week grids */
+  .mo { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; background:var(--line-soft); border:1px solid var(--line-soft); }
+  .mo .dow { background:var(--sunk); text-align:center; font-family:var(--f-mono); font-size:var(--step--2); color:var(--faint); padding:.15rem 0; }
+  .mo .day { background:var(--surface); min-height:2.9rem; padding:.18rem .25rem; display:flex; flex-direction:column; gap:.12rem; }
+  .mo .day .d { font-family:var(--f-mono); font-size:var(--step--2); color:var(--muted); }
+  .mo .day.out { opacity:.35; }
+  .mo .day.today .d { color:var(--surface); background:var(--brand); border-radius:2px; width:1.2rem; text-align:center; }
+  .mo .ev { font-size:.62rem; line-height:1.25; padding:.03rem .2rem; border-radius:2px; border-left:2px solid var(--sched);
+    background:var(--sunk); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mo .ev.due { border-left-color:var(--signal); }
+  .mo .ev.rem { border-left-color:var(--signal); }
+  .mo .more { font-family:var(--f-mono); font-size:.58rem; color:var(--faint); }
+
+  .wk { display:grid; gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); font-size:.62rem; }
+  .wk.d7 { grid-template-columns:2.2rem repeat(7,1fr); }
+  .wk.d3 { grid-template-columns:2.2rem repeat(3,1fr); }
+  .wk .hd { background:var(--sunk); text-align:center; font-family:var(--f-mono); font-size:var(--step--2); color:var(--faint); padding:.2rem 0; }
+  .wk .hd.now { color:var(--brand); }
+  .wk .tm { background:var(--sunk); font-family:var(--f-mono); font-size:.58rem; color:var(--faint); text-align:right; padding:.06rem .22rem 0 0; }
+  .wk .cell { background:var(--surface); min-height:1.3rem; position:relative; }
+  .wk .allday { background:var(--surface); min-height:1.05rem; padding:.1rem .18rem; }
+  .wk .blk { position:absolute; left:1px; right:1px; top:0; border-radius:2px; padding:.08rem .2rem; line-height:1.2;
+    overflow:hidden; background:var(--sched-soft); border-left:2px solid var(--sched); color:var(--ink); }
+  .wk .blk.rem { background:var(--signal-soft); border-left-color:var(--signal); }
+  .wk .blk.due { background:var(--signal-soft); border-left-color:var(--signal); }
+  .wk .blk.half { right:50%; }
+  .wk .blk.half2 { left:50%; }
+  .wk .allday .pill { white-space:normal; }
+  .wkscroll { overflow-x:auto; }
+  .wkscroll .wk.d7 { min-width:460px; }
+
+  /* rules list */
+  .rules { border:1px solid var(--line); border-radius:3px; background:var(--surface); overflow:hidden; }
+  .rules > div { display:grid; grid-template-columns:8.5rem 1fr; gap:.9rem; padding:.55rem .9rem; border-bottom:1px solid var(--line-soft); font-size:var(--step--1); }
+  .rules > div:last-child { border-bottom:0; }
+  .rules dt, .rules .k { font-family:var(--f-mono); font-size:var(--step--2); letter-spacing:.06em; color:var(--brand); padding-top:.15rem; }
+  .rules .v { color:var(--muted); }
+  .rules .v strong { color:var(--ink); font-weight:600; }
+  @media (max-width:620px) { .rules > div { grid-template-columns:1fr; gap:.1rem; } }
+
+  .scroll { overflow-x:auto; margin:1rem 0 1.4rem; border:1px solid var(--line); border-radius:3px; background:var(--surface); }
+  table { border-collapse:collapse; width:100%; min-width:580px; font-size:var(--step--1); }
+  th, td { text-align:left; padding:.55rem .85rem; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  thead th { font-family:var(--f-mono); text-transform:uppercase; letter-spacing:.1em; color:var(--faint);
+    font-weight:500; background:var(--sunk); border-bottom:1px solid var(--line); }
+  tbody tr:last-child td { border-bottom:0; }
+  td.f { font-family:var(--f-mono); color:var(--ink); white-space:nowrap; }
+
+  .legend { display:grid; gap:.7rem; margin:1.2rem 0; }
+  @media (min-width:700px) { .legend { grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:1000px) { .legend { grid-template-columns:repeat(4,1fr); } }
+  .lg { border:1px solid var(--line); border-radius:3px; background:var(--surface); padding:.65rem .8rem; border-left-width:3px; border-left-style:solid; }
+  .lg h5 { margin:0 0 .15rem; font-family:var(--f-display); font-size:var(--step-0); font-weight:600; }
+  .lg p { margin:0; font-size:var(--step--2); color:var(--muted); line-height:1.6; }
+  .lg.a { border-left-color:var(--sched); }
+  .lg.b { border-left-color:var(--signal); }
+  .lg.c { border-left-color:var(--task); }
+  .lg.d { border-left-color:var(--note); }
+
+  .diagram { width:100%; height:auto; display:block; background:var(--surface); border:1px solid var(--line); border-radius:3px; }
+  figure { margin:1.4rem 0; }
+  figcaption { font-size:var(--step--1); color:var(--faint); font-family:var(--f-mono); margin-top:.6rem; }
+
+  .states { display:grid; gap:.8rem; margin:1.2rem 0; }
+  @media (min-width:760px) { .states { grid-template-columns:1fr 1fr; } }
+  .st { border:1px solid var(--line); border-radius:3px; background:var(--surface); padding:.8rem 1rem; }
+  .st h5 { margin:0 0 .3rem; font-family:var(--f-display); font-size:var(--step-0); font-weight:600; }
+  .st p { margin:0 0 .4rem; font-size:var(--step--1); color:var(--muted); }
+  .st .say { font-family:var(--f-mono); font-size:var(--step--2); color:var(--brand); display:block; }
+
+  .nongoal { border:1px solid var(--line); border-left:3px solid var(--faint); border-radius:3px;
+    background:var(--surface); padding:.65rem .9rem; margin-bottom:.6rem; }
+  .nongoal h5 { margin:0 0 .15rem; font-family:var(--f-display); font-size:var(--step-0); font-weight:600; }
+  .nongoal p { margin:0; font-size:var(--step--1); color:var(--muted); }
+
+  footer { padding:2.4rem 0 4rem; color:var(--faint); font-family:var(--f-mono); font-size:var(--step--1); letter-spacing:.06em; }
+  footer a { color:var(--brand); }
+  :focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+</style>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="kicker"><span>เอกสาร UX · ฉบับละเอียด</span><span>·</span><span>17 ส.ค. 2026</span><span>·</span><b>รออนุมัติ</b></div>
+    <h1>Kevi<span class="n">N</span> — ทุกหน้าจอ</h1>
+    <p class="thesis">แบบร่างระดับหน้าจอ ครบทุกสถานะและทุกกฎการแสดงผล อ่านคู่กับ <a href="https://claude.ai/code/artifact/6f50ef21-9670-40e0-84dd-86b29852ec36">ข้อเสนอโปรเจกต์</a></p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <p class="eyebrow">หลักการ</p>
+    <h2>ห้าข้อที่ใช้ตัดสินทุกครั้งที่ลังเล</h2>
+    <div class="col">
+      <ul>
+        <li><strong>เปิดมาต้องตอบได้ทันทีว่าตอนนี้ต้องทำอะไร</strong> — ไม่ใช่ให้ไล่กดหาเอง โครงสร้างสามชั้นเป็นวิธีเก็บ ไม่ใช่วิธีดู</li>
+        <li><strong>สีมีความหมายเดียว ใช้ตรงกันทั้งระบบ</strong> — ม่วงคือเวลาที่ตายตัวแล้ว แดงคือมีเส้นตาย เขียวคือของที่ไม่มีเวลา ไม่มีสีไหนใช้เพื่อความสวย</li>
+        <li><strong>งานที่ทำบ่อยต้องกดน้อยที่สุด</strong> — ติ๊กงานเสร็จกดครั้งเดียวจากทุกหน้าที่งานนั้นโผล่ ไม่ต้องเข้าไปข้างใน</li>
+        <li><strong>ปฏิทินไว้ดู คลังไว้แก้</strong> — แยกหน้าที่ชัดเจน ไม่พยายามให้ทุกหน้าทำได้ทุกอย่าง</li>
+        <li><strong>ไม่มีอะไรหายเงียบ ๆ</strong> — ลบต้องยืนยัน archive กู้คืนได้ และทุกครั้งที่ Claude เขียนอะไรลง ต้องบอกว่าเขียนอะไรที่ไหน</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">การนำทาง</p>
+    <h2>สามแท็บ หนึ่งปุ่มลัด</h2>
+    <figure>
+      <svg class="diagram" viewBox="0 0 900 340" role="img" aria-label="แผนผังการนำทาง สามแท็บหลักคือ วันนี้ ปฏิทิน คลัง และปุ่มเพิ่มเร็วที่เข้าถึงได้จากทุกหน้า">
+        <g font-family="Consolas, monospace" font-size="11.5" letter-spacing=".6">
+          <defs>
+            <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--faint)"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="24" width="860" height="40" rx="3" fill="var(--brand-soft)" stroke="var(--brand)"/>
+          <text x="40" y="49" fill="var(--brand)" font-size="13">แถบล่าง (มือถือ) · แถบข้าง (เดสก์ท็อป) — เข้าถึงได้ตลอดเวลา</text>
+
+          <rect x="20" y="100" width="255" height="66" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="38" y="126" fill="var(--ink)" font-size="14" letter-spacing="0">วันนี้</text>
+          <text x="38" y="148" fill="var(--faint)">หน้าเริ่มต้น · ตอบว่าตอนนี้ต้องทำอะไร</text>
+
+          <rect x="322" y="100" width="255" height="66" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="340" y="126" fill="var(--ink)" font-size="14" letter-spacing="0">ปฏิทิน</text>
+          <text x="340" y="148" fill="var(--faint)">สลับ เดือน ⇄ สัปดาห์ · ดูอย่างเดียว</text>
+
+          <rect x="625" y="100" width="255" height="66" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="643" y="126" fill="var(--ink)" font-size="14" letter-spacing="0">คลัง</text>
+          <text x="643" y="148" fill="var(--faint)">Area → Project → Item · แก้ได้ครบ</text>
+
+          <rect x="322" y="212" width="255" height="52" rx="3" fill="var(--surface)" stroke="var(--brand)" stroke-dasharray="4 3"/>
+          <text x="340" y="234" fill="var(--brand)" font-size="13" letter-spacing="0">+ เพิ่มเร็ว</text>
+          <text x="340" y="252" fill="var(--faint)">แผงลอย เรียกได้จากทุกหน้า</text>
+
+          <rect x="625" y="212" width="255" height="52" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="643" y="234" fill="var(--ink)" font-size="13" letter-spacing="0">แผงรายละเอียด</text>
+          <text x="643" y="252" fill="var(--faint)">เปิดทับหน้าเดิม ไม่เปลี่ยนหน้า</text>
+
+          <rect x="20" y="212" width="255" height="52" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="38" y="234" fill="var(--ink)" font-size="13" letter-spacing="0">ตั้งค่า</text>
+          <text x="38" y="252" fill="var(--faint)">แจ้งเตือน · ติดตั้งลงหน้าจอ · ธีม</text>
+
+          <path d="M147,68 L147,96" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none"/>
+          <path d="M449,68 L449,96" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none"/>
+          <path d="M752,68 L752,96" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none"/>
+          <path d="M449,170 L449,208" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none" stroke-dasharray="3 3"/>
+          <path d="M752,170 L752,208" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none"/>
+          <path d="M275,236 L318,236" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none"/>
+          <path d="M275,133 C295,133 300,236 318,236" stroke="var(--faint)" stroke-width="1.2" fill="none" opacity="0"/>
+          <path d="M577,133 C600,133 605,236 623,236" stroke="var(--faint)" stroke-width="1.2" marker-end="url(#a2)" fill="none" stroke-dasharray="3 3"/>
+        </g>
+      </svg>
+      <figcaption>เส้นประ = เปิดทับหน้าเดิมแล้วปิดกลับที่เดิม ไม่นับเป็นการเปลี่ยนหน้า</figcaption>
+    </figure>
+    <div class="col">
+      <p>ความลึกสูงสุดคือสามชั้น (คลัง → project → รายละเอียด) และทุกอย่างที่ลึกกว่านั้นเปิดเป็นแผงทับ ไม่พาไปหน้าใหม่ — เพราะบนมือถือทุกชั้นที่เพิ่มคือปุ่มย้อนกลับที่ต้องกดเพิ่มหนึ่งครั้ง</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">ภาษาภาพ</p>
+    <h2>สีสี่สี ความหมายตายตัว</h2>
+    <div class="col"><p>แถบสีด้านซ้ายของการ์ดทุกใบบอกชนิดของสิ่งนั้น ใช้ตรงกันทุกหน้าจอ ไม่มีข้อยกเว้น</p></div>
+    <div class="legend">
+      <div class="lg a"><h5>ฟ้า · ช่วงเวลาประจำ</h5><p>คาบเรียนและอะไรก็ตามที่เกิดซ้ำตามตาราง เวลาตายตัวแล้ว เราเปลี่ยนไม่ได้ ไม่แจ้งเตือน</p></div>
+      <div class="lg b"><h5>ส้ม · มีเส้นตาย</h5><p>task ที่มี due_at และ reminder ทุกตัว — ของที่ปล่อยผ่านแล้วเสียหาย</p></div>
+      <div class="lg c"><h5>เขียว · งานทั่วไป</h5><p>task ที่ยังไม่กำหนดวันส่ง ทำเมื่อไหร่ก็ได้ แต่ยังไม่เสร็จ</p></div>
+      <div class="lg d"><h5>เทาม่วง · โน้ต</h5><p>shortnote — ไม่มีเวลา ไม่มีสถานะเสร็จ อ่านอย่างเดียว</p></div>
+    </div>
+    <h4>องค์ประกอบของการ์ดหนึ่งใบ</h4>
+    <div class="rules">
+      <div><span class="k">แถบสี</span><span class="v">ซ้ายสุด กว้าง 3px — บอกชนิด</span></div>
+      <div><span class="k">ช่องติ๊ก</span><span class="v">มีเฉพาะ <strong>task</strong> เท่านั้น · reminder / shortnote / schedule ไม่มี</span></div>
+      <div><span class="k">หัวเรื่อง</span><span class="v">บรรทัดเดียว ยาวเกินตัดด้วย … · แตะทั้งใบเพื่อเปิดรายละเอียด</span></div>
+      <div><span class="k">บรรทัดข้อมูล</span><span class="v">ตัวพิมพ์เล็กสีจาง · <strong>ในหน้าวันนี้และปฏิทิน</strong> ขึ้นต้นด้วยชื่อ project เสมอ เพราะของมาจากหลายที่ปนกัน · <strong>ในหน้า project</strong> ไม่ต้องซ้ำชื่อตัวเอง</span></div>
+      <div><span class="k">ป้ายขวา</span><span class="v">โผล่เฉพาะตอนมีอะไรผิดปกติ — เลยกำหนด, อีกไม่ถึงชั่วโมง, ยังไม่ตั้งวัน</span></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">หน้าจอ</p>
+    <h2>ทีละหน้า พร้อมกฎการแสดงผล</h2>
+
+    <!-- S1 -->
+    <div class="spec">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S1 · วันนี้</span><span>375px</span></div>
+          <div class="screen">
+            <div class="bar-row"><strong>จันทร์ 17 ส.ค.</strong><span class="pill hot" style="margin-left:auto">เลยกำหนด 1</span></div>
+            <div class="sec-label"><span>เลยกำหนด</span></div>
+            <div class="card due"><span class="stripe"></span><span class="cb"></span><div class="body"><div>ส่งใบสมัครชมรม</div><div class="meta">Personal · เลย 2 วัน</div></div></div>
+            <div class="sec-label"><span>ตารางวันนี้</span></div>
+            <div class="card sch"><span class="stripe"></span><div class="body"><div>แคลคูลัส 1</div><div class="meta">09:00–11:00 · ENG-401</div></div></div>
+            <div class="card sch"><span class="stripe"></span><div class="body"><div>ฟิสิกส์ 2</div><div class="meta">13:00–15:00 · SCI-210</div></div></div>
+            <div class="sec-label"><span>กำลังจะถึง</span></div>
+            <div class="card due"><span class="stripe"></span><div class="body"><div>Quiz บทที่ 3</div><div class="meta">แคลคูลัส 1 · 11:00</div></div><span class="pill hot">40 นาที</span></div>
+            <div class="card due"><span class="stripe"></span><span class="cb"></span><div class="body"><div>ส่งแล็บฟิสิกส์</div><div class="meta">ฟิสิกส์ 2 · 23:59</div></div></div>
+            <div class="sec-label"><span>สัปดาห์นี้</span><span>3</span></div>
+            <div class="card"><span class="stripe"></span><span class="cb"></span><div class="body"><div>อ่านบท 5</div><div class="meta">แคลคูลัส 1 · พฤ.</div></div></div>
+            <div class="card"><span class="stripe"></span><span class="cb on"></span><div class="body" style="opacity:.5"><div>เตรียมสไลด์</div><div class="meta">Hackathon · เสร็จแล้ว</div></div></div>
+            <div class="fab">+ เพิ่มเร็ว</div>
+          </div>
+          <div class="nav"><span class="on">วันนี้</span><span>ปฏิทิน</span><span>คลัง</span><span>ตั้งค่า</span></div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S1</span>
+        <h3>วันนี้</h3>
+        <p>หน้าเริ่มต้นของแอป ดึงของจากทุก Area มารวมกันแล้วเรียงตามความเร่งด่วน ไม่สนใจว่ามาจากที่ไหน</p>
+        <h4>ลำดับกลุ่ม (ตายตัว)</h4>
+        <div class="rules">
+          <div><span class="k">1 เลยกำหนด</span><span class="v">task ที่ <code>due_at &lt; now</code> และยังไม่เสร็จ · <strong>ซ่อนทั้งกลุ่มถ้าไม่มี</strong> ไม่แสดงหัวข้อว่างเปล่า</span></div>
+          <div><span class="k">2 ตารางวันนี้</span><span class="v">ช่วงเวลาประจำที่ตกวันนี้ เรียงตามเวลาเริ่ม · ช่วงที่ผ่านไปแล้วจางลง 45%</span></div>
+          <div><span class="k">3 กำลังจะถึง</span><span class="v">reminder และ task ที่ครบกำหนดวันนี้ เรียงตามเวลา</span></div>
+          <div><span class="k">4 สัปดาห์นี้</span><span class="v">ครบกำหนดภายใน 7 วันข้างหน้า เรียงตามวัน แล้วตามความสำคัญ</span></div>
+          <div><span class="k">ไม่แสดง</span><span class="v">task ที่ไม่มีวันกำหนด · shortnote — สองอย่างนี้อยู่ในคลังเท่านั้น ไม่งั้นหน้านี้จะยาวจนไร้ประโยชน์</span></div>
+        </div>
+        <h4>พฤติกรรม</h4>
+        <div class="rules">
+          <div><span class="k">ติ๊กเสร็จ</span><span class="v">การ์ดจางลงและขีดฆ่าทันที <strong>ค้างอยู่ที่เดิม</strong> ไม่หายไป จนกว่าจะโหลดหน้าใหม่ — กันการติ๊กผิดแล้วหาไม่เจอ</span></div>
+          <div><span class="k">แตะการ์ด</span><span class="v">เปิดแผงรายละเอียด (S7) ทับขึ้นมาจากด้านล่าง</span></div>
+          <div><span class="k">ปัดซ้าย</span><span class="v">เลื่อนกำหนดไปพรุ่งนี้ · ปัดขวา = ติ๊กเสร็จ (เฟสหลัง)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="spec wide">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S2 · ปฏิทิน โหมดเดือน</span><span>1 หน้า = 1 เดือน</span></div>
+          <div class="screen">
+            <div class="bar-row">
+              <span class="btn ghost">‹</span><strong>สิงหาคม 2026</strong><span class="btn ghost">›</span>
+              <span class="toggle" style="margin-left:auto"><span class="on">เดือน</span><span>สัปดาห์</span></span>
+            </div>
+            <div class="mo">
+              <div class="dow">จ</div><div class="dow">อ</div><div class="dow">พ</div><div class="dow">พฤ</div><div class="dow">ศ</div><div class="dow">ส</div><div class="dow">อา</div>
+              <div class="day out"><span class="d">27</span></div><div class="day out"><span class="d">28</span></div>
+              <div class="day out"><span class="d">29</span></div><div class="day out"><span class="d">30</span></div>
+              <div class="day out"><span class="d">31</span></div><div class="day"><span class="d">1</span></div><div class="day"><span class="d">2</span></div>
+
+              <div class="day"><span class="d">3</span><span class="ev">แคล 09:00</span><span class="ev">อังกฤษ</span></div>
+              <div class="day"><span class="d">4</span><span class="ev">ฟิสิกส์</span></div>
+              <div class="day"><span class="d">5</span><span class="ev">อังกฤษ</span></div>
+              <div class="day"><span class="d">6</span><span class="ev">แคล 13:00</span><span class="ev">ฟิสิกส์</span></div>
+              <div class="day"><span class="d">7</span><span class="ev due">ส่งงานกลุ่ม</span></div>
+              <div class="day"><span class="d">8</span></div><div class="day"><span class="d">9</span></div>
+
+              <div class="day"><span class="d">10</span><span class="ev">แคล 09:00</span><span class="ev">อังกฤษ</span></div>
+              <div class="day"><span class="d">11</span><span class="ev">ฟิสิกส์</span><span class="ev rem">ประชุมทีม</span></div>
+              <div class="day"><span class="d">12</span><span class="ev">อังกฤษ</span></div>
+              <div class="day"><span class="d">13</span><span class="ev">แคล 13:00</span><span class="ev">ฟิสิกส์</span><span class="more">+2</span></div>
+              <div class="day"><span class="d">14</span><span class="ev due">แล็บ 3</span></div>
+              <div class="day"><span class="d">15</span></div><div class="day"><span class="d">16</span></div>
+
+              <div class="day today"><span class="d">17</span><span class="ev">แคล 09:00</span><span class="ev rem">Quiz</span><span class="more">+2</span></div>
+              <div class="day"><span class="d">18</span><span class="ev">ฟิสิกส์</span></div>
+              <div class="day"><span class="d">19</span><span class="ev">อังกฤษ</span></div>
+              <div class="day"><span class="d">20</span><span class="ev">แคล 13:00</span><span class="ev">ฟิสิกส์</span></div>
+              <div class="day"><span class="d">21</span></div>
+              <div class="day"><span class="d">22</span><span class="ev due">แบบฝึกหัด 4</span></div>
+              <div class="day"><span class="d">23</span></div>
+
+              <div class="day"><span class="d">24</span><span class="ev">แคล 09:00</span></div>
+              <div class="day"><span class="d">25</span><span class="ev">ฟิสิกส์</span></div>
+              <div class="day"><span class="d">26</span><span class="ev">อังกฤษ</span></div>
+              <div class="day"><span class="d">27</span><span class="ev">แคล 13:00</span></div>
+              <div class="day"><span class="d">28</span><span class="ev due">Hackathon</span></div>
+              <div class="day"><span class="d">29</span><span class="ev due">Hackathon</span></div>
+              <div class="day"><span class="d">30</span></div>
+            </div>
+            <div class="bar-row" style="gap:.8rem;margin-top:.15rem">
+              <span class="meta" style="font-family:var(--f-mono);color:var(--sched)">▍คาบประจำ</span>
+              <span class="meta" style="font-family:var(--f-mono);color:var(--signal)">▍กำหนดส่ง</span>
+              <span class="meta" style="font-family:var(--f-mono);color:var(--signal)">▍เตือน</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S2</span>
+        <h3>ปฏิทิน · โหมดเดือน</h3>
+        <p>ตอบคำถามว่า “เดือนนี้ของไปกองอยู่ช่วงไหน” เห็นทั้งเดือนในหน้าจอเดียวโดยไม่ต้องเลื่อน</p>
+        <h4>กฎการแสดงผล</h4>
+        <div class="rules">
+          <div><span class="k">แสดง</span><span class="v">ช่วงเวลาประจำ · task ที่มี due_at · reminder — <strong>ไม่แสดง shortnote และ task ที่ไม่มีวัน</strong></span></div>
+          <div><span class="k">จำนวนต่อวัน</span><span class="v">สูงสุด 3 รายการ เกินนั้นสรุปเป็น <code>+n</code> · แตะที่วันเพื่อเปิดรายการเต็มของวันนั้น</span></div>
+          <div><span class="k">ลำดับในวัน</span><span class="v">ช่วงเวลาประจำก่อน (เรียงตามเวลา) แล้วค่อย reminder แล้ว task</span></div>
+          <div><span class="k">วันนี้</span><span class="v">ตัวเลขวันกลับสีเป็นพื้นเขียว — ไม่ใช้กรอบทั้งช่อง เพราะกินพื้นที่ที่ต้องใช้แสดงรายการ</span></div>
+          <div><span class="k">เดือนก่อน/หลัง</span><span class="v">วันที่ไม่ใช่ของเดือนนี้จางลง 35% แต่ยังแสดงรายการ ไม่ปล่อยว่าง</span></div>
+          <div><span class="k">เลื่อนเดือน</span><span class="v">ปุ่ม ‹ › และปัดซ้ายขวา · มีปุ่ม “วันนี้” โผล่ขึ้นมาเมื่อไม่ได้อยู่เดือนปัจจุบัน</span></div>
+        </div>
+        <h4>บนมือถือ</h4>
+        <p style="font-size:var(--step--1);color:var(--muted)">ช่องวันเตี้ยลง แสดงได้ 2 รายการ และย่อชื่อเหลือแค่จุดสีเมื่อจอแคบกว่า 340px — แต่ยังคงเห็นครบทั้งเดือนเสมอ ไม่ตัดเป็นสองหน้า</p>
+      </div>
+    </div>
+
+    <!-- S3 -->
+    <div class="spec wide">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S3 · ปฏิทิน โหมดตารางงาน</span><span>เดสก์ท็อป · 7 วัน</span></div>
+          <div class="screen">
+            <div class="bar-row">
+              <span class="btn ghost">‹</span><strong>17–23 ส.ค. 2026</strong><span class="btn ghost">›</span>
+              <span class="pill">สัปดาห์ที่ 3</span>
+              <span class="toggle" style="margin-left:auto"><span>เดือน</span><span class="on">สัปดาห์</span></span>
+            </div>
+            <div class="wkscroll"><div class="wk d7">
+              <div class="hd"></div>
+              <div class="hd now">จ 17</div><div class="hd">อ 18</div><div class="hd">พ 19</div><div class="hd">พฤ 20</div><div class="hd">ศ 21</div><div class="hd">ส 22</div><div class="hd">อา 23</div>
+
+              <div class="tm">ทั้งวัน</div>
+              <div class="allday"></div><div class="allday"></div><div class="allday"></div><div class="allday"></div><div class="allday"></div>
+              <div class="allday"><span class="pill hot" style="font-size:.55rem;padding:0 .2rem">แบบฝึกหัด 4</span></div>
+              <div class="allday"></div>
+
+              <div class="tm">08</div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">09</div>
+              <div class="cell"><span class="blk" style="height:2.6rem">แคลคูลัส 1<br>ENG-401</span></div>
+              <div class="cell"></div>
+              <div class="cell"><span class="blk" style="height:1.3rem">อังกฤษ</span></div>
+              <div class="cell"></div>
+              <div class="cell"><span class="blk" style="height:2.6rem">แคลคูลัส 1<br>ENG-401</span></div>
+              <div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">10</div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">11</div>
+              <div class="cell"><span class="blk rem" style="height:1.3rem">Quiz</span></div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">12</div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">13</div>
+              <div class="cell"><span class="blk" style="height:2.6rem">ฟิสิกส์ 2<br>SCI-210</span></div>
+              <div class="cell"><span class="blk half" style="height:2.6rem">ชมรม</span><span class="blk half2" style="height:1.3rem">ติว</span></div>
+              <div class="cell"></div>
+              <div class="cell"><span class="blk" style="height:2.6rem">ฟิสิกส์ 2 แล็บ<br>SCI-B2</span></div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">14</div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+              <div class="tm">15</div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            </div></div>
+          </div>
+        </div>
+
+        <div class="frame">
+          <div class="frame-head"><span>S3-m · เดียวกัน บนมือถือ</span><span>375px · 3 วัน</span></div>
+          <div class="screen">
+            <div class="bar-row"><span class="btn ghost">‹</span><strong>17–19 ส.ค.</strong><span class="btn ghost">›</span><span class="pill ok" style="margin-left:auto">วันนี้</span></div>
+            <div class="wk d3">
+              <div class="hd"></div><div class="hd now">จ 17</div><div class="hd">อ 18</div><div class="hd">พ 19</div>
+              <div class="tm">ทั้งวัน</div><div class="allday"></div><div class="allday"></div><div class="allday"></div>
+              <div class="tm">09</div>
+              <div class="cell"><span class="blk" style="height:2.6rem">แคลคูลัส 1</span></div><div class="cell"></div>
+              <div class="cell"><span class="blk" style="height:1.3rem">อังกฤษ</span></div>
+              <div class="tm">10</div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              <div class="tm">11</div>
+              <div class="cell"><span class="blk rem" style="height:1.3rem">Quiz</span></div><div class="cell"></div><div class="cell"></div>
+              <div class="tm">13</div>
+              <div class="cell"><span class="blk" style="height:2.6rem">ฟิสิกส์ 2</span></div>
+              <div class="cell"><span class="blk" style="height:2.6rem">ชมรม</span></div><div class="cell"></div>
+            </div>
+            <div class="sec-label"><span>ปัดซ้ายขวาเพื่อเลื่อนทีละ 3 วัน</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S3</span>
+        <h3>ปฏิทิน · โหมดตารางงาน</h3>
+        <p>ตอบคำถามว่า “วันพุธบ่ายว่างไหม” — คำถามที่โหมดเดือนตอบไม่ได้ เพราะต้องเห็นความยาวของคาบเทียบกับช่องว่างจริง</p>
+        <h4>โครงตาราง</h4>
+        <div class="rules">
+          <div><span class="k">แกนตั้ง</span><span class="v">เวลา · ช่วงเริ่มต้นคำนวณจากข้อมูลจริง — เร็วสุดลบ 1 ชม. ถึงช้าสุดบวก 1 ชม. ไม่ fix 00:00–24:00 ให้ต้องเลื่อนหา</span></div>
+          <div><span class="k">แกนนอน</span><span class="v">วัน · เริ่มวันจันทร์ · เดสก์ท็อป 7 วัน มือถือ 3 วัน</span></div>
+          <div><span class="k">แถวทั้งวัน</span><span class="v">อยู่บนสุด สำหรับ task ที่มีวันกำหนดแต่ไม่มีเวลา — ไม่เอาไปแปะมั่วที่ 00:00</span></div>
+          <div><span class="k">เส้นเวลาปัจจุบัน</span><span class="v">เส้นบางสีเขียวลากขวางทั้งตาราง เฉพาะเมื่อดูสัปดาห์ปัจจุบัน</span></div>
+          <div><span class="k">บล็อกซ้อนกัน</span><span class="v">แบ่งความกว้างเท่า ๆ กันในคอลัมน์นั้น สูงสุด 3 อัน เกินนั้นอันที่ 3 กลายเป็น <code>+n</code></span></div>
+          <div><span class="k">บล็อกสั้นมาก</span><span class="v">น้อยกว่า 30 นาที แสดงแค่ชื่อบรรทัดเดียว ไม่แสดงสถานที่</span></div>
+        </div>
+        <h4>บนมือถือ</h4>
+        <p style="font-size:var(--step--1);color:var(--muted)">7 คอลัมน์บนจอ 375px ทำให้แต่ละคอลัมน์เหลือ ~45px อ่านชื่อวิชาไม่ออก จึงแสดงทีละ 3 วันแล้วปัดเลื่อน โดยยังนับ “สัปดาห์” เป็นหน่วยเดิม ปุ่ม ‹ › ยังกระโดดทีละสัปดาห์เต็ม ปัดนิ้วเลื่อนทีละวัน</p>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="spec">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S4 · คลัง</span><span>375px</span></div>
+          <div class="screen">
+            <div class="bar-row"><strong>คลัง</strong><span class="input ph" style="margin-left:auto;max-width:9rem">ค้นหา…</span></div>
+            <div class="card"><span class="stripe"></span><div class="body"><div><strong>Class</strong></div><div class="meta">4 วิชา · 6 งานค้าง · 2 เตือน</div></div><span class="pill hot">2</span></div>
+            <div class="card"><span class="stripe"></span><div class="body"><div><strong>Hackathon</strong></div><div class="meta">2 โปรเจกต์ · 3 งานค้าง</div></div></div>
+            <div class="card"><span class="stripe"></span><div class="body"><div><strong>Financial</strong></div><div class="meta">1 โปรเจกต์ · 1 งานค้าง</div></div></div>
+            <div class="card"><span class="stripe"></span><div class="body"><div><strong>Personal</strong></div><div class="meta">3 โปรเจกต์ · 2 งานค้าง</div></div><span class="pill hot">1</span></div>
+            <div class="sec-label"><span>Class › วิชา</span></div>
+            <div class="card sch"><span class="stripe"></span><div class="body"><div>แคลคูลัส 1</div><div class="meta">จ. 09:00 · พฤ. 13:00</div></div><span class="pill hot">2</span></div>
+            <div class="card sch"><span class="stripe"></span><div class="body"><div>ฟิสิกส์ 2</div><div class="meta">อ. 13:00 · พฤ. 13:00</div></div></div>
+            <div class="card"><span class="stripe"></span><div class="body"><div>อังกฤษ</div><div class="meta">พ. 09:00</div></div></div>
+            <div class="card done"><span class="stripe"></span><div class="body"><div>สถิติ</div><div class="meta">เก็บเข้าคลังแล้ว</div></div><span class="pill">archived</span></div>
+            <div class="fab">+ วิชาใหม่</div>
+          </div>
+          <div class="nav"><span>วันนี้</span><span>ปฏิทิน</span><span class="on">คลัง</span><span>ตั้งค่า</span></div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S4</span>
+        <h3>คลัง</h3>
+        <p>ที่เดียวที่เห็นโครงสร้างสามชั้นตรง ๆ ใช้ตอนตั้งใจจะเข้าไปจัดการอะไรสักอย่าง ไม่ใช่ตอนรีบ</p>
+        <div class="rules">
+          <div><span class="k">Area</span><span class="v">แตะเพื่อกางรายการ project ข้างใต้ <strong>ในหน้าเดิม</strong> ไม่เปลี่ยนหน้า — ทำให้เทียบข้าม Area ได้</span></div>
+          <div><span class="k">ตัวเลขขวา</span><span class="v">นับเฉพาะของที่<strong>ต้องสนใจ</strong> (เลยกำหนด + ครบวันนี้) ไม่ใช่จำนวนงานทั้งหมด ตัวเลขที่ไม่บอกอะไรคือขยะ</span></div>
+          <div><span class="k">บรรทัดใต้ชื่อวิชา</span><span class="v">สรุปช่วงเวลาประจำแบบย่อ — เห็นว่าวิชานี้เรียนวันไหนโดยไม่ต้องเข้าไป</span></div>
+          <div><span class="k">Archived</span><span class="v">ร่วงไปอยู่ท้ายสุดของ Area นั้น จางลง ยังกดเข้าไปดูได้ ไม่ซ่อนหาย</span></div>
+          <div><span class="k">ค้นหา</span><span class="v">ค้นข้ามทุกชั้นพร้อมกัน · ผลลัพธ์บอกเส้นทางเต็ม <code>Class › แคล › งาน</code></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5 -->
+    <div class="spec">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S5 · หน้า Project</span><span>375px</span></div>
+          <div class="screen">
+            <div class="bar-row"><span class="meta" style="font-family:var(--f-mono)">‹ Class</span><strong style="margin-left:.2rem">แคลคูลัส 1</strong><span class="btn ghost" style="margin-left:auto">⋯</span></div>
+            <div class="card sch"><span class="stripe"></span><div class="body"><div>จ. 09:00–11:00 · ENG-401</div><div class="meta">พฤ. 13:00–15:00 · ENG-401 — 16 สัปดาห์</div></div><span class="pill sch">แก้</span></div>
+            <div class="sec-label"><span>งาน</span><span>2 / 5</span></div>
+            <div class="card due"><span class="stripe"></span><span class="cb"></span><div class="body"><div>แบบฝึกหัดบทที่ 4</div><div class="meta">ศุกร์ 22 ส.ค.</div></div></div>
+            <div class="card"><span class="stripe"></span><span class="cb"></span><div class="body"><div>รายงานกลุ่ม</div><div class="meta">ยังไม่กำหนดวัน</div></div><span class="pill">ตั้งวัน</span></div>
+            <div class="card done"><span class="stripe"></span><span class="cb on"></span><div class="body"><div style="text-decoration:line-through">แบบฝึกหัดบทที่ 3</div><div class="meta">เสร็จ 12 ส.ค.</div></div></div>
+            <div class="sec-label"><span>เตือน</span><span>1</span></div>
+            <div class="card due"><span class="stripe"></span><div class="body"><div>เอาปากกาไปด้วย</div><div class="meta">พรุ่งนี้ 08:30</div></div></div>
+            <div class="sec-label"><span>โน้ต</span><span>2</span></div>
+            <div class="card note"><span class="stripe"></span><div class="body"><div>อ.ชอบออกจากตัวอย่างในสไลด์</div></div></div>
+            <div class="card note"><span class="stripe"></span><div class="body"><div>ขาดได้ 2 ครั้ง</div></div></div>
+            <div class="fab">+ เพิ่มลงวิชานี้</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S5</span>
+        <h3>หน้า Project</h3>
+        <p>ทุกอย่างของวิชานี้อยู่ในหน้าเดียว แบ่งเป็นสี่ส่วนตามชนิด ไม่ปนกัน</p>
+        <div class="rules">
+          <div><span class="k">แถบตาราง</span><span class="v">อยู่บนสุดแบบย่อ สรุปทุกช่วงในบรรทัดเดียวสองบรรทัด · กด “แก้” เปิด S6 · <strong>ไม่มีช่วงเวลาก็ไม่แสดงแถบนี้</strong></span></div>
+          <div><span class="k">ลำดับส่วน</span><span class="v">งาน → เตือน → โน้ต · ตายตัว ไม่ให้สลับ เพื่อให้จำตำแหน่งได้</span></div>
+          <div><span class="k">ตัวนับหัวข้อ</span><span class="v">งานแสดง <code>เหลือ / ทั้งหมด</code> · ส่วนอื่นแสดงจำนวนเฉย ๆ</span></div>
+          <div><span class="k">งานที่เสร็จ</span><span class="v">ร่วงไปท้ายกลุ่ม ขีดฆ่า จาง 45% · <strong>ไม่ซ่อน</strong> — เห็นว่าทำอะไรไปแล้วบ้างมีประโยชน์ตอนทบทวน</span></div>
+          <div><span class="k">โน้ต</span><span class="v">อยู่ล่างสุดเป็นรายการธรรมดา ไม่ปักหมุด ไม่มีช่องติ๊ก แตะเพื่อแก้ข้อความ</span></div>
+          <div><span class="k">เมนู ⋯</span><span class="v">เปลี่ยนชื่อ · ย้าย Area · เก็บเข้าคลัง · ลบ (ยืนยันสองชั้น พิมพ์ชื่อวิชายืนยัน)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S6 -->
+    <div class="spec wide">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S6 · ตัวจัดการช่วงเวลาประจำ</span><span>หน้าจอที่ซับซ้อนที่สุด</span></div>
+          <div class="screen">
+            <div class="bar-row"><strong>ช่วงเวลาประจำ — แคลคูลัส 1</strong></div>
+
+            <div class="sec-label"><span>ช่วงที่ 1</span><span>ลบ</span></div>
+            <div style="border:1px solid var(--line);border-left:3px solid var(--sched);border-radius:3px;padding:.6rem;display:flex;flex-direction:column;gap:.4rem">
+              <div class="bar-row"><span class="input" style="max-width:5.5rem">จันทร์ ▾</span><span class="input" style="max-width:4rem">09:00</span><span class="meta">–</span><span class="input" style="max-width:4rem">11:00</span></div>
+              <div class="bar-row"><span class="input">ENG-401</span><span class="input" style="max-width:6rem">บรรยาย</span></div>
+              <div class="bar-row"><span class="meta" style="min-width:5rem">เริ่มสัปดาห์</span><span class="input" style="max-width:8rem">17 ส.ค. 2026</span></div>
+              <div class="bar-row" style="align-items:flex-start"><span class="radio on"></span><span>ซ้ำทุกสัปดาห์ ต่อไปอีก <span class="input" style="display:inline-block;max-width:2.6rem;text-align:center">16</span> สัปดาห์</span></div>
+              <div class="bar-row" style="align-items:flex-start"><span class="radio"></span><span>เลือกสัปดาห์เอง</span></div>
+              <div class="weeks" style="opacity:.4">
+                <span class="on">1</span><span class="on">2</span><span class="on">3</span><span class="on">4</span><span class="on">5</span><span class="on">6</span><span class="on">7</span><span class="on">8</span>
+                <span class="on">9</span><span class="on">10</span><span class="on">11</span><span class="on">12</span><span class="on">13</span><span class="on">14</span><span class="on">15</span><span class="on">16</span>
+              </div>
+            </div>
+
+            <div class="sec-label"><span>ช่วงที่ 2</span><span>ลบ</span></div>
+            <div style="border:1px solid var(--line);border-left:3px solid var(--sched);border-radius:3px;padding:.6rem;display:flex;flex-direction:column;gap:.4rem">
+              <div class="bar-row"><span class="input" style="max-width:5.5rem">พฤหัส ▾</span><span class="input" style="max-width:4rem">13:00</span><span class="meta">–</span><span class="input" style="max-width:4rem">15:00</span></div>
+              <div class="bar-row"><span class="input">ENG-401</span><span class="input" style="max-width:6rem">ปฏิบัติ</span></div>
+              <div class="bar-row" style="align-items:flex-start"><span class="radio"></span><span>ซ้ำทุกสัปดาห์</span></div>
+              <div class="bar-row" style="align-items:flex-start"><span class="radio on"></span><span>เลือกสัปดาห์เอง — เว้นสัปดาห์สอบกลางภาค</span></div>
+              <div class="weeks">
+                <span class="on">1</span><span class="on">2</span><span class="on">3</span><span class="on">4</span><span class="on">5</span><span class="on">6</span><span class="on">7</span><span>8</span>
+                <span class="on">9</span><span class="on">10</span><span class="on">11</span><span class="on">12</span><span class="on">13</span><span class="on">14</span><span class="on">15</span><span class="on">16</span>
+              </div>
+            </div>
+
+            <div class="fab">+ เพิ่มช่วงเวลา</div>
+
+            <div class="sec-label"><span>ตัวอย่างผลลัพธ์</span></div>
+            <div style="border:1px solid var(--line-soft);border-radius:3px;padding:.5rem .65rem;background:var(--sunk)">
+              <div class="meta" style="line-height:1.9">17 ส.ค. · 20 ส.ค. · 24 ส.ค. · 27 ส.ค. · 31 ส.ค. · 3 ก.ย. · …<br>รวม 31 คาบ ถึง 4 ธ.ค. 2026</div>
+            </div>
+            <div class="bar-row" style="justify-content:flex-end"><span class="btn ghost">ยกเลิก</span><span class="btn">บันทึก</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S6</span>
+        <h3>ตัวจัดการช่วงเวลาประจำ</h3>
+        <p>หน้าจอที่ตัดสินว่าระบบนี้จะถูกใช้จริงหรือไม่ — ถ้ากรอกตารางเรียนทั้งเทอมแล้วรู้สึกทรมาน จะไม่มีใครกรอกรอบสอง</p>
+        <h4>สองโหมดการซ้ำ เก็บลง DB เหมือนกัน</h4>
+        <div class="rules">
+          <div><span class="k">โหมด ก</span><span class="v"><strong>ซ้ำต่อไปอีก N สัปดาห์</strong> — พิมพ์เลขเดียวจบ ใช้กับวิชาปกติที่เรียนทุกสัปดาห์ตลอดเทอม</span></div>
+          <div><span class="k">โหมด ข</span><span class="v"><strong>เลือกสัปดาห์เอง</strong> — ติ๊กจากตาราง 16 ช่อง ใช้กับแล็บสลับสัปดาห์ หรือเว้นสัปดาห์สอบ</span></div>
+          <div><span class="k">สลับโหมด</span><span class="v">สลับไปโหมด ข ให้ยกค่าจากโหมด ก มาติ๊กไว้ก่อน ไม่เริ่มจากศูนย์ · สลับกลับมาโหมด ก เตือนว่าการติ๊กจะหาย</span></div>
+          <div><span class="k">เก็บจริง</span><span class="v">ทั้งสองโหมดลงเป็น <code>week_offsets</code> ชุดเดียวกัน — โหมด ก เป็นแค่ปุ่มลัดที่เติม <code>[0..N-1]</code></span></div>
+        </div>
+        <h4>รายละเอียดที่ต้องมี</h4>
+        <div class="rules">
+          <div><span class="k">ตัวอย่างผลลัพธ์</span><span class="v">แสดงวันที่จริง 6 วันแรกและวันสุดท้าย <strong>อัปเดตสดขณะพิมพ์</strong> — เป็นตัวจับผิดว่าตั้งค่าผิดตั้งแต่ก่อนกดบันทึก</span></div>
+          <div><span class="k">หลายช่วง</span><span class="v">แต่ละช่วงตั้งการซ้ำแยกกันได้ เพราะบรรยายกับแล็บมักไม่ตรงกัน</span></div>
+          <div><span class="k">ป้ายช่วง</span><span class="v">ช่องเสริมสำหรับ “บรรยาย / ปฏิบัติ / ติว” — โผล่ในปฏิทินต่อท้ายชื่อวิชาเมื่อบล็อกกว้างพอ</span></div>
+          <div><span class="k">ตรวจทับ</span><span class="v">ถ้าช่วงใหม่ชนกับช่วงที่มีอยู่ของ project อื่น เตือนแต่ไม่ห้าม — ชีวิตจริงมันชนกันได้</span></div>
+          <div><span class="k">แก้ทีหลัง</span><span class="v">แก้แล้วมีผลกับทุกสัปดาห์ที่ยังไม่ผ่าน · สัปดาห์ที่ผ่านไปแล้วไม่แตะ</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S7 + S8 -->
+    <div class="spec">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S7 · แผงรายละเอียด</span><span>เปิดทับจากด้านล่าง</span></div>
+          <div class="screen">
+            <div class="bar-row"><span class="pill hot">task</span><span class="meta" style="margin-left:auto">Class › แคลคูลัส 1</span></div>
+            <div style="font-size:var(--step-0);font-weight:600">แบบฝึกหัดบทที่ 4</div>
+            <div class="meta">ข้อ 1–20 หน้า 88 · ส่งท้ายคาบ</div>
+            <div class="bar-row" style="gap:.3rem;flex-wrap:wrap">
+              <span class="pill">ศุกร์ 22 ส.ค. 23:59</span><span class="pill">สำคัญปานกลาง</span>
+            </div>
+            <div class="bar-row" style="gap:.3rem;margin-top:.3rem"><span class="btn">ติ๊กเสร็จ</span><span class="btn ghost">แก้</span><span class="btn ghost">ย้าย</span><span class="btn ghost" style="color:var(--signal);border-color:var(--signal)">ลบ</span></div>
+          </div>
+        </div>
+
+        <div class="frame">
+          <div class="frame-head"><span>S8 · เพิ่มเร็ว</span><span>พิมพ์บรรทัดเดียว</span></div>
+          <div class="screen">
+            <div class="input" style="color:var(--ink)">แคล: ส่งแบบฝึกหัด ศุกร์</div>
+            <div class="sec-label"><span>ตีความได้ว่า</span></div>
+            <div class="card due"><span class="stripe"></span><div class="body"><div>ส่งแบบฝึกหัด</div><div class="meta">Class › แคลคูลัส 1 · task · ศ. 22 ส.ค.</div></div></div>
+            <div class="bar-row" style="gap:.3rem;flex-wrap:wrap">
+              <span class="pill ok">task</span><span class="pill">reminder</span><span class="pill">โน้ต</span>
+              <span class="meta" style="margin-left:auto">แตะเพื่อเปลี่ยนชนิด</span>
+            </div>
+            <div class="bar-row" style="justify-content:flex-end"><span class="btn ghost">แก้รายละเอียด</span><span class="btn">บันทึก</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S7</span>
+        <h3>แผงรายละเอียด</h3>
+        <p>เปิดทับหน้าเดิมเสมอ ปิดแล้วกลับที่เดิมพร้อมตำแหน่งเลื่อนเดิม — เพราะมันถูกเรียกจากทุกหน้า ถ้าพาเปลี่ยนหน้าจะหลงทางทันที</p>
+        <div class="rules">
+          <div><span class="k">หัวแผง</span><span class="v">ป้ายชนิด + เส้นทางเต็ม — บอกเสมอว่าของชิ้นนี้อยู่ตรงไหนในโครงสร้าง</span></div>
+          <div><span class="k">ปุ่มหลัก</span><span class="v">เปลี่ยนตามชนิด — task ได้ “ติ๊กเสร็จ” · reminder ได้ “เลื่อนเวลา” · โน้ตมีแค่ “แก้”</span></div>
+          <div><span class="k">ลบ</span><span class="v">สีแดง อยู่ขวาสุด · ลบแล้วมีแถบ “เลิกทำ” ค้าง 8 วินาที</span></div>
+        </div>
+
+        <span class="spec-id" style="margin-top:2rem">S8</span>
+        <h3>เพิ่มเร็ว</h3>
+        <p>ช่องเดียวแทนฟอร์มห้าช่อง ตีความให้ก่อนแล้วให้แก้ ไม่ใช่ให้กรอกครบตั้งแต่แรก</p>
+        <div class="rules">
+          <div><span class="k">ตีความ</span><span class="v">คำก่อน <code>:</code> คือชื่อ project (จับแบบคำขึ้นต้น) · คำบอกเวลาท้ายประโยคกลายเป็นวันกำหนด</span></div>
+          <div><span class="k">แสดงผลลัพธ์</span><span class="v">การ์ดตัวอย่างขึ้นทันทีขณะพิมพ์ — เห็นว่าจะได้อะไรก่อนกดบันทึก</span></div>
+          <div><span class="k">เดาชนิด</span><span class="v">มีเวลาเจาะจง → reminder · มีวันแต่ไม่มีเวลา → task · ไม่มีทั้งคู่ → task ไม่กำหนดวัน · กดเปลี่ยนได้เสมอ</span></div>
+          <div><span class="k">เดาไม่ออก</span><span class="v">ถ้าจับ project ไม่ได้ ให้เลือกจากรายการล่าสุด 5 อัน <strong>ไม่บันทึกลงที่มั่ว ๆ</strong></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S9 -->
+    <div class="spec">
+      <div>
+        <div class="frame">
+          <div class="frame-head"><span>S9 · ตั้งค่าแจ้งเตือน</span><span>375px</span></div>
+          <div class="screen">
+            <div class="bar-row"><strong>การแจ้งเตือน</strong></div>
+            <div class="card"><span class="stripe" style="background:var(--task)"></span><div class="body"><div>เครื่องนี้ · Android Chrome</div><div class="meta">เปิดอยู่ · ทดสอบล่าสุด 16 ส.ค.</div></div><span class="pill ok">เปิด</span></div>
+            <div class="card"><span class="stripe" style="background:var(--faint)"></span><div class="body"><div>iPhone ของฉัน</div><div class="meta">ยังไม่ได้ติดตั้ง</div></div><span class="pill">ปิด</span></div>
+            <div class="bar-row"><span class="btn ghost">ส่งการแจ้งเตือนทดสอบ</span></div>
+            <div class="sec-label"><span>วิธีเปิดบน iPhone</span></div>
+            <div style="border:1px solid var(--line);border-left:3px solid var(--signal);border-radius:3px;padding:.55rem .7rem">
+              <div class="meta" style="line-height:1.9">1 · เปิดหน้านี้ใน Safari<br>2 · กดปุ่มแชร์ → “เพิ่มลงหน้าจอโฮม”<br>3 · เปิดแอปจากไอคอนบนหน้าจอ<br>4 · กลับมาหน้านี้แล้วกด “เปิดการแจ้งเตือน”</div>
+            </div>
+          </div>
+          <div class="nav"><span>วันนี้</span><span>ปฏิทิน</span><span>คลัง</span><span class="on">ตั้งค่า</span></div>
+        </div>
+      </div>
+      <div>
+        <span class="spec-id">S9</span>
+        <h3>ตั้งค่าแจ้งเตือน</h3>
+        <p>หน้าที่มีอยู่เพราะข้อจำกัดของ iOS ล้วน ๆ — ถ้าไม่บอกขั้นตอนไว้ตรงนี้ จะกลายเป็นบั๊กที่หาสาเหตุไม่เจอในอีกสามเดือน</p>
+        <div class="rules">
+          <div><span class="k">รายเครื่อง</span><span class="v">หนึ่งแถวต่อหนึ่งเครื่องที่เคยอนุญาต · ปิดรายเครื่องได้ · ลบเครื่องที่ไม่ใช้แล้วได้</span></div>
+          <div><span class="k">ปุ่มทดสอบ</span><span class="v">ส่ง push จริงทันที — วิธีเดียวที่จะรู้ว่าใช้ได้จริงโดยไม่ต้องรอ reminder ตัวถัดไป</span></div>
+          <div><span class="k">คำแนะนำ iOS</span><span class="v">แสดง<strong>เฉพาะเมื่อ</strong>ตรวจพบว่าเปิดจาก Safari บน iOS และยังไม่ได้ติดตั้ง — ไม่รกหน้าจอคนใช้ Android</span></div>
+          <div><span class="k">เตือนล่วงหน้า</span><span class="v">ตั้งค่าเริ่มต้นได้ว่า reminder ที่สร้างใหม่จะเตือนก่อนกี่นาที (ค่าเริ่มต้น: ตรงเวลา)</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">สถานะพิเศษ</p>
+    <h2>ตอนที่ไม่มีข้อมูล หรือมีอะไรพัง</h2>
+    <div class="col"><p>สถานะเหล่านี้เจอบ่อยกว่าที่คิด โดยเฉพาะสัปดาห์แรกที่ยังไม่มีข้อมูล — และเป็นตัวตัดสินว่าจะใช้ต่อหรือเลิก</p></div>
+    <div class="states">
+      <div class="st"><h5>วันนี้ · ไม่มีอะไรเลย</h5><p>ไม่ขึ้นหัวข้อว่างเปล่าเรียงกันสี่อัน</p><span class="say">“วันนี้ว่าง — สัปดาห์นี้มี 3 งานรออยู่ ดูเลยไหม”</span></div>
+      <div class="st"><h5>คลัง · ยังไม่มี project</h5><p>Area ว่างแสดงปุ่มสร้างในตัวเอง ไม่ใช่ข้อความว่างเปล่า</p><span class="say">“Financial ยังว่าง — + เพิ่มโปรเจกต์แรก”</span></div>
+      <div class="st"><h5>ปฏิทิน · สัปดาห์ที่ไม่มีอะไร</h5><p>ยังวาดตารางเปล่าไว้เหมือนเดิม ไม่แทนที่ด้วยข้อความ — เพราะตารางเปล่าคือคำตอบว่า “ว่างทั้งสัปดาห์”</p></div>
+      <div class="st"><h5>ต่อเน็ตไม่ได้</h5><p>แสดงข้อมูลที่แคชไว้พร้อมแถบเตือน ปุ่มแก้ไขถูกปิด</p><span class="say">“ออฟไลน์ — กำลังแสดงข้อมูลเมื่อ 14:20”</span></div>
+      <div class="st"><h5>บันทึกไม่สำเร็จ</h5><p>ไม่ทิ้งสิ่งที่พิมพ์ไป เก็บไว้ในช่องเดิมพร้อมปุ่มลองใหม่</p><span class="say">“บันทึกไม่สำเร็จ — ข้อความยังอยู่ ลองอีกครั้ง”</span></div>
+      <div class="st"><h5>กำลังโหลด</h5><p>โครงร่างเทา ๆ ในตำแหน่งเดียวกับของจริง ไม่ใช้วงกลมหมุน — จะได้ไม่กระตุกตอนข้อมูลมาถึง</p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">มือถือ กับ เดสก์ท็อป</p>
+    <h2>ต่างกันตรงไหนบ้าง</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>เรื่อง</th><th>มือถือ (&lt; 768px)</th><th>เดสก์ท็อป</th></tr></thead>
+        <tbody>
+          <tr><td class="f">การนำทาง</td><td>แถบล่าง 4 ปุ่ม</td><td>แถบข้างซ้ายค้างไว้ พร้อมรายการ Area กางอยู่</td></tr>
+          <tr><td class="f">ปฏิทินสัปดาห์</td><td>3 วันต่อหน้า ปัดเลื่อน</td><td>7 วันเต็ม</td></tr>
+          <tr><td class="f">ปฏิทินเดือน</td><td>2 รายการต่อวัน</td><td>3–4 รายการต่อวัน ตามความสูงจอ</td></tr>
+          <tr><td class="f">แผงรายละเอียด</td><td>เลื่อนขึ้นจากด้านล่าง เต็มความกว้าง</td><td>แผงข้างขวา กว้าง 380px หน้าหลักยังเห็นอยู่</td></tr>
+          <tr><td class="f">หน้า project</td><td>เรียงลงมาชั้นเดียว</td><td>สองคอลัมน์ — งาน/เตือน ซ้าย · ตาราง/โน้ต ขวา</td></tr>
+          <tr><td class="f">เพิ่มเร็ว</td><td>ปุ่มลอยมุมขวาล่าง</td><td>กด <code>N</code> ที่คีย์บอร์ดได้ทันที</td></tr>
+          <tr><td class="f">แก้ตารางเวลา (S6)</td><td>ทีละช่วง เลื่อนลง</td><td>เห็นทุกช่วงพร้อมกัน + ตัวอย่างผลลัพธ์ค้างด้านขวา</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">คำที่ใช้</p>
+    <h2>ศัพท์ในหน้าจอ กับศัพท์ในฐานข้อมูล</h2>
+    <div class="col"><p>ในโค้ดใช้อังกฤษให้ตรงกับ schema แต่บนหน้าจอใช้คำไทยที่อ่านแล้วรู้เรื่องทันที ไม่ต้องแปลในหัว</p></div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>ในฐานข้อมูล</th><th>บนหน้าจอ</th><th>ตอนคุยกับ Claude</th></tr></thead>
+        <tbody>
+          <tr><td class="f">area</td><td>ด้าน</td><td>รับทั้ง “area” และชื่อจริง เช่น “Class”</td></tr>
+          <tr><td class="f">project</td><td>โปรเจกต์ · ใน Class เรียก “วิชา”</td><td>รับทั้งสองคำ</td></tr>
+          <tr><td class="f">task</td><td>งาน</td><td>“งาน” / “ต้องทำ” / “ส่ง”</td></tr>
+          <tr><td class="f">reminder</td><td>เตือน</td><td>“เตือน” / “อย่าลืม”</td></tr>
+          <tr><td class="f">shortnote</td><td>โน้ต</td><td>“โน้ต” / “จดไว้”</td></tr>
+          <tr><td class="f">project_schedule</td><td>ช่วงเวลาประจำ · ใน Class เรียก “คาบเรียน”</td><td>“ตารางเรียน” / “คาบ”</td></tr>
+          <tr><td class="f">archived</td><td>เก็บเข้าคลัง</td><td>“เก็บ” / “จบเทอมแล้ว”</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">ขอบเขต</p>
+    <h2>สิ่งที่ตั้งใจไม่ทำในเวอร์ชันแรก</h2>
+    <div class="col">
+      <div class="nongoal"><h5>ลากย้ายในปฏิทิน</h5><p>ตกลงกันแล้วว่าปฏิทินเป็นมุมมองสำหรับดู · ถ้าอยากได้ทีหลัง เพิ่มได้โดยไม่ต้องรื้อโครงสร้าง</p></div>
+      <div class="nongoal"><h5>reminder แบบเตือนซ้ำ</h5><p>ตกลงกันแล้วว่าเตือนครั้งเดียว · แต่ <code>items</code> จะเผื่อคอลัมน์ไว้ให้เติมทีหลังได้</p></div>
+      <div class="nongoal"><h5>งานย่อยใน task</h5><p>สามชั้นพอแล้ว การเพิ่มชั้นที่สี่ทำให้ทั้งระบบซับซ้อนขึ้นเพื่อแลกกับกรณีที่เจอไม่บ่อย</p></div>
+      <div class="nongoal"><h5>ไฟล์แนบ</h5><p>ต้องใช้ Supabase Storage และจัดการโควตา · เลื่อนไปหลังจากใช้จริงแล้วรู้ว่าต้องการจริงไหม</p></div>
+      <div class="nongoal"><h5>ซิงก์กับ Google Calendar</h5><p>น่าสนใจแต่เป็นโปรเจกต์ของตัวเอง ไม่ใช่ฟีเจอร์ · ตารางเวลาที่ออกแบบไว้รองรับการส่งออกเป็น iCal ได้ในอนาคต</p></div>
+      <div class="nongoal"><h5>โหมดหลายคน</h5><p>ใส่ <code>user_id</code> ไว้ครบแล้ว แต่ยังไม่ทำหน้าจอเชิญคนหรือแบ่งสิทธิ์</p></div>
+    </div>
+  </section>
+
+  <footer>
+    เอกสาร UX เพื่อพิจารณา · อ่านคู่กับ <a href="https://claude.ai/code/artifact/6f50ef21-9670-40e0-84dd-86b29852ec36">ข้อเสนอโปรเจกต์</a> · เมื่ออนุมัติทั้งสองฉบับแล้วจะเขียน PLAN.md
+  </footer>
+
+</main>

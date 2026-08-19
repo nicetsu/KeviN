@@ -1,0 +1,32 @@
+# ---- ความลับ · ห้ามขึ้น repo เด็ดขาด ----
+.env
+.env.*
+!.env.local.example
+.vapid-backup.json
+*.pem
+*.key
+
+# ---- Supabase ----
+supabase/.temp/
+supabase/.branches/
+
+# ---- Node / Next ----
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---- Vercel ----
+.vercel
+
+# ---- เครื่องมือ / ระบบ ----
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# ---- ของชั่วคราวที่เคยสร้างระหว่างทาง ----
+_wk-test.html

@@ -1,0 +1,94 @@
+// KeviN · send-reminders
+//
+// pg_cron เรียกทุกนาที → อ้างสิทธิ์ reminder ที่ถึงเวลา → ยิง Web Push
+//
+// ⚠️ ห้ามเขียนตรรกะ "เลือกแถวแล้วค่อยอัปเดต" เองที่นี่เด็ดขาด (doc/TRAPS.md)
+//    ต้องเรียก claim_due_reminders() ซึ่งเขียน notified_at ในคำสั่งเดียวกับที่เลือกแถว
+//    ไม่งั้น cron รอบที่ทับกันจะส่ง push ซ้ำ
+
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+import webpush from 'npm:web-push@3.6.7'
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const VAPID_PUBLIC = Deno.env.get('VAPID_PUBLIC_KEY')!
+const VAPID_PRIVATE = Deno.env.get('VAPID_PRIVATE_KEY')!
+const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:noreply@example.com'
+
+webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE)
+
+type Item = {
+  id: string
+  user_id: string
+  title: string
+  body: string | null
+  remind_at: string
+}
+
+Deno.serve(async () => {
+  const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
+
+  // ถ้ายังไม่มีเครื่องไหนสมัครรับเลย ห้ามอ้างสิทธิ์ —
+  // เพราะ claim_due_reminders() เขียน notified_at ทันทีที่หยิบ
+  // ถ้าหยิบมาแล้วไม่มีที่ส่ง การเตือนนั้นจะถูกทำเครื่องหมายว่าส่งแล้วและหายไปเงียบ ๆ
+  const { count: deviceCount } = await supabase
+    .from('push_subscriptions')
+    .select('*', { count: 'exact', head: true })
+    .eq('enabled', true)
+
+  if (!deviceCount) {
+    return Response.json({ ok: true, claimed: 0, sent: 0, skipped: 'ยังไม่มีเครื่องที่สมัครรับ' })
+  }
+
+  // อ้างสิทธิ์แบบ atomic — แถวที่ได้มาแล้วจะไม่ถูกหยิบซ้ำโดยรอบถัดไป
+  const { data: due, error } = await supabase.rpc('claim_due_reminders')
+  if (error) {
+    return Response.json({ ok: false, stage: 'claim', error: error.message }, { status: 500 })
+  }
+
+  const items = (due ?? []) as Item[]
+  if (items.length === 0) {
+    return Response.json({ ok: true, claimed: 0, sent: 0 })
+  }
+
+  const userIds = [...new Set(items.map((i) => i.user_id))]
+  const { data: subs } = await supabase
+    .from('push_subscriptions')
+    .select('user_id, endpoint, p256dh, auth')
+    .in('user_id', userIds)
+    .eq('enabled', true)
+
+  let sent = 0
+  const dead: string[] = []
+
+  for (const item of items) {
+    const targets = (subs ?? []).filter((s) => s.user_id === item.user_id)
+
+    for (const s of targets) {
+      const payload = JSON.stringify({
+        title: item.title,
+        body: item.body ?? '',
+        tag: `kevin-${item.id}`,
+        url: '/',
+      })
+
+      try {
+        await webpush.sendNotification(
+          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+          payload
+        )
+        sent++
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode
+        // 404/410 = เครื่องนั้นถอนการติดตามไปแล้ว เก็บกวาดทิ้ง
+        if (status === 404 || status === 410) dead.push(s.endpoint)
+      }
+    }
+  }
+
+  if (dead.length > 0) {
+    await supabase.from('push_subscriptions').delete().in('endpoint', dead)
+  }
+
+  return Response.json({ ok: true, claimed: items.length, sent, pruned: dead.length })
+})

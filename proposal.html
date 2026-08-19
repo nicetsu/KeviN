@@ -1,0 +1,674 @@
+<title>KeviN</title>
+<style>
+  :root {
+    --paper:      #F1F3F2;
+    --surface:    #FBFCFB;
+    --sunk:       #E7EBE9;
+    --ink:        #101619;
+    --muted:      #5B6B6E;
+    --faint:      #8A9A9C;
+    --line:       #D3DAD8;
+    --line-soft:  #E2E7E5;
+    --brand:      #0E6E68;
+    --brand-soft: #D9EAE7;
+    --signal:     #B3123C;
+    --signal-soft:#F7DEE5;
+    --sched:      #6A4FA3;
+    --sched-soft: #E6DEF4;
+    --d1:         #0E6E68;
+    --d2:         #3F8C82;
+    --d3:         #7FAEA6;
+    --shadow:     0 1px 2px rgba(16,22,25,.06), 0 8px 24px -16px rgba(16,22,25,.28);
+
+    --f-display: Bahnschrift, "DIN Alternate", "Segoe UI Variable Display", "Leelawadee UI", "Noto Sans Thai", "Segoe UI", sans-serif;
+    --f-body: "Segoe UI", "Leelawadee UI", "Noto Sans Thai", system-ui, -apple-system, sans-serif;
+    --f-mono: Consolas, "Cascadia Mono", ui-monospace, "Leelawadee UI", monospace;
+
+    --step--2: .72rem;
+    --step--1: clamp(.78rem, .76rem + .1vw, .84rem);
+    --step-0:  clamp(.98rem, .95rem + .15vw, 1.06rem);
+    --step-1:  clamp(1.18rem, 1.1rem + .35vw, 1.35rem);
+    --step-2:  clamp(1.5rem, 1.3rem + .8vw, 2rem);
+    --step-3:  clamp(2rem, 1.5rem + 2.2vw, 3.4rem);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0C1113; --surface:#141B1D; --sunk:#101718; --ink:#E3EAE8;
+      --muted:#94A5A6; --faint:#6B7B7D; --line:#26302F; --line-soft:#1D2626;
+      --brand:#4FC2B6; --brand-soft:#16302E; --signal:#FF6B8A; --signal-soft:#33161F;
+      --sched:#A78BE8; --sched-soft:#241B38;
+      --d1:#4FC2B6; --d2:#3A8F87; --d3:#2A6660;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0C1113; --surface:#141B1D; --sunk:#101718; --ink:#E3EAE8;
+    --muted:#94A5A6; --faint:#6B7B7D; --line:#26302F; --line-soft:#1D2626;
+    --brand:#4FC2B6; --brand-soft:#16302E; --signal:#FF6B8A; --signal-soft:#33161F;
+    --sched:#A78BE8; --sched-soft:#241B38;
+    --d1:#4FC2B6; --d2:#3A8F87; --d3:#2A6660;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--f-body); font-size: var(--step-0); line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 3rem); }
+  .col { max-width: 68ch; }
+
+  .mast { border-bottom: 1px solid var(--line); padding: clamp(2.4rem,6vw,4.6rem) 0 clamp(1.8rem,4vw,2.8rem); }
+  .mast-inner { display: flex; flex-direction: column; gap: 1.6rem; }
+  .kicker { font-family: var(--f-mono); font-size: var(--step--1); letter-spacing: .16em;
+    text-transform: uppercase; color: var(--faint); display: flex; gap: .9rem; flex-wrap: wrap; align-items: center; }
+  .kicker b { color: var(--brand); font-weight: 600; }
+  .wordmark { font-family: var(--f-display); font-size: var(--step-3); line-height: .95;
+    letter-spacing: -.01em; font-weight: 600; margin: 0; text-wrap: balance; }
+  .wordmark .n { color: var(--brand); }
+  .thesis { font-size: var(--step-1); color: var(--muted); max-width: 46ch; margin: 0; text-wrap: balance; }
+  .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip { font-family: var(--f-mono); font-size: var(--step--1); padding: .22rem .6rem;
+    border: 1px solid var(--line); border-radius: 2px; color: var(--muted); background: var(--surface); }
+  .chip.on { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+
+  section { padding: clamp(2.6rem,6vw,4.4rem) 0; border-bottom: 1px solid var(--line-soft); }
+  .eyebrow { font-family: var(--f-mono); font-size: var(--step--1); letter-spacing: .18em;
+    text-transform: uppercase; color: var(--brand); margin: 0 0 .7rem; display: flex; align-items: baseline; gap: .7rem; }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  h2 { font-family: var(--f-display); font-size: var(--step-2); font-weight: 600; line-height: 1.15; margin: 0 0 1rem; text-wrap: balance; }
+  h3 { font-family: var(--f-display); font-size: var(--step-1); font-weight: 600; margin: 2.2rem 0 .6rem; }
+  p { margin: 0 0 1rem; }
+  .lead { font-size: var(--step-1); color: var(--muted); max-width: 52ch; }
+  strong { font-weight: 600; }
+  code { font-family: var(--f-mono); font-size: .88em; background: var(--sunk); padding: .1em .38em; border-radius: 2px; }
+  a { color: var(--brand); }
+
+  .tree { background: var(--surface); border: 1px solid var(--line); border-radius: 3px;
+    padding: 1.4rem clamp(1rem,3vw,2rem); margin: 1.6rem 0; box-shadow: var(--shadow); }
+  .node { display: flex; align-items: flex-start; gap: .8rem; padding: .42rem 0; }
+  .node .bar { width: 3px; align-self: stretch; border-radius: 2px; flex: none; }
+  .lvl2 { margin-left: clamp(1rem,4vw,2.4rem); }
+  .lvl3 { margin-left: clamp(2rem,8vw,4.8rem); }
+  .lvl1 .bar { background: var(--d1); }
+  .lvl2 .bar { background: var(--d2); }
+  .lvl3 .bar { background: var(--d3); }
+  .node.time .bar { background: var(--signal); }
+  .node.sch .bar { background: var(--sched); }
+  .node .tag { font-family: var(--f-mono); font-size: var(--step--1); letter-spacing: .08em;
+    text-transform: uppercase; flex: none; width: 8.5em; color: var(--faint); padding-top: .12em; }
+  .lvl1 .tag { color: var(--d1); }
+  .node.time .tag { color: var(--signal); }
+  .node.sch .tag { color: var(--sched); }
+  .node .txt { flex: 1; min-width: 0; }
+  .node .txt small { display: block; color: var(--faint); font-size: var(--step--1); }
+
+  .scroll { overflow-x: auto; margin: 1.2rem 0 1.6rem; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 580px; font-size: var(--step--1); }
+  th, td { text-align: left; padding: .62rem .9rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  thead th { font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .1em;
+    color: var(--faint); font-weight: 500; background: var(--sunk); border-bottom: 1px solid var(--line); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.f { font-family: var(--f-mono); color: var(--ink); white-space: nowrap; }
+  td.t { font-family: var(--f-mono); color: var(--muted); }
+  .req { color: var(--signal); font-family: var(--f-mono); }
+
+  figure { margin: 1.6rem 0; }
+  figcaption { font-size: var(--step--1); color: var(--faint); font-family: var(--f-mono); margin-top: .7rem; }
+  .diagram { width: 100%; height: auto; display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 3px; }
+
+  .frames { display: grid; gap: 1.6rem; grid-template-columns: 1fr; margin: 1.6rem 0; }
+  @media (min-width: 900px) { .frames.two { grid-template-columns: 1fr 1fr; } }
+  .frame { border: 1px solid var(--line); border-radius: 4px; background: var(--surface); overflow: hidden; box-shadow: var(--shadow); }
+  .frame-head { font-family: var(--f-mono); font-size: var(--step--1); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--faint); padding: .5rem .9rem; border-bottom: 1px solid var(--line); background: var(--sunk);
+    display: flex; justify-content: space-between; gap: 1rem; }
+  .screen { padding: .9rem; display: flex; flex-direction: column; gap: .55rem; font-size: var(--step--1); }
+  .bar-row { display: flex; align-items: center; gap: .55rem; }
+  .card { border: 1px solid var(--line-soft); border-radius: 3px; padding: .55rem .7rem;
+    display: flex; gap: .6rem; align-items: flex-start; background: var(--paper); }
+  .card .stripe { width: 3px; align-self: stretch; border-radius: 2px; background: var(--d3); flex: none; }
+  .card.due .stripe { background: var(--signal); }
+  .card.note .stripe { background: var(--d2); }
+  .card.sch .stripe { background: var(--sched); }
+  .card .body { flex: 1; min-width: 0; }
+  .card .meta { font-family: var(--f-mono); font-size: var(--step--2); color: var(--faint); letter-spacing: .04em; }
+  .pill { font-family: var(--f-mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+    padding: .1rem .4rem; border-radius: 2px; border: 1px solid var(--line); color: var(--muted); flex: none; }
+  .pill.hot { color: var(--signal); border-color: var(--signal); background: var(--signal-soft); }
+  .pill.ok { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }
+  .pill.sch { color: var(--sched); border-color: var(--sched); background: var(--sched-soft); }
+  .sec-label { font-family: var(--f-mono); font-size: var(--step--2); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin-top: .3rem; }
+  .fab { border: 1px dashed var(--brand); color: var(--brand); border-radius: 3px; text-align: center; padding: .4rem;
+    font-family: var(--f-mono); font-size: var(--step--2); letter-spacing: .06em; }
+  .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; font-family: var(--f-mono); font-size: var(--step--2); }
+  .toggle span { padding: .2rem .6rem; color: var(--muted); }
+  .toggle span.on { background: var(--brand); color: var(--surface); }
+
+  /* month grid */
+  .mo { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: var(--line-soft); border: 1px solid var(--line-soft); }
+  .mo .dow { background: var(--sunk); text-align: center; font-family: var(--f-mono); font-size: var(--step--2); color: var(--faint); padding: .2rem 0; }
+  .mo .day { background: var(--surface); min-height: 3.1rem; padding: .2rem .28rem; display: flex; flex-direction: column; gap: .15rem; }
+  .mo .day .d { font-family: var(--f-mono); font-size: var(--step--2); color: var(--muted); }
+  .mo .day.out { opacity: .35; }
+  .mo .day.today .d { color: var(--surface); background: var(--brand); border-radius: 2px; width: 1.2rem; text-align: center; }
+  .mo .ev { font-size: .64rem; line-height: 1.25; padding: .05rem .22rem; border-radius: 2px; border-left: 2px solid var(--d3);
+    background: var(--sunk); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mo .ev.due { border-left-color: var(--signal); }
+  .mo .ev.sch { border-left-color: var(--sched); }
+  .mo .more { font-family: var(--f-mono); font-size: .6rem; color: var(--faint); }
+
+  /* week timetable */
+  .wk { display: grid; grid-template-columns: 2.3rem repeat(7, 1fr); gap: 1px; background: var(--line-soft);
+    border: 1px solid var(--line-soft); font-size: .64rem; }
+  .wk .hd { background: var(--sunk); text-align: center; font-family: var(--f-mono); font-size: var(--step--2); color: var(--faint); padding: .22rem 0; }
+  .wk .hd.now { color: var(--brand); }
+  .wk .tm { background: var(--sunk); font-family: var(--f-mono); font-size: .6rem; color: var(--faint); text-align: right; padding: .1rem .25rem 0 0; }
+  .wk .cell { background: var(--surface); min-height: 1.35rem; position: relative; }
+  .wk .blk { position: absolute; left: 1px; right: 1px; border-radius: 2px; padding: .1rem .22rem; line-height: 1.2;
+    overflow: hidden; background: var(--sched-soft); border-left: 2px solid var(--sched); color: var(--ink); }
+  .wk .blk.due { background: var(--signal-soft); border-left-color: var(--signal); }
+  .wk .allday .pill { white-space: normal; }
+  .wkscroll { overflow-x: auto; }
+  .wkscroll .wk { min-width: 460px; }
+  .wk .blk.rem { background: var(--brand-soft); border-left-color: var(--brand); }
+  .wk .allday { background: var(--surface); padding: .12rem .2rem; min-height: 1.1rem; }
+
+  .chat { display: flex; flex-direction: column; gap: .6rem; margin: 1.4rem 0; }
+  .msg { padding: .6rem .85rem; border-radius: 3px; max-width: 62ch; font-size: var(--step--1); }
+  .msg.u { background: var(--brand-soft); border: 1px solid var(--brand); align-self: flex-start; }
+  .msg.a { background: var(--surface); border: 1px solid var(--line); align-self: flex-start; margin-left: 1.6rem; }
+  .msg .who { font-family: var(--f-mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: .2rem; }
+
+  .phases { display: flex; flex-direction: column; margin: 1.6rem 0; border-left: 2px solid var(--line); }
+  .phase { display: grid; grid-template-columns: 4.2rem 1fr; gap: 1rem; padding: 1rem 0 1rem 1.2rem; position: relative; border-bottom: 1px solid var(--line-soft); }
+  .phase:last-child { border-bottom: 0; }
+  .phase::before { content: ""; position: absolute; left: -5px; top: 1.5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+  .phase .num { font-family: var(--f-mono); font-size: var(--step--1); color: var(--faint); letter-spacing: .1em; padding-top: .2rem; }
+  .phase h4 { font-family: var(--f-display); font-size: var(--step-1); font-weight: 600; margin: 0 0 .3rem; }
+  .phase p { margin: 0 0 .5rem; color: var(--muted); }
+  .out { font-family: var(--f-mono); font-size: var(--step--1); color: var(--brand); }
+  @media (max-width: 560px) { .phase { grid-template-columns: 1fr; gap: .2rem; } }
+
+  .traps { display: grid; gap: .9rem; margin: 1.4rem 0; }
+  @media (min-width: 760px) { .traps { grid-template-columns: 1fr 1fr; } }
+  .trap { border: 1px solid var(--line); border-left: 3px solid var(--signal); border-radius: 3px; padding: .8rem 1rem; background: var(--surface); }
+  .trap h5 { margin: 0 0 .3rem; font-family: var(--f-display); font-size: var(--step-0); font-weight: 600; }
+  .trap p { margin: 0; font-size: var(--step--1); color: var(--muted); }
+
+  .decided { display: grid; gap: .7rem; margin: 1.4rem 0; }
+  @media (min-width: 760px) { .decided { grid-template-columns: 1fr 1fr; } }
+  .dec { border: 1px solid var(--line); border-left: 3px solid var(--brand); border-radius: 3px; padding: .7rem .95rem; background: var(--surface); }
+  .dec h5 { margin: 0 0 .2rem; font-family: var(--f-mono); font-size: var(--step--2); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 500; }
+  .dec p { margin: 0; font-size: var(--step--1); }
+
+  footer { padding: 2.6rem 0 4rem; color: var(--faint); font-family: var(--f-mono); font-size: var(--step--1); letter-spacing: .06em; }
+  footer a { color: var(--brand); }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+</style>
+
+<header class="mast">
+  <div class="wrap mast-inner">
+    <div class="kicker"><span>ข้อเสนอโปรเจกต์ · ฉบับแก้ครั้งที่ 2</span><span>·</span><span>17 ส.ค. 2026</span><span>·</span><b>รออนุมัติ</b></div>
+    <h1 class="wordmark">Kevi<span class="n">N</span></h1>
+    <p class="thesis">ผู้ช่วยส่วนตัวที่เก็บทุกอย่างไว้บนคลาวด์ สั่งงานด้วยการพิมพ์คุยกับ Claude และเปิดดูเป็นภาพได้จากทั้งคอมและมือถือ</p>
+    <div class="chips">
+      <span class="chip on">Supabase (Postgres)</span>
+      <span class="chip on">MCP Connector</span>
+      <span class="chip on">Next.js + Vercel</span>
+      <span class="chip on">PWA + Web Push</span>
+      <span class="chip on">pg_cron + Edge Function</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <p class="eyebrow">สิ่งที่กำลังสร้าง</p>
+    <h2>ระบบเดียว สองทางเข้า</h2>
+    <div class="col">
+      <p class="lead">ข้อมูลอยู่ที่เดียวบนคลาวด์ แล้วเปิดสองประตูให้เข้าถึง — ประตูที่ <em>คุยได้</em> กับประตูที่ <em>มองเห็น</em></p>
+      <p><strong>ประตูที่คุยได้</strong> คือ Claude ที่ต่อกับฐานข้อมูลผ่าน MCP พิมพ์ว่า “พรุ่งนี้วิชาแคลมี quiz” แล้วมันไปสร้าง reminder ให้ถูกที่เอง ใช้ได้ทั้งบนคอมและในแอปมือถือ เหมาะกับตอนนึกอะไรออกกลางทางแล้วอยากโยนเข้าระบบเร็ว ๆ</p>
+      <p><strong>ประตูที่มองเห็น</strong> คือเว็บแอปที่แสดงทุกอย่างเป็นภาพ — ทั้งแบบรายการและแบบปฏิทิน ติ๊กงานเสร็จ จัดลำดับ แก้ไขได้ครบ เหมาะกับตอนนั่งวางแผนว่าสัปดาห์นี้จะเอายังไง</p>
+      <p>ทั้งสองประตูอ่านเขียนตารางเดียวกัน ไม่มีการ sync ไม่มีข้อมูลสองชุดที่ต้องมาไล่จับให้ตรงกัน</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">โครงสร้างข้อมูล</p>
+    <h2>สามระดับ บวกตารางเวลาที่เกาะอยู่กับ project</h2>
+    <div class="col">
+      <p>ระดับบนสองชั้นเป็นแค่ “ที่เก็บ” ของจริงอยู่ชั้นล่างสุดซึ่งแตกเป็นสามชนิด — และ project ยังพ่วง <strong>ช่วงเวลาประจำ</strong> ได้อีกหลายช่วง สำหรับสิ่งที่เกิดซ้ำตามตาราง เช่นคาบเรียน</p>
+    </div>
+
+    <div class="tree">
+      <div class="node lvl1"><span class="bar"></span><span class="tag">Area</span><span class="txt"><strong>Class</strong><small>ก้อนใหญ่ของชีวิต — Class / Hackathon / Financial / Personal</small></span></div>
+      <div class="node lvl2"><span class="bar"></span><span class="tag">Project</span><span class="txt"><strong>แคลคูลัส 1</strong><small>สิ่งที่อยู่ในก้อนนั้น — ในที่นี้คือรายวิชา</small></span></div>
+      <div class="node lvl3 sch"><span class="bar"></span><span class="tag">Schedule</span><span class="txt">จันทร์ 09:00–11:00 · ENG-401<small>ช่วงเวลาประจำของ project · ใส่ได้หลายช่วง · ตั้งได้ว่าซ้ำกี่สัปดาห์</small></span></div>
+      <div class="node lvl3"><span class="bar"></span><span class="tag">Task</span><span class="txt">ทำแบบฝึกหัดบทที่ 4 ส่งศุกร์<small>มีสถานะเสร็จ/ไม่เสร็จ · มีกำหนดส่ง (ไม่บังคับ)</small></span></div>
+      <div class="node lvl3 time"><span class="bar"></span><span class="tag">Reminder</span><span class="txt">คาบหน้ามี quiz — เอาปากกาไปด้วย<small>มีเวลาแจ้งเตือน · เด้งเข้ามือถือเมื่อถึงเวลา · เตือนครั้งเดียว</small></span></div>
+      <div class="node lvl3"><span class="bar"></span><span class="tag">Shortnote</span><span class="txt">อ.ชอบออกข้อสอบจากตัวอย่างในสไลด์<small>ไม่มีเวลา · อยู่ในรายการรวมกับของอื่น ไม่ปักหมุด</small></span></div>
+    </div>
+
+    <div class="col">
+      <h3>ความต่างที่แท้จริงคือ “เวลา”</h3>
+      <p>สามชนิดล่างสุดหน้าตาคล้ายกันมาก ต่างกันที่ฟิลด์เวลาเพียงจุดเดียว — และความต่างนั้นเป็นตัวกำหนดว่าระบบจะปฏิบัติกับมันยังไง</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>ชนิด</th><th>ฟิลด์เวลา</th><th>ขึ้นปฏิทิน</th><th>ระบบทำอะไรให้</th></tr></thead>
+        <tbody>
+          <tr><td class="f">task</td><td class="t">due_at <span class="t">(ไม่บังคับ)</span></td><td>ขึ้น ถ้ามี due_at</td><td>ขึ้นหน้า “วันนี้” เมื่อใกล้กำหนด · เตือนว่าเลยกำหนด</td></tr>
+          <tr><td class="f">reminder</td><td class="t">remind_at <span class="req">*บังคับ</span></td><td>ขึ้นเสมอ</td><td>ส่ง push เข้ามือถือเมื่อถึงเวลา ครั้งเดียวจบ</td></tr>
+          <tr><td class="f">shortnote</td><td class="t">— ไม่มี</td><td>ไม่ขึ้น</td><td>เก็บไว้อ่านในหน้า project เท่านั้น</td></tr>
+          <tr><td class="f">schedule</td><td class="t">day + start/end + ช่วงสัปดาห์</td><td>ขึ้นเสมอ</td><td>วาดเป็นบล็อกในปฏิทิน · <strong>ไม่แจ้งเตือน</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+      <h3>เก็บ item เป็นตารางเดียวหรือสามตาราง</h3>
+      <p>เสนอให้ใช้ <strong>ตารางเดียวชื่อ <code>items</code></strong> แล้วแยกด้วยคอลัมน์ <code>type</code> เพราะทั้งสามชนิดใช้ฟิลด์ร่วมกันเกือบหมด และหน้าจอส่วนใหญ่ต้องดึงมาแสดงปนกันอยู่แล้ว ถ้าแยกสามตารางจะต้อง <code>UNION</code> แทบทุกครั้ง</p>
+      <p>ป้องกันข้อมูลเพี้ยนด้วย <code>CHECK</code> constraint ที่ระดับฐานข้อมูล เช่น “ถ้า type เป็น reminder แล้ว remind_at ต้องไม่ว่าง” และ “ถ้าเป็น shortnote แล้ว remind_at กับ due_at ต้องว่าง” — กติกาที่ตัว DB บังคับเอง ทำให้ Claude ใส่ข้อมูลผิดรูปไม่ได้ ต่อให้ prompt หลุด</p>
+
+      <h3>ช่วงเวลาประจำ เก็บยังไงให้รองรับทั้งสองแบบ</h3>
+      <p>คุณต้องการตั้งได้สองแบบ — “ซ้ำไปอีก 16 สัปดาห์” กับ “เลือกเองว่าสัปดาห์ไหนบ้าง” เสนอให้ <strong>เก็บเป็นรูปแบบเดียว แต่กรอกได้สองทาง</strong></p>
+      <p>ในฐานข้อมูลเก็บแค่ <code>start_date</code> กับ <code>week_offsets</code> (รายการเลขสัปดาห์ที่มีคาบ นับจากสัปดาห์แรก) ส่วนโหมด “ซ้ำ 16 สัปดาห์” เป็นแค่ปุ่มลัดใน UI ที่เติม <code>[0,1,2,…,15]</code> ให้เอง</p>
+      <p>ได้ประโยชน์สองอย่าง — โค้ดวาดปฏิทินมีทางเดียวต้องดูแล และเวลาสัปดาห์ไหนงดคาบ ก็แค่ติ๊กสัปดาห์นั้นออก ไม่ต้องแยกเป็นข้อยกเว้นพิเศษ</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>ตาราง</th><th>คอลัมน์หลัก</th><th>หมายเหตุ</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="f">areas</td>
+            <td class="t">id · user_id · name · color · sort_order</td>
+            <td>วันแรกมี 4 อัน — Class, Hackathon, Financial, Personal</td>
+          </tr>
+          <tr>
+            <td class="f">projects</td>
+            <td class="t">id · area_id · name · status · description · sort_order</td>
+            <td>status = active / archived / done — จบเทอมแล้ว archive ทั้งวิชาได้ ไม่ต้องลบ</td>
+          </tr>
+          <tr>
+            <td class="f">project_schedules</td>
+            <td class="t">id · project_id · day_of_week · start_time · end_time · location · label · start_date · week_offsets[]</td>
+            <td>หนึ่งแถวต่อหนึ่งช่วงเวลา · หนึ่ง project มีได้หลายแถว (บรรยาย + แล็บ)</td>
+          </tr>
+          <tr>
+            <td class="f">items</td>
+            <td class="t">id · project_id · <strong>type</strong> · title · body · due_at · remind_at · done_at · notified_at · priority</td>
+            <td>task / reminder / shortnote อยู่รวมกันที่นี่ · <code>notified_at</code> กัน push ซ้ำ</td>
+          </tr>
+          <tr>
+            <td class="f">push_subscriptions</td>
+            <td class="t">id · user_id · endpoint · p256dh · auth · device_label</td>
+            <td>หนึ่งแถวต่อหนึ่งเครื่องที่กดอนุญาตแจ้งเตือน</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <p>ทุกตารางมี <code>user_id</code> และเปิด Row Level Security ตั้งแต่วันแรก แม้จะใช้คนเดียว — เพราะเปิดทีหลังตอนมีข้อมูลแล้วเจ็บกว่ามาก</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">สถาปัตยกรรม</p>
+    <h2>ใครคุยกับใคร</h2>
+    <figure>
+      <svg class="diagram" viewBox="0 0 900 420" role="img" aria-label="แผนผังสถาปัตยกรรม: Claude และเว็บแอปเข้าถึง Supabase ตรงกลาง โดยมี pg_cron ยิง Edge Function ส่ง Web Push">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--faint)"/>
+          </marker>
+          <marker id="ar-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--signal)"/>
+          </marker>
+        </defs>
+        <g font-family="Consolas, monospace" font-size="12" letter-spacing="1">
+          <rect x="24" y="40" width="200" height="76" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="40" y="68" fill="var(--ink)" font-size="14" letter-spacing="0">Claude (คอม + มือถือ)</text>
+          <text x="40" y="90" fill="var(--faint)">พิมพ์คุย · เพิ่ม ลบ แก้ ค้นหา</text>
+          <text x="40" y="106" fill="var(--brand)">MCP CONNECTOR</text>
+
+          <rect x="24" y="160" width="200" height="76" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="40" y="188" fill="var(--ink)" font-size="14" letter-spacing="0">เว็บแอป (Next.js)</text>
+          <text x="40" y="210" fill="var(--faint)">รายการ · ปฏิทิน · จัดการ</text>
+          <text x="40" y="226" fill="var(--brand)">VERCEL</text>
+
+          <rect x="24" y="280" width="200" height="76" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="40" y="308" fill="var(--ink)" font-size="14" letter-spacing="0">Cowork (วันละครั้ง)</text>
+          <text x="40" y="330" fill="var(--faint)">สรุปเช้า · ตรวจงานค้าง</text>
+          <text x="40" y="346" fill="var(--brand)">งานที่ต้องคิด</text>
+
+          <rect x="350" y="120" width="200" height="160" rx="3" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="1.5"/>
+          <text x="370" y="152" fill="var(--ink)" font-size="16" letter-spacing="0" font-weight="600">Supabase</text>
+          <text x="370" y="176" fill="var(--muted)">Postgres</text>
+          <text x="370" y="196" fill="var(--muted)">areas / projects / items</text>
+          <text x="370" y="214" fill="var(--muted)">project_schedules</text>
+          <text x="370" y="244" fill="var(--brand)">แหล่งความจริงเดียว</text>
+
+          <rect x="640" y="40" width="230" height="70" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="656" y="68" fill="var(--ink)" font-size="14" letter-spacing="0">pg_cron — ทุกนาที</text>
+          <text x="656" y="90" fill="var(--faint)">หา reminder ที่ถึงเวลาแล้ว</text>
+
+          <rect x="640" y="140" width="230" height="70" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+          <text x="656" y="168" fill="var(--ink)" font-size="14" letter-spacing="0">Edge Function</text>
+          <text x="656" y="190" fill="var(--faint)">เซ็น VAPID · ยิง push</text>
+
+          <rect x="640" y="240" width="230" height="70" rx="3" fill="var(--surface)" stroke="var(--signal)"/>
+          <text x="656" y="268" fill="var(--signal)" font-size="14" letter-spacing="0">แจ้งเตือนบนมือถือ</text>
+          <text x="656" y="290" fill="var(--faint)">เด้งแม้ปิดเว็บอยู่</text>
+
+          <path d="M228,78 C290,78 300,160 346,178" fill="none" stroke="var(--faint)" stroke-width="1.3" marker-end="url(#ar)"/>
+          <path d="M228,198 L346,198" fill="none" stroke="var(--faint)" stroke-width="1.3" marker-end="url(#ar)"/>
+          <path d="M228,318 C290,318 300,250 346,224" fill="none" stroke="var(--faint)" stroke-width="1.3" marker-end="url(#ar)"/>
+          <path d="M554,170 C600,170 600,80 636,78" fill="none" stroke="var(--faint)" stroke-width="1.3" marker-end="url(#ar)"/>
+          <path d="M755,114 L755,136" fill="none" stroke="var(--faint)" stroke-width="1.3" marker-end="url(#ar)"/>
+          <path d="M755,214 L755,236" fill="none" stroke="var(--signal)" stroke-width="1.6" marker-end="url(#ar-hot)"/>
+        </g>
+      </svg>
+      <figcaption>เส้นสีแดงคือทางเดินของการแจ้งเตือน — ไม่ผ่าน LLM เลย จึงตรงเวลาและไม่มีค่าใช้จ่ายต่อรอบ</figcaption>
+    </figure>
+    <div class="col">
+      <p>จุดสำคัญคือ <strong>Supabase เป็นแหล่งความจริงเดียว</strong> ทุกอย่างที่เหลือเป็นแค่หน้าต่างมองเข้าไป การแจ้งเตือนเดินอยู่ในฝั่ง Postgres ล้วน ๆ ไม่ต้องรอให้เว็บเปิดอยู่ ไม่ต้องรอให้ Claude ตื่น</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">ออกแบบ UX</p>
+    <h2>สามมุมมองต่อข้อมูลชุดเดียวกัน</h2>
+    <div class="col">
+      <p class="lead">โครงสร้างสามชั้นเป็นวิธี<em>เก็บ</em> ไม่ใช่วิธี<em>ดู</em> — เว็บจึงมีสามมุมมองที่สลับกันได้ตามว่ากำลังจะทำอะไร</p>
+      <ul style="margin:0 0 1rem;padding-left:1.1rem">
+        <li style="margin-bottom:.35rem"><strong>วันนี้</strong> — เปิดมาเจอเป็นหน้าแรก ตอบคำถามเดียวว่าตอนนี้ต้องทำอะไร</li>
+        <li style="margin-bottom:.35rem"><strong>ปฏิทิน</strong> — สลับได้ระหว่างรายเดือนกับรายสัปดาห์ ตอบว่าของไปกองอยู่ช่วงไหนบ้าง</li>
+        <li><strong>คลัง</strong> — ไล่ Area → Project → Item ตอบว่าวิชานี้มีอะไรค้างอยู่</li>
+      </ul>
+      <p>รายละเอียดทุกหน้าจอ ทุกสถานะ และทุกปฏิสัมพันธ์ อยู่ในเอกสารแยกอีกฉบับ — ด้านล่างนี้เป็นแค่ภาพรวมพอให้เห็นทิศทาง</p>
+    </div>
+
+    <div class="frames two">
+      <div class="frame">
+        <div class="frame-head"><span>หน้าแรก · วันนี้</span><span>มือถือ</span></div>
+        <div class="screen">
+          <div class="bar-row"><strong>จันทร์ 17 ส.ค.</strong><span class="pill hot">2 ด่วน</span></div>
+          <div class="sec-label">ตารางวันนี้</div>
+          <div class="card sch"><span class="stripe"></span><div class="body"><div>แคลคูลัส 1</div><div class="meta">09:00–11:00 · ENG-401</div></div><span class="pill sch">คาบ</span></div>
+          <div class="sec-label">กำลังจะถึง</div>
+          <div class="card due"><span class="stripe"></span><div class="body"><div>Quiz บทที่ 3</div><div class="meta">แคลคูลัส 1 · อีก 40 นาที</div></div><span class="pill hot">reminder</span></div>
+          <div class="card due"><span class="stripe"></span><div class="body"><div>ส่งแล็บฟิสิกส์</div><div class="meta">ฟิสิกส์ 2 · วันนี้ 23:59</div></div><span class="pill hot">task</span></div>
+          <div class="sec-label">สัปดาห์นี้</div>
+          <div class="card"><span class="stripe"></span><div class="body"><div>อ่านบท 5 เตรียมสอบย่อย</div><div class="meta">แคลคูลัส 1 · พฤหัส</div></div></div>
+          <div class="fab">+ เพิ่มเร็ว</div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-head"><span>ภายใน Project</span><span>มือถือ</span></div>
+        <div class="screen">
+          <div class="bar-row"><span class="meta" style="font-family:var(--f-mono);color:var(--faint)">Class ›</span><strong>แคลคูลัส 1</strong></div>
+          <div class="card sch"><span class="stripe"></span><div class="body"><div>จ. 09:00–11:00 · พฤ. 13:00–15:00</div><div class="meta">2 ช่วงเวลา · 16 สัปดาห์ · ENG-401</div></div><span class="pill sch">แก้</span></div>
+          <div class="sec-label">งาน · เหลือ 2</div>
+          <div class="card"><span class="stripe"></span><div class="body"><div>แบบฝึกหัดบทที่ 4</div><div class="meta">ส่งศุกร์ 22 ส.ค.</div></div></div>
+          <div class="card"><span class="stripe"></span><div class="body"><div>รายงานกลุ่ม</div><div class="meta">ยังไม่กำหนด</div></div></div>
+          <div class="sec-label">เตือน · 1</div>
+          <div class="card due"><span class="stripe"></span><div class="body"><div>เอาปากกาไปด้วย</div><div class="meta">พรุ่งนี้ 08:30</div></div></div>
+          <div class="sec-label">โน้ต · 2</div>
+          <div class="card note"><span class="stripe"></span><div class="body"><div>อ.ชอบออกจากตัวอย่างในสไลด์</div></div></div>
+          <div class="card note"><span class="stripe"></span><div class="body"><div>ขาดได้ 2 ครั้ง</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>ปฏิทินสองโหมด สลับด้วยปุ่มเดียว</h3>
+      <p>โหมดเดือนตอบว่า “เดือนนี้ของไปกองอยู่ตรงไหน” โหมดสัปดาห์ตอบว่า “วันพุธมีช่องว่างตอนบ่ายไหม” — เป็นคำถามคนละแบบ จึงต้องมีทั้งคู่ ปฏิทินเป็นมุมมองสำหรับ<strong>ดู</strong> กดที่รายการเพื่อดูรายละเอียดและเด้งไปหน้าแก้ได้ แต่ไม่ลากย้ายในปฏิทินโดยตรง</p>
+    </div>
+
+    <div class="frames two">
+      <div class="frame">
+        <div class="frame-head"><span>ปฏิทิน · เดือน</span><span>1 หน้า = 1 เดือน</span></div>
+        <div class="screen">
+          <div class="bar-row"><strong>สิงหาคม 2026</strong><span class="toggle" style="margin-left:auto"><span class="on">เดือน</span><span>สัปดาห์</span></span></div>
+          <div class="mo">
+            <div class="dow">จ</div><div class="dow">อ</div><div class="dow">พ</div><div class="dow">พฤ</div><div class="dow">ศ</div><div class="dow">ส</div><div class="dow">อา</div>
+            <div class="day out"><span class="d">27</span></div>
+            <div class="day out"><span class="d">28</span></div>
+            <div class="day out"><span class="d">29</span></div>
+            <div class="day out"><span class="d">30</span></div>
+            <div class="day out"><span class="d">31</span></div>
+            <div class="day"><span class="d">1</span></div>
+            <div class="day"><span class="d">2</span></div>
+
+            <div class="day"><span class="d">3</span><span class="ev sch">แคล 09:00</span></div>
+            <div class="day"><span class="d">4</span></div>
+            <div class="day"><span class="d">5</span><span class="ev sch">ฟิสิกส์</span></div>
+            <div class="day"><span class="d">6</span><span class="ev sch">แคล 13:00</span></div>
+            <div class="day"><span class="d">7</span><span class="ev due">ส่งงาน</span></div>
+            <div class="day"><span class="d">8</span></div>
+            <div class="day"><span class="d">9</span></div>
+
+            <div class="day"><span class="d">10</span><span class="ev sch">แคล 09:00</span></div>
+            <div class="day"><span class="d">11</span><span class="ev">Hackathon</span></div>
+            <div class="day"><span class="d">12</span><span class="ev sch">ฟิสิกส์</span></div>
+            <div class="day"><span class="d">13</span><span class="ev sch">แคล 13:00</span><span class="more">+2</span></div>
+            <div class="day"><span class="d">14</span><span class="ev due">แล็บ</span></div>
+            <div class="day"><span class="d">15</span></div>
+            <div class="day"><span class="d">16</span></div>
+
+            <div class="day today"><span class="d">17</span><span class="ev sch">แคล 09:00</span><span class="ev due">Quiz</span></div>
+            <div class="day"><span class="d">18</span></div>
+            <div class="day"><span class="d">19</span><span class="ev sch">ฟิสิกส์</span></div>
+            <div class="day"><span class="d">20</span><span class="ev sch">แคล 13:00</span></div>
+            <div class="day"><span class="d">21</span></div>
+            <div class="day"><span class="d">22</span><span class="ev due">ส่งแบบฝึกหัด</span></div>
+            <div class="day"><span class="d">23</span></div>
+          </div>
+          <div class="bar-row" style="gap:.7rem;margin-top:.2rem">
+            <span class="meta" style="color:var(--sched)">▍คาบประจำ</span>
+            <span class="meta" style="color:var(--signal)">▍กำหนดส่ง / เตือน</span>
+            <span class="meta">▍อื่น ๆ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div class="frame-head"><span>ปฏิทิน · ตารางงาน</span><span>1 หน้า = 1 สัปดาห์</span></div>
+        <div class="screen">
+          <div class="bar-row"><strong>17–23 ส.ค.</strong><span class="toggle" style="margin-left:auto"><span>เดือน</span><span class="on">สัปดาห์</span></span></div>
+          <div class="wkscroll"><div class="wk">
+            <div class="hd"></div>
+            <div class="hd now">จ 17</div><div class="hd">อ 18</div><div class="hd">พ 19</div><div class="hd">พฤ 20</div><div class="hd">ศ 21</div><div class="hd">ส 22</div><div class="hd">อา 23</div>
+
+            <div class="tm">ทั้งวัน</div>
+            <div class="allday"></div><div class="allday"></div><div class="allday"></div><div class="allday"></div><div class="allday"></div>
+            <div class="allday"><span class="pill hot" style="font-size:.55rem;padding:0 .2rem">ส่งงาน</span></div>
+            <div class="allday"></div>
+
+            <div class="tm">08</div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+            <div class="tm">09</div>
+            <div class="cell"><span class="blk" style="top:0;height:2.7rem">แคลคูลัส 1<br>ENG-401</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="blk" style="top:0;height:1.35rem">อังกฤษ</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="blk" style="top:0;height:2.7rem">แคลคูลัส 1<br>ENG-401</span></div>
+            <div class="cell"></div><div class="cell"></div>
+
+            <div class="tm">10</div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+            <div class="tm">11</div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="blk rem" style="top:0;height:1.35rem">Quiz</span></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+            <div class="tm">13</div>
+            <div class="cell"></div>
+            <div class="cell"><span class="blk" style="top:0;height:2.7rem">ฟิสิกส์ 2<br>SCI-210</span></div>
+            <div class="cell"></div>
+            <div class="cell"><span class="blk" style="top:0;height:2.7rem">ฟิสิกส์ 2 แล็บ</span></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+            <div class="tm">14</div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+
+            <div class="tm">15</div>
+            <div class="cell"></div><div class="cell"></div>
+            <div class="cell"><span class="blk" style="top:0;height:1.35rem">ชมรม</span></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          </div></div>
+          <div class="sec-label">กดที่บล็อกเพื่อดูรายละเอียด แล้วเด้งไปหน้าแก้ได้</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>การเพิ่มของ มีสองทางที่ไม่เหมือนกัน</h3>
+      <p>บนเว็บ ปุ่ม “เพิ่มเร็ว” เปิดช่องพิมพ์บรรทัดเดียวที่เดาให้อัตโนมัติ — พิมพ์ <code>แคล: ส่งแบบฝึกหัด ศุกร์</code> แล้วมันเลือก project และตั้ง due ให้ กดแก้ได้ก่อนบันทึก ไม่ต้องกรอกฟอร์มห้าช่อง</p>
+      <p>ส่วนบน Claude ไม่มีฟอร์มเลย พูดเป็นภาษาคนแล้วมันจัดการเอง แต่ต้อง <strong>ทวนกลับมาให้ยืนยันก่อนเสมอ</strong> ว่าจะลงที่ไหนเป็นชนิดอะไร เพราะสิ่งที่แย่ที่สุดของระบบแบบนี้คือของหายไปอยู่ผิดที่โดยไม่รู้ตัว</p>
+    </div>
+
+    <div class="chat">
+      <div class="msg u"><span class="who">คุณ</span>คาบแคลพรุ่งนี้มี quiz อย่าลืมเอาปากกาไป</div>
+      <div class="msg a"><span class="who">KeviN</span>จะบันทึกเป็น <strong>reminder</strong> ใน <strong>Class › แคลคูลัส 1</strong> เตือนพรุ่งนี้ 08:30 (ก่อนคาบ 30 นาที — ตารางระบุว่าคาบถัดไปคือพฤหัส 09:00) ยืนยันไหม</div>
+      <div class="msg u"><span class="who">คุณ</span>ได้ แล้ววิชานี้เหลืองานอะไรบ้าง</div>
+      <div class="msg a"><span class="who">KeviN</span>เหลือ 2 งาน — แบบฝึกหัดบทที่ 4 (ส่งศุกร์ 22 ส.ค.) และรายงานกลุ่ม (ยังไม่กำหนดวันส่ง) ต้องการให้ตั้งวันส่งรายงานกลุ่มไหม</div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">แผนการสร้าง</p>
+    <h2>หกเฟส เรียงตามลำดับที่ใช้งานได้เร็วที่สุด</h2>
+    <div class="col">
+      <p>ลำดับนี้จงใจให้ <strong>ใช้งานได้จริงตั้งแต่เฟส 1</strong> ก่อนที่จะมีเว็บสักหน้า เพราะประตูที่คุยได้สร้างเสร็จก่อน และมันคือส่วนที่ใช้บ่อยที่สุดในชีวิตประจำวัน</p>
+    </div>
+
+    <div class="phases">
+      <div class="phase">
+        <div class="num">เฟส 0</div>
+        <div>
+          <h4>วางฐานข้อมูล</h4>
+          <p>สร้างโปรเจกต์ Supabase, เขียน schema ทั้ง 5 ตาราง, ใส่ CHECK constraint และ RLS, ใส่ข้อมูลจริงของ 4 Area และวิชาที่เรียนอยู่</p>
+          <span class="out">ได้: ฐานข้อมูลที่ใส่ข้อมูลผิดรูปไม่ได้</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">เฟส 1</div>
+        <div>
+          <h4>ต่อ Claude เข้ากับฐานข้อมูล</h4>
+          <p>ตั้ง MCP connector, เขียน project prompt ที่อธิบาย schema และกติกา (ยืนยันก่อนเขียน, ห้ามลบโดยไม่ถาม, เดา project จากบริบท, อ่านตารางเวลาเพื่อคำนวณ “คาบหน้า”), ทดสอบทั้งบนคอมและมือถือ</p>
+          <span class="out">ได้: ใช้งานได้จริงแล้ว — เพิ่ม ลบ ค้นหา ผ่านการพิมพ์คุย</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">เฟส 2</div>
+        <div>
+          <h4>เว็บแอปแบบดูอย่างเดียว</h4>
+          <p>Next.js บน Vercel ต่อ Supabase, ทำหน้า “วันนี้” และหน้าคลัง (Area → Project → Item) ให้ครบก่อน ยังไม่ต้องแก้ไขอะไรได้</p>
+          <span class="out">ได้: เห็นภาพรวมทั้งระบบในหน้าจอเดียว</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">เฟส 3</div>
+        <div>
+          <h4>ปฏิทินสองโหมด</h4>
+          <p>โหมดเดือนและโหมดตารางงานรายสัปดาห์แบบมีแกนเวลา, ตัวจัดการช่วงเวลาประจำของ project (ใส่หลายช่วง เลือกจำนวนสัปดาห์หรือติ๊กสัปดาห์เอง), ตรรกะคลี่ <code>week_offsets</code> ออกเป็นวันจริง</p>
+          <span class="out">ได้: เห็นตารางเรียนทั้งเทอมโดยกรอกครั้งเดียว</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">เฟส 4</div>
+        <div>
+          <h4>จัดการได้บนเว็บ</h4>
+          <p>เพิ่ม ลบ แก้ ติ๊กเสร็จ จัดลำดับ, ช่อง “เพิ่มเร็ว” แบบพิมพ์บรรทัดเดียว, archive project</p>
+          <span class="out">ได้: ประตูที่สองเปิดครบ ใช้แทน Claude ได้ทุกอย่าง</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">เฟส 5</div>
+        <div>
+          <h4>PWA และการแจ้งเตือน</h4>
+          <p>ทำให้ติดตั้งลงหน้าจอโฮมได้, ขอสิทธิ์แจ้งเตือนและเก็บ subscription, เขียน Edge Function ส่ง push, ตั้ง pg_cron ให้รันทุกนาที, กันการเตือนซ้ำด้วย <code>notified_at</code></p>
+          <span class="out">ได้: reminder เด้งเข้ามือถือจริง แม้ปิดเว็บอยู่</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="num">เฟส 6</div>
+        <div>
+          <h4>ผู้ช่วยที่คิดเป็น</h4>
+          <p>ตั้ง Cowork ให้รันวันละครั้ง สรุปว่าวันนี้ควรทำอะไรก่อนหลัง และรายสัปดาห์ตรวจว่ามี project ไหนเงียบหายหรืองานไหนเลยกำหนดแล้วยังค้าง</p>
+          <span class="out">ได้: ระบบเริ่มบอกเราแทนที่จะรอเราถาม</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">กับดัก</p>
+    <h2>จุดที่รู้ล่วงหน้าว่าจะเจ็บ</h2>
+    <div class="traps">
+      <div class="trap">
+        <h5>iOS ต้องติดตั้งก่อนถึงจะเตือนได้</h5>
+        <p>Safari บน iPhone ไม่ให้เว็บทั่วไปส่ง push ต้องกด “เพิ่มลงหน้าจอโฮม” ก่อน ต้องมีหน้าจอสอนขั้นตอนนี้ ไม่งั้นจะงงว่าทำไมไม่เตือน</p>
+      </div>
+      <div class="trap">
+        <h5>VAPID key เปลี่ยนไม่ได้</h5>
+        <p>ถ้าสร้างคู่กุญแจใหม่ subscription เก่าทั้งหมดตายทันที ต้องเก็บให้ดีตั้งแต่แรกและห้าม regenerate</p>
+      </div>
+      <div class="trap">
+        <h5>เวลาเก็บเป็น UTC เสมอ</h5>
+        <p>ใช้ <code>timestamptz</code> ตลอด แล้วแปลงเป็นเวลาไทยตอนแสดงผล — <strong>ยกเว้น</strong> <code>start_time</code>/<code>end_time</code> ของตารางเรียนที่ต้องเป็น <code>time</code> เปล่า ๆ เพราะ “09:00 ทุกวันจันทร์” คือเวลาท้องถิ่น ไม่ใช่จุดเวลาจุดเดียว</p>
+      </div>
+      <div class="trap">
+        <h5>push ซ้ำเพราะ cron ทับกัน</h5>
+        <p>cron รันทุกนาที ถ้ารอบก่อนยังไม่จบจะเตือนซ้ำ ต้องเขียน <code>notified_at</code> ลงไปในคำสั่งเดียวกับที่เลือกแถว (<code>UPDATE … RETURNING</code>)</p>
+      </div>
+      <div class="trap">
+        <h5>service_role key ห้ามหลุดไปฝั่งเว็บ</h5>
+        <p>กุญแจนี้ข้าม RLS ได้ทั้งหมด ให้อยู่แค่ใน Edge Function กับ MCP connector เท่านั้น ฝั่งเบราว์เซอร์ใช้ anon key คู่กับ RLS</p>
+      </div>
+      <div class="trap">
+        <h5>Claude ลบของโดยไม่ได้ตั้งใจ</h5>
+        <p>ใน prompt ต้องกำหนดชัดว่าการลบต้องถามยืนยันทุกครั้ง และเสนอให้ใช้ <code>archived_at</code> แทนการลบจริง กู้คืนได้</p>
+      </div>
+      <div class="trap">
+        <h5>ตารางงานรายสัปดาห์บนจอมือถือ</h5>
+        <p>7 คอลัมน์ × แกนเวลา บีบลงจอ 375px แล้วอ่านไม่ออก ต้องออกแบบพฤติกรรมเฉพาะมือถือไว้ตั้งแต่แรก ไม่ใช่ย่อส่วนลงมาเฉย ๆ</p>
+      </div>
+      <div class="trap">
+        <h5>คาบเรียนซ้อนกันในปฏิทิน</h5>
+        <p>ถ้าสองช่วงเวลาทับกัน บล็อกจะซ้อนกันจนอ่านไม่ได้ ต้องมีตรรกะแบ่งคอลัมน์ย่อยตั้งแต่ตอนเขียนโหมดสัปดาห์</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">ข้อสรุป</p>
+    <h2>สิ่งที่เคาะแล้ว</h2>
+    <div class="decided">
+      <div class="dec"><h5>ผู้ใช้</h5><p>ใช้คนเดียว — RLS แบบง่าย แต่ใส่ <code>user_id</code> ไว้ครบทุกตารางเผื่ออนาคต</p></div>
+      <div class="dec"><h5>reminder</h5><p>เตือนครั้งเดียว ไม่ต้องรองรับการเตือนซ้ำ</p></div>
+      <div class="dec"><h5>ตารางเรียน</h5><p>ไม่ใช่ shortnote แล้ว — ขึ้นเป็นตาราง <code>project_schedules</code> ของตัวเอง ใส่ได้หลายช่วงต่อ project</p></div>
+      <div class="dec"><h5>ช่วงเวลาประจำ</h5><p>ไม่แจ้งเตือน แสดงในปฏิทินอย่างเดียว</p></div>
+      <div class="dec"><h5>shortnote</h5><p>เป็นรายการธรรมดาในหน้า project ไม่ปักหมุดบนสุด</p></div>
+      <div class="dec"><h5>ปฏิทิน</h5><p>ดูอย่างเดียว กดดูรายละเอียดได้ แต่ไม่ลากย้าย · โหมดสัปดาห์เป็นตารางมีแกนเวลา</p></div>
+      <div class="dec"><h5>Areas วันแรก</h5><p>Class · Hackathon · Financial · Personal</p></div>
+      <div class="dec"><h5>ชื่อเรียก</h5><p>Area ที่สี่ใช้ชื่อ Personal เพื่อไม่ให้ชนกับคำว่า project ในระดับที่ 2</p></div>
+    </div>
+  </section>
+
+  <footer>
+    เอกสารนี้เป็นข้อเสนอเพื่อพิจารณา · รายละเอียด UX ทุกหน้าจออยู่ใน <a href="https://claude.ai/code/artifact/06b0354f-7284-4f28-9b6a-c70b078855dc">เอกสาร UX ฉบับละเอียด</a> · เมื่ออนุมัติแล้วจะแปลงเป็น PLAN.md พร้อม schema SQL และ prompt ฉบับเต็ม
+  </footer>
+
+</main>

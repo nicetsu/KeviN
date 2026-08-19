@@ -1,0 +1,555 @@
+<title>KeviN Nightfall</title>
+<style>
+  :root {
+    --bg:        #0A0912;
+    --surface:   #14131F;
+    --raised:    #1C1B2B;
+    --line:      #26253A;
+    --line-soft: #1D1C2C;
+
+    --ink:    #F1F0F7;
+    --muted:  #A5A2B8;
+    --faint:  #87849D;
+
+    /* brand keeps its saturation — it is the only thing you act on */
+    --brand:      #A594FF;
+    --brand-deep: #8878F0;
+    --brand-soft: #1E1B33;
+
+    /* data colours: same hues, chroma pulled down ~45% */
+    --sched:      #79C2D0;
+    --sched-soft: #16292E;
+    --due:        #E0897E;
+    --due-soft:   #2E1E1D;
+    --task:       #74C6A4;
+    --task-soft:  #172A24;
+    --note:       #8E88A8;
+    --note-soft:  #1B1A28;
+
+    --g-class: linear-gradient(135deg, #79C2D0 0%, #8878F0 100%);
+    --g-hack:  linear-gradient(135deg, #E0897E 0%, #A594FF 100%);
+    --g-fin:   linear-gradient(135deg, #74C6A4 0%, #79C2D0 100%);
+    --g-pers:  linear-gradient(135deg, #A594FF 0%, #D98BB4 100%);
+
+    --r-card: 14px;
+    --r-tile: 10px;
+    --r-pill: 999px;
+
+    --f: Inter, Geist, "Segoe UI Variable Text", "Leelawadee UI",
+         "Noto Sans Thai", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --f-mono: "Geist Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+    --s--2: .69rem;
+    --s--1: .79rem;
+    --s-0:  .92rem;
+    --s-1:  1.08rem;
+    --s-2:  clamp(1.35rem, 1.1rem + .9vw, 1.8rem);
+    --s-3:  clamp(2rem, 1.5rem + 2.2vw, 3.1rem);
+
+    --sp: clamp(2.8rem, 6vw, 5rem);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--f); font-size: var(--s-0); line-height: 1.72;
+    letter-spacing: -.005em; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(1.2rem, 5vw, 3.5rem); }
+  .col { max-width: 64ch; }
+
+  header.mast { padding: clamp(3.4rem, 9vw, 6.5rem) 0 clamp(2rem, 4vw, 3rem); }
+  .kick {
+    font-family: var(--f-mono); font-size: var(--s--1); letter-spacing: .14em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 1.8rem;
+    display: flex; gap: .8rem; flex-wrap: wrap; align-items: center;
+  }
+  .kick b { color: var(--brand); font-weight: 500; }
+  h1.mark { font-size: var(--s-3); font-weight: 600; line-height: 1; margin: 0 0 1.4rem; letter-spacing: -.035em; }
+  h1.mark .n { color: var(--brand); }
+  .thesis { font-size: var(--s-1); color: var(--muted); max-width: 46ch; margin: 0 0 2rem; text-wrap: balance; }
+
+  section { padding: var(--sp) 0; border-top: 1px solid var(--line-soft); }
+  .eyebrow {
+    font-family: var(--f-mono); font-size: var(--s--1); letter-spacing: .16em;
+    text-transform: uppercase; color: var(--faint); margin: 0 0 1rem;
+  }
+  h2 { font-size: var(--s-2); font-weight: 600; line-height: 1.25; margin: 0 0 1.1rem; letter-spacing: -.025em; text-wrap: balance; }
+  h3 { font-size: var(--s-1); font-weight: 600; margin: 3rem 0 .9rem; letter-spacing: -.015em; }
+  p { margin: 0 0 1.1rem; }
+  .lead { font-size: var(--s-1); color: var(--muted); max-width: 50ch; }
+  code { font-family: var(--f-mono); font-size: .85em; color: var(--brand); }
+  strong { font-weight: 600; }
+
+  /* ---------- swatches ---------- */
+  .sw-grid { display: grid; gap: 1rem; margin: 1.8rem 0; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .sw .chip { height: 54px; border-radius: var(--r-tile); border: 1px solid var(--line); }
+  .sw .role { font-size: var(--s--1); margin-top: .6rem; }
+  .sw .hex { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: 1.5rem; }
+  .two { display: grid; gap: 1.6rem; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } }
+
+  /* ---------- controls ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    border: 1px solid transparent; background: var(--brand); color: #12102A;
+    font-family: var(--f); font-weight: 600; font-size: var(--s--1); letter-spacing: 0;
+    padding: .58rem 1.25rem; border-radius: var(--r-pill);
+    box-shadow: none; transition: box-shadow .18s ease, background .18s ease;
+  }
+  .btn:hover { background: var(--brand-deep); box-shadow: 0 6px 24px -8px rgba(165,148,255,.75); }
+  .btn.ghost { background: transparent; color: var(--brand); border-color: var(--line); }
+  .btn.ghost:hover { background: var(--brand-soft); border-color: var(--brand); box-shadow: 0 6px 24px -12px rgba(165,148,255,.5); }
+  .btn.quiet { background: transparent; color: var(--muted); border-color: var(--line); }
+  .btn.quiet:hover { background: var(--raised); box-shadow: none; }
+  .btn.danger { background: transparent; color: var(--due); border-color: rgba(224,137,126,.4); }
+  .btn.danger:hover { background: var(--due-soft); box-shadow: 0 6px 24px -12px rgba(224,137,126,.5); }
+
+  .pill {
+    display: inline-flex; align-items: center; font-family: var(--f-mono);
+    font-size: var(--s--2); letter-spacing: .04em; padding: .18rem .55rem;
+    border-radius: var(--r-pill); border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+  }
+  .pill.sched { color: var(--sched); border-color: rgba(121,194,208,.32); }
+  .pill.due   { color: var(--due);   border-color: rgba(224,137,126,.32); }
+  .pill.task  { color: var(--task);  border-color: rgba(116,198,164,.32); }
+  .pill.brand { color: var(--brand); border-color: rgba(165,148,255,.38); }
+
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-pill); padding: 2px; }
+  .seg span { padding: .26rem .85rem; border-radius: var(--r-pill); font-size: var(--s--1); color: var(--muted); }
+  .seg span.on { background: var(--brand); color: #12102A; font-weight: 600; }
+
+  /* ---------- item ---------- */
+  .item { display: flex; gap: .85rem; align-items: flex-start; padding: .8rem .2rem; border-bottom: 1px solid var(--line-soft); }
+  .item:last-child { border-bottom: 0; }
+  .item .rail { width: 2px; align-self: stretch; border-radius: 2px; flex: none; background: var(--task); }
+  .item.sched .rail { background: var(--sched); }
+  .item.due   .rail { background: var(--due); }
+  .item.note  .rail { background: var(--note); }
+  .item.done { opacity: .38; }
+  .item .body { flex: 1; min-width: 0; }
+  .item .title { font-size: var(--s-0); line-height: 1.45; }
+  .item .sub { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: .15rem; }
+  .cb { width: 1rem; height: 1rem; border: 1.5px solid var(--line); border-radius: 5px; flex: none; margin-top: .28rem; }
+  .cb.on { background: var(--task); border-color: var(--task); }
+
+  /* ---------- areas ---------- */
+  .areas { display: grid; gap: 1rem; grid-template-columns: repeat(2, 1fr); margin-top: 1.6rem; }
+  @media (min-width: 700px) { .areas { grid-template-columns: repeat(4, 1fr); } }
+  .area {
+    border-radius: var(--r-card); padding: 1.1rem; min-height: 96px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden; border: 1px solid var(--line); background: var(--surface);
+  }
+  .area::before { content: ""; position: absolute; inset: 0; opacity: .11; }
+  .area.a1::before { background: var(--g-class); }
+  .area.a2::before { background: var(--g-hack); }
+  .area.a3::before { background: var(--g-fin); }
+  .area.a4::before { background: var(--g-pers); }
+  .area > * { position: relative; }
+  .area .nm { font-weight: 600; font-size: var(--s-0); }
+  .area .ct { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
+
+  /* ---------- phone ---------- */
+  .phones { display: grid; gap: 2rem; grid-template-columns: 1fr; margin: 2rem 0 0; }
+  @media (min-width: 760px) { .phones.p2 { grid-template-columns: 1fr 1fr; } }
+  .phone { border: 1px solid var(--line); border-radius: 20px; background: var(--bg); overflow: hidden; display: flex; flex-direction: column; }
+  .status { display: flex; justify-content: space-between; padding: .7rem 1.1rem .3rem; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+  .scr { padding: .7rem 1.1rem 1.1rem; display: flex; flex-direction: column; gap: .3rem; flex: 1; }
+  .scr-h { display: flex; align-items: center; gap: .6rem; margin-bottom: .4rem; }
+  .scr-h .t { font-size: var(--s-1); font-weight: 600; letter-spacing: -.02em; }
+  .lbl { font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--faint); margin-top: 1.5rem; margin-bottom: .2rem; display: flex; justify-content: space-between; }
+  .lbl:first-of-type { margin-top: 1rem; }
+  .nav { display: flex; border-top: 1px solid var(--line-soft); padding: .2rem 0 .5rem; }
+  .nav span { flex: 1; text-align: center; padding: .5rem 0; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+  .nav span.on { color: var(--brand); }
+
+  .hero { border-radius: var(--r-card); padding: 1.3rem; border: 1px solid var(--line); background: var(--surface); }
+  .hero .big { font-size: 2rem; font-weight: 600; line-height: 1; letter-spacing: -.045em; margin: .5rem 0 .3rem; }
+  .hero .big small { font-size: .9rem; font-weight: 400; color: var(--muted); letter-spacing: -.01em; }
+
+  /* ---------- WEEK: days on Y, time on X ---------- */
+  .wkwrap { overflow-x: auto; margin-top: .5rem; padding-bottom: .4rem; }
+  .wk {
+    display: grid;
+    grid-template-columns: 2.9rem repeat(12, minmax(40px, 1fr));
+    grid-auto-rows: 40px; min-width: 540px; position: relative;
+  }
+  .wk .corner { grid-column: 1; grid-row: 1; }
+  .wk .hh {
+    grid-row: 1; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+    padding-bottom: .35rem; align-self: end; border-left: 1px solid var(--line-soft); padding-left: .3rem;
+  }
+  .wk .dd {
+    grid-column: 1; font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted);
+    display: flex; align-items: center; padding-right: .5rem; justify-content: flex-end;
+  }
+  .wk .dd.now { color: var(--brand); }
+  .wk .cell { border-left: 1px solid var(--line-soft); border-top: 1px solid var(--line-soft); }
+  .wk .cell.last { border-bottom: 1px solid var(--line-soft); }
+  .wk .blk {
+    align-self: center; margin: 3px 3px 3px 4px; border-radius: 7px; padding: .18rem .5rem;
+    font-size: .7rem; line-height: 1.35; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    background: var(--sched-soft); border-left: 2px solid var(--sched); color: #CDE6EC; z-index: 2;
+  }
+  .wk .blk.due { background: var(--due-soft); border-left-color: var(--due); color: #F2CFC9; }
+  .wk .blk.rem { background: var(--brand-soft); border-left-color: var(--brand); color: #DDD5FF; }
+  .wk .blk .loc { color: var(--faint); font-family: var(--f-mono); font-size: .62rem; margin-left: .35rem; }
+  .wk .nowline { width: 1px; background: var(--brand); justify-self: start; margin-left: -1px; z-index: 3; }
+  .wk .nowline::before { content: ""; position: absolute; margin: -3px 0 0 -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--brand); }
+
+  /* ---------- month ---------- */
+  .mo { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: .5rem; }
+  .mo .dw { text-align: center; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); padding-bottom: .3rem; }
+  .mo .dy { border-radius: 8px; min-height: 44px; padding: .3rem; display: flex; flex-direction: column; gap: .2rem; }
+  .mo .dy.out { opacity: .28; }
+  .mo .dy .d { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
+  .mo .dy.today { background: var(--brand-soft); }
+  .mo .dy.today .d { color: var(--brand); font-weight: 600; }
+  .dot { display: flex; gap: 3px; }
+  .dot i { width: 4px; height: 4px; border-radius: 50%; background: var(--sched); }
+  .dot i.due { background: var(--due); }
+  .dot i.task { background: var(--task); }
+
+  .mood { display: flex; gap: .5rem; }
+  .mood span { flex: 1; text-align: center; padding: .55rem .2rem; border-radius: var(--r-pill); border: 1px solid var(--line); font-size: var(--s--1); color: var(--muted); }
+  .mood span.on { border-color: var(--brand); color: var(--brand); }
+
+  .cmp { display: grid; gap: 1.1rem; margin: 1.6rem 0; }
+  @media (min-width: 800px) { .cmp { grid-template-columns: 1fr 1fr; } }
+  .cmp .box { border-left: 2px solid var(--line); padding: .3rem 0 .3rem 1.1rem; }
+  .cmp .box.good { border-left-color: var(--brand); }
+  .cmp h5 { margin: 0 0 .35rem; font-size: var(--s-0); font-weight: 600; }
+  .cmp p { margin: 0; font-size: var(--s--1); color: var(--muted); }
+
+  .scroll { overflow-x: auto; margin: 1.4rem 0 1.8rem; }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: var(--s--1); }
+  th, td { text-align: left; padding: .75rem 1rem .75rem 0; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  thead th { font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--faint); font-weight: 400; font-size: var(--s--2); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.f { font-family: var(--f-mono); color: var(--brand); white-space: nowrap; }
+
+  .nb { border-left: 2px solid var(--line); padding: .2rem 0 .2rem 1.1rem; margin-bottom: 1.6rem; }
+  .nb h5 { margin: 0 0 .3rem; font-size: var(--s-0); font-weight: 600; }
+  .nb p { margin: 0; font-size: var(--s--1); color: var(--muted); }
+
+  footer { padding: var(--sp) 0 5rem; color: var(--faint); font-family: var(--f-mono); font-size: var(--s--1); border-top: 1px solid var(--line-soft); }
+  footer a { color: var(--brand); }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+</style>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="kick"><span>UI Kit · ร่างที่ 2</span><span>·</span><span>18 ส.ค. 2026</span><span>·</span><b>รอความเห็น</b></div>
+    <h1 class="mark">Kevi<span class="n">N</span> Nightfall</h1>
+    <p class="thesis">ภาษาภาพของ KeviN — บรรยากาศกลางคืนสีม่วง เก็บเฉพาะสิ่งที่ทำหน้าที่ ตัดที่เหลือทิ้ง</p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <span class="pill brand">Inter</span>
+      <span class="pill">สีข้อมูลลดความจัด</span>
+      <span class="pill">โปร่งขึ้นทั้งแอป</span>
+      <span class="pill">เงาเฉพาะตอน hover</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= CHANGES ================= -->
+  <section>
+    <p class="eyebrow">เปลี่ยนจากร่างที่ 1</p>
+    <h2>ห้าอย่างที่ทำให้เรียบขึ้น</h2>
+    <div class="cmp">
+      <div class="box"><h5>แสงเรืองบนพื้นหลัง · เงาใต้การ์ด</h5><p>ตัดออกหมด · พื้นหลังเป็นสีเดียวเรียบ ๆ</p></div>
+      <div class="box good"><h5>เงาเรืองเหลือแค่ตอน hover</h5><p>ปุ่มนิ่งอยู่เฉย ๆ ไม่มีเงา · เรืองขึ้นตอนเอาเมาส์ไปชี้เท่านั้น</p></div>
+      <div class="box"><h5>สีข้อมูลลดความจัดลง ~45%</h5><p>แต่ <strong>ม่วงแบรนด์คงความจัดไว้เต็ม</strong> — ของที่กดได้จึงเด่นกว่าข้อมูลโดยอัตโนมัติ</p></div>
+      <div class="box good"><h5>Inter แทน Poppins · มุมโค้ง 14px แทน 20px</h5><p>คมขึ้น เป็นกลางขึ้น · ตัวอักษรบีบระยะ (letter-spacing ติดลบ) ตามสไตล์ modern</p></div>
+      <div class="box"><h5>การ์ดกลายเป็นรายการคั่นเส้น</h5><p>เลิกใส่กล่องซ้อนกล่อง · ใช้เส้นคั่นบางแทน ลดชั้นพื้นผิวจาก 3 เหลือ 2</p></div>
+      <div class="box good"><h5>ปฏิทินสัปดาห์สลับแกน</h5><p>วัน = แนวตั้ง · เวลา = แนวนอน — เห็นครบ 7 วันบนมือถือ ไม่ต้องตัดเหลือ 3 วันอีกแล้ว</p></div>
+    </div>
+  </section>
+
+  <!-- ================= PALETTE ================= -->
+  <section>
+    <p class="eyebrow">จานสี</p>
+    <h2>ม่วงคือสิ่งที่กดได้ · สีที่เหลือคือข้อมูล</h2>
+    <div class="col">
+      <p class="lead">ลดความจัดเฉพาะสี่สีข้อมูล แต่คงม่วงแบรนด์ไว้เต็ม — ผลคือลำดับความสำคัญเกิดเองโดยไม่ต้องใส่ขนาดหรือเงาเพิ่ม สิ่งที่สว่างที่สุดบนจอคือสิ่งที่กดได้เสมอ</p>
+    </div>
+
+    <h3>พื้นและตัวอักษร</h3>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:#0A0912"></div><div class="role">พื้นหลัง</div><div class="hex">#0A0912</div></div>
+      <div class="sw"><div class="chip" style="background:#14131F"></div><div class="role">พื้นผิวยก</div><div class="hex">#14131F</div></div>
+      <div class="sw"><div class="chip" style="background:#26253A"></div><div class="role">เส้นคั่น</div><div class="hex">#26253A</div></div>
+      <div class="sw"><div class="chip" style="background:#F1F0F7"></div><div class="role">ตัวอักษรหลัก</div><div class="hex">#F1F0F7</div></div>
+      <div class="sw"><div class="chip" style="background:#A5A2B8"></div><div class="role">ตัวอักษรรอง</div><div class="hex">#A5A2B8</div></div>
+    </div>
+
+    <h3>แบรนด์ · และสี่ชนิดข้อมูล</h3>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:#A594FF"></div><div class="role">แบรนด์ · ปุ่ม · เลือกอยู่</div><div class="hex">#A594FF · จัดเต็ม</div></div>
+      <div class="sw"><div class="chip" style="background:#79C2D0"></div><div class="role">คาบเรียน</div><div class="hex">#79C2D0</div></div>
+      <div class="sw"><div class="chip" style="background:#E0897E"></div><div class="role">เส้นตาย · เตือน</div><div class="hex">#E0897E</div></div>
+      <div class="sw"><div class="chip" style="background:#74C6A4"></div><div class="role">งาน</div><div class="hex">#74C6A4</div></div>
+      <div class="sw"><div class="chip" style="background:#8E88A8"></div><div class="role">โน้ต</div><div class="hex">#8E88A8</div></div>
+    </div>
+
+    <h3>Gradient ประจำ Area</h3>
+    <div class="col"><p>เหลือความทึบแค่ 11% — พอให้แยกออกว่าของมาจากไหน แต่ไม่แย่งความสนใจจากเนื้อหา</p></div>
+    <div class="areas">
+      <div class="area a1"><div class="nm">Class</div><div class="ct">4 วิชา · 6 ค้าง</div></div>
+      <div class="area a2"><div class="nm">Hackathon</div><div class="ct">2 โปรเจกต์ · 3 ค้าง</div></div>
+      <div class="area a3"><div class="nm">Financial</div><div class="ct">1 โปรเจกต์ · 1 ค้าง</div></div>
+      <div class="area a4"><div class="nm">Personal</div><div class="ct">3 โปรเจกต์ · 2 ค้าง</div></div>
+    </div>
+  </section>
+
+  <!-- ================= COMPONENTS ================= -->
+  <section>
+    <p class="eyebrow">ชิ้นส่วน</p>
+    <h2>องค์ประกอบพื้นฐาน</h2>
+    <div class="two">
+      <div class="panel">
+        <div class="lbl" style="margin-top:0">ปุ่ม — ลองเอาเมาส์ไปชี้</div>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin:.9rem 0 2rem">
+          <span class="btn" tabindex="0">บันทึก</span>
+          <span class="btn ghost" tabindex="0">แก้ไข</span>
+          <span class="btn quiet" tabindex="0">ยกเลิก</span>
+          <span class="btn danger" tabindex="0">ลบ</span>
+        </div>
+
+        <div class="lbl">ป้ายและตัวสลับ</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.9rem 0 1.3rem">
+          <span class="pill sched">คาบ</span>
+          <span class="pill due">เลยกำหนด</span>
+          <span class="pill task">เสร็จแล้ว</span>
+          <span class="pill">ยังไม่ตั้งวัน</span>
+        </div>
+        <span class="seg"><span class="on">เดือน</span><span>สัปดาห์</span></span>
+
+        <div class="lbl">เช็กอินตอนจบวัน</div>
+        <div class="mood" style="margin-top:.7rem">
+          <span>😮‍💨 เหนื่อย</span><span class="on">🙂 โอเค</span><span>🔥 ลื่นมาก</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="lbl" style="margin-top:0">รายการ · สี่ชนิด</div>
+        <div style="margin-top:.4rem">
+          <div class="item sched"><span class="rail"></span><div class="body"><div class="title">แคลคูลัส 1</div><div class="sub">09:00–11:00 · ENG-401</div></div><span class="pill sched">คาบ</span></div>
+          <div class="item due"><span class="rail"></span><span class="cb"></span><div class="body"><div class="title">ส่งแบบฝึกหัดบทที่ 4</div><div class="sub">แคลคูลัส 1 · ศุกร์ 23:59</div></div><span class="pill due">2 วัน</span></div>
+          <div class="item"><span class="rail"></span><span class="cb"></span><div class="body"><div class="title">รายงานกลุ่ม</div><div class="sub">ยังไม่กำหนดวัน</div></div></div>
+          <div class="item note"><span class="rail"></span><div class="body"><div class="title">อ.ชอบออกจากตัวอย่างในสไลด์</div></div></div>
+          <div class="item done"><span class="rail"></span><span class="cb on"></span><div class="body"><div class="title" style="text-decoration:line-through">แบบฝึกหัดบทที่ 3</div><div class="sub">เสร็จ 12 ส.ค.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WEEK ================= -->
+  <section>
+    <p class="eyebrow">หน้าจอ · ปฏิทินสัปดาห์</p>
+    <h2>วันเป็นแนวตั้ง เวลาเป็นแนวนอน</h2>
+    <div class="col">
+      <p class="lead">สลับแกนแล้วได้อะไรบ้าง — 7 แถวสูงราว 280px ลงจอมือถือได้ทั้งหมด ไม่ต้องตัดเหลือ 3 วันเหมือนที่เคยออกแบบไว้ แถวหนึ่งคือหนึ่งวัน กวาดตาลงมาก็รู้ทันทีว่าวันไหนแน่นวันไหนว่าง</p>
+      <p>ที่ดีขึ้นอีกอย่างคือ <strong>ชื่อวิชาใส่ได้ยาวขึ้น</strong> — บล็อกวางตัวตามแนวนอน คาบสองชั่วโมงจึงมีพื้นที่กว้างพอเขียน “แคลคูลัส 1” เต็ม ๆ พร้อมห้องเรียน ต่างจากแบบเดิมที่บีบอยู่ในคอลัมน์ 45px จนต้องตัดคำ</p>
+      <p>ส่วนที่แลกไป: การเทียบว่า “สิบโมงของแต่ละวันทำอะไร” ต้องกวาดตาลงตามแนวตั้ง ซึ่งยังทำได้แต่ไม่คุ้นเท่าปฏิทินทั่วไป — ผมว่าคุ้มกับการได้เห็นครบ 7 วันบนมือถือ</p>
+    </div>
+
+    <div class="phones">
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>▮▮▮ ⌁ ▰</span></div>
+        <div class="scr">
+          <div class="scr-h">
+            <span class="btn quiet" style="padding:.25rem .6rem">‹</span>
+            <div class="t">17–23 ส.ค.</div>
+            <span class="btn quiet" style="padding:.25rem .6rem">›</span>
+            <span class="seg" style="margin-left:auto"><span>เดือน</span><span class="on">สัปดาห์</span></span>
+          </div>
+
+          <div class="wkwrap">
+            <div class="wk">
+              <div class="corner"></div>
+              <div class="hh">08</div><div class="hh">09</div><div class="hh">10</div><div class="hh">11</div>
+              <div class="hh">12</div><div class="hh">13</div><div class="hh">14</div><div class="hh">15</div>
+              <div class="hh">16</div><div class="hh">17</div><div class="hh">18</div><div class="hh">19</div>
+
+              <!-- background grid -->
+              <div class="dd" style="grid-row:2">จ 17</div>
+              <div class="dd now" style="grid-row:3">อ 18</div>
+              <div class="dd" style="grid-row:4">พ 19</div>
+              <div class="dd" style="grid-row:5">พฤ 20</div>
+              <div class="dd" style="grid-row:6">ศ 21</div>
+              <div class="dd" style="grid-row:7">ส 22</div>
+              <div class="dd" style="grid-row:8">อา 23</div>
+
+              <div class="cell" style="grid-row:2;grid-column:2"></div><div class="cell" style="grid-row:2;grid-column:3"></div><div class="cell" style="grid-row:2;grid-column:4"></div><div class="cell" style="grid-row:2;grid-column:5"></div><div class="cell" style="grid-row:2;grid-column:6"></div><div class="cell" style="grid-row:2;grid-column:7"></div><div class="cell" style="grid-row:2;grid-column:8"></div><div class="cell" style="grid-row:2;grid-column:9"></div><div class="cell" style="grid-row:2;grid-column:10"></div><div class="cell" style="grid-row:2;grid-column:11"></div><div class="cell" style="grid-row:2;grid-column:12"></div><div class="cell" style="grid-row:2;grid-column:13"></div>
+              <div class="cell" style="grid-row:3;grid-column:2"></div><div class="cell" style="grid-row:3;grid-column:3"></div><div class="cell" style="grid-row:3;grid-column:4"></div><div class="cell" style="grid-row:3;grid-column:5"></div><div class="cell" style="grid-row:3;grid-column:6"></div><div class="cell" style="grid-row:3;grid-column:7"></div><div class="cell" style="grid-row:3;grid-column:8"></div><div class="cell" style="grid-row:3;grid-column:9"></div><div class="cell" style="grid-row:3;grid-column:10"></div><div class="cell" style="grid-row:3;grid-column:11"></div><div class="cell" style="grid-row:3;grid-column:12"></div><div class="cell" style="grid-row:3;grid-column:13"></div>
+              <div class="cell" style="grid-row:4;grid-column:2"></div><div class="cell" style="grid-row:4;grid-column:3"></div><div class="cell" style="grid-row:4;grid-column:4"></div><div class="cell" style="grid-row:4;grid-column:5"></div><div class="cell" style="grid-row:4;grid-column:6"></div><div class="cell" style="grid-row:4;grid-column:7"></div><div class="cell" style="grid-row:4;grid-column:8"></div><div class="cell" style="grid-row:4;grid-column:9"></div><div class="cell" style="grid-row:4;grid-column:10"></div><div class="cell" style="grid-row:4;grid-column:11"></div><div class="cell" style="grid-row:4;grid-column:12"></div><div class="cell" style="grid-row:4;grid-column:13"></div>
+              <div class="cell" style="grid-row:5;grid-column:2"></div><div class="cell" style="grid-row:5;grid-column:3"></div><div class="cell" style="grid-row:5;grid-column:4"></div><div class="cell" style="grid-row:5;grid-column:5"></div><div class="cell" style="grid-row:5;grid-column:6"></div><div class="cell" style="grid-row:5;grid-column:7"></div><div class="cell" style="grid-row:5;grid-column:8"></div><div class="cell" style="grid-row:5;grid-column:9"></div><div class="cell" style="grid-row:5;grid-column:10"></div><div class="cell" style="grid-row:5;grid-column:11"></div><div class="cell" style="grid-row:5;grid-column:12"></div><div class="cell" style="grid-row:5;grid-column:13"></div>
+              <div class="cell" style="grid-row:6;grid-column:2"></div><div class="cell" style="grid-row:6;grid-column:3"></div><div class="cell" style="grid-row:6;grid-column:4"></div><div class="cell" style="grid-row:6;grid-column:5"></div><div class="cell" style="grid-row:6;grid-column:6"></div><div class="cell" style="grid-row:6;grid-column:7"></div><div class="cell" style="grid-row:6;grid-column:8"></div><div class="cell" style="grid-row:6;grid-column:9"></div><div class="cell" style="grid-row:6;grid-column:10"></div><div class="cell" style="grid-row:6;grid-column:11"></div><div class="cell" style="grid-row:6;grid-column:12"></div><div class="cell" style="grid-row:6;grid-column:13"></div>
+              <div class="cell" style="grid-row:7;grid-column:2"></div><div class="cell" style="grid-row:7;grid-column:3"></div><div class="cell" style="grid-row:7;grid-column:4"></div><div class="cell" style="grid-row:7;grid-column:5"></div><div class="cell" style="grid-row:7;grid-column:6"></div><div class="cell" style="grid-row:7;grid-column:7"></div><div class="cell" style="grid-row:7;grid-column:8"></div><div class="cell" style="grid-row:7;grid-column:9"></div><div class="cell" style="grid-row:7;grid-column:10"></div><div class="cell" style="grid-row:7;grid-column:11"></div><div class="cell" style="grid-row:7;grid-column:12"></div><div class="cell" style="grid-row:7;grid-column:13"></div>
+              <div class="cell last" style="grid-row:8;grid-column:2"></div><div class="cell last" style="grid-row:8;grid-column:3"></div><div class="cell last" style="grid-row:8;grid-column:4"></div><div class="cell last" style="grid-row:8;grid-column:5"></div><div class="cell last" style="grid-row:8;grid-column:6"></div><div class="cell last" style="grid-row:8;grid-column:7"></div><div class="cell last" style="grid-row:8;grid-column:8"></div><div class="cell last" style="grid-row:8;grid-column:9"></div><div class="cell last" style="grid-row:8;grid-column:10"></div><div class="cell last" style="grid-row:8;grid-column:11"></div><div class="cell last" style="grid-row:8;grid-column:12"></div><div class="cell last" style="grid-row:8;grid-column:13"></div>
+
+              <!-- blocks -->
+              <div class="blk" style="grid-row:2;grid-column:3/span 2">แคลคูลัส 1<span class="loc">ENG-401</span></div>
+              <div class="blk" style="grid-row:3;grid-column:7/span 2">ฟิสิกส์ 2<span class="loc">SCI-210</span></div>
+              <div class="blk rem" style="grid-row:3;grid-column:5/span 1">Quiz</div>
+              <div class="blk" style="grid-row:4;grid-column:3/span 1">อังกฤษ</div>
+              <div class="blk" style="grid-row:5;grid-column:7/span 2">ฟิสิกส์ 2 แล็บ<span class="loc">SCI-B2</span></div>
+              <div class="blk" style="grid-row:6;grid-column:3/span 2">แคลคูลัส 1<span class="loc">ENG-401</span></div>
+              <div class="blk due" style="grid-row:7;grid-column:9/span 2">ส่งแบบฝึกหัด 4</div>
+              <div class="blk" style="grid-row:4;grid-column:9/span 1">ชมรม</div>
+
+              <div class="nowline" style="grid-row:2/span 7;grid-column:5"></div>
+            </div>
+          </div>
+          <div style="font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);margin-top:.6rem">ปัดซ้ายขวาเพื่อเลื่อนเวลา · เส้นม่วงแนวตั้งคือตอนนี้</div>
+        </div>
+        <div class="nav"><span>วันนี้</span><span class="on">ปฏิทิน</span><span>คลัง</span><span>ตั้งค่า</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OTHER SCREENS ================= -->
+  <section>
+    <p class="eyebrow">หน้าจอ · ที่เหลือ</p>
+    <h2>วันนี้ และ ปฏิทินเดือน</h2>
+
+    <div class="phones p2">
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>▮▮▮ ⌁ ▰</span></div>
+        <div class="scr">
+          <div class="scr-h"><div class="t">อังคาร 18 ส.ค.</div><span class="pill due" style="margin-left:auto">ด่วน 2</span></div>
+
+          <div class="hero">
+            <div style="font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);letter-spacing:.1em">คาบถัดไป · อีก 40 นาที</div>
+            <div class="big">09:00 <small>– 11:00</small></div>
+            <div style="font-size:var(--s--1);color:var(--muted)">แคลคูลัส 1 · ENG-401</div>
+          </div>
+
+          <div class="lbl">เลยกำหนด</div>
+          <div class="item due"><span class="rail"></span><span class="cb"></span><div class="body"><div class="title">ส่งใบสมัครชมรม</div><div class="sub">Personal · เลย 2 วัน</div></div></div>
+
+          <div class="lbl">ตารางวันนี้</div>
+          <div class="item sched"><span class="rail"></span><div class="body"><div class="title">แคลคูลัส 1</div><div class="sub">09:00–11:00 · ENG-401</div></div></div>
+          <div class="item sched"><span class="rail"></span><div class="body"><div class="title">ฟิสิกส์ 2</div><div class="sub">13:00–15:00 · SCI-210</div></div></div>
+
+          <div class="lbl">กำลังจะถึง</div>
+          <div class="item due"><span class="rail"></span><div class="body"><div class="title">Quiz บทที่ 3</div><div class="sub">แคลคูลัส 1 · 11:00</div></div><span class="pill due">40 น.</span></div>
+
+          <div class="lbl">สัปดาห์นี้<span>3</span></div>
+          <div class="item"><span class="rail"></span><span class="cb"></span><div class="body"><div class="title">อ่านบท 5</div><div class="sub">แคลคูลัส 1 · พฤ.</div></div></div>
+
+          <div style="margin-top:auto;padding-top:1.4rem"><span class="btn" style="width:100%">+ เพิ่มเร็ว</span></div>
+        </div>
+        <div class="nav"><span class="on">วันนี้</span><span>ปฏิทิน</span><span>คลัง</span><span>ตั้งค่า</span></div>
+      </div>
+
+      <div class="phone">
+        <div class="status"><span>9:41</span><span>▮▮▮ ⌁ ▰</span></div>
+        <div class="scr">
+          <div class="scr-h"><div class="t">สิงหาคม 2026</div><span class="seg" style="margin-left:auto"><span class="on">เดือน</span><span>สัปดาห์</span></span></div>
+
+          <div class="mo">
+            <div class="dw">จ</div><div class="dw">อ</div><div class="dw">พ</div><div class="dw">พฤ</div><div class="dw">ศ</div><div class="dw">ส</div><div class="dw">อา</div>
+            <div class="dy out"><span class="d">27</span></div><div class="dy out"><span class="d">28</span></div><div class="dy out"><span class="d">29</span></div><div class="dy out"><span class="d">30</span></div><div class="dy out"><span class="d">31</span></div><div class="dy"><span class="d">1</span></div><div class="dy"><span class="d">2</span></div>
+            <div class="dy"><span class="d">3</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">4</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">5</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">6</span><span class="dot"><i></i><i></i></span></div>
+            <div class="dy"><span class="d">7</span><span class="dot"><i class="due"></i></span></div>
+            <div class="dy"><span class="d">8</span></div><div class="dy"><span class="d">9</span></div>
+            <div class="dy"><span class="d">10</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">11</span><span class="dot"><i></i><i class="task"></i></span></div>
+            <div class="dy"><span class="d">12</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">13</span><span class="dot"><i></i><i></i></span></div>
+            <div class="dy"><span class="d">14</span><span class="dot"><i class="due"></i></span></div>
+            <div class="dy"><span class="d">15</span></div><div class="dy"><span class="d">16</span></div>
+            <div class="dy"><span class="d">17</span><span class="dot"><i></i></span></div>
+            <div class="dy today"><span class="d">18</span><span class="dot"><i></i><i class="due"></i></span></div>
+            <div class="dy"><span class="d">19</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">20</span><span class="dot"><i></i><i></i></span></div>
+            <div class="dy"><span class="d">21</span></div>
+            <div class="dy"><span class="d">22</span><span class="dot"><i class="due"></i></span></div>
+            <div class="dy"><span class="d">23</span></div>
+            <div class="dy"><span class="d">24</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">25</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">26</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">27</span><span class="dot"><i></i></span></div>
+            <div class="dy"><span class="d">28</span><span class="dot"><i class="due"></i></span></div>
+            <div class="dy"><span class="d">29</span><span class="dot"><i class="due"></i></span></div>
+            <div class="dy"><span class="d">30</span></div>
+          </div>
+
+          <div style="display:flex;gap:1rem;margin-top:.9rem;font-family:var(--f-mono);font-size:var(--s--2)">
+            <span style="color:var(--sched)">● คาบ</span>
+            <span style="color:var(--due)">● กำหนดส่ง</span>
+            <span style="color:var(--task)">● งาน</span>
+          </div>
+
+          <div class="lbl">18 ส.ค. · 3 รายการ</div>
+          <div class="item sched"><span class="rail"></span><div class="body"><div class="title">แคลคูลัส 1</div><div class="sub">09:00–11:00</div></div></div>
+          <div class="item due"><span class="rail"></span><div class="body"><div class="title">Quiz บทที่ 3</div><div class="sub">11:00</div></div></div>
+        </div>
+        <div class="nav"><span>วันนี้</span><span class="on">ปฏิทิน</span><span>คลัง</span><span>ตั้งค่า</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= IMPACT ================= -->
+  <section>
+    <p class="eyebrow">ผลกระทบ</p>
+    <h2>ต้องแก้อะไรในเอกสาร UX</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>หัวข้อ</th><th>เดิม</th><th>ใหม่</th></tr></thead>
+        <tbody>
+          <tr><td class="f">สี · schedule</td><td>ม่วง <code>#6A4FA3</code></td><td>ฟ้าหม่น <code>#79C2D0</code></td></tr>
+          <tr><td class="f">สี · due / reminder</td><td>แดง <code>#B3123C</code></td><td>ส้มหม่น <code>#E0897E</code></td></tr>
+          <tr><td class="f">สี · task</td><td>เขียวเข้ม <code>#0E6E68</code></td><td>เขียวหม่น <code>#74C6A4</code></td></tr>
+          <tr><td class="f">สี · shortnote</td><td>เขียวอ่อน <code>#3F8C82</code></td><td>ม่วงเทา <code>#8E88A8</code></td></tr>
+          <tr><td class="f">สี · แบรนด์</td><td>ไม่มี</td><td>ม่วง <code>#A594FF</code></td></tr>
+          <tr><td class="f">S3 · โครงตาราง</td><td>แกนตั้ง = เวลา, แกนนอน = วัน</td><td><strong>แกนตั้ง = วัน, แกนนอน = เวลา</strong></td></tr>
+          <tr><td class="f">S3 · บนมือถือ</td><td>แสดง 3 วัน ปัดเลื่อนทีละวัน</td><td><strong>แสดงครบ 7 วัน</strong> ปัดซ้ายขวาเพื่อเลื่อนเวลาแทน</td></tr>
+          <tr><td class="f">S3 · เส้นเวลาปัจจุบัน</td><td>เส้นแนวนอน</td><td>เส้นแนวตั้ง</td></tr>
+          <tr><td class="f">S3 · บล็อกซ้อนกัน</td><td>แบ่งความกว้างในคอลัมน์</td><td>แบ่งความสูงในแถวของวันนั้น</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= HANDOFF ================= -->
+  <section>
+    <p class="eyebrow">การนำไปใช้</p>
+    <h2>สิ่งที่จะล็อกลง PLAN.md</h2>
+    <div class="col">
+      <div class="nb">
+        <h5>ฟอนต์ — หน้านี้ยังไม่ได้ของจริง</h5>
+        <p>artifact โหลดฟอนต์ภายนอกไม่ได้ · ในแอปจริงใช้ <code>next/font/google</code> โหลด <strong>Inter</strong> คู่กับ <strong>Noto Sans Thai</strong> แล้วเปิด <code>font-feature-settings: "cv11", "ss01"</code> ของ Inter เพื่อให้เลข 1 กับตัว l แยกกันชัด</p>
+      </div>
+      <div class="nb">
+        <h5>Token ยกไปใช้ได้ทันที</h5>
+        <p>บล็อก <code>:root</code> ของหน้านี้คือ <code>globals.css</code> ฉบับร่าง หรือแปลงเป็น <code>theme.extend.colors</code> ใน Tailwind config</p>
+      </div>
+      <div class="nb">
+        <h5>ตรรกะปฏิทินสัปดาห์ที่ต้องเขียน</h5>
+        <p>บล็อกวางด้วย <code>grid-column: เวลาเริ่ม / span จำนวนชั่วโมง</code> และ <code>grid-row: วันในสัปดาห์</code> · ช่วงเวลาที่แสดงคำนวณจากคาบเร็วสุดลบ 1 ชม. ถึงช้าสุดบวก 1 ชม. เหมือนเดิม</p>
+      </div>
+      <div class="nb">
+        <h5>ยังไม่ได้ทำในร่างนี้</h5>
+        <p>แผงรายละเอียด (S7), ตัวจัดการช่วงเวลาประจำ (S6), หน้าตั้งค่าแจ้งเตือน (S9), เพิ่มเร็ว (S8), หน้าคลัง (S4/S5), สถานะ empty/loading/error และหน้าตา push notification</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    ร่างภาษาภาพ · อ่านคู่กับ
+    <a href="https://claude.ai/code/artifact/06b0354f-7284-4f28-9b6a-c70b078855dc">เอกสาร UX</a> ·
+    <a href="https://claude.ai/code/artifact/6f50ef21-9670-40e0-84dd-86b29852ec36">ข้อเสนอโปรเจกต์</a>
+  </footer>
+
+</main>

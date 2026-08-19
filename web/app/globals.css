@@ -1,0 +1,508 @@
+/* =====================================================================
+   KeviN · design tokens
+   ยกไปวางใน app/globals.css ได้เลย หรือแปลงเป็น theme.extend ใน Tailwind
+   ที่มาและกฎการใช้: doc/DESIGN.md
+   ===================================================================== */
+
+:root {
+  /* ---- พื้น ---- */
+  --bg:        #0A0912;
+  --surface:   #14131F;
+  --raised:    #1C1B2B;
+  --line:      #26253A;
+  --line-soft: #1D1C2C;
+
+  /* ---- ตัวอักษร · คอนทราสต์สูงโดยตั้งใจ เพื่อให้อ่านกลางแดดได้ ---- */
+  --ink:   #F1F0F7;
+  --muted: #A5A2B8;
+  --faint: #87849D;
+
+  /* ---- แบรนด์ · คงความจัดไว้เต็ม เพราะเป็นสิ่งเดียวที่กดได้ ---- */
+  --brand:      #A594FF;
+  --brand-deep: #8878F0;
+  --brand-soft: #1E1B33;
+
+  /* ---- สีชนิดข้อมูล · ลดความจัดลง ~45% จากสีอิ่มตัว ---- */
+  --sched:      #79C2D0;   /* คาบเรียน  · 187° */
+  --sched-soft: #16292E;
+  --due:        #E0897E;   /* เส้นตาย/เตือน · 6° */
+  --due-soft:   #2E1E1D;
+  --task:       #74C6A4;   /* งาน · 157° */
+  --task-soft:  #172A24;
+  --note:       #8E88A8;   /* โน้ต · ไร้ hue เด่น */
+  --note-soft:  #1B1A28;
+
+  /* ---- gradient ประจำ Area ---- */
+  --g-class: linear-gradient(135deg, #79C2D0 0%, #8878F0 100%);
+  --g-hack:  linear-gradient(135deg, #E0897E 0%, #A594FF 100%);
+  --g-fin:   linear-gradient(135deg, #74C6A4 0%, #79C2D0 100%);
+  --g-pers:  linear-gradient(135deg, #A594FF 0%, #D98BB4 100%);
+
+  /* ---- รูปทรง ---- */
+  --r-card: 14px;
+  --r-tile: 10px;
+  --r-pill: 999px;
+
+  /* ---- ตัวอักษร ---- */
+  --f: var(--font-inter), var(--font-noto-thai), system-ui, sans-serif;
+  --f-mono: "Geist Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+  --s--2: 0.69rem;
+  --s--1: 0.79rem;
+  --s-0:  0.92rem;
+  --s-1:  1.08rem;
+  --s-2:  clamp(1.35rem, 1.1rem + 0.9vw, 1.8rem);
+  --s-3:  clamp(2rem, 1.5rem + 2.2vw, 3.1rem);
+}
+
+html { color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f);
+  font-size: var(--s-0);
+  line-height: 1.72;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";  /* Inter: เลข 1 กับตัว l แยกกันชัด */
+}
+
+/* ---------------------------------------------------------------------
+   ปุ่ม · ไม่มีเงาตอนนิ่ง เรืองเฉพาะตอน hover
+   --------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  background: var(--brand);
+  color: #12102A;
+  font-weight: 600;
+  font-size: var(--s--1);
+  padding: 0.58rem 1.25rem;
+  border-radius: var(--r-pill);
+  box-shadow: none;
+  transition: box-shadow 0.18s ease, background 0.18s ease;
+}
+.btn:hover {
+  background: var(--brand-deep);
+  box-shadow: 0 6px 24px -8px rgba(165, 148, 255, 0.75);
+}
+.btn--ghost { background: transparent; color: var(--brand); border-color: var(--line); }
+.btn--quiet { background: transparent; color: var(--muted); border-color: var(--line); }
+.btn--danger { background: transparent; color: var(--due); border-color: rgba(224, 137, 126, 0.4); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
+
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+/* =====================================================================
+   เพิ่มจากไฟล์ token · สไตล์ระดับแอป
+   ===================================================================== */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+
+.mono { font-family: var(--f-mono); }
+
+/* ---- หัวหน้าจอ ---- */
+.page-head { margin: 0 0 1.5rem; }
+.page-head h1 { font-size: var(--s-2); font-weight: 600; letter-spacing: -0.025em; margin: 0; }
+.page-head .sub {
+  font-family: var(--f-mono); font-size: var(--s--1); color: var(--faint);
+  letter-spacing: 0.04em; margin-top: 0.15rem;
+}
+
+/* ---- ป้ายกลุ่ม ---- */
+.sec {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--faint);
+  margin: 1.75rem 0 0.35rem;
+}
+.sec:first-of-type { margin-top: 0; }
+
+/* ---- แถวรายการ · เส้นคั่นบาง ไม่ใช่การ์ดแยกใบ ---- */
+.row {
+  display: flex; align-items: flex-start; gap: 0.7rem;
+  padding: 0.72rem 0; border-top: 1px solid var(--line-soft);
+}
+.row__stripe { width: 2px; align-self: stretch; border-radius: 2px; flex: none; }
+.row__body { min-width: 0; flex: 1; }
+.row__title {
+  font-size: var(--s-0); line-height: 1.4;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.row__meta {
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+  letter-spacing: 0.02em; margin-top: 0.15rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* เสร็จแล้ว: จาง + ขีดฆ่า · ไม่ซ่อน */
+.row--done .row__title { text-decoration: line-through; }
+.row--done { opacity: 0.38; }
+
+/* ---- ช่องติ๊ก · มีเฉพาะ task ---- */
+.cb {
+  width: 1.05rem; height: 1.05rem; margin-top: 0.18rem; flex: none;
+  border: 1.5px solid var(--line); border-radius: 5px; background: transparent;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  transition: border-color 0.15s ease;
+}
+.cb:hover { border-color: var(--task); }
+.cb[data-on="true"] { background: var(--task); border-color: var(--task); }
+.cb svg { display: block; }
+
+/* ---- ป้ายขวา · โผล่เฉพาะตอนผิดปกติ ---- */
+.tag {
+  font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.06em;
+  padding: 0.05rem 0.45rem; border-radius: var(--r-pill);
+  border: 1px solid currentColor; flex: none; align-self: center;
+}
+.tag--late { color: var(--due); }
+.tag--soon { color: var(--due); }
+
+/* ---- สถานะว่าง ---- */
+.empty {
+  border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: 1.5rem 1.25rem; text-align: center; color: var(--muted);
+  background: var(--surface);
+}
+.empty strong { color: var(--ink); display: block; margin-bottom: 0.3rem; font-weight: 600; }
+
+/* ---- โครงร่างตอนโหลด · ไม่ใช้วงกลมหมุน ---- */
+.skel { background: var(--raised); border-radius: 6px; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 0.55; } 50% { opacity: 0.28; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
+/* ---- แถบแจ้งข้อผิดพลาด ---- */
+.alert {
+  border: 1px solid rgba(224,137,126,0.4); background: var(--due-soft);
+  color: var(--due); border-radius: var(--r-tile);
+  padding: 0.6rem 0.8rem; font-size: var(--s--1);
+}
+
+/* ---- ฟอร์ม ---- */
+.field { display: block; margin-bottom: 0.9rem; }
+.field span {
+  display: block; font-family: var(--f-mono); font-size: var(--s--2);
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint);
+  margin-bottom: 0.35rem;
+}
+.input {
+  width: 100%; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r-tile);
+  padding: 0.62rem 0.75rem; font: inherit; font-size: var(--s-0);
+}
+.input:focus { border-color: var(--brand); outline: none; }
+
+/* =====================================================================
+   การนำทาง · มือถือ = แถบล่าง · เดสก์ท็อป = แถบข้างซ้าย
+   ===================================================================== */
+.nav {
+  position: fixed; z-index: 20;
+  left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: space-around;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+}
+.nav__item {
+  flex: 1; text-align: center; text-decoration: none;
+  font-size: var(--s--1); color: var(--muted);
+  padding: 0.3rem 0; border-radius: var(--r-pill);
+}
+.nav__item--on { color: var(--brand); font-weight: 600; }
+.nav__item--off { color: var(--faint); opacity: 0.45; cursor: default; }
+
+@media (min-width: 768px) {
+  .nav {
+    top: 0; right: auto; bottom: 0; width: 200px;
+    flex-direction: column; justify-content: flex-start; gap: 0.15rem;
+    border-top: none; border-right: 1px solid var(--line);
+    padding: 1.5rem 0.75rem;
+  }
+  .nav__item { flex: none; text-align: left; padding: 0.5rem 0.85rem; }
+  .nav__item--on { background: var(--raised); }
+  .wrap { margin-left: 200px; }
+}
+
+/* =====================================================================
+   คลัง (S4)
+   ===================================================================== */
+.area { border-top: 1px solid var(--line-soft); }
+.area__head {
+  display: flex; align-items: center; gap: 0.7rem;
+  width: 100%; background: none; border: none; color: inherit;
+  font: inherit; text-align: left; padding: 0.85rem 0; cursor: pointer;
+}
+.area__dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.area__name { font-size: var(--s-0); font-weight: 600; flex: 1; }
+.area__sum { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+.area__count {
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--due);
+  border: 1px solid var(--due); border-radius: var(--r-pill);
+  padding: 0.02rem 0.42rem; flex: none;
+}
+.area__kids { padding: 0 0 0.5rem 1.7rem; }
+
+.proj {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 0; border-top: 1px solid var(--line-soft);
+  text-decoration: none; color: inherit;
+}
+.proj__name { font-size: var(--s-0); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj__when { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj--archived { opacity: 0.42; }
+
+/* =====================================================================
+   หน้า project (S5)
+   ===================================================================== */
+.back {
+  display: inline-block; text-decoration: none; color: var(--muted);
+  font-size: var(--s--1); margin-bottom: 0.4rem;
+}
+.back:hover { color: var(--brand); }
+
+.sched-strip {
+  border: 1px solid var(--line); border-radius: var(--r-tile);
+  background: var(--surface); padding: 0.7rem 0.85rem; margin-bottom: 1.5rem;
+}
+.sched-strip div { font-family: var(--f-mono); font-size: var(--s--1); color: var(--muted); }
+.sched-strip div + div { margin-top: 0.25rem; }
+
+/* =====================================================================
+   ปฏิทิน · โหมดสัปดาห์ (S3)
+   วัน = แกนตั้ง · เวลา = แกนนอน — กลับด้านจาก Google Calendar โดยตั้งใจ
+   7 แถวสูงรวมราว 280px ลงจอมือถือได้ครบ ไม่ต้องตัดเหลือ 3 วัน
+   ===================================================================== */
+.wk-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -1rem; padding: 0 1rem; }
+
+.wk {
+  --wk-row: 40px;
+  display: grid;
+  grid-auto-rows: var(--wk-row);
+  gap: 1px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-tile);
+  overflow: hidden;
+  min-width: max-content;
+}
+
+.wk__hd, .wk__day, .wk__cell {
+  background: var(--bg);
+  font-family: var(--f-mono);
+  font-size: var(--s--2);
+  color: var(--faint);
+}
+.wk__hd { display: flex; align-items: center; justify-content: center; }
+.wk__hd--now { color: var(--brand); }
+
+.wk__day {
+  display: flex; align-items: center; gap: 0.3rem;
+  padding-left: 0.45rem; position: sticky; left: 0; z-index: 2;
+  background: var(--surface); border-right: 1px solid var(--line);
+}
+.wk__day--today { color: var(--brand); font-weight: 600; }
+
+.wk__blk {
+  border-radius: 6px; padding: 0 0.35rem;
+  font-size: var(--s--2); line-height: 1.25;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  display: flex; flex-direction: column; justify-content: center;
+  border-left: 2px solid var(--sched);
+  background: var(--sched-soft); color: var(--ink);
+  z-index: 1;
+}
+.wk__blk b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+.wk__blk span { color: var(--muted); font-family: var(--f-mono); font-size: 0.62rem; }
+
+/* เส้นเวลาปัจจุบัน · แนวตั้ง สีแบรนด์ */
+.wk__now { width: 2px; background: var(--brand); justify-self: start; z-index: 3; margin-left: -1px; }
+
+/* =====================================================================
+   ปฏิทิน · โหมดเดือน (S2)
+   ===================================================================== */
+/* minmax(0,1fr) ไม่ใช่ 1fr — เพราะ 1fr มี min-width:auto ทำให้ชื่อวิชายาว ๆ
+   ที่ตั้ง nowrap ดันคอลัมน์จนตารางล้นออกนอกจอ */
+.mo { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px;
+      background: var(--line-soft); border: 1px solid var(--line-soft);
+      border-radius: var(--r-tile); overflow: hidden; }
+.mo__hd { background: var(--surface); text-align: center; padding: 0.35rem 0;
+          font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+.mo__day { background: var(--bg); min-height: 74px; padding: 0.25rem 0.3rem; min-width: 0; overflow: hidden; }
+.mo__day--out { opacity: 0.35; }
+.mo__n { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+.mo__day--today .mo__n {
+  color: #0A0912; background: var(--brand); border-radius: var(--r-pill);
+  padding: 0 0.34rem; font-weight: 600;
+}
+.mo__ev { min-width: 0; font-size: 0.63rem; line-height: 1.35; margin-top: 0.12rem;
+          padding-left: 0.28rem; border-left: 2px solid var(--sched);
+          overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); }
+.mo__more { font-family: var(--f-mono); font-size: 0.58rem; color: var(--faint); margin-top: 0.1rem; }
+
+@media (min-width: 768px) { .mo__day { min-height: 104px; } }
+
+/* ตัวสลับโหมด */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-pill); overflow: hidden; }
+.seg a { text-decoration: none; color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem; }
+.seg a[data-on="true"] { background: var(--brand); color: #12102A; font-weight: 600; }
+
+.cal-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.9rem; }
+.cal-nav { display: flex; gap: 0.35rem; }
+.cal-nav a {
+  text-decoration: none; color: var(--muted); border: 1px solid var(--line);
+  border-radius: var(--r-pill); width: 1.9rem; height: 1.9rem;
+  display: grid; place-items: center; font-size: var(--s--1);
+}
+.cal-nav a:hover { color: var(--brand); border-color: var(--brand); }
+
+/* ปฏิทินต้องการความกว้างมากกว่าหน้ารายการ · เดสก์ท็อปจะได้ 3-4 รายการต่อวันตามที่ออกแบบ */
+.wrap--wide { max-width: 1040px; }
+@media (min-width: 768px) { .mo__day { min-height: 104px; } }
+
+/* มือถือ 2 รายการต่อวัน · เดสก์ท็อป 3 (doc/DESIGN.md) */
+.mo__ev--d, .mo__more--d { display: none; }
+@media (min-width: 768px) {
+  .mo__ev--d { display: block; }
+  .mo__more--d { display: block; }
+  .mo__more--m { display: none; }
+}
+
+/* =====================================================================
+   S6 · ตัวจัดการช่วงเวลาประจำ
+   ===================================================================== */
+.slot { border: 1px solid var(--line); border-radius: var(--r-tile);
+        background: var(--surface); padding: 0.85rem; margin-top: 0.9rem; }
+.slot__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+.slot__row { display: flex; gap: 0.45rem; margin-top: 0.45rem; flex-wrap: wrap; }
+.slot__row--mid { align-items: center; margin-top: 0.55rem; }
+.slot__row .input { flex: 1; min-width: 0; }
+.input--n { flex: none !important; width: 5rem; }
+.dash { color: var(--faint); align-self: center; }
+.muted { color: var(--muted); font-size: var(--s--1); }
+.strong { color: var(--ink); }
+.hint { display: block; margin-top: 0.25rem; color: var(--faint);
+        font-family: var(--f-mono); font-size: var(--s--2); }
+
+.linkbtn { background: none; border: none; color: var(--due);
+           font: inherit; font-size: var(--s--1); cursor: pointer; padding: 0; }
+
+.seg--btn { margin-top: 0.6rem; }
+.seg button { background: none; border: none; font: inherit; cursor: pointer;
+              color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem; }
+.seg button[data-on="true"] { background: var(--brand); color: #12102A; font-weight: 600; }
+
+.weeks { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
+         gap: 0.3rem; margin-top: 0.6rem; }
+.weeks__b { aspect-ratio: 1; border: 1px solid var(--line); background: transparent;
+            color: var(--muted); border-radius: 7px; font: inherit;
+            font-size: var(--s--2); font-family: var(--f-mono); cursor: pointer; padding: 0; }
+.weeks__b[data-on="true"] { background: var(--brand); border-color: var(--brand);
+                            color: #12102A; font-weight: 600; }
+
+.add-slot { margin-top: 0.9rem; }
+.sec--gap { margin-top: 1.6rem; }
+.alert--gap { margin-top: 0.8rem; }
+.actions { display: flex; gap: 0.6rem; margin-top: 1.4rem; }
+
+@media (min-width: 768px) { .weeks { grid-template-columns: repeat(12, minmax(0, 1fr)); } }
+
+/* =====================================================================
+   ปุ่มในแถว · แถบเลิกทำ (เฟส 4)
+   ===================================================================== */
+.rowbtn {
+  background: none; border: none; color: var(--faint); cursor: pointer;
+  font-size: 1.05rem; line-height: 1; padding: 0.15rem 0.35rem;
+  border-radius: var(--r-pill); align-self: center; flex: none;
+  opacity: 0; transition: opacity 0.15s ease, color 0.15s ease;
+}
+.row:hover .rowbtn, .rowbtn:focus-visible { opacity: 1; }
+.rowbtn:hover { color: var(--due); }
+/* จอสัมผัสไม่มี hover — ให้เห็นตลอด */
+@media (hover: none) { .rowbtn { opacity: 0.55; } }
+
+.undo {
+  position: fixed; z-index: 30; left: 50%; transform: translateX(-50%);
+  bottom: calc(4.2rem + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 0.9rem;
+  background: var(--raised); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 0.5rem 0.6rem 0.5rem 1rem;
+  font-size: var(--s--1); color: var(--muted);
+  max-width: calc(100vw - 2rem);
+}
+.undo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.undo button {
+  background: none; border: none; color: var(--brand); font: inherit;
+  font-weight: 600; cursor: pointer; padding: 0.1rem 0.6rem; flex: none;
+  border-radius: var(--r-pill);
+}
+.undo button:hover { background: var(--brand-soft); }
+
+@media (min-width: 768px) { .undo { bottom: 1.5rem; left: calc(50% + 100px); } }
+
+.cb { background: transparent; }
+button.cb { cursor: pointer; }
+.none { color: var(--faint); font-size: var(--s--1); margin: 0.2rem 0 0; }
+
+/* =====================================================================
+   S8 · เพิ่มเร็ว
+   ===================================================================== */
+.fab {
+  position: fixed; z-index: 25; right: 1rem;
+  bottom: calc(4.4rem + env(safe-area-inset-bottom));
+  width: 3.1rem; height: 3.1rem; border-radius: var(--r-pill);
+  background: var(--brand); color: #12102A; border: none;
+  font-size: 1.6rem; line-height: 1; cursor: pointer;
+  box-shadow: none; transition: box-shadow 0.18s ease, background 0.18s ease;
+}
+.fab:hover { background: var(--brand-deep); box-shadow: 0 6px 24px -8px rgba(165,148,255,.75); }
+@media (min-width: 768px) { .fab { bottom: 1.5rem; right: 1.5rem; } }
+
+.sheet {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(10, 9, 18, 0.72);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.sheet__panel {
+  width: 100%; max-width: 520px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-card) var(--r-card) 0 0;
+  padding: 1rem 1rem calc(1.2rem + env(safe-area-inset-bottom));
+  max-height: 88vh; overflow-y: auto;
+}
+.sheet__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+@media (min-width: 768px) {
+  .sheet { align-items: center; }
+  .sheet__panel { border-radius: var(--r-card); padding-bottom: 1.2rem; }
+}
+
+.readout {
+  background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--r-tile); padding: 0.55rem 0.7rem;
+  font-size: var(--s-0); color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.field.grow { flex: 1; min-width: 0; margin-bottom: 0; }
+
+/* แถวที่กดเปิดแผงได้ · ยังต้องดูเหมือนแถวเดิมทุกประการ */
+.row__body--tap {
+  background: none; border: none; padding: 0; margin: 0; font: inherit;
+  color: inherit; text-align: left; cursor: pointer; display: block;
+}
+.row__body--tap .row__title, .row__body--tap .row__meta { display: block; }
+.row__body--tap:hover .row__title { color: var(--brand); }
+textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
+.actions--end { margin-top: 2.4rem; padding-top: 1.2rem; border-top: 1px solid var(--line-soft); }
+.steps { margin: 0.6rem 0 0; padding-left: 1.1rem; color: var(--muted); font-size: var(--s--1); line-height: 1.9; }
+.steps strong { color: var(--ink); }

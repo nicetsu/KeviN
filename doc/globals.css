@@ -1,0 +1,101 @@
+/* =====================================================================
+   KeviN · design tokens
+   ยกไปวางใน app/globals.css ได้เลย หรือแปลงเป็น theme.extend ใน Tailwind
+   ที่มาและกฎการใช้: doc/DESIGN.md
+   ===================================================================== */
+
+:root {
+  /* ---- พื้น ---- */
+  --bg:        #0A0912;
+  --surface:   #14131F;
+  --raised:    #1C1B2B;
+  --line:      #26253A;
+  --line-soft: #1D1C2C;
+
+  /* ---- ตัวอักษร · คอนทราสต์สูงโดยตั้งใจ เพื่อให้อ่านกลางแดดได้ ---- */
+  --ink:   #F1F0F7;
+  --muted: #A5A2B8;
+  --faint: #87849D;
+
+  /* ---- แบรนด์ · คงความจัดไว้เต็ม เพราะเป็นสิ่งเดียวที่กดได้ ---- */
+  --brand:      #A594FF;
+  --brand-deep: #8878F0;
+  --brand-soft: #1E1B33;
+
+  /* ---- สีชนิดข้อมูล · ลดความจัดลง ~45% จากสีอิ่มตัว ---- */
+  --sched:      #79C2D0;   /* คาบเรียน  · 187° */
+  --sched-soft: #16292E;
+  --due:        #E0897E;   /* เส้นตาย/เตือน · 6° */
+  --due-soft:   #2E1E1D;
+  --task:       #74C6A4;   /* งาน · 157° */
+  --task-soft:  #172A24;
+  --note:       #8E88A8;   /* โน้ต · ไร้ hue เด่น */
+  --note-soft:  #1B1A28;
+
+  /* ---- gradient ประจำ Area ---- */
+  --g-class: linear-gradient(135deg, #79C2D0 0%, #8878F0 100%);
+  --g-hack:  linear-gradient(135deg, #E0897E 0%, #A594FF 100%);
+  --g-fin:   linear-gradient(135deg, #74C6A4 0%, #79C2D0 100%);
+  --g-pers:  linear-gradient(135deg, #A594FF 0%, #D98BB4 100%);
+
+  /* ---- รูปทรง ---- */
+  --r-card: 14px;
+  --r-tile: 10px;
+  --r-pill: 999px;
+
+  /* ---- ตัวอักษร ---- */
+  --f: var(--font-inter), var(--font-noto-thai), system-ui, sans-serif;
+  --f-mono: "Geist Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+  --s--2: 0.69rem;
+  --s--1: 0.79rem;
+  --s-0:  0.92rem;
+  --s-1:  1.08rem;
+  --s-2:  clamp(1.35rem, 1.1rem + 0.9vw, 1.8rem);
+  --s-3:  clamp(2rem, 1.5rem + 2.2vw, 3.1rem);
+}
+
+html { color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f);
+  font-size: var(--s-0);
+  line-height: 1.72;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";  /* Inter: เลข 1 กับตัว l แยกกันชัด */
+}
+
+/* ---------------------------------------------------------------------
+   ปุ่ม · ไม่มีเงาตอนนิ่ง เรืองเฉพาะตอน hover
+   --------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  background: var(--brand);
+  color: #12102A;
+  font-weight: 600;
+  font-size: var(--s--1);
+  padding: 0.58rem 1.25rem;
+  border-radius: var(--r-pill);
+  box-shadow: none;
+  transition: box-shadow 0.18s ease, background 0.18s ease;
+}
+.btn:hover {
+  background: var(--brand-deep);
+  box-shadow: 0 6px 24px -8px rgba(165, 148, 255, 0.75);
+}
+.btn--ghost { background: transparent; color: var(--brand); border-color: var(--line); }
+.btn--quiet { background: transparent; color: var(--muted); border-color: var(--line); }
+.btn--danger { background: transparent; color: var(--due); border-color: rgba(224, 137, 126, 0.4); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
+
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
