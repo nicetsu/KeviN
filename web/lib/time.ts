@@ -83,6 +83,19 @@ export function addDays(dateKey: string, n: number) {
   return dt.toISOString().slice(0, 10)
 }
 
+/**
+ * "พรุ่งนี้" · "มะรืนนี้" · "ศุกร์ 21 ส.ค." — คืน null ถ้าเป็นวันเดียวกับ `fromKey`
+ *
+ * ใช้กับ hero คาบถัดไป: null = วันนี้ จึงนับถอยหลังเป็นนาทีได้
+ * ไม่ null = คนละวัน การนับถอยหลังเป็นชั่วโมงไม่ช่วยอะไร บอกชื่อวันตรง ๆ ดีกว่า
+ */
+export function dayAheadLabel(fromKey: string, targetKey: string): string | null {
+  if (targetKey === fromKey) return null
+  if (targetKey === addDays(fromKey, 1)) return 'พรุ่งนี้'
+  if (targetKey === addDays(fromKey, 2)) return 'มะรืนนี้'
+  return thaiDateLabel(targetKey)
+}
+
 export function addMonths(dateKey: string, n: number) {
   const [y, m] = dateKey.split('-').map(Number)
   const dt = new Date(Date.UTC(y, m - 1 + n, 1))

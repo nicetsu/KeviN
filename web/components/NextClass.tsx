@@ -11,6 +11,8 @@ export type NextClassInfo = {
   endsAt: string
   startLabel: string
   endLabel: string
+  /** null = คาบนี้อยู่ในวันนี้ · ไม่ null = คนละวัน เช่น "พรุ่งนี้" */
+  dayLabel: string | null
 }
 
 /**
@@ -33,7 +35,11 @@ export default function NextClass({ info }: { info: NextClassInfo }) {
   const end = new Date(info.endsAt).getTime()
 
   let kicker = 'คาบถัดไป'
-  if (now !== null) {
+
+  // คนละวันแล้ว — นับถอยหลังเป็นชั่วโมงไม่ช่วยอะไร บอกชื่อวันตรง ๆ ชัดกว่า
+  if (info.dayLabel) {
+    kicker = `คาบถัดไป · ${info.dayLabel}`
+  } else if (now !== null) {
     if (now >= start && now < end) {
       const left = Math.round((end - now) / 60000)
       kicker = left >= 60

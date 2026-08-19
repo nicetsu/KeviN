@@ -7,6 +7,8 @@ import {
   clockLabel,
   overdueLabel,
   soonLabel,
+  addDays,
+  dayAheadLabel,
 } from '@/lib/time'
 import ItemList, { type Row } from '@/components/ItemList'
 import NextClass, { type NextClassInfo } from '@/components/NextClass'
@@ -39,6 +41,15 @@ type Item = {
 type Line = Row & { sortAt: number }
 
 /**
+ * มองไปข้างหน้ากี่วันเพื่อหา "คาบถัดไป"
+ *
+ * ต้องเผื่อให้ข้ามสัปดาห์ที่ไม่มีเรียนได้ — ตารางเทอมนี้เว้นสัปดาห์สอบกลางภาค
+ * กับ Commencement Week ทำให้ช่องว่างยาวสุดราว 10 วัน (ศุกร์ก่อนหยุด ถึงจันทร์
+ * ที่กลับมาเรียน) · 14 วันจึงครอบคลุม และยังถูกเมื่อหมดเทอมแล้วคือไม่เจออะไรเลย
+ */
+const LOOKAHEAD_DAYS = 14
+
+/**
  * เวลาปัจจุบัน ณ ตอนที่ request เข้ามา
  *
  * `await connection()` ประกาศชัดว่าหน้านี้ขึ้นกับ request จริง จึง prerender
@@ -60,7 +71,10 @@ export default async function TodayPage() {
   const { start, end, dateKey } = bangkokToday()
 
   const [occRes, itemRes] = await Promise.all([
-    supabase.rpc('schedule_occurrences', { p_from: dateKey, p_to: dateKey }),
+    supabase.rpc('schedule_occurrences', {
+      p_from: dateKey,
+      p_to: addDays(dateKey, LOOKAHEAD_DAYS),
+    }),
     supabase
       .from('items')
       .select('id, project_id, type, title, body, due_at, remind_at, done_at, projects(name)')
@@ -88,7 +102,10 @@ export default async function TodayPage() {
   const now = await requestNow()
 
   // คาบเรียนไม่ใช่ item — ติ๊กไม่ได้ เก็บเข้าคลังไม่ได้ แก้ที่หน้าวิชา
-  const classLines: Line[] = occurrences.map((o) => ({
+  // รายการข้างล่างเป็น "วันนี้" จึงตัดคาบของวันอื่นทิ้ง — ต่างจาก hero ที่มองข้ามวันได้
+  const todayOcc = occurrences.filter((o) => o.occurs_on === dateKey)
+
+  const classLines: Line[] = todayOcc.map((o) => ({
     id: null,
     sortAt: new Date(`${dateKey}T${o.start_time}+07:00`).getTime(),
     color: 'var(--sched)',
@@ -101,12 +118,17 @@ export default async function TodayPage() {
     tag: null,
   }))
 
-  // คาบถัดไป = คาบแรกของวันนี้ที่ยังไม่จบ · ถ้าเลิกหมดแล้วไม่ต้องโชว์ hero
+  // คาบถัดไป = คาบแรกที่ยังไม่จบ **ข้ามวันได้**
+  //
+  // เดิมดูแค่วันนี้ พอคาบสุดท้ายเลิก การ์ดก็หายไปทั้งใบจนถึงเช้าวันรุ่งขึ้น ซึ่งเป็น
+  // ช่วงเย็นที่คนอยากรู้พอดีว่าพรุ่งนี้เริ่มกี่โมง (เจ้าของเคาะให้เปลี่ยน 19 ส.ค.)
+  //
+  // ใช้ `o.occurs_on` ไม่ใช่ `dateKey` — คาบที่เจอไม่จำเป็นต้องเป็นของวันนี้แล้ว
   const upcoming = occurrences
     .map((o) => ({
       o,
-      start: new Date(`${dateKey}T${o.start_time}+07:00`).getTime(),
-      end: new Date(`${dateKey}T${o.end_time}+07:00`).getTime(),
+      start: new Date(`${o.occurs_on}T${o.start_time}+07:00`).getTime(),
+      end: new Date(`${o.occurs_on}T${o.end_time}+07:00`).getTime(),
     }))
     .filter((x) => x.end > now)
     .sort((a, b) => a.start - b.start)[0]
@@ -120,6 +142,7 @@ export default async function TodayPage() {
         endsAt: new Date(upcoming.end).toISOString(),
         startLabel: clockLabel(upcoming.o.start_time),
         endLabel: clockLabel(upcoming.o.end_time),
+        dayLabel: dayAheadLabel(dateKey, upcoming.o.occurs_on),
       }
     : null
 
