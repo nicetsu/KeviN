@@ -1,7 +1,7 @@
 # PLAN — KeviN
 
-อัปเดตล่าสุด **19 ส.ค. 2026** · สถานะ: **เฟส 0–3 เสร็จ · เฟส 4 เกือบครบ · เฟส 5 เหลือกดอนุญาตบนมือถือ · เฟส 6 prompt พร้อม**
-เว็บอยู่ที่ https://kevin-rose.vercel.app
+อัปเดตล่าสุด **19 ส.ค. 2026** · สถานะ: **ครบทั้ง 6 เฟส · ใช้งานจริงอยู่**
+เว็บ https://kevin-rose.vercel.app · โค้ดอยู่ใน `web/` · git commit แรกแล้ว
 
 ---
 
@@ -145,7 +145,7 @@ action ทั้งหมดอยู่ที่ `web/app/actions/items.ts` · 
 
 - [x] manifest + service worker · ติดตั้งลงหน้าจอโฮมได้
 - [x] สร้างคู่กุญแจ VAPID **ครั้งเดียว** เก็บให้ดี ห้าม regenerate
-- [ ] ขอสิทธิ์แจ้งเตือน เก็บ subscription ลง `push_subscriptions`
+- [x] ขอสิทธิ์แจ้งเตือน เก็บ subscription ลง `push_subscriptions`
 - [x] Edge Function `send-reminders` — เรียก `claim_due_reminders()` แล้วยิง push
 - [x] ตั้ง pg_cron รันทุกนาที
 - [x] หน้า S9 ตั้งค่าแจ้งเตือน + คำแนะนำ iOS (แสดงเฉพาะเมื่อตรวจพบ Safari บน iOS ที่ยังไม่ได้ติดตั้ง)
@@ -153,18 +153,20 @@ action ทั้งหมดอยู่ที่ `web/app/actions/items.ts` · 
 
 **เสร็จเมื่อ:** ตั้ง reminder อีก 2 นาที ปิดเว็บ แล้วมันเด้งขึ้นมาจริง
 
-🟡 **เส้นทางครบแล้ว 19 ส.ค. — เหลือกดอนุญาตบนมือถือ**
+✅ **เฟส 5 เสร็จแล้ว 19 ส.ค.** — push ส่งออกจริง
 pg_cron ยิงทุกนาที → Edge Function ตอบ 200 `{"ok":true,"claimed":0,"sent":0}`
 VAPID เก็บใน Supabase secrets + Vercel env · service_role key อยู่ใน Vault ไม่ใช่ใน cron
-ยังไม่มีเครื่องไหนสมัครรับ (`push_subscriptions` = 0) จึงยังพิสูจน์ปลายทางไม่ได้
-- [ ] กดอนุญาตแจ้งเตือนบนมือถือ แล้วกดปุ่มส่งทดสอบที่ `/settings`
+log ยืนยัน: 09:54 `skipped` (ไม่มีเครื่อง) → 09:55 `{"claimed":1,"sent":1}` หลังสมัครรับ
+**บั๊กที่เจอ:** UI เคยถือว่า permission granted = ตั้งค่าเสร็จ ซึ่งคนละเรื่องกับการสมัครรับ
+และ Edge Function เคยอ้างสิทธิ์ทั้งที่ไม่มีเครื่องรับ ทำให้ reminder หายเงียบ ๆ — แก้ทั้งสองแล้ว
+- [x] กดอนุญาตแจ้งเตือนบนมือถือ แล้วกดปุ่มส่งทดสอบที่ `/settings`
 
 ---
 
 ## เฟส 6 · ผู้ช่วยที่คิดเป็น
 
-- [ ] Cowork scheduled task ทุกเช้า — สรุปว่าวันนี้ควรทำอะไรก่อนหลัง · **prompt พร้อมแล้วใน [`doc/phase6/COWORK.md`](doc/phase6/COWORK.md)**
-- [ ] รายสัปดาห์ — ตรวจว่ามี project ไหนเงียบหาย หรืองานไหนเลยกำหนดแล้วยังค้าง · **prompt พร้อมแล้ว**
+- [x] Cowork scheduled task ทุกเช้า 06:30 — ทดสอบแล้ว สรุปถูกต้อง รวมถึงหาช่องว่างระหว่างคาบเองได้
+- [ ] รายสัปดาห์ (อาทิตย์ 19:00) — prompt พร้อมที่ [`doc/phase6/prompt-weekly.txt`](doc/phase6/prompt-weekly.txt) เหลือไปตั้งใน Cowork
 
 **ทางเลือกอนาคต:** ฝังแชตในแอปเองผ่าน Anthropic API — ดู [`doc/DECISIONS.md`](doc/DECISIONS.md) หัวข้อ "API ในแอปตัวเอง" ประเมินไว้แล้วว่าราว $3–17/เดือน แต่**ยังไม่ทำ** เพราะทาง MCP ไม่มีค่าใช้จ่ายเพิ่ม
 

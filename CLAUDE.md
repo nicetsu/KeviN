@@ -9,8 +9,8 @@
 |---|---|
 | 0 ฐานข้อมูล · 1 MCP · 2 เว็บ · 3 ปฏิทิน | เสร็จ |
 | 4 จัดการบนเว็บ | เสร็จ ยกเว้นลากจัดลำดับ |
-| 5 PWA + แจ้งเตือน | เส้นทางครบ **เหลือกดอนุญาตบนมือถือ** |
-| 6 Cowork | prompt พร้อมใน `doc/phase6/COWORK.md` เหลือไปตั้งใน Cowork |
+| 5 PWA + แจ้งเตือน | เสร็จ · push ส่งออกจริงแล้ว |
+| 6 Cowork | สรุปเช้าใช้งานอยู่ · รายสัปดาห์เหลือไปตั้ง (`doc/phase6/prompt-weekly.txt`) |
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
@@ -62,4 +62,4 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 ## สภาพแวดล้อม
 
 - Windows · เชลล์หลักเป็น PowerShell
-- ยังไม่ได้ `git init`
+- git init แล้ว มี commit แรกครบทั้งโปรเจกต์ · ยังไม่มี remote
