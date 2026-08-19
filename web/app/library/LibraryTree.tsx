@@ -54,22 +54,22 @@ export default function LibraryTree({ areas }: { areas: TreeArea[] }) {
   const refs = useRef<Record<string, HTMLElement | null>>({})
 
   // จำไว้ว่ากางอะไรค้างไว้ · เปิดกลับมาครั้งหน้าจะอยู่ที่เดิม
+  //
+  // ต้องแยก "ยังไม่เคยบันทึก" ออกจาก "บันทึกไว้ว่าไม่เปิดอะไรเลย" —
+  // ถ้าเช็กแค่ความยาว การปิดทุกอันจะถูกมองว่ายังไม่เคยบันทึก แล้วเด้งกลับมาเปิดเอง
   useEffect(() => {
-    let restored: string[] | null = null
     try {
       const raw = localStorage.getItem(STORE)
-      if (raw) restored = JSON.parse(raw)
+      if (raw !== null) {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) setOpenAreas(new Set(parsed as string[]))
+      }
+      // ยังไม่เคยบันทึก = ปิดทุกอัน ให้เห็นภาพรวมทั้ง 4 Area ก่อน
     } catch {
-      restored = null
-    }
-    if (restored && restored.length) setOpenAreas(new Set(restored))
-    else {
-      // ครั้งแรก: เปิด Class ไว้เพราะใช้บ่อยสุด
-      const first = areas.find((a) => a.name === 'Class') ?? areas[0]
-      if (first) setOpenAreas(new Set([first.id]))
+      // อ่านไม่ได้ก็ถือว่าปิดทุกอัน
     }
     setReady(true)
-  }, [areas])
+  }, [])
 
   useEffect(() => {
     if (!ready) return
