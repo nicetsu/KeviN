@@ -26,6 +26,9 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 
 ## อ่านตามลำดับนี้ก่อนแตะอะไร
 
+0. **[ARCHITECTURE.md](ARCHITECTURE.md)** — ระบบทำงานยังไงทั้งหมด อ่านอันนี้ก่อนถ้าเพิ่งเปิดโปรเจกต์ครั้งแรก
+   (ฉบับภาพอยู่ที่ [SYSTEM.html](SYSTEM.html) และ [UXUI.html](UXUI.html))
+
 1. **[PLAN.md](PLAN.md)** — แผนงานรายเฟส สถานะล่าสุด
 2. **[doc/DECISIONS.md](doc/DECISIONS.md)** — ทุกข้อที่เคาะไปแล้วพร้อมเหตุผล **อย่าเปลี่ยนโดยไม่ถามเจ้าของก่อน**
 3. **[doc/TRAPS.md](doc/TRAPS.md)** — กับดักที่รู้ล่วงหน้า อ่านก่อนเขียนโค้ดส่วนที่เกี่ยว

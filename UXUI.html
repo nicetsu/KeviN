@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeviN · UX และ UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0912; --surface:#14131F; --raised:#1C1B2B; --line:#26253A; --line-soft:#1D1C2C;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#87849D;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --sched:#79C2D0; --sched-soft:#16292E;
+  --due:#E0897E; --due-soft:#2E1E1D;
+  --task:#74C6A4; --task-soft:#172A24;
+  --note:#8E88A8; --note-soft:#1B1A28;
+  --g-class:linear-gradient(135deg,#79C2D0,#8878F0);
+  --g-hack:linear-gradient(135deg,#E0897E,#A594FF);
+  --g-fin:linear-gradient(135deg,#74C6A4,#79C2D0);
+  --g-pers:linear-gradient(135deg,#A594FF,#D98BB4);
+  --r-card:14px; --r-tile:10px; --r-pill:999px;
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"Geist Mono","Cascadia Mono",Consolas,ui-monospace,monospace;
+  --s--2:.69rem; --s--1:.79rem; --s-0:.92rem; --s-1:1.08rem;
+  --s-2:clamp(1.35rem,1.1rem + .9vw,1.8rem); --s-3:clamp(2rem,1.5rem + 2.2vw,3rem);
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);
+  font-size:var(--s-0);line-height:1.72;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 clamp(1.1rem,5vw,2.5rem)}
+header{padding:4rem 0 2.5rem;border-bottom:1px solid var(--line)}
+.kick{font-family:var(--f-mono);font-size:var(--s--1);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--brand)}
+h1{font-size:var(--s-3);font-weight:600;letter-spacing:-.04em;margin:.6rem 0 .5rem;line-height:1.05}
+.lead{font-size:var(--s-1);color:var(--muted);max-width:54ch;margin:0}
+h2{font-size:var(--s-2);font-weight:600;letter-spacing:-.03em;margin:3.5rem 0 .3rem}
+h2 .n{color:var(--brand);font-family:var(--f-mono);font-size:.55em;margin-right:.6rem;letter-spacing:0}
+h3{font-size:var(--s-1);font-weight:600;letter-spacing:-.02em;margin:2rem 0 .5rem}
+.sub{color:var(--muted);margin:0 0 1.3rem;max-width:64ch}
+p{max-width:68ch}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--raised);
+  padding:.1rem .35rem;border-radius:5px}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:var(--s--1)}
+th{text-align:left;font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);font-weight:400;padding:.5rem .6rem .5rem 0;
+  border-bottom:1px solid var(--line)}
+td{padding:.6rem .6rem .6rem 0;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.rule{border-left:2px solid var(--brand);padding:.4rem 0 .4rem 1.2rem;margin:1.4rem 0;
+  font-size:var(--s-1);color:var(--ink);max-width:60ch}
+.note{border-left:2px solid var(--line);padding:.3rem 0 .3rem 1.1rem;margin:1.2rem 0;color:var(--muted)}
+
+/* จานสี */
+.sw-grid{display:grid;gap:1rem;margin:1.6rem 0;grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}
+.sw .chip{height:56px;border-radius:var(--r-tile);border:1px solid var(--line)}
+.sw .role{font-size:var(--s--1);margin-top:.55rem}
+.sw .hex{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint)}
+
+/* area gradient */
+.areas{display:grid;gap:.9rem;grid-template-columns:repeat(2,1fr);margin:1.5rem 0}
+@media(min-width:700px){.areas{grid-template-columns:repeat(4,1fr)}}
+.area{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--r-card);
+  background:var(--surface);padding:1rem;min-height:92px;display:flex;flex-direction:column;
+  justify-content:space-between}
+.area::before{content:"";position:absolute;inset:0;opacity:.11}
+.area.a1::before{background:var(--g-class)}
+.area.a2::before{background:var(--g-hack)}
+.area.a3::before{background:var(--g-fin)}
+.area.a4::before{background:var(--g-pers)}
+.area>*{position:relative}
+.area .nm{font-weight:600;font-size:var(--s-0)}
+.area .ct{font-family:var(--f-mono);font-size:var(--s--2);color:var(--muted)}
+
+/* โทรศัพท์ */
+.phones{display:grid;gap:1.6rem;grid-template-columns:1fr;margin:1.8rem 0}
+@media(min-width:640px){.phones{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:980px){.phones{grid-template-columns:repeat(3,1fr)}}
+.phone{border:1px solid var(--line);border-radius:20px;background:var(--bg);overflow:hidden}
+.phone .cap{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);padding:.7rem .95rem .1rem;
+  display:flex;justify-content:space-between}
+.scr{padding:.4rem .95rem 1rem;display:flex;flex-direction:column;gap:.25rem}
+.scr h4{font-size:var(--s-1);font-weight:600;letter-spacing:-.025em;margin:.3rem 0 .1rem}
+.lbl{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);margin-top:.7rem;
+  display:flex;justify-content:space-between}
+.item{display:flex;gap:.6rem;align-items:flex-start;padding:.55rem 0;
+  border-top:1px solid var(--line-soft)}
+.item .rail{width:2px;align-self:stretch;border-radius:2px;flex:none;background:var(--task)}
+.item.sched .rail{background:var(--sched)}
+.item.due .rail{background:var(--due)}
+.item.note .rail{background:var(--note)}
+.item.done{opacity:.38}
+.item.done .title{text-decoration:line-through}
+.item .body{flex:1;min-width:0}
+.item .title{font-size:var(--s--1);line-height:1.4}
+.item .meta{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);margin-top:.1rem}
+.cb{width:.95rem;height:.95rem;border:1.5px solid var(--line);border-radius:5px;flex:none;
+  margin-top:.22rem}
+.cb.on{background:var(--task);border-color:var(--task)}
+.tag{font-family:var(--f-mono);font-size:var(--s--2);padding:.02rem .5rem;
+  border-radius:var(--r-pill);border:1px solid rgba(224,137,126,.32);color:var(--due);
+  align-self:center;white-space:nowrap}
+.hero{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-card);
+  padding:.85rem .95rem;margin:.4rem 0 .3rem}
+.hero .k{font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand);letter-spacing:.06em}
+.hero .big{font-size:1.7rem;font-weight:600;line-height:1;letter-spacing:-.045em;margin:.4rem 0 .25rem}
+.hero .big small{font-size:.78rem;font-weight:400;color:var(--muted);letter-spacing:-.01em}
+.hero .s{font-size:var(--s--1);color:var(--muted)}
+
+/* ปฏิทินเดือน */
+.mo{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:.5rem}
+.mo .dw{text-align:center;font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);
+  padding-bottom:.25rem}
+.mo .dy{background:var(--surface);border:1px solid transparent;border-radius:8px;min-height:40px;
+  padding:.25rem;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.mo .dy.out{opacity:.28}
+.mo .dy.today .d{color:var(--brand);font-weight:600}
+.mo .dy.pick{background:var(--brand-soft);border-color:var(--brand)}
+.mo .d{font-family:var(--f-mono);font-size:var(--s--2);color:var(--muted);line-height:1}
+.dots{display:flex;gap:3px;min-height:5px}
+.dots i{width:5px;height:5px;border-radius:50%;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:.9rem;margin:.8rem 0 .3rem;font-size:var(--s--2);color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.legend i{width:6px;height:6px;border-radius:50%;display:block}
+
+/* ปฏิทินสัปดาห์ */
+.wkwrap{overflow-x:auto;margin:1.2rem 0}
+.wk{display:grid;grid-template-columns:2.6rem repeat(13,minmax(34px,1fr));grid-auto-rows:34px;
+  gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--r-tile);
+  overflow:hidden;min-width:560px}
+.wk .c{background:var(--bg)}
+.wk .hh{background:var(--bg);font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);
+  display:flex;align-items:center;justify-content:center}
+.wk .dd{background:var(--surface);font-family:var(--f-mono);font-size:var(--s--2);color:var(--muted);
+  display:flex;align-items:center;padding-left:.4rem;border-right:1px solid var(--line)}
+.wk .dd.now{color:var(--brand);font-weight:600}
+.wk .blk{align-self:center;margin:3px 3px 3px 4px;border-radius:7px;padding:.1rem .4rem;
+  font-size:.64rem;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  background:var(--sched-soft);border-left:2px solid var(--sched);color:var(--ink)}
+.wk .nowline{width:2px;background:var(--brand);justify-self:start;margin-left:-1px}
+
+.cmp{display:grid;gap:1.1rem;margin:1.5rem 0}
+@media(min-width:700px){.cmp{grid-template-columns:1fr 1fr}}
+.box{border-left:2px solid var(--line);padding:.35rem 0 .35rem 1.1rem}
+.box.good{border-left-color:var(--brand)}
+.box h5{margin:0 0 .3rem;font-size:var(--s-0);font-weight:600}
+.box p{margin:0;font-size:var(--s--1);color:var(--muted)}
+footer{margin:5rem 0 4rem;padding-top:1.5rem;border-top:1px solid var(--line);
+  color:var(--faint);font-size:var(--s--1)}
+a{color:var(--brand)}
+.toc{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.6rem}
+.toc a{text-decoration:none;font-size:var(--s--1);color:var(--muted);
+  border:1px solid var(--line);border-radius:var(--r-pill);padding:.25rem .8rem}
+.toc a:hover{color:var(--brand);border-color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">ภาษาภาพ · Nightfall</div>
+  <h1>UX และ UI ของ KeviN</h1>
+  <p class="lead">ธีมมืดอย่างเดียว · สีมีความหมายเดียวใช้ตรงกันทั้งระบบ ·
+    ไม่มีสีไหนใช้เพื่อความสวย</p>
+  <div class="toc">
+    <a href="#rule">กฎข้อเดียว</a>
+    <a href="#color">จานสี</a>
+    <a href="#area">Area gradient</a>
+    <a href="#screens">หน้าจอ</a>
+    <a href="#week">ปฏิทินกลับแกน</a>
+    <a href="#row">องค์ประกอบรายการ</a>
+    <a href="#principle">หลักการห้าข้อ</a>
+  </div>
+</header>
+
+<h2 id="rule"><span class="n">01</span>กฎข้อเดียวที่ทุกอย่างตามมา</h2>
+<div class="rule"><b>ม่วงคือสิ่งที่กดได้ · สีที่เหลือคือข้อมูล</b></div>
+<p>ม่วงแบรนด์คงความจัดไว้เต็ม ส่วนสีชนิดข้อมูลลดความจัดลงราว 45%
+  ผลคือลำดับความสำคัญเกิดขึ้นเอง — <b>สิ่งที่สว่างที่สุดบนจอคือสิ่งที่กดได้เสมอ</b>
+  ไม่ต้องเพิ่มขนาดหรือเงาช่วย</p>
+
+<div class="cmp">
+  <div class="box">
+    <h5>ตัดออกหมด</h5>
+    <p>แสงเรืองบนพื้นหลัง · เงาใต้การ์ด · พื้นหลังเป็นสีเดียวเรียบ ๆ</p>
+  </div>
+  <div class="box good">
+    <h5>เหลือไว้</h5>
+    <p>ปุ่มนิ่งไม่มีเงา เรืองขึ้นเฉพาะตอนเอาเมาส์ไปชี้เท่านั้น</p>
+  </div>
+</div>
+
+<h2 id="color"><span class="n">02</span>จานสี</h2>
+<p class="sub">องศาที่กำกับคือระยะบนวงล้อสี — ม่วงอยู่ที่ 265°
+  ทั้งสามสีข้อมูลห่างออกไปอย่างน้อย 78° จึงแยกออกได้แม้บนบล็อกเล็ก ๆ ในปฏิทิน</p>
+
+<div class="sw-grid">
+  <div class="sw"><div class="chip" style="background:#A594FF"></div>
+    <div class="role">แบรนด์ · กดได้</div><div class="hex">#A594FF · 265°</div></div>
+  <div class="sw"><div class="chip" style="background:#79C2D0"></div>
+    <div class="role">คาบเรียน</div><div class="hex">#79C2D0 · 187°</div></div>
+  <div class="sw"><div class="chip" style="background:#E0897E"></div>
+    <div class="role">เส้นตาย · เตือน</div><div class="hex">#E0897E · 6°</div></div>
+  <div class="sw"><div class="chip" style="background:#74C6A4"></div>
+    <div class="role">งาน · เสร็จแล้ว</div><div class="hex">#74C6A4 · 157°</div></div>
+  <div class="sw"><div class="chip" style="background:#8E88A8"></div>
+    <div class="role">โน้ต</div><div class="hex">#8E88A8</div></div>
+</div>
+
+<h3>พื้นและตัวอักษร</h3>
+<div class="sw-grid">
+  <div class="sw"><div class="chip" style="background:#0A0912"></div>
+    <div class="role">พื้นแอป</div><div class="hex">#0A0912</div></div>
+  <div class="sw"><div class="chip" style="background:#14131F"></div>
+    <div class="role">พื้นผิวยก</div><div class="hex">#14131F</div></div>
+  <div class="sw"><div class="chip" style="background:#26253A"></div>
+    <div class="role">เส้นคั่น</div><div class="hex">#26253A</div></div>
+  <div class="sw"><div class="chip" style="background:#F1F0F7"></div>
+    <div class="role">ตัวอักษรหลัก</div><div class="hex">#F1F0F7</div></div>
+  <div class="sw"><div class="chip" style="background:#A5A2B8"></div>
+    <div class="role">ตัวอักษรรอง</div><div class="hex">#A5A2B8</div></div>
+  <div class="sw"><div class="chip" style="background:#87849D"></div>
+    <div class="role">ตัวอักษรจาง</div><div class="hex">#87849D</div></div>
+</div>
+
+<div class="note">
+  <b>ตัวอักษรจางเคาะสองรอบ</b> — เดิมเป็น <code>#6E6B83</code> ซึ่งตกเกณฑ์ WCAG AA ทุกพื้น
+  (3.30–3.86 จากที่ต้องการ 4.5) รอบแรกเจ้าของเลือกคงไว้จากการดูภาพบนจอคอม
+  แต่หลังใช้จริงบนมือถือเปลี่ยนเป็น <code>#87849D</code> ซึ่งผ่านทุกพื้น
+</div>
+
+<h2 id="area"><span class="n">03</span>Gradient ประจำ Area</h2>
+<p class="sub">ใช้แทนภาพประกอบ ความทึบ <b>11%</b> เท่านั้น —
+  พอให้แยกว่าของมาจากไหน แต่ไม่แย่งความสนใจ</p>
+
+<div class="areas">
+  <div class="area a1"><div class="nm">Class</div><div class="ct">8 วิชา</div></div>
+  <div class="area a2"><div class="nm">Hackathon</div><div class="ct">1 โปรเจกต์</div></div>
+  <div class="area a3"><div class="nm">Financial</div><div class="ct">ว่าง</div></div>
+  <div class="area a4"><div class="nm">Personal</div><div class="ct">ว่าง</div></div>
+</div>
+
+<p>ทางเลือกที่ปฏิเสธไป: ลอกทิวทัศน์กลางคืนมาใช้เป็นภาพประกอบ —
+  ทำให้ KeviN ดูเหมือนแอปช่วยนอน · gradient ประจำ Area ได้ความอบอุ่นเหมือนกัน
+  <b>แต่ทำงานให้ด้วย</b> เพราะบอกได้ว่าของชิ้นนี้มาจากด้านไหนของชีวิต</p>
+
+<h2 id="screens"><span class="n">04</span>หน้าจอ</h2>
+<p class="sub">S7 แผงรายละเอียด และ S8 เพิ่มเร็ว เป็นแผงเปิดทับ ไม่ใช่หน้าใหม่ —
+  เพราะบนมือถือทุกชั้นที่เพิ่มคือปุ่มย้อนกลับที่ต้องกดเพิ่มหนึ่งครั้ง</p>
+
+<div class="phones">
+
+  <div class="phone">
+    <div class="cap"><span>S1 · วันนี้</span><span>375px</span></div>
+    <div class="scr">
+      <h4>พุธ 19 ส.ค.</h4>
+      <div class="hero">
+        <div class="k">คาบถัดไป · อีก 40 นาที</div>
+        <div class="big">09:00<small> – 12:00</small></div>
+        <div class="s">สถาปัตยกรรมเครือข่ายฯ · E11-S604</div>
+      </div>
+      <div class="lbl"><span>เลยกำหนด</span><span>1</span></div>
+      <div class="item due"><span class="rail"></span><span class="cb"></span>
+        <div class="body"><div class="title">ส่งใบสมัครชมรม</div>
+        <div class="meta">Personal · เลย 2 วัน</div></div>
+        <span class="tag">เลยกำหนด</span></div>
+      <div class="lbl"><span>วันนี้</span><span>3</span></div>
+      <div class="item sched"><span class="rail"></span>
+        <div class="body"><div class="title">สถาปัตยกรรมเครือข่ายฯ</div>
+        <div class="meta">09:00–12:00 · E11-S604</div></div></div>
+      <div class="item sched"><span class="rail"></span>
+        <div class="body"><div class="title">เกษตรศาสตร์ฯ</div>
+        <div class="meta">15:00–17:00 · ONLINE</div></div></div>
+      <div class="item done"><span class="rail"></span><span class="cb on"></span>
+        <div class="body"><div class="title">อ่านสรุปบทที่ 3</div>
+        <div class="meta">ดิสครีต · เสร็จ 14:20</div></div></div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="cap"><span>S2 · ปฏิทิน เดือน</span><span>375px</span></div>
+    <div class="scr">
+      <h4>สิงหาคม 2569</h4>
+      <div class="mo">
+        <div class="dw">จ</div><div class="dw">อ</div><div class="dw">พ</div><div class="dw">พฤ</div>
+        <div class="dw">ศ</div><div class="dw">ส</div><div class="dw">อา</div>
+        <div class="dy out"><span class="d">28</span><span class="dots"></span></div>
+        <div class="dy out"><span class="d">29</span><span class="dots"></span></div>
+        <div class="dy out"><span class="d">30</span><span class="dots"></span></div>
+        <div class="dy out"><span class="d">31</span><span class="dots"></span></div>
+        <div class="dy"><span class="d">1</span><span class="dots"></span></div>
+        <div class="dy"><span class="d">2</span><span class="dots"></span></div>
+        <div class="dy"><span class="d">3</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">17</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">18</span><span class="dots"><i style="background:#79C2D0"></i><i style="background:#74C6A4"></i></span></div>
+        <div class="dy today pick"><span class="d">19</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">20</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">21</span><span class="dots"><i style="background:#79C2D0"></i><i style="background:#E0897E"></i></span></div>
+        <div class="dy"><span class="d">22</span><span class="dots"></span></div>
+        <div class="dy"><span class="d">23</span><span class="dots"></span></div>
+        <div class="dy"><span class="d">24</span><span class="dots"><i style="background:#79C2D0"></i><i style="background:#E0897E"></i></span></div>
+        <div class="dy"><span class="d">25</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">26</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">27</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">28</span><span class="dots"><i style="background:#79C2D0"></i></span></div>
+        <div class="dy"><span class="d">29</span><span class="dots"><i style="background:#E0897E"></i></span></div>
+        <div class="dy"><span class="d">30</span><span class="dots"></span></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#79C2D0"></i>คาบ</span>
+        <span><i style="background:#E0897E"></i>กำหนดส่ง</span>
+        <span><i style="background:#74C6A4"></i>เสร็จแล้ว</span>
+      </div>
+      <div class="lbl"><span>พุธ 19 ส.ค.</span><span>2 รายการ</span></div>
+      <div class="item sched"><span class="rail"></span>
+        <div class="body"><div class="title">สถาปัตยกรรมเครือข่ายฯ</div>
+        <div class="meta">09:00–12:00 · E11-S604</div></div></div>
+      <div class="item sched"><span class="rail"></span>
+        <div class="body"><div class="title">เกษตรศาสตร์ฯ</div>
+        <div class="meta">15:00–17:00 · ONLINE</div></div></div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="cap"><span>S4 · คลัง</span><span>375px</span></div>
+    <div class="scr">
+      <h4>คลัง</h4>
+      <div class="areas" style="grid-template-columns:repeat(2,1fr);margin:.6rem 0 1rem">
+        <div class="area a1" style="min-height:70px;padding:.7rem">
+          <div class="nm" style="font-size:var(--s--1)">Class</div>
+          <div class="ct">8 วิชา</div></div>
+        <div class="area a2" style="min-height:70px;padding:.7rem">
+          <div class="nm" style="font-size:var(--s--1)">Hackathon</div>
+          <div class="ct">1 โปรเจกต์</div></div>
+        <div class="area a3" style="min-height:70px;padding:.7rem">
+          <div class="nm" style="font-size:var(--s--1)">Financial</div>
+          <div class="ct">ว่าง</div></div>
+        <div class="area a4" style="min-height:70px;padding:.7rem">
+          <div class="nm" style="font-size:var(--s--1)">Personal</div>
+          <div class="ct">ว่าง</div></div>
+      </div>
+      <div class="lbl" style="color:var(--brand)"><span>▾ Class</span><span>8</span></div>
+      <div class="item" style="border-top-color:var(--line-soft)"><span style="color:var(--faint);font-size:.8rem">›</span>
+        <div class="body"><div class="title">ดิสครีต</div>
+        <div class="meta">อ. 13:00 · พฤ. 09:00</div></div></div>
+      <div class="item"><span style="color:var(--brand);font-size:.8rem">⌄</span>
+        <div class="body"><div class="title">ซอฟต์แวร์</div>
+        <div class="meta">จ. 13:00 · อ. 09:00</div></div></div>
+      <div style="padding-left:1.2rem">
+        <div class="item due"><span class="rail"></span><span class="cb"></span>
+          <div class="body"><div class="title">แบบฝึกหัดบทที่ 4</div>
+          <div class="meta">22 ส.ค. 23:59</div></div></div>
+        <div class="item note"><span class="rail"></span>
+          <div class="body"><div class="title">อ.ชอบออกจากสไลด์</div></div></div>
+      </div>
+      <div class="lbl"><span>› Hackathon</span><span>1</span></div>
+    </div>
+  </div>
+
+</div>
+
+<h2 id="week"><span class="n">05</span>ปฏิทินสัปดาห์ที่กลับแกน</h2>
+<div class="rule">วัน = แกนตั้ง · เวลา = แกนนอน — ตรงข้ามกับ Google Calendar โดยตั้งใจ</div>
+<p class="sub">7 แถวสูงรวมราว 280px ลงจอมือถือได้ครบ ไม่ต้องตัดเหลือ 3 วัน ·
+  บล็อกวางแนวนอนจึงมีที่พอเขียนชื่อวิชาเต็มพร้อมเลขห้อง</p>
+
+<div class="wkwrap">
+  <div class="wk">
+    <div class="dd"></div>
+    <div class="hh">08</div><div class="hh">09</div><div class="hh">10</div><div class="hh">11</div>
+    <div class="hh">12</div><div class="hh">13</div><div class="hh">14</div><div class="hh">15</div>
+    <div class="hh">16</div><div class="hh">17</div><div class="hh">18</div><div class="hh">19</div>
+    <div class="hh">20</div>
+
+    <div class="dd">จ.</div>
+    <div class="c"></div><div class="c"></div>
+    <div class="blk" style="grid-column:4/span 2">สื่อสารสนเทศ</div>
+    <div class="c"></div>
+    <div class="blk" style="grid-column:7/span 2">ซอฟต์แวร์</div>
+    <div class="c"></div>
+    <div class="blk" style="grid-column:10/span 2">แมทวิศวะ</div>
+    <div class="c"></div><div class="c"></div><div class="c"></div>
+
+    <div class="dd">อ.</div>
+    <div class="c"></div>
+    <div class="blk" style="grid-column:3/span 3">ซอฟต์แวร์ แล็บ</div>
+    <div class="c"></div>
+    <div class="blk" style="grid-column:7/span 2">ดิสครีต</div>
+    <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
+    <div class="c"></div><div class="c"></div>
+
+    <div class="dd now">พ.</div>
+    <div class="c"></div>
+    <div class="blk" style="grid-column:3/span 3">เน็ตเวิร์ก</div>
+    <div class="c"></div><div class="c"></div>
+    <div class="blk" style="grid-column:9/span 2">เกษตร</div>
+    <div class="nowline" style="grid-column:9"></div>
+    <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
+
+    <div class="dd">พฤ.</div>
+    <div class="c"></div>
+    <div class="blk" style="grid-column:3/span 2">ดิสครีต</div>
+    <div class="c"></div><div class="c"></div>
+    <div class="blk" style="grid-column:7/span 3">ลูกทุ่ง</div>
+    <div class="blk" style="grid-column:10/span 3">สุขภาพ</div>
+    <div class="c"></div><div class="c"></div>
+
+    <div class="dd">ศ.</div>
+    <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
+    <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
+    <div class="blk" style="grid-column:10/span 2">แมทวิศวะ</div>
+    <div class="c"></div><div class="c"></div>
+
+    <div class="dd">ส.</div>
+    <div class="c" style="grid-column:2/span 13"></div>
+    <div class="dd">อา.</div>
+    <div class="c" style="grid-column:2/span 13"></div>
+  </div>
+</div>
+
+<table>
+  <tr><th>กฎ</th><th>ทำไม</th></tr>
+  <tr><td>แกนเวลาคำนวณจากข้อมูลจริง</td>
+      <td>เร็วสุด −1 ชม. ถึงช้าสุด +1 ชม. · ห้าม fix 00:00–24:00 ให้ต้องเลื่อนหา</td></tr>
+  <tr><td>คอลัมน์ละ 30 นาที</td>
+      <td>ตารางจริงมีคาบจบ 17:30 และ 19:30 ถ้าใช้คอลัมน์ละชั่วโมงบล็อกจะเพี้ยน</td></tr>
+  <tr><td>บล็อกชนกัน <b>แบ่งความสูง</b></td>
+      <td>ไม่ใช่แบ่งความกว้าง เพราะแกนนอนคือเวลา ถ้าแบ่งความกว้างเวลาจะโกหก</td></tr>
+  <tr><td>เส้นเวลาปัจจุบันเป็น<b>เส้นแนวตั้ง</b></td>
+      <td>ตามแกนที่กลับด้าน</td></tr>
+  <tr><td>สัปดาห์ว่างยังวาดตารางเปล่า</td>
+      <td>ตารางเปล่าคือคำตอบว่า "ว่างทั้งสัปดาห์"</td></tr>
+</table>
+
+<h2 id="row"><span class="n">06</span>องค์ประกอบของรายการหนึ่งแถว</h2>
+
+<table>
+  <tr><th>ส่วน</th><th>กติกา</th></tr>
+  <tr><td>แถบสีซ้าย</td><td>กว้าง 2px บอกชนิด</td></tr>
+  <tr><td>ช่องติ๊ก</td><td>มีเฉพาะ <b>task</b> เท่านั้น · reminder/shortnote/คาบเรียนไม่มี</td></tr>
+  <tr><td>หัวเรื่อง</td><td>บรรทัดเดียว ยาวเกินตัดด้วย …</td></tr>
+  <tr><td>บรรทัดข้อมูล</td><td>mono ตัวเล็กสีจาง · <b>ในหน้าวันนี้และปฏิทิน</b> ขึ้นต้นด้วยชื่อ project เสมอ · <b>ในหน้า project</b> ไม่ต้องซ้ำชื่อตัวเอง</td></tr>
+  <tr><td>ป้ายขวา</td><td>โผล่เฉพาะตอนผิดปกติ — เลยกำหนด · อีกไม่ถึงชั่วโมง · ยังไม่ตั้งวัน</td></tr>
+  <tr><td>เสร็จแล้ว</td><td>จาง 38% + ขีดฆ่า · ร่วงท้ายกลุ่ม <b>ไม่ซ่อน</b></td></tr>
+</table>
+
+<h3>รายการคั่นเส้น ไม่ใช่การ์ดแยกใบ</h3>
+<p>เลิกใส่กล่องซ้อนกล่อง ใช้เส้นคั่นบางแทน — ลดชั้นพื้นผิวจาก 3 เหลือ 2
+  ทำให้หน้าจอโปร่งขึ้นมากโดยไม่เสียการแบ่งกลุ่ม</p>
+
+<h2 id="principle"><span class="n">07</span>หลักการห้าข้อ</h2>
+<p class="sub">ใช้ตัดสินทุกครั้งที่ลังเล</p>
+
+<div class="cmp">
+  <div class="box good"><h5>1 · เปิดมาต้องตอบได้ทันทีว่าตอนนี้ต้องทำอะไร</h5>
+    <p>โครงสร้างสามชั้นเป็นวิธีเก็บ ไม่ใช่วิธีดู — หน้าแรกจึงเรียงตามเวลา ไม่ใช่ตามชั้น
+      และมี hero บอกคาบถัดไปพร้อมนับถอยหลัง</p></div>
+  <div class="box good"><h5>2 · สีมีความหมายเดียว ใช้ตรงกันทั้งระบบ</h5>
+    <p>ไม่มีสีไหนใช้เพื่อความสวย</p></div>
+  <div class="box good"><h5>3 · งานที่ทำบ่อยต้องกดน้อยที่สุด</h5>
+    <p>เพิ่มเร็วอยู่ทุกหน้า กด N บนคอม · ติ๊กเสร็จขยับทันทีไม่รอเซิร์ฟเวอร์</p></div>
+  <div class="box good"><h5>4 · ปฏิทินไว้ดู คลังไว้แก้</h5>
+    <p>ไม่พยายามให้ทุกหน้าทำได้ทุกอย่าง</p></div>
+  <div class="box good"><h5>5 · ไม่มีอะไรหายเงียบ ๆ</h5>
+    <p>ลบต้องยืนยัน · archive กู้คืนได้ · แถบเลิกทำค้าง 8 วินาที ·
+      Claude เขียนอะไรต้องบอก</p></div>
+</div>
+
+<div class="note">
+  ข้อ 5 ไม่ใช่แค่เรื่อง UI — บั๊กครึ่งหนึ่งที่เจอตอนสร้างระบบนี้เป็นประเภท
+  <b>"หายเงียบ ๆ ไม่มี error"</b> ทั้งนั้น เช่น CHECK ที่ปล่อยผ่านเพราะได้ผลเป็น NULL
+  หรือการเตือนที่ถูกทำเครื่องหมายว่าส่งแล้วทั้งที่ไม่มีเครื่องรับ
+</div>
+
+<h2><span class="n">08</span>มือถือกับเดสก์ท็อป</h2>
+<table>
+  <tr><th>เรื่อง</th><th>มือถือ (&lt; 768px)</th><th>เดสก์ท็อป</th></tr>
+  <tr><td>การนำทาง</td><td>แถบล่าง 4 ปุ่ม</td><td>แถบข้างซ้ายค้างไว้</td></tr>
+  <tr><td>ปฏิทินสัปดาห์</td><td>7 วันครบ · ปัดซ้ายขวาเลื่อนเวลา</td><td>เห็นช่วงเวลากว้างขึ้น</td></tr>
+  <tr><td>ปฏิทินเดือน</td><td>2 รายการต่อวัน</td><td>3 รายการต่อวัน</td></tr>
+  <tr><td>การ์ด Area</td><td>2 คอลัมน์</td><td>4 คอลัมน์</td></tr>
+  <tr><td>แผงรายละเอียด</td><td>เลื่อนขึ้นจากด้านล่าง</td><td>กล่องกลางจอ</td></tr>
+  <tr><td>เพิ่มเร็ว</td><td>ปุ่มลอยมุมขวาล่าง</td><td>กด <code>N</code></td></tr>
+</table>
+
+<h2><span class="n">09</span>คำที่ใช้บนหน้าจอ</h2>
+<table>
+  <tr><th>ใน DB</th><th>บนหน้าจอ</th></tr>
+  <tr><td><code>area</code></td><td>ด้าน</td></tr>
+  <tr><td><code>project</code></td><td>โปรเจกต์ · ใน Class เรียก "วิชา"</td></tr>
+  <tr><td><code>task</code></td><td>งาน</td></tr>
+  <tr><td><code>reminder</code></td><td>เตือน</td></tr>
+  <tr><td><code>shortnote</code></td><td>โน้ต</td></tr>
+  <tr><td><code>project_schedule</code></td><td>ช่วงเวลาประจำ · ใน Class เรียก "คาบเรียน"</td></tr>
+  <tr><td><code>archived</code></td><td>เก็บเข้าคลัง</td></tr>
+</table>
+
+<footer>
+  KeviN · เอกสารนี้คู่กับ <a href="SYSTEM.html">SYSTEM.html</a>
+  และ <a href="ARCHITECTURE.md">ARCHITECTURE.md</a><br>
+  token จริงอยู่ใน <code>doc/globals.css</code> · กฎฉบับเต็มอยู่ใน <code>doc/DESIGN.md</code> ·
+  เอกสารออกแบบรุ่นก่อนอยู่ใน <code>archive/</code>
+</footer>
+
+</div>
+</body>
+</html>
