@@ -16,6 +16,7 @@
 
 **ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย**
 `web/lib/layout.ts` (คาบชนกัน 7 เคส) · `web/lib/weeks.ts` (การซ้ำ 20 เคส) · `web/lib/parse.ts` (ตีความภาษาไทย 15 เคส)
+`web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง 16 เคส)
 
 **ความลับเก็บที่ไหน**
 VAPID private key → Supabase secrets · VAPID public key → Vercel env (`NEXT_PUBLIC_`)
@@ -55,6 +56,15 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 - **ปฏิทินสัปดาห์กลับแกน** — วัน = แกนตั้ง, เวลา = แกนนอน ไม่ใช่แบบ Google Calendar อย่าเผลอทำกลับ
 - **timestamptz เสมอ** ยกเว้น `project_schedules.start_time/end_time` ที่เป็น `time` เปล่า
 
+**สามข้อล่างนี้ถ้ารื้อจะพังแบบเงียบ ๆ** รายละเอียดอยู่ใน ARCHITECTURE.md หัวข้อ "ความเร็ว"
+
+- **ห้ามลบ `web/vercel.json`** — มันตรึงให้ฟังก์ชันรันที่โตเกียว region เดียวกับ Supabase
+  ถ้าหาย Vercel จะกลับไปใช้ค่าเริ่มต้นที่เวอร์จิเนีย แล้วทุก query ข้ามแปซิฟิกไปกลับ
+- **ใน server action ใช้ `currentUserId()` ไม่ใช่ `getUser()`** — `getUser()` ยิงเน็ตทุกครั้ง
+  และ `proxy.ts` ยืนยันตัวตนให้แล้วทุก request (แต่ `proxy.ts` เองยังต้องใช้ `getUser()` ต่อไป)
+- **เขียนข้อมูลต้องมี `.select()` แล้วนับแถวเสมอ** — `update` ที่ไม่โดนสักแถวรายงานว่าสำเร็จ
+  เคยทำให้ลากจัดลำดับดูเหมือนได้แต่ไม่ได้เขียนอะไรลง DB เลย (ดู `doc/TRAPS.md`)
+
 ## สิ่งที่ยังไม่ได้ทำ (งานค้างที่รู้แล้ว)
 
 > รายการนี้ตรงกับ [ARCHITECTURE.md §10](ARCHITECTURE.md#10--สิ่งที่ยังไม่ได้ทำ) — แก้ที่ไหนต้องแก้อีกที่ด้วย
@@ -65,3 +75,8 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 
 - Windows · เชลล์หลักเป็น PowerShell
 - git remote `origin` → https://github.com/nicetsu/KeviN (private)
+- `gh.exe` อยู่ที่ `C:\Users\LENOVO\AppData\Local\gh\` และอยู่ใน PATH ของผู้ใช้แล้ว
+  git credential helper ชี้มาที่ไฟล์นี้ — **ถ้าไฟล์หาย `git push` จะพัง**
+- `npm run dev --prefix web` เปิดที่ **พอร์ต 3001**
+- deploy ต้องใส่ `--scope nicetsuuu` ทุกครั้ง ไม่งั้น Vercel CLI ตอบ `Not authorized`
+  เพราะ scope เริ่มต้นเป็นบัญชีส่วนตัว แต่ project อยู่ใต้ team
