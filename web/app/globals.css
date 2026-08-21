@@ -25,6 +25,8 @@
   /* ---- สีชนิดข้อมูล · ลดความจัดลง ~45% จากสีอิ่มตัว ---- */
   --sched:      #79C2D0;   /* คาบเรียน  · 187° */
   --sched-soft: #16292E;
+  --event:      #D5BB6D;   /* กิจกรรม · 45° · ห่างจากม่วงแบรนด์ 152° */
+  --event-soft: #2D2716;
   --due:        #E0897E;   /* เส้นตาย/เตือน · 6° */
   --due-soft:   #2E1E1D;
   --task:       #74C6A4;   /* งาน · 157° */
@@ -85,6 +87,8 @@ body {
   border-radius: var(--r-pill);
   box-shadow: none;
   transition: box-shadow 0.18s ease, background 0.18s ease;
+  /* คลาสนี้ใช้กับทั้ง <button> และ <a> — <a> มีเส้นใต้เป็นค่าเริ่มต้น ต้องถอดเอง */
+  text-decoration: none;
 }
 .btn:hover {
   background: var(--brand-deep);
@@ -170,6 +174,7 @@ html, body { margin: 0; padding: 0; }
 .tag--late { color: var(--due); border-color: rgba(224, 137, 126, 0.32); }
 .tag--soon { color: var(--due); border-color: rgba(224, 137, 126, 0.32); }
 .tag--sched { color: var(--sched); border-color: rgba(121, 194, 208, 0.32); }
+.tag--event { color: var(--event); border-color: rgba(213, 187, 109, 0.32); }
 .tag--task { color: var(--task); border-color: rgba(116, 198, 164, 0.32); }
 .tag--brand { color: var(--brand); border-color: rgba(165, 148, 255, 0.38); }
 
@@ -328,6 +333,8 @@ html, body { margin: 0; padding: 0; }
   background: var(--sched-soft); color: var(--ink);
   z-index: 1;
 }
+/* กิจกรรมใช้สีของตัวเอง · คาบเรียนกับกิจกรรมอยู่บนแกนเดียวกันจึงต้องแยกออกด้วยตา */
+.wk__blk--event { border-left-color: var(--event); background: var(--event-soft); }
 .wk__blk b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
 .wk__blk span { color: var(--muted); font-family: var(--f-mono); font-size: 0.62rem; }
 
@@ -546,6 +553,8 @@ button.cb { cursor: pointer; }
 .row__body--tap {
   background: none; border: none; padding: 0; margin: 0; font: inherit;
   color: inherit; text-align: left; cursor: pointer; display: block;
+  /* เช่นเดียวกับ .btn — แถว event ใช้ <a> เพราะพาไปหน้าของตัวเอง ไม่ใช่เปิดแผง */
+  text-decoration: none;
 }
 .row__body--tap .row__title, .row__body--tap .row__meta { display: block; }
 .row__body--tap:hover .row__title { color: var(--brand); }
@@ -597,12 +606,81 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
   font-family: var(--f-mono); font-size: var(--s--2);
   letter-spacing: 0.08em; color: var(--brand);
 }
-.hero__big {
-  font-size: 2rem; font-weight: 600; line-height: 1;
-  letter-spacing: -0.045em; margin: 0.5rem 0 0.3rem;
+.hero__kick--live { color: var(--sched); }
+.hero--live { border-color: rgba(121, 194, 208, 0.35); }
+
+/* ชื่อขึ้นบรรทัดใหญ่ เวลาลงมาอยู่บรรทัดรอง (เจ้าของเคาะ 21 ส.ค.)
+   ทำให้ทุกสถานะใช้โครงเดียวกัน รวมงานข้ามวันที่ไม่มี "เวลาเริ่มของวันนี้"
+   ที่มีความหมาย · แลกกับการที่ตัวเลขเวลาไม่เด่นเท่าเดิม จึงยังใช้ฟอนต์ mono
+   สีตัวอักษรหลักไว้ ไม่ลดเป็นสีจาง */
+.hero__name {
+  font-size: 1.55rem; font-weight: 600; line-height: 1.18;
+  letter-spacing: -0.03em; margin: 0.45rem 0 0.3rem;
+  display: block; color: var(--ink); text-decoration: none;
 }
-.hero__big small { font-size: 0.9rem; font-weight: 400; color: var(--muted); letter-spacing: -0.01em; }
-.hero__sub { font-size: var(--s--1); color: var(--muted); }
+.hero__name--tap:hover { color: var(--brand); }
+.hero__time {
+  font-family: var(--f-mono); font-size: var(--s-0);
+  color: var(--ink); letter-spacing: -0.01em;
+}
+.hero__sub { font-size: var(--s--1); color: var(--muted); margin-top: 0.15rem; }
+
+/* ช่องเดียว สองความหมาย — "ถัดไป" ปกติ · "ทับกับ" เมื่อมันเบียดเข้ามาในเวลา
+   ของอันบน คือไปสองที่พร้อมกันไม่ได้ (doc/DECISIONS.md) */
+.hero__after {
+  display: flex; gap: 0.55rem; align-items: stretch;
+  margin-top: 0.75rem; padding-top: 0.7rem; border-top: 1px solid var(--line-soft);
+}
+.hero__afterBar { width: 2px; flex: none; background: var(--sched); border-radius: 0; }
+.hero__after--clash .hero__afterBar { background: var(--due); }
+.hero__afterBody {
+  display: flex; flex-direction: column; gap: 0.12rem;
+  color: inherit; text-decoration: none; min-width: 0;
+}
+.hero__afterTop { font-size: var(--s--1); color: var(--ink); }
+.hero__after--clash .hero__afterTop { color: var(--due); }
+.hero__afterSub { font-size: var(--s--1); color: var(--muted); }
+a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
+
+/* =====================================================================
+   หน้า event · pill ข้อมูล · เนื้อความ · กำหนดการ
+   ===================================================================== */
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+.pill {
+  font-size: var(--s--1); color: var(--muted);
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 0.2rem 0.7rem; white-space: nowrap;
+}
+.pill--time {
+  color: var(--sched); border-color: rgba(121, 194, 208, 0.32);
+  font-family: var(--f-mono); letter-spacing: 0.02em;
+}
+
+.prose {
+  font-size: var(--s--1); color: var(--muted); line-height: 1.75;
+  margin-bottom: 0.4rem; overflow-wrap: anywhere;
+}
+/* ม่วงคือสิ่งที่กดได้ · ลิงก์ในเนื้อความก็อยู่ใต้กฎเดียวกัน */
+.alink { color: var(--brand); text-decoration: none; border-bottom: 1px solid rgba(165, 148, 255, 0.4); }
+.alink:hover { border-bottom-color: var(--brand); }
+
+/* กำหนดการเป็นรายการที่อ่าน ไม่ใช่วัตถุบนปฏิทิน จึงเป็นสองคอลัมน์เรียบ ๆ
+   ไม่ใช่แถวแบบ .row ที่มีแถบสีและปุ่ม — ทั้งบล็อกเป็นของ event ใบเดียวอยู่แล้ว */
+.agenda { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.agenda__row { display: contents; }
+.agenda__time {
+  font-family: var(--f-mono); font-size: var(--s--1); color: var(--sched);
+  white-space: nowrap; padding: 0.5rem 0.8rem 0.5rem 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.agenda__title {
+  font-size: var(--s-0); color: var(--ink); padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.agenda__day {
+  font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.08em;
+  color: var(--faint); margin: 0.85rem 0 0.15rem;
+}
 
 /* =====================================================================
    คลัง · dropdown สองชั้น (ux.html S4)

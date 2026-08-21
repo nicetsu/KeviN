@@ -5,8 +5,8 @@ import { addDays, thaiDateLabel } from '@/lib/time'
 
 const DOW = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา']
 
-/** สามชนิดที่ลงปฏิทินได้ · โน้ตกับงานที่ไม่กำหนดวันไม่มีวันให้ลง */
-export type EntryKind = 'class' | 'due' | 'done'
+/** สี่ชนิดที่ลงปฏิทินได้ · โน้ตกับงานที่ไม่กำหนดวันไม่มีวันให้ลง */
+export type EntryKind = 'class' | 'event' | 'due' | 'done'
 
 export type DayEntry = {
   kind: EntryKind
@@ -18,6 +18,7 @@ export type DayEntry = {
 
 const COLOR: Record<EntryKind, string> = {
   class: 'var(--sched)',
+  event: 'var(--event)',
   due: 'var(--due)',
   done: 'var(--task)',
 }
@@ -54,7 +55,7 @@ export default function MonthGrid({
   const entriesOf = (d: string) => byDay[d] ?? []
   const dotKinds = (d: string): EntryKind[] => {
     const set = new Set(entriesOf(d).map((e) => e.kind))
-    return (['class', 'due', 'done'] as EntryKind[]).filter((k) => set.has(k))
+    return (['class', 'event', 'due', 'done'] as EntryKind[]).filter((k) => set.has(k))
   }
 
   const chosen = entriesOf(picked)
@@ -96,6 +97,7 @@ export default function MonthGrid({
 
       <div className="legend">
         <span><i style={{ background: COLOR.class }} />คาบ</span>
+        <span><i style={{ background: COLOR.event }} />กิจกรรม</span>
         <span><i style={{ background: COLOR.due }} />กำหนดส่ง</span>
         <span><i style={{ background: COLOR.done }} />งานที่เสร็จแล้ว</span>
       </div>

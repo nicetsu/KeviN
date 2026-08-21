@@ -10,6 +10,8 @@ function refresh() {
   revalidatePath('/')
   revalidatePath('/library')
   revalidatePath('/calendar')
+  // งานที่ผูกกับกิจกรรมโผล่ในหน้า event ด้วย · layout ครอบทุก eventId ใต้ project
+  revalidatePath('/project/[id]/event/[eventId]', 'page')
 }
 
 /**
@@ -84,6 +86,15 @@ export type ItemDraft = {
   body?: string | null
   /** ISO string · task ใช้ due_at · reminder ใช้ remind_at */
   at?: string | null
+  /**
+   * ผูกกับกิจกรรม · ใส่มาจากหน้า event เท่านั้น
+   *
+   * ⚠️ **ละคีย์นี้ไว้ = ไม่แตะการผูกเดิม** ส่วนใส่ `null` = ปลดการผูก
+   *    ที่ต้องแยกสองกรณีเพราะแผงแก้ไข (S7) สร้าง draft โดยไม่รู้จัก event เลย
+   *    ถ้า shape() ใส่ `event_id: null` ลงไปทุกครั้ง การกดแก้ชื่องานเฉย ๆ
+   *    จะปลดงานออกจากกิจกรรมไปเงียบ ๆ
+   */
+  event_id?: string | null
 }
 
 /**
@@ -96,6 +107,8 @@ function shape(d: ItemDraft) {
     type: d.type,
     title: d.title.trim(),
     body: d.body?.trim() || null,
+    // มีคีย์อยู่จริงเท่านั้นจึงเขียนทับ (ดูคำเตือนใน ItemDraft)
+    ...('event_id' in d ? { event_id: d.event_id ?? null } : {}),
   }
   if (d.type === 'reminder') return { ...base, remind_at: d.at, due_at: null }
   if (d.type === 'task') return { ...base, due_at: d.at || null, remind_at: null }

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { describe, type Slot } from '@/lib/schedule'
 import { bangkokTime, thaiDateLabel } from '@/lib/time'
+import { ENTRY_COLOR } from '@/lib/calendar'
 import ItemList, { type Row } from '@/components/ItemList'
 import ProjectMenu from '@/components/ProjectMenu'
 
@@ -17,6 +18,16 @@ type Item = {
   remind_at: string | null
   done_at: string | null
   sort_order: number
+  event_id: string | null
+}
+
+type EventRow = {
+  id: string
+  title: string
+  starts_at: string
+  ends_at: string
+  location: string | null
+  label: string | null
 }
 
 /** "22 ส.ค. 14:30" — วันไทยแบบสั้นพร้อมเวลา */
@@ -24,6 +35,17 @@ function stamp(iso: string) {
   const shifted = new Date(new Date(iso).getTime() + 7 * 3600 * 1000)
   const key = shifted.toISOString().slice(0, 10)
   return `${thaiDateLabel(key).split(' ').slice(1).join(' ')} ${bangkokTime(iso)}`
+}
+
+/** วันไทย YYYY-MM-DD ของจุดเวลาหนึ่ง */
+function dayKeyOf(iso: string) {
+  return new Date(new Date(iso).getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10)
+}
+
+/** "22 ส.ค. 09:30 – 12:30" · ข้ามวันจะบอกวันจบด้วย "5 ก.ย. 20:00 – 7 ก.ย. 09:00" */
+function eventStamp(e: EventRow) {
+  const sameDay = dayKeyOf(e.starts_at) === dayKeyOf(e.ends_at)
+  return `${stamp(e.starts_at)} – ${sameDay ? bangkokTime(e.ends_at) : stamp(e.ends_at)}`
 }
 
 export default async function ProjectPage({
@@ -34,7 +56,7 @@ export default async function ProjectPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [projRes, schedRes, itemRes] = await Promise.all([
+  const [projRes, schedRes, itemRes, eventRes] = await Promise.all([
     supabase
       .from('projects')
       .select('id, name, description, status, archived_at, areas(name)')
@@ -46,9 +68,15 @@ export default async function ProjectPage({
       .eq('project_id', id),
     supabase
       .from('items')
-      .select('id, type, title, body, due_at, remind_at, done_at, sort_order')
+      .select('id, type, title, body, due_at, remind_at, done_at, sort_order, event_id')
       .eq('project_id', id)
       .is('archived_at', null),
+    supabase
+      .from('events')
+      .select('id, title, starts_at, ends_at, location, label')
+      .eq('project_id', id)
+      .is('archived_at', null)
+      .order('starts_at'),
   ])
 
   if (projRes.error) {
@@ -69,6 +97,14 @@ export default async function ProjectPage({
   }
   const slots = (schedRes.data ?? []) as Slot[]
   const items = (itemRes.data ?? []) as Item[]
+  const events = (eventRes.data ?? []) as EventRow[]
+
+  // ป้ายบอกว่างานชิ้นนี้เป็นของกิจกรรมไหน · null = ไม่ได้ผูกกับกิจกรรมใด
+  const eventName = new Map(events.map((e) => [e.id, e.title]))
+  const chip = (i: Item): Row['tag'] =>
+    i.event_id && eventName.has(i.event_id)
+      ? { text: eventName.get(i.event_id)!, kind: 'event' }
+      : null
 
   const tasks = items.filter((i) => i.type === 'task')
   const reminders = items.filter((i) => i.type === 'reminder')
@@ -109,6 +145,30 @@ export default async function ProjectPage({
         </div>
       </div>
 
+      {/*
+        กิจกรรมมาก่อนงาน เพราะมันคือ "ต้องไปที่ไหนตอนไหน" ซึ่งเปลี่ยนไม่ได้
+        ส่วนงานเป็นสิ่งที่จัดเวลาเองได้ · เรียงตาม starts_at เสมอ ลากไม่ได้
+      */}
+      <Group title="กิจกรรม" count={events.length || null}>
+        <ItemList
+          rows={events.map(
+            (e): Row => ({
+              id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้ เก็บเข้าคลังจากหน้าของมันเอง
+              color: ENTRY_COLOR.event,
+              title: e.title,
+              meta: [eventStamp(e), e.location, e.label].filter(Boolean).join(' · '),
+              done: false,
+              checkable: false,
+              tag: null,
+              href: `/project/${id}/event/${e.id}`,
+            })
+          )}
+        />
+      </Group>
+      <Link href={`/project/${id}/event/new`} className="btn btn--ghost add-slot">
+        + กิจกรรมใหม่
+      </Link>
+
       <Group title="งาน" count={tasks.length ? `${doneCount} / ${tasks.length}` : null}>
         <ItemList
           rows={tasks.map(
@@ -123,6 +183,7 @@ export default async function ProjectPage({
                   : 'ยังไม่กำหนดวัน',
               done: t.done_at !== null,
               checkable: true,
+              tag: chip(t),
               // due_at มาก่อน sort_order ใน sink() งานที่มีวันกำหนดจึงลากไม่ได้
               movable: t.done_at === null && t.due_at === null,
               panel: {
@@ -145,6 +206,7 @@ export default async function ProjectPage({
               meta: r.remind_at ? stamp(r.remind_at) : '',
               done: false,
               checkable: false,
+              tag: chip(r),
               panel: {
                 id: r.id, projectId: id, type: 'reminder' as const, title: r.title,
                 body: r.body, at: r.remind_at, done: false,
@@ -165,6 +227,7 @@ export default async function ProjectPage({
               meta: n.body ?? '',
               done: false,
               checkable: false,
+              tag: chip(n),
               movable: true,
               panel: {
                 id: n.id, projectId: id, type: 'shortnote' as const, title: n.title,

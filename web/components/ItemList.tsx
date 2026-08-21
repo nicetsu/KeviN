@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useRef, useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toggleDone, archiveItem, restoreItem, reorderItems } from '@/app/actions/items'
 import ItemPanel, { type PanelItem } from './ItemPanel'
@@ -14,9 +15,15 @@ export type Row = {
   done: boolean
   /** ช่องติ๊กมีเฉพาะ task (doc/DESIGN.md) */
   checkable: boolean
-  tag?: { text: string; kind: 'late' | 'soon' } | null
+  /** ป้ายขวาสุด · `event` ใช้บอกว่างานชิ้นนี้เป็นของกิจกรรมไหน */
+  tag?: { text: string; kind: 'late' | 'soon' | 'sched' | 'event' } | null
   /** ข้อมูลสำหรับแผงรายละเอียด · ไม่มี = แถวนี้เปิดแผงไม่ได้ (เช่น คาบเรียน) */
   panel?: PanelItem
+  /**
+   * พาไปหน้าอื่นแทนการเปิดแผง — ใช้กับ event ที่มีหน้าของตัวเอง
+   * `panel` มาก่อนถ้าใส่มาทั้งคู่ เพราะแผงคือการแวะดูที่ไม่ทิ้งตำแหน่งเลื่อน
+   */
+  href?: string | null
   /**
    * ลากจัดลำดับได้ไหม — ตั้ง true เฉพาะแถวที่ `sort_order` เป็นตัวตัดสินลำดับจริง
    * ถ้าตั้งกับแถวที่เรียงด้วย due_at/remind_at ลากแล้วจะเด้งกลับตอนโหลดใหม่
@@ -228,6 +235,12 @@ export default function ItemList({ rows }: { rows: Row[] }) {
                   <span className="row__title">{r.title}</span>
                   {r.meta && <span className="row__meta">{r.meta}</span>}
                 </button>
+              ) : r.href ? (
+                <Link className="row__body row__body--tap" href={r.href}
+                  aria-label={`เปิด ${r.title}`}>
+                  <span className="row__title">{r.title}</span>
+                  {r.meta && <span className="row__meta">{r.meta}</span>}
+                </Link>
               ) : (
                 <div className="row__body">
                   <div className="row__title">{r.title}</div>

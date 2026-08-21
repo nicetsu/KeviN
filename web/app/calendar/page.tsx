@@ -2,9 +2,10 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import {
   bangkokToday, mondayOf, addDays, addMonths,
-  thaiMonthLabel, thaiRangeLabel, bangkokTime, clockLabel,
+  thaiMonthLabel, thaiRangeLabel, bangkokTime,
 } from '@/lib/time'
-import WeekGrid, { type Occ } from './WeekGrid'
+import { spanLabel, type CalendarEntry } from '@/lib/calendar'
+import WeekGrid from './WeekGrid'
 import MonthGrid, { type DayEntry } from './MonthGrid'
 
 export const dynamic = 'force-dynamic'
@@ -44,9 +45,10 @@ export default async function CalendarPage({
 
   const supabase = await createClient()
 
-  const [occRes, itemRes] = await Promise.all([
-    supabase.rpc('schedule_occurrences', { p_from: rangeFrom, p_to: rangeTo }),
-    // โหมดเดือนต้องมีจุดของงานและการเตือนด้วย ไม่ใช่แค่คาบเรียน
+  const [entryRes, itemRes] = await Promise.all([
+    // คาบเรียน + event มาจากฟังก์ชันเดียว · event ข้ามคืนถูกหั่นเป็นบล็อกรายวันให้แล้ว
+    supabase.rpc('calendar_entries', { p_from: rangeFrom, p_to: rangeTo }),
+    // โหมดเดือนต้องมีจุดของงานและการเตือนด้วย ไม่ใช่แค่ช่วงเวลาที่ถูกจอง
     mode === 'month'
       ? supabase
           .from('items')
@@ -60,8 +62,8 @@ export default async function CalendarPage({
       : Promise.resolve({ data: [], error: null }),
   ])
 
-  const error = occRes.error ?? itemRes.error
-  const occurrences = (occRes.data ?? []) as Occ[]
+  const error = entryRes.error ?? itemRes.error
+  const entries = (entryRes.data ?? []) as CalendarEntry[]
   const items = (itemRes.data ?? []) as unknown as Item[]
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i))
 
@@ -72,12 +74,17 @@ export default async function CalendarPage({
   }
 
   if (mode === 'month') {
-    for (const o of occurrences) {
-      push(o.occurs_on, {
-        kind: 'class',
-        title: o.project_name,
-        time: `${clockLabel(o.start_time)}–${clockLabel(o.end_time)}`,
-        detail: [o.location, o.label].filter(Boolean).join(' · '),
+    for (const e of entries) {
+      push(e.occurs_on, {
+        kind: e.kind,
+        title: e.title,
+        time: spanLabel(e),
+        // คาบเรียนใช้ชื่อ project เป็นชื่อบล็อกอยู่แล้ว บรรทัดล่างจึงเป็นห้อง/ชนิดคาบ
+        // ส่วน event มีชื่อของตัวเอง ต้องบอกด้วยว่าเป็นของงานไหน
+        detail: (e.kind === 'event'
+          ? [e.project_name, e.location]
+          : [e.location, e.label]
+        ).filter(Boolean).join(' · '),
       })
     }
     for (const it of items) {
@@ -122,7 +129,7 @@ export default async function CalendarPage({
         <p className="alert" role="alert">โหลดปฏิทินไม่สำเร็จ · {error.message}</p>
       ) : mode === 'week' ? (
         <>
-          <WeekGrid occurrences={occurrences} days={days} />
+          <WeekGrid entries={entries} days={days} />
           <p className="none" style={{ marginTop: '1rem' }}>ปฏิทินไว้ดู · แก้ที่หน้าคลัง</p>
         </>
       ) : (

@@ -1,17 +1,7 @@
 import { hourOf, bangkokNow } from '@/lib/time'
 import { dayAbbr } from '@/lib/schedule'
 import { layoutDay } from '@/lib/layout'
-
-export type Occ = {
-  schedule_id: string
-  project_name: string
-  occurs_on: string
-  start_time: string
-  end_time: string
-  location: string | null
-  /** "บรรยาย" / "ปฏิบัติ" / "ติว" · ใช้ในรายละเอียดของโหมดเดือน */
-  label: string | null
-}
+import { entryKey, spanLabel, type CalendarEntry } from '@/lib/calendar'
 
 const SLOT = 0.5 // คอลัมน์ละ 30 นาที — ตารางจริงมีคาบจบ 17:30 และ 19:30
 
@@ -20,26 +10,33 @@ const SLOT = 0.5 // คอลัมน์ละ 30 นาที — ตารา
  *
  * แกนเวลาคำนวณจากข้อมูลจริง เร็วสุด −1 ชม. ถึงช้าสุด +1 ชม.
  * ห้าม fix 00:00–24:00 ให้ต้องเลื่อนหา
+ *
+ * รับทั้งคาบเรียนและ event ในรูปเดียวกันจาก `calendar_entries()` — เข้าตัวจัดบล็อก
+ * ชนกันตัวเดียวกัน แต่**คนละสี** เพราะบนแกนเดียวกันต้องแยกออกด้วยตาว่าอันไหนเป็นอะไร
  */
 export default function WeekGrid({
-  occurrences,
+  entries,
   days,
 }: {
-  occurrences: Occ[]
+  entries: CalendarEntry[]
   days: string[] // 7 วัน เริ่มวันจันทร์
 }) {
   const now = bangkokNow()
 
-  if (occurrences.length === 0) {
+  if (entries.length === 0) {
     // สัปดาห์ที่ไม่มีอะไร ยังวาดตารางเปล่าไว้ —
     // เพราะตารางเปล่าคือคำตอบว่า "ว่างทั้งสัปดาห์" (doc/DESIGN.md)
     return <EmptyWeek days={days} today={now.dateKey} />
   }
 
-  const starts = occurrences.map((o) => hourOf(o.start_time))
-  const ends = occurrences.map((o) => hourOf(o.end_time))
-  const from = Math.floor(Math.min(...starts) - 1)
-  const to = Math.ceil(Math.max(...ends) + 1)
+  const starts = entries.map((e) => hourOf(e.start_time))
+  const ends = entries.map((e) => hourOf(e.end_time)) // "24:00:00" -> 24
+
+  // ยังเผื่อหัวท้ายชั่วโมงละหนึ่งเหมือนเดิม แต่ต้องหนีบไว้ในกรอบวันจริง —
+  // event ข้ามคืนถูกหั่นให้เริ่ม 00:00 และจบ 24:00 ซึ่งถ้าเผื่อต่อจะได้แกน
+  // −1 ถึง 25 แล้วหัวคอลัมน์จะขึ้นเลขติดลบ
+  const from = Math.max(0, Math.floor(Math.min(...starts) - 1))
+  const to = Math.min(24, Math.ceil(Math.max(...ends) + 1))
   const cols = Math.round((to - from) / SLOT)
 
   const colOf = (h: number) => Math.round((h - from) / SLOT) + 2 // +1 ชื่อวัน, +1 ฐาน 1
@@ -49,9 +46,9 @@ export default function WeekGrid({
   // ตรรกะอยู่ใน lib/layout.ts และมีเทสต์ครอบเคสชนต่อเนื่องไว้แล้ว
   const laid = days.flatMap((day, dow) =>
     layoutDay(
-      occurrences.filter((o) => o.occurs_on === day),
-      (o) => ({ start: hourOf(o.start_time), end: hourOf(o.end_time) })
-    ).map((p) => ({ occ: p.item, dow, lane: p.lane, of: p.of }))
+      entries.filter((e) => e.occurs_on === day),
+      (e) => ({ start: hourOf(e.start_time), end: hourOf(e.end_time) })
+    ).map((p) => ({ entry: p.item, dow, lane: p.lane, of: p.of }))
   )
 
   return (
@@ -91,25 +88,31 @@ export default function WeekGrid({
           ))
         )}
 
-        {laid.map(({ occ, dow, lane, of }) => {
-          const s = hourOf(occ.start_time)
-          const e = hourOf(occ.end_time)
+        {laid.map(({ entry, dow, lane, of }) => {
+          const s = hourOf(entry.start_time)
+          const e = hourOf(entry.end_time)
           const span = Math.max(1, Math.round((e - s) / SLOT))
           const h = 40 / of
           return (
             <div
-              key={`${occ.schedule_id}-${occ.occurs_on}`}
-              className="wk__blk"
+              key={entryKey(entry)}
+              className={`wk__blk${entry.kind === 'event' ? ' wk__blk--event' : ''}`}
               style={{
                 gridRow: dow + 2,
                 gridColumn: `${colOf(s)} / span ${span}`,
                 height: `${h}px`,
                 marginTop: `${h * lane}px`,
               }}
-              title={`${occ.project_name} ${occ.start_time.slice(0, 5)}–${occ.end_time.slice(0, 5)}${occ.location ? ' · ' + occ.location : ''}`}
+              title={[
+                `${entry.title} ${spanLabel(entry)}`,
+                entry.kind === 'event' ? entry.project_name : null,
+                entry.location,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             >
-              <b>{occ.project_name}</b>
-              {of === 1 && occ.location && <span>{occ.location}</span>}
+              <b>{entry.title}</b>
+              {of === 1 && entry.location && <span>{entry.location}</span>}
             </div>
           )
         })}

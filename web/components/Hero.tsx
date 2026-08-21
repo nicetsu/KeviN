@@ -1,0 +1,139 @@
+'use client'
+
+import { useSyncExternalStore } from 'react'
+import Link from 'next/link'
+
+export type HeroEntry = {
+  kind: 'class' | 'event'
+  /** คาบเรียนใช้ชื่อวิชา · event ใช้ชื่อของตัวเอง */
+  title: string
+  /** บรรทัดล่างสุด — วิชา/สถานที่/ชนิด รวมมาแล้ว */
+  sub: string
+  /** บรรทัดเวลา "09:30 – 12:30" หรือ "เสาร์ 08:00 – อาทิตย์ 17:00" */
+  spanText: string
+  startsAt: string
+  endsAt: string
+  /** null = อยู่ในวันนี้ · ไม่ null = คนละวัน เช่น "พรุ่งนี้" */
+  dayLabel: string | null
+  /** "ถึงพรุ่งนี้ 17:00" — เฉพาะงานที่ยาวข้ามวัน ไม่งั้นเป็น null */
+  untilText: string | null
+  href: string | null
+}
+
+export type HeroInfo = {
+  main: HeroEntry
+  /**
+   * อันถัดไปที่จะเริ่ม · `clash` = เริ่มก่อนอันบนจบ คือไปสองที่พร้อมกันไม่ได้
+   *
+   * ช่องนี้มีช่องเดียวและมีสองความหมาย เพราะมันคือสิ่งเดียวกัน — สิ่งที่จะเริ่มถัดไป
+   * ต่างแค่ว่ามันเบียดเข้ามาในเวลาของอันบนหรือไม่
+   */
+  after: { clash: boolean; when: string; title: string; detail: string; href: string | null } | null
+}
+
+const TICK_MS = 30_000
+
+/**
+ * เวลาปัจจุบันฝั่งเบราว์เซอร์ · null ตอน render บนเซิร์ฟเวอร์
+ *
+ * ใช้ `useSyncExternalStore` ไม่ใช่ `useEffect` + `setState` เพราะนาฬิกาคือ
+ * "แหล่งข้อมูลภายนอก" ที่ React ควรสมัครรับ ไม่ใช่สถานะที่เราไปตั้งเองใน effect
+ * (โค้ดเดิมทำแบบหลัง แล้ว eslint จับว่าเป็น cascading render มาตลอด)
+ *
+ * ⚠️ getSnapshot ต้องคืนค่าเดิมเป๊ะ ๆ ระหว่างสองจังหวะติ๊ก ไม่งั้น React
+ *    จะ re-render ไม่รู้จบ · จึงปัดลงเป็นช่วงละ 30 วินาที ซึ่งละเอียดพอสำหรับ
+ *    การนับถอยหลังเป็นนาทีอยู่แล้ว
+ */
+function useNow(): number | null {
+  return useSyncExternalStore(
+    (onChange) => {
+      const t = setInterval(onChange, TICK_MS)
+      return () => clearInterval(t)
+    },
+    () => Math.floor(Date.now() / TICK_MS) * TICK_MS,
+    () => null
+  )
+}
+
+/**
+ * hero บนหน้าวันนี้ · ตอบหลักการ UX ข้อ 1 —
+ * เปิดมาต้องรู้ทันทีว่าตอนนี้ต้องทำอะไร โดยไม่ต้องกวาดตาหาเอง
+ *
+ * ชื่ออยู่บรรทัดใหญ่ เวลาลงมาอยู่บรรทัดรอง (เจ้าของเคาะ 21 ส.ค.) — ทำให้ทุกสถานะ
+ * ใช้โครงเดียวกันหมด รวมถึงงานข้ามวันที่ไม่มี "เวลาเริ่มของวันนี้" ที่มีความหมาย
+ *
+ * นับถอยหลังฝั่งเบราว์เซอร์ เพราะถ้าเรนเดอร์ฝั่งเซิร์ฟเวอร์อย่างเดียว
+ * ตัวเลขจะค้างอยู่ที่ตอนโหลดหน้า แล้วโกหกทันทีที่ผ่านไปหนึ่งนาที
+ */
+export default function Hero({ info }: { info: HeroInfo }) {
+  const { main, after } = info
+  const now = useNow()
+
+  const start = new Date(main.startsAt).getTime()
+  const end = new Date(main.endsAt).getTime()
+  const isEvent = main.kind === 'event'
+
+  const NEXT = isEvent ? 'ถัดไป' : 'คาบถัดไป'
+  const NOW = isEvent ? 'กำลังเกิดขึ้น' : 'กำลังเรียนอยู่'
+
+  let kicker = NEXT
+  let live = false
+
+  if (main.dayLabel) {
+    // คนละวันแล้ว — นับถอยหลังเป็นชั่วโมงไม่ช่วยอะไร บอกชื่อวันตรง ๆ ชัดกว่า
+    kicker = `${NEXT} · ${main.dayLabel}`
+  } else if (now !== null) {
+    if (now >= start && now < end) {
+      live = true
+      // งานข้ามวันที่เหลืออีกเป็นสิบชั่วโมง นับเป็นนาทีแล้วอ่านไม่รู้เรื่อง
+      kicker = main.untilText ? `${NOW} · ${main.untilText}` : `${NOW} · เหลืออีก ${gap(end - now)}`
+    } else if (now < start) {
+      kicker = `${NEXT} · อีก ${gap(start - now)}`
+    }
+  }
+
+  return (
+    <div className={`hero${live ? ' hero--live' : ''}`}>
+      <div className={`hero__kick${live ? ' hero__kick--live' : ''}`}>{kicker}</div>
+
+      {main.href ? (
+        <Link href={main.href} className="hero__name hero__name--tap">{main.title}</Link>
+      ) : (
+        <div className="hero__name">{main.title}</div>
+      )}
+
+      <div className="hero__time">{main.spanText}</div>
+      {main.sub && <div className="hero__sub">{main.sub}</div>}
+
+      {after && <AfterLine {...after} />}
+    </div>
+  )
+}
+
+function AfterLine({
+  clash, when, title, detail, href,
+}: NonNullable<HeroInfo['after']>) {
+  const body = (
+    <>
+      <span className="hero__afterTop">
+        {clash ? 'ทับกับ' : 'ถัดไป'} {when} · {title}
+      </span>
+      {detail && <span className="hero__afterSub">{detail}</span>}
+    </>
+  )
+
+  return (
+    <div className={`hero__after${clash ? ' hero__after--clash' : ''}`}>
+      <span className="hero__afterBar" />
+      {href ? <Link href={href} className="hero__afterBody">{body}</Link>
+            : <span className="hero__afterBody">{body}</span>}
+    </div>
+  )
+}
+
+/** "1 ชม. 53 นาที" · "40 นาที" */
+function gap(ms: number) {
+  const mins = Math.round(ms / 60000)
+  if (mins < 60) return `${mins} นาที`
+  return `${Math.floor(mins / 60)} ชม. ${mins % 60} นาที`
+}
