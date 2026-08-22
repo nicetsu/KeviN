@@ -13,6 +13,7 @@
   --ink:#F1F0F7; --muted:#A5A2B8; --faint:#87849D;
   --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
   --sched:#79C2D0; --sched-soft:#16292E;
+  --event:#D5BB6D; --event-soft:#2D2716;
   --due:#E0897E; --due-soft:#2E1E1D;
   --task:#74C6A4; --task-soft:#172A24;
   --note:#8E88A8; --note-soft:#1B1A28;
@@ -92,6 +93,9 @@ td{padding:.6rem .6rem .6rem 0;border-bottom:1px solid var(--line-soft);vertical
 .item.sched .rail{background:var(--sched)}
 .item.due .rail{background:var(--due)}
 .item.note .rail{background:var(--note)}
+.item.event .rail{background:var(--event)}
+.item.skip{opacity:.42}
+.item.skip .title{text-decoration:line-through}
 .item.done{opacity:.38}
 .item.done .title{text-decoration:line-through}
 .item .body{flex:1;min-width:0}
@@ -106,9 +110,25 @@ td{padding:.6rem .6rem .6rem 0;border-bottom:1px solid var(--line-soft);vertical
 .hero{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-card);
   padding:.85rem .95rem;margin:.4rem 0 .3rem}
 .hero .k{font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand);letter-spacing:.06em}
+.hero .k.live{color:var(--sched)}
 .hero .big{font-size:1.7rem;font-weight:600;line-height:1;letter-spacing:-.045em;margin:.4rem 0 .25rem}
 .hero .big small{font-size:.78rem;font-weight:400;color:var(--muted);letter-spacing:-.01em}
+/* ชื่ออยู่บรรทัดใหญ่ เวลาลงบรรทัดรอง (เคาะ 21 ส.ค. 2026) */
+.hero .nm{font-size:1.3rem;font-weight:600;line-height:1.18;letter-spacing:-.03em;margin:.35rem 0 .2rem}
+.hero .tm{font-family:var(--f-mono);font-size:var(--s-0);color:var(--ink)}
 .hero .s{font-size:var(--s--1);color:var(--muted)}
+.hero .after{display:flex;gap:.5rem;margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--line-soft)}
+.hero .after i{width:2px;align-self:stretch;background:var(--sched);flex:none}
+.hero .after.clash i{background:var(--due)}
+.hero .after .t{font-size:var(--s--1)}
+.hero .after.clash .t{color:var(--due)}
+.hero .after .m{font-size:var(--s--1);color:var(--muted)}
+.tagbtn{font-family:var(--f-mono);font-size:var(--s--2);padding:.02rem .55rem;
+  border-radius:var(--r-pill);border:1px solid rgba(165,148,255,.38);color:var(--brand);
+  background:none;flex:none;align-self:center;white-space:nowrap}
+.agn{display:grid;grid-template-columns:auto 1fr;gap:0 .7rem;font-size:var(--s--1)}
+.agn>div{padding:.35rem 0;border-bottom:1px solid var(--line-soft)}
+.agn .t{font-family:var(--f-mono);color:var(--sched);white-space:nowrap}
 
 /* ปฏิทินเดือน */
 .mo{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:.5rem}
@@ -140,6 +160,9 @@ td{padding:.6rem .6rem .6rem 0;border-bottom:1px solid var(--line-soft);vertical
 .wk .blk{align-self:center;margin:3px 3px 3px 4px;border-radius:7px;padding:.1rem .4rem;
   font-size:.64rem;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
   background:var(--sched-soft);border-left:2px solid var(--sched);color:var(--ink)}
+.wk .blk.ev{background:var(--event-soft);border-left-color:var(--event)}
+.wk .blk.skip{opacity:.4;text-decoration:line-through}
+.wk .blk.trim{border-left-style:dashed;border-left-width:3px}
 .wk .nowline{width:2px;background:var(--brand);justify-self:start;margin-left:-1px}
 
 .cmp{display:grid;gap:1.1rem;margin:1.5rem 0}
@@ -170,6 +193,7 @@ a{color:var(--brand)}
     <a href="#color">จานสี</a>
     <a href="#area">Area gradient</a>
     <a href="#screens">หน้าจอ</a>
+    <a href="#events">กิจกรรมและการตัดทอน</a>
     <a href="#week">ปฏิทินกลับแกน</a>
     <a href="#row">องค์ประกอบรายการ</a>
     <a href="#principle">หลักการห้าข้อ</a>
@@ -195,19 +219,32 @@ a{color:var(--brand)}
 
 <h2 id="color"><span class="n">02</span>จานสี</h2>
 <p class="sub">องศาที่กำกับคือระยะบนวงล้อสี — ม่วงอยู่ที่ 265°
-  ทั้งสามสีข้อมูลห่างออกไปอย่างน้อย 78° จึงแยกออกได้แม้บนบล็อกเล็ก ๆ ในปฏิทิน</p>
+  ทุกสีข้อมูลห่างออกไปอย่างน้อย 78° จึงแยกออกได้แม้บนบล็อกเล็ก ๆ ในปฏิทิน</p>
 
 <div class="sw-grid">
   <div class="sw"><div class="chip" style="background:#A594FF"></div>
     <div class="role">แบรนด์ · กดได้</div><div class="hex">#A594FF · 265°</div></div>
   <div class="sw"><div class="chip" style="background:#79C2D0"></div>
     <div class="role">คาบเรียน</div><div class="hex">#79C2D0 · 187°</div></div>
+  <div class="sw"><div class="chip" style="background:#D5BB6D"></div>
+    <div class="role">กิจกรรม</div><div class="hex">#D5BB6D · 45°</div></div>
   <div class="sw"><div class="chip" style="background:#E0897E"></div>
     <div class="role">เส้นตาย · เตือน</div><div class="hex">#E0897E · 6°</div></div>
   <div class="sw"><div class="chip" style="background:#74C6A4"></div>
     <div class="role">งาน · เสร็จแล้ว</div><div class="hex">#74C6A4 · 157°</div></div>
   <div class="sw"><div class="chip" style="background:#8E88A8"></div>
     <div class="role">โน้ต</div><div class="hex">#8E88A8</div></div>
+</div>
+
+<div class="note">
+  <b>กิจกรรมได้สีที่ห้าหลังเห็นของจริง</b> — รอบแรกเคาะว่าให้ใช้ <code>#79C2D0</code>
+  ร่วมกับคาบเรียนแล้วนิยามความหมายใหม่เป็น "ช่วงเวลาที่ถูกจองไว้" เพราะกลัวว่าสีที่ห้า
+  จะแยกไม่ออกบนบล็อกเล็ก<br>
+  <b>แต่พอ deploy แล้วเปิดดูจริง ปัญหากลับตรงข้าม</b> — บนปฏิทินสัปดาห์ที่ทุกอย่างอยู่บนแกนเดียวกัน
+  มองไม่ออกเลยว่าบล็อกไหนคือคาบเรียนที่ต้องไป กับบล็อกไหนคืองานที่สมัครเอง<br>
+  กิจกรรมห่างจากส้ม 39° ซึ่งใกล้กว่าคู่อื่น แต่ยังกว้างกว่าคู่ที่มีอยู่เดิม
+  คือคาบเรียน 187° กับงาน 157° ที่ห่างกันแค่ 30° และอยู่ด้วยกันได้มาตลอด<br>
+  <b>บทเรียน: เรื่องสีตัดสินบนกระดาษไม่ได้ ต้องดูบนจอจริง</b> — ซ้ำรอยตัวอักษรจางที่เคาะสองรอบด้วยเหตุผลเดียวกัน
 </div>
 
 <h3>พื้นและตัวอักษร</h3>
@@ -259,8 +296,9 @@ a{color:var(--brand)}
       <h4>พุธ 19 ส.ค.</h4>
       <div class="hero">
         <div class="k">คาบถัดไป · อีก 40 นาที</div>
-        <div class="big">09:00<small> – 12:00</small></div>
-        <div class="s">สถาปัตยกรรมเครือข่ายฯ · E11-S604</div>
+        <div class="nm">สถาปัตยกรรมเครือข่ายฯ</div>
+        <div class="tm">09:00 – 12:00</div>
+        <div class="s">E11-S604 · บรรยาย</div>
       </div>
       <div class="lbl"><span>เลยกำหนด</span><span>1</span></div>
       <div class="item due"><span class="rail"></span><span class="cb"></span>
@@ -362,7 +400,96 @@ a{color:var(--brand)}
 
 </div>
 
-<h2 id="week"><span class="n">05</span>ปฏิทินสัปดาห์ที่กลับแกน</h2>
+<h2 id="events"><span class="n">05</span>กิจกรรมและการตัดทอนเวลา</h2>
+<p class="sub">งานที่เกิดครั้งเดียวมีหน้าของตัวเอง เพราะมันมีกำหนดการข้างใน —
+  และเพราะมันต้องมี URL ให้ Claude ส่งลิงก์มาให้กดได้</p>
+
+<div class="phones">
+
+  <div class="phone">
+    <div class="cap"><span>หน้ากิจกรรม</span><span>route ไม่ใช่แผงเปิดทับ</span></div>
+    <div class="scr">
+      <div style="font-size:var(--s--2);color:var(--brand)">‹ UniHack 2026</div>
+      <h4>Orientation Day</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin:.3rem 0 .5rem">
+        <span class="tag" style="color:var(--sched);border-color:rgba(121,194,208,.32)">เสาร์ 22 ส.ค. · 09:30–12:30</span>
+        <span class="tag" style="color:var(--muted);border-color:var(--line)">KLOUD by KBank</span>
+      </div>
+      <div class="lbl"><span>กำหนดการ</span><span>7</span></div>
+      <div class="agn">
+        <div class="t">09:30 – 09:50</div><div>Registration</div>
+        <div class="t">09:50 – 10:05</div><div>Introduction to CUTS</div>
+        <div class="t">10:05 – 10:25</div><div>Case Reveal</div>
+        <div class="t">10:25 – 11:25</div><div>AI &amp; Safety Session</div>
+      </div>
+      <div class="lbl"><span>ที่เกี่ยวข้อง</span><span>1</span></div>
+      <div class="item"><span class="rail"></span><span class="cb"></span>
+        <div class="body"><div class="title">ลงทะเบียนผ่าน Google Forms</div>
+        <div class="meta">ไม่กำหนดวัน</div></div></div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="cap"><span>วันนี้ · เมื่อมีการตัดทอน</span><span>375px</span></div>
+    <div class="scr">
+      <h4>เสาร์ 22 ส.ค.</h4>
+      <div class="hero">
+        <div class="k live">กำลังเกิดขึ้น · เหลืออีก 1 ชม. 40 นาที</div>
+        <div class="nm">Orientation Day</div>
+        <div class="tm">09:30 – 11:00</div>
+        <div class="s">UniHack 2026 · KLOUD by KBank</div>
+        <div class="after clash"><i></i>
+          <div><div class="t">ทับกับ 11:00 · คณิตศาสตร์วิศวกรรม II</div>
+          <div class="m">ติดต่อโครงการ IUP</div></div>
+        </div>
+      </div>
+      <div class="lbl"><span>วันนี้</span><span>3</span></div>
+      <div class="item event"><span class="rail"></span>
+        <div class="body"><div class="title">Orientation Day</div>
+        <div class="meta">UniHack 2026 · 09:30–11:00</div></div>
+        <span class="tag" style="color:var(--sched);border-color:rgba(121,194,208,.32)">ตัดเวลา</span>
+        <span class="tagbtn">คืนค่า</span></div>
+      <div class="item sched skip"><span class="rail"></span>
+        <div class="body"><div class="title">ฟิสิกส์ทั่วไป</div>
+        <div class="meta">13:00–16:00 · SC-201</div></div>
+        <span class="tag" style="color:var(--faint);border-color:var(--line)">ไม่ไป</span>
+        <span class="tagbtn">คืนค่า</span></div>
+      <div class="item sched"><span class="rail"></span>
+        <div class="body"><div class="title">คณิตศาสตร์วิศวกรรม II</div>
+        <div class="meta">11:00–14:00 · ติดต่อโครงการ IUP</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<h3>สามอย่างที่ภาพนี้บอก</h3>
+<p><b>ชื่ออยู่บรรทัดใหญ่ เวลาลงบรรทัดรอง</b> — สลับจากเดิมที่เวลาเป็นตัวใหญ่
+  เพราะงานข้ามวันที่กำลังเกิดขึ้นไม่มี "เวลาเริ่มของวันนี้" ที่มีความหมาย
+  พอสลับแล้วทุกสถานะใช้โครงเดียวกันหมด ไม่มีข้อยกเว้นให้ต้องจำ</p>
+
+<p><b>บรรทัดล่างของการ์ดมีช่องเดียว สองความหมาย</b> — "ถัดไป" สีฟ้าตามปกติ
+  และ "ทับกับ" สีส้มเมื่ออันถัดไปเบียดเข้ามาก่อนอันบนจบ · มันคือสิ่งเดียวกัน
+  คือสิ่งที่จะเริ่มถัดไป ต่างแค่ว่ามันชนหรือไม่ชน</p>
+
+<div class="note">
+  <b>สิ่งที่ตั้งใจไม่ไปจางลง ไม่หายไป</b> — ตามหลักข้อ 5 "ไม่มีอะไรหายเงียบ ๆ"
+  ถ้าซ่อนทิ้ง เปิดปฏิทินมาอีกทีจะไม่รู้ว่าเคยตัดสินใจอะไรไว้ หรือกดผิดแล้วคาบหายไปเฉย ๆ<br>
+  <b>ยกเว้นจุดบนช่องวันในโหมดเดือน</b> ที่ไม่นับ เพราะจุดตอบคำถามว่า "วันนั้นติดอะไรไหม"
+  ซึ่งถ้าไม่ไปแล้วก็คือไม่ติด
+</div>
+
+<div class="note">
+  <b>ปุ่ม "คืนค่า" เป็นสีม่วง ไม่ใช่สีเดียวกับป้าย</b> — ทรงเดียวกันเป๊ะแต่คนละสี
+  เพราะป้าย "ไม่ไป" กับ "ตัดเวลา" เป็นข้อมูลที่กดไม่ได้ ส่วน "คืนค่า" เป็นการกระทำ<br>
+  ถ้าทำสีเดียวกัน บนจอจะมีของหน้าตาเหมือนกันสองอย่างที่อันหนึ่งกดได้อันหนึ่งกดไม่ได้ —
+  ซึ่งเป็นสิ่งที่กฎข้อเดียวของทั้งระบบตั้งใจกันไว้
+</div>
+
+<p><b>เว็บตั้งค่าตัดทอนไม่ได้ ทำได้แค่คืนค่า</b> — การถามว่า "จะแบ่งเวลาตรงไหน"
+  แล้วรอคำตอบคือบทสนทนา ไม่ใช่ฟอร์ม จึงเป็นงานของ Claude
+  ส่วนเว็บรับหน้าที่แสดงผลกับกดคืน</p>
+
+<h2 id="week"><span class="n">06</span>ปฏิทินสัปดาห์ที่กลับแกน</h2>
 <div class="rule">วัน = แกนตั้ง · เวลา = แกนนอน — ตรงข้ามกับ Google Calendar โดยตั้งใจ</div>
 <p class="sub">7 แถวสูงรวมราว 280px ลงจอมือถือได้ครบ ไม่ต้องตัดเหลือ 3 วัน ·
   บล็อกวางแนวนอนจึงมีที่พอเขียนชื่อวิชาเต็มพร้อมเลขห้อง</p>
@@ -411,18 +538,28 @@ a{color:var(--brand)}
     <div class="dd">ศ.</div>
     <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
     <div class="c"></div><div class="c"></div><div class="c"></div><div class="c"></div>
-    <div class="blk" style="grid-column:10/span 2">แมทวิศวะ</div>
+    <div class="blk skip" style="grid-column:10/span 2">แมทวิศวะ</div>
     <div class="c"></div><div class="c"></div>
 
     <div class="dd">ส.</div>
-    <div class="c" style="grid-column:2/span 13"></div>
+    <div class="c"></div><div class="c"></div>
+    <div class="blk ev trim" style="grid-column:4/span 3">Orientation Day</div>
+    <div class="c" style="grid-column:7/span 8"></div>
     <div class="dd">อา.</div>
     <div class="c" style="grid-column:2/span 13"></div>
   </div>
 </div>
 
+<div class="legend" style="margin:.6rem 0 1rem">
+  <span><i style="background:#79C2D0"></i>คาบเรียน</span>
+  <span><i style="background:#D5BB6D"></i>กิจกรรม</span>
+  <span style="color:var(--faint)">ขอบประ = เวลาถูกตัด · จาง+ขีดฆ่า = ตั้งใจไม่ไป</span>
+</div>
+
 <table>
   <tr><th>กฎ</th><th>ทำไม</th></tr>
+  <tr><td>คาบเรียนกับกิจกรรมคนละสี</td>
+      <td>อยู่บนแกนเดียวกัน ถ้าสีเท่ากันจะแยกไม่ออกว่าอันไหนต้องไป อันไหนสมัครเอง</td></tr>
   <tr><td>แกนเวลาคำนวณจากข้อมูลจริง</td>
       <td>เร็วสุด −1 ชม. ถึงช้าสุด +1 ชม. · ห้าม fix 00:00–24:00 ให้ต้องเลื่อนหา</td></tr>
   <tr><td>คอลัมน์ละ 30 นาที</td>
@@ -435,7 +572,7 @@ a{color:var(--brand)}
       <td>ตารางเปล่าคือคำตอบว่า "ว่างทั้งสัปดาห์"</td></tr>
 </table>
 
-<h2 id="row"><span class="n">06</span>องค์ประกอบของรายการหนึ่งแถว</h2>
+<h2 id="row"><span class="n">07</span>องค์ประกอบของรายการหนึ่งแถว</h2>
 
 <table>
   <tr><th>ส่วน</th><th>กติกา</th></tr>
@@ -451,7 +588,7 @@ a{color:var(--brand)}
 <p>เลิกใส่กล่องซ้อนกล่อง ใช้เส้นคั่นบางแทน — ลดชั้นพื้นผิวจาก 3 เหลือ 2
   ทำให้หน้าจอโปร่งขึ้นมากโดยไม่เสียการแบ่งกลุ่ม</p>
 
-<h2 id="principle"><span class="n">07</span>หลักการห้าข้อ</h2>
+<h2 id="principle"><span class="n">08</span>หลักการห้าข้อ</h2>
 <p class="sub">ใช้ตัดสินทุกครั้งที่ลังเล</p>
 
 <div class="cmp">

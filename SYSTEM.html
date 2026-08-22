@@ -13,6 +13,7 @@
   --ink:#F1F0F7; --muted:#A5A2B8; --faint:#87849D;
   --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
   --sched:#79C2D0; --sched-soft:#16292E;
+  --event:#D5BB6D; --event-soft:#2D2716;
   --due:#E0897E; --due-soft:#2E1E1D;
   --task:#74C6A4; --task-soft:#172A24;
   --note:#8E88A8;
@@ -63,6 +64,7 @@ td:first-child{white-space:nowrap}
   font-size:var(--s--2);letter-spacing:.06em;padding:.08rem .55rem;border-radius:var(--r-pill);
   border:1px solid transparent}
 .pill.sched{color:var(--sched);border-color:rgba(121,194,208,.32)}
+.pill.event{color:var(--event);border-color:rgba(213,187,109,.32)}
 .pill.due{color:var(--due);border-color:rgba(224,137,126,.32)}
 .pill.task{color:var(--task);border-color:rgba(116,198,164,.32)}
 .pill.brand{color:var(--brand);border-color:rgba(165,148,255,.38)}
@@ -97,6 +99,7 @@ a{color:var(--brand)}
     <a href="#data">โครงสร้างข้อมูล</a>
     <a href="#rules">กติกาที่บังคับใน DB</a>
     <a href="#repeat">การซ้ำของตารางเรียน</a>
+    <a href="#events">กิจกรรมและการตัดทอน</a>
     <a href="#push">เส้นทางแจ้งเตือน</a>
     <a href="#sec">ความปลอดภัย</a>
     <a href="#traps">กับดัก</a>
@@ -185,11 +188,27 @@ a{color:var(--brand)}
 
 <pre><code>Area (Class / Hackathon / Financial / Personal)
 └── Project            ใน Class เรียก "วิชา"
-    ├── project_schedules   ช่วงเวลาประจำ · หลายช่วงได้ · ไม่แจ้งเตือน
+    ├── project_schedules   ช่วงเวลาที่ซ้ำรายสัปดาห์ · หลายช่วงได้ · ไม่แจ้งเตือน
+    ├── events              กิจกรรมครั้งเดียว · มีชื่อของตัวเอง · ไม่แจ้งเตือน
+    │   └── event_agenda    กำหนดการข้างในงาน · ไม่ขึ้นปฏิทิน
     └── items
         ├── task        มีสถานะเสร็จ · due_at ไม่บังคับ
         ├── reminder    remind_at บังคับ · push เข้ามือถือ · เตือนครั้งเดียว
-        └── shortnote   ไม่มีเวลา ไม่มีสถานะเสร็จ</code></pre>
+        └── shortnote   ไม่มีเวลา ไม่มีสถานะเสร็จ
+
+time_offsets   ชี้ไปที่คาบเรียนหรือกิจกรรม บอกว่า "วันนั้นวันเดียว"
+               ไม่ไป หรือไปแค่บางช่วง</code></pre>
+
+<h3>สามตารางเวลา แยกหน้าที่กันชัด ๆ</h3>
+<table>
+  <tr><th>ถ้าสิ่งนั้น…</th><th>ลงที่</th><th>ตัวอย่าง</th></tr>
+  <tr><td>ซ้ำทุกสัปดาห์</td><td><code>project_schedules</code></td><td>คาบเรียน · แล็บประจำ</td></tr>
+  <tr><td>เกิดครั้งเดียว ต้องขึ้นปฏิทิน</td><td><code>events</code></td><td>Orientation Day · รอบชิง · สอบปลายภาค</td></tr>
+  <tr><td>เป็นรายละเอียดภายในงานเดียว</td><td><code>event_agenda</code></td><td>"09:30 Registration"</td></tr>
+</table>
+<p><b>ห้ามใส่ <code>week_offsets</code> ลง <code>events</code></b> — ถ้าสิ่งนั้นซ้ำ แปลว่ามันคือ schedule
+  ไม่ใช่ event · และ <b>ห้ามให้ <code>event_agenda</code> ขึ้นปฏิทิน</b> เพราะกำหนดการจริงมีบรรทัด
+  สั้นระดับ 10 นาที ถ้าวาดทุกบรรทัดลงปฏิทินรายสัปดาห์ วันนั้นจะมีบล็อกจิ๋วเรียงกันจนอ่านไม่ออกสักใบ</p>
 
 <h3>ทำไมสามชนิดอยู่ตารางเดียวกัน</h3>
 <p>เพราะ 80% ของฟิลด์ซ้ำกัน และหน้าจอส่วนใหญ่ต้องดึงมารวมกันเรียงตามเวลาอยู่แล้ว
@@ -209,7 +228,23 @@ a{color:var(--brand)}
   <tr><td><code>sched_start_is_mon</code></td><td><code>start_date</code> ต้องเป็นวันจันทร์</td></tr>
   <tr><td><code>sched_weeks_present</code></td><td>ต้องมีอย่างน้อย 1 สัปดาห์</td></tr>
   <tr><td><code>sched_weeks_valid</code></td><td>ห้ามมี NULL และห้ามติดลบ</td></tr>
+  <tr><td><code>event_time_order</code></td><td>กิจกรรมต้องจบหลังเริ่ม</td></tr>
+  <tr><td><code>event_span_sane</code></td><td>กิจกรรมยาวได้ไม่เกิน 30 วัน — กันพิมพ์ปีผิดแล้วตัวหั่นระเบิด</td></tr>
+  <tr><td><code>agenda_time_order</code></td><td>บรรทัดกำหนดการที่ใส่เวลาจบ ต้องจบหลังเริ่ม</td></tr>
+  <tr><td><code>items_event_same_project</code></td><td>งานกับกิจกรรมที่ผูกกันต้องอยู่ project เดียวกัน — FK สองคอลัมน์</td></tr>
+  <tr><td><code>offset_one_target</code></td><td>การตัดทอนชี้ได้ทีละอัน คาบเรียน <b>หรือ</b> กิจกรรม</td></tr>
+  <tr><td><code>offset_skip_clean</code></td><td>ไม่ไปเลยแล้วยังบอกเวลาไม่ได้ — คำสั่งที่ขัดกันเอง</td></tr>
+  <tr><td><code>offset_says_something</code></td><td>แถวตัดทอนที่ไม่บอกอะไรเลยเข้าไม่ได้</td></tr>
 </table>
+
+<div class="warn">
+  <b><code>on delete set null</code> บน FK สองคอลัมน์ ต้องระบุคอลัมน์</b><br>
+  <code>items.event_id</code> อ้าง <code>events(id, project_id)</code> เพื่อให้ Postgres บังคับเองว่า
+  งานกับกิจกรรมอยู่ project เดียวกัน<br>
+  ถ้าเขียน <code>on delete set null</code> เปล่า ๆ Postgres จะพยายามเซ็ต <code>project_id</code>
+  เป็น null ด้วย ซึ่งชน NOT NULL แล้ว<b>การลบกิจกรรมจะล้มทั้งคำสั่ง</b><br>
+  ต้องเขียน <code>on delete set null (event_id)</code> (Postgres 15 ขึ้นไป)
+</div>
 
 <div class="warn">
   <b>สองข้อสุดท้ายเคยเขียนผิดจนไม่ได้กันอะไรเลย</b><br>
@@ -245,7 +280,65 @@ week_offsets  = [0,1,2,...] สัปดาห์ที่มีคาบนี�
   เพื่อโชว์ "ตัวอย่างสด" ขณะกรอกฟอร์ม — และมีเทสต์เทียบกับผลจาก DB จริงว่าตรงกัน
   <b>ถ้าแก้ตัวใดตัวหนึ่งต้องแก้อีกตัวด้วย</b></p>
 
-<h2 id="push"><span class="n">05</span>เส้นทางแจ้งเตือน</h2>
+<h2 id="events"><span class="n">05</span>กิจกรรมและการตัดทอนเวลา</h2>
+<p class="sub">สองอย่างที่ตารางเรียนอย่างเดียวเก็บไม่ได้ — งานที่เกิดครั้งเดียว
+  และคำตัดสินว่าจริง ๆ แล้วจะไปหรือไม่ไป</p>
+
+<h3>ทำไม project_schedules ไม่พอ</h3>
+<p>มันไม่มีชื่อของตัวเอง — ปฏิทินยืมชื่อ project มาใช้ ดังนั้นกิจกรรมหนึ่งอันจะต้องสร้าง
+  project หนึ่งอัน · และ <code>week_offsets</code> เป็นเครื่องมือของ "การซ้ำ" ซึ่งผิดงาน
+  ตั้งแต่ต้นสำหรับสิ่งที่เกิดครั้งเดียว</p>
+
+<h3>calendar_entries() — ประตูเดียวของปฏิทิน</h3>
+<p>รวม <b>คาบเรียน + กิจกรรม</b> เป็นรูปเดียว และเอาการตัดทอนมาใช้ให้แล้ว
+  · <code>security invoker</code> จึงเคารพ RLS เหมือน <code>schedule_occurrences()</code></p>
+<p>มีสามที่ที่กินข้อมูลชุดนี้ — การ์ดใหญ่หน้าแรก · ปฏิทินเดือน · ปฏิทินสัปดาห์
+  ถ้ารวมฝั่งเว็บต้องเขียนตรรกะเดียวกันสามรอบ <b>ห้ามดึง <code>events</code> มาปนเองฝั่งเว็บ</b></p>
+
+<div class="note">
+  คืนสองคอลัมน์ที่ฝั่งเว็บต้องอ่าน — <code>skipped</code> (ตั้งใจไม่ไป) และ
+  <code>trimmed</code> (เวลาถูกตัด) · <b>แถวที่ <code>skipped</code> ยังอยู่ในผลลัพธ์</b>
+  ไม่ถูกกรองทิ้ง เว็บทำให้จางลงและติดป้ายแทนการซ่อน
+</div>
+
+<h3>กิจกรรมข้ามคืนถูกหั่นเป็นบล็อกรายวัน</h3>
+<p>ปฏิทินสัปดาห์วางบล็อกด้วย <code>grid-row = วัน</code> บล็อกใบหนึ่งจึงอยู่ได้วันเดียว</p>
+<pre><code>ศุกร์ 20:00 → เสาร์ 09:00
+
+  กลายเป็น   ศุกร์ 20:00–24:00   +   เสาร์ 00:00–09:00</code></pre>
+
+<div class="warn">
+  <b><code>"24:00:00"</code> ประกอบเป็น <code>Date</code> ไม่ได้</b><br>
+  <code>new Date('2026-09-05T24:00:00+07:00')</code> คืน <b>Invalid Date เงียบ ๆ</b> ไม่ throw<br>
+  ต้องแปลงเป็นเที่ยงคืนของวันถัดไปเอง — ทำไว้แล้วใน <code>entryEndMs()</code>
+  ที่ <code>web/lib/calendar.ts</code> <b>ห้ามคำนวณเองที่อื่น</b>
+</div>
+
+<h3>time_offsets — คำตัดสินของเจ้าของ แยกจากเวลาจริง</h3>
+<table>
+  <tr><th>เวลาชุดไหน</th><th>เก็บที่</th><th>ใครเป็นเจ้าของ</th></tr>
+  <tr><td>คาบเรียน</td><td><code>project_schedules.start_time</code></td><td>มหาลัยกำหนด</td></tr>
+  <tr><td>กิจกรรม</td><td><code>events.starts_at</code></td><td>ผู้จัดประกาศ</td></tr>
+  <tr><td>จะไปไหม ถึงกี่โมง</td><td><code>time_offsets</code></td><td><b>เจ้าของ · เฉพาะวันนั้น</b></td></tr>
+</table>
+<p>คืนค่า = ลบแถวทิ้ง · <b>เวลาจริงไม่เคยถูกแตะเลยตั้งแต่ต้น</b></p>
+
+<div class="warn">
+  <b><code>week_offsets</code> ไม่ใช่ที่เก็บ "ฉันจะไม่ไป"</b><br>
+  มันแปลว่า <b>สัปดาห์นั้นมหาลัยไม่มีคาบ</b> (สัปดาห์สอบ · Commencement Week)<br>
+  การเอาไปใช้แทนความหมาย "ไม่ไป" ให้ผลบนปฏิทินที่ถูกต้องเป๊ะ <b>แต่ทำลายข้อมูลถาวร</b> —
+  ย้อนดูแล้วแยกไม่ออกว่าหยุดจริงหรือโดด · วิชาที่มีหลายคาบในสัปดาห์เดียวจะหายทั้งหมด ·
+  และเลิกทำไม่ได้เพราะไม่มีอะไรบันทึกว่าเลขไหนหายไป
+</div>
+
+<h3>ใครเป็นคนตั้งค่าตัดทอน</h3>
+<p><b>Claude ถามแล้วเขียนให้</b> — เว็บตั้งค่าไม่ได้โดยตั้งใจ ทำได้แค่กดคืนค่า
+  · การถามว่า "จะแบ่งเวลาตรงไหน" แล้วรอคำตอบคือบทสนทนา ไม่ใช่ฟอร์ม
+  ซึ่งตรงกับกฎเดิมที่ว่างานที่ต้องคิดให้ Claude ทำ ส่วนเว็บเก่งเรื่องแสดงภาพ</p>
+<p>แต่<b>การคืนค่าต้องมีบนเว็บ</b> เพราะหลัก UX ข้อ 5 "ไม่มีอะไรหายเงียบ ๆ" —
+  ถ้าเห็นบนจอว่าคาบถูกตัด ต้องกดคืนได้จากที่เดียวกัน</p>
+
+<h2 id="push"><span class="n">06</span>เส้นทางแจ้งเตือน</h2>
 
 <div class="diagram">
 <svg viewBox="0 0 900 150" role="img" aria-label="ลำดับการส่งการแจ้งเตือน">
@@ -299,7 +392,7 @@ returning *;</code></pre>
   ลงไปใน<b>คำสั่งเดียวกับที่เลือกแถว</b> ทำให้อ้างสิทธิ์ได้แค่รอบเดียว
   <b>ห้ามแยกเป็น SELECT แล้วค่อย UPDATE เด็ดขาด</b></p>
 
-<h2 id="sec"><span class="n">06</span>ความปลอดภัย</h2>
+<h2 id="sec"><span class="n">07</span>ความปลอดภัย</h2>
 
 <div class="grid2">
   <div class="panel">
@@ -336,7 +429,7 @@ returning *;</code></pre>
   ต้องให้ผู้ใช้ไปกดเปิดใหม่ทุกเครื่อง สำเนาอยู่ที่ <code>web/.vapid-backup.json</code> (gitignore)
 </div>
 
-<h2 id="traps"><span class="n">07</span>กับดักที่เคยเสียเวลาไปแล้ว</h2>
+<h2 id="traps"><span class="n">08</span>กับดักที่เคยเสียเวลาไปแล้ว</h2>
 <p class="sub">ทุกข้อคือของที่เกิดขึ้นจริงในโปรเจกต์นี้ ไม่ใช่ทฤษฎี</p>
 
 <table>
@@ -350,6 +443,10 @@ returning *;</code></pre>
   <tr><td>Next 16</td><td><code>middleware</code> เปลี่ยนชื่อเป็น <code>proxy</code> · path CSS เป็น <code>immutable/chunks</code></td></tr>
   <tr><td>psql บน Windows ไทย</td><td><code>client_encoding</code> เป็น WIN874 อ่าน UTF-8 พัง ต้องตั้ง <code>PGCLIENTENCODING=UTF8</code></td></tr>
   <tr><td>เชลล์</td><td>cmd ใช้ <code>&amp;&amp;</code> · PowerShell 5.1 ใช้ <code>;</code> และบล็อก <code>npx.ps1</code> ให้ใช้ <code>npx.cmd</code></td></tr>
+  <tr><td>CHECK กับ <code>at time zone</code></td><td>เป็น STABLE ไม่ใช่ IMMUTABLE — ใส่ใน CHECK ไม่ได้ กฎอย่าง "ห้ามข้ามเที่ยงคืน" จึงบังคับที่ DB ไม่ได้</td></tr>
+  <tr><td><code>"24:00:00"</code></td><td><code>new Date()</code> คืน Invalid Date เงียบ ๆ ไม่ throw</td></tr>
+  <tr><td><code>week_offsets</code> ≠ "ไม่ไป"</td><td>เอาไปปนกันแล้วผลบนจอถูก แต่ข้อมูลเสียถาวรและกู้ไม่ได้</td></tr>
+  <tr><td><code>next build</code> ทับ dev server</td><td>ใช้ <code>.next</code> ร่วมกัน แล้วเสิร์ฟของค้างต่อโดยขึ้น 200 ปกติ</td></tr>
 </table>
 
 <div class="note">
@@ -358,15 +455,19 @@ returning *;</code></pre>
   ตั้งแต่ก่อนเขียนโค้ดบรรทัดแรก
 </div>
 
-<h2><span class="n">08</span>ตรรกะที่มีเทสต์กำกับ</h2>
-<p class="sub">สามไฟล์นี้เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ — <b>แก้แล้วต้องรันเทสต์</b></p>
+<h2><span class="n">09</span>ตรรกะที่มีเทสต์กำกับ</h2>
+<p class="sub">ไฟล์เหล่านี้เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ — <b>แก้แล้วต้องรันเทสต์</b></p>
 
 <table>
   <tr><th>ไฟล์</th><th>ทำอะไร</th><th>เทสต์</th></tr>
   <tr><td><code>lib/layout.ts</code></td><td>จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์</td><td>7 เคส</td></tr>
   <tr><td><code>lib/weeks.ts</code></td><td>ตรรกะการซ้ำ + คลี่เป็นวันที่จริง</td><td>20 เคส</td></tr>
   <tr><td><code>lib/parse.ts</code></td><td>ตีความบรรทัดเดียวเป็น item ภาษาไทย</td><td>15 เคส</td></tr>
+  <tr><td><code>lib/libraryOpen.ts</code></td><td>สถานะกาง/หุบของหน้าคลัง เก็บใน cookie</td><td>16 เคส</td></tr>
+  <tr><td><code>lib/calendar.ts</code> + <code>lib/agenda.ts</code></td><td>เวลาของบล็อกปฏิทิน · การเติมเวลาจบของกำหนดการ · กิจกรรมชนคาบเรียน</td><td>26 เคส</td></tr>
 </table>
+<p>ฝั่ง DB มีชุดทดสอบ constraint ที่รันกับฐานข้อมูลจริงอีก <b>18 เคส</b> —
+  8 เคสของกิจกรรม และ 10 เคสของการตัดทอนเวลา</p>
 
 <footer>
   KeviN · เอกสารนี้คู่กับ <a href="ARCHITECTURE.md">ARCHITECTURE.md</a>

@@ -8,106 +8,42 @@ Cowork scheduled task สองตัว — สรุปเช้าทุก�
 
 ---
 
+## ตัว prompt อยู่ในไฟล์ ไม่ได้อยู่ในหน้านี้
+
+| งาน | ตั้งเวลา | ไฟล์ที่ต้องคัดลอกไปวาง |
+|---|---|---|
+| สรุปเช้า | ทุกวัน 06:30 (Asia/Bangkok) | [`prompt-daily.txt`](prompt-daily.txt) |
+| ตรวจงานค้างรายสัปดาห์ | อาทิตย์ 19:00 (Asia/Bangkok) | [`prompt-weekly.txt`](prompt-weekly.txt) |
+
+> ⚠️ **เอกสารนี้เคยคัดลอก prompt ทั้งสองมาไว้เต็ม ๆ อีกชุด แล้วมันแยกกันจริง ๆ**
+> ตอนเพิ่มกิจกรรม (21 ส.ค. 2026) ไฟล์ `.txt` ถูกอัปเดตให้ใช้ `calendar_entries()`
+> แต่สำเนาในหน้านี้ยังเรียก `schedule_occurrences()` อยู่ — ใครเปิดผิดไฟล์ก็ได้ของเก่า
+> โดยไม่มีอะไรเตือน · **จึงตัดสำเนาออกทั้งหมด เหลือทางเดียวคือไฟล์ `.txt`**
+>
+> ถ้าจะแก้ prompt ให้แก้ที่ไฟล์ `.txt` เท่านั้น **ห้ามเอากลับมาแปะไว้ที่นี่อีก**
+
+---
+
 ## ตั้งยังไง
 
 1. เปิด Claude → **Cowork** → สร้าง scheduled task ใหม่
 2. เปิด connector **Supabase** ให้ task นี้ (ตัวเดียวกับที่ใช้ในเฟส 1)
-3. วาง prompt ด้านล่าง
-4. ตั้งเวลา
+3. เปิดไฟล์ `.txt` ตามตารางข้างบน คัดลอกทั้งไฟล์ไปวาง
+4. ตั้งเวลาตามตาราง
+
+**เวลาแก้อะไรใน schema ต้องกลับมาดูสองไฟล์นี้ด้วย** — มันเขียน SQL ไว้ตรง ๆ
+ไม่ได้ผ่านโค้ดที่ TypeScript ตรวจให้ ถ้าตารางเปลี่ยนแล้วลืมแก้ prompt
+มันจะพังตอนตีห้าครึ่งโดยไม่มีใครเห็น
 
 ---
 
-## ตัวที่ 1 · สรุปเช้า
+## สิ่งที่ prompt ทั้งสองต้องรู้ (สรุปไว้ให้ตรวจง่าย)
 
-**ตั้งเวลา:** ทุกวัน 06:30 (Asia/Bangkok)
-
-```
-คุณคือ KeviN ผู้ช่วยส่วนตัวของนักศึกษาคนหนึ่ง
-ทุกเช้าคุณสรุปให้ว่าวันนี้ควรทำอะไรก่อนหลัง
-
-user_id ของเจ้าของคือ 445a3654-f9fa-4f46-a140-741ebfc86bb5
-เวลาทั้งหมดใน DB เป็น UTC ต้องแปลงเป็น Asia/Bangkok (UTC+7) ก่อนพูดถึงเสมอ
-
-ดึงข้อมูลสามชุดนี้:
-
-1. คาบเรียนวันนี้
-   select * from schedule_occurrences(
-     (now() at time zone 'Asia/Bangkok')::date,
-     (now() at time zone 'Asia/Bangkok')::date);
-
-2. งานที่เลยกำหนดและงานที่ครบวันนี้
-   select i.title, i.due_at at time zone 'Asia/Bangkok' as due_bkk,
-          p.name as project, i.priority
-   from items i join projects p on p.id = i.project_id
-   where i.type = 'task' and i.done_at is null and i.archived_at is null
-     and i.due_at is not null
-     and i.due_at < ((now() at time zone 'Asia/Bangkok')::date + 1)::timestamp at time zone 'Asia/Bangkok'
-   order by i.due_at;
-
-3. การเตือนที่จะถึงในวันนี้
-   select i.title, i.remind_at at time zone 'Asia/Bangkok' as at_bkk, p.name as project
-   from items i join projects p on p.id = i.project_id
-   where i.type = 'reminder' and i.archived_at is null
-     and i.remind_at >= (now() at time zone 'Asia/Bangkok')::date::timestamp at time zone 'Asia/Bangkok'
-     and i.remind_at <  ((now() at time zone 'Asia/Bangkok')::date + 1)::timestamp at time zone 'Asia/Bangkok'
-   order by i.remind_at;
-
-แล้วเขียนสรุปสั้น ๆ ไม่เกิน 8 บรรทัด ภาษาไทย:
-
-- เริ่มด้วยประโยคเดียวว่าวันนี้หนักหรือเบา
-- บอกว่าควรทำอะไรก่อน โดยดูจากเวลาว่างระหว่างคาบเรียนจริง ๆ
-  เช่นถ้ามีคาบ 9-12 แล้ว 15-17 ให้ชี้ว่าช่วงบ่ายว่างพอทำอะไรได้
-- งานที่เลยกำหนดต้องขึ้นก่อนเสมอ และบอกว่าเลยมากี่วัน
-- ถ้าไม่มีอะไรเลย บอกตรง ๆ ว่าวันนี้ว่าง อย่าหาเรื่องมาเติม
-
-ห้ามเขียนหรือแก้ข้อมูลใด ๆ — งานนี้อ่านอย่างเดียว
-```
-
----
-
-## ตัวที่ 2 · ตรวจงานค้างรายสัปดาห์
-
-**ตั้งเวลา:** ทุกวันอาทิตย์ 19:00 (Asia/Bangkok)
-
-```
-คุณคือ KeviN ทุกสัปดาห์คุณตรวจว่ามีอะไรกำลังหลุดมือ
-
-user_id ของเจ้าของคือ 445a3654-f9fa-4f46-a140-741ebfc86bb5
-เวลาใน DB เป็น UTC แปลงเป็น Asia/Bangkok ก่อนพูดถึงเสมอ
-
-ดึงสามชุดนี้:
-
-1. งานเลยกำหนดที่ยังไม่เสร็จ
-   select p.name as project, i.title,
-          (now()::date - (i.due_at at time zone 'Asia/Bangkok')::date) as days_late
-   from items i join projects p on p.id = i.project_id
-   where i.type='task' and i.done_at is null and i.archived_at is null
-     and i.due_at < now()
-   order by days_late desc;
-
-2. project ที่เงียบหาย — ไม่มีความเคลื่อนไหวเกิน 14 วัน
-   select p.name, max(greatest(i.created_at, i.updated_at)) as last_touch,
-          count(*) filter (where i.done_at is null) as open_items
-   from projects p left join items i on i.project_id = p.id and i.archived_at is null
-   where p.archived_at is null
-   group by p.id, p.name
-   having coalesce(max(greatest(i.created_at, i.updated_at)), p.created_at) < now() - interval '14 days'
-   order by last_touch nulls first;
-
-3. สัปดาห์หน้ามีอะไรรออยู่
-   select * from schedule_occurrences(
-     (now() at time zone 'Asia/Bangkok')::date + 1,
-     (now() at time zone 'Asia/Bangkok')::date + 7);
-
-เขียนสรุปไม่เกิน 10 บรรทัด ภาษาไทย:
-
-- ชี้เฉพาะสิ่งที่ต้องลงมือ ไม่ต้องรายงานว่าอะไรปกติดี
-- project ที่เงียบหายให้ถามตรง ๆ ว่ายังทำอยู่ไหม หรือควรเก็บเข้าคลัง
-- ถ้าสัปดาห์หน้ามีคาบหนักผิดปกติ ให้เตือนล่วงหน้า
-- ถ้าทุกอย่างเรียบร้อย บอกสั้น ๆ ว่าเรียบร้อย
-
-ห้ามเขียนหรือแก้ข้อมูล — อ่านอย่างเดียว
-```
+- ใช้ **`calendar_entries()`** ไม่ใช่ `schedule_occurrences()` — ตัวหลังเห็นแต่คาบเรียน
+  ไม่เห็นกิจกรรม และไม่รู้เรื่องการตัดทอนเวลาเลย
+- แถวที่ **`skipped = true`** คือเจ้าของตั้งใจไม่ไปแล้ว ห้ามนับว่าต้องไป
+- แถวที่ **`trimmed = true`** เวลาที่คืนมาคือเวลาที่ตัดแล้ว ช่องว่างต้องนับจากค่านั้น
+- **กิจกรรมมาก่อนคาบเรียน** ในสรุปเช้า เพราะมันเกิดครั้งเดียว พลาดแล้วพลาดเลย
 
 ---
 
@@ -116,5 +52,9 @@ user_id ของเจ้าของคือ 445a3654-f9fa-4f46-a140-741ebfc8
 connector ตัวเดียวกันนี้เขียนข้อมูลได้ และ `doc/TRAPS.md` เตือนไว้ว่า Claude เคยลบของโดยไม่ตั้งใจ
 งานที่รันเองอัตโนมัติทุกวันโดยไม่มีคนดู **ไม่ควรมีสิทธิ์เขียนอะไรเลย** — ถ้าเดาผิดแล้วเขียนลงไป
 จะไม่มีใครรู้จนกว่าจะสาย
+
+ข้อนี้ยิ่งสำคัญขึ้นหลังมี `time_offsets` — สรุปรายสัปดาห์เห็นเวลาที่ทับกันได้แล้ว
+และ**ชี้ให้ดูได้** แต่ห้ามตัดสินใจแบ่งเวลาเองแล้วเขียนลงไป เพราะเจ้าของเป็นคนเคาะเวลาเสมอ
+(ดู `doc/DECISIONS.md` หัวข้อ "เวลาทับกันและการไม่ไป")
 
 ถ้าอยากให้มันสร้างงานให้ได้จริง ๆ ค่อยเพิ่มทีหลังโดยให้มันเสนอมาก่อน แล้วเรากดยืนยันเอง
