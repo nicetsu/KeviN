@@ -11,6 +11,7 @@
 | 4 จัดการบนเว็บ | เสร็จ · รวมลากจัดลำดับ |
 | 5 PWA + แจ้งเตือน | เสร็จ · push ส่งออกจริงแล้ว |
 | 6 Cowork | เสร็จ · สรุปเช้า 06:30 + สรุปรายสัปดาห์ อาทิตย์ 19:00 |
+| กิจกรรม + ตัดทอนเวลา | เสร็จ · `events` · `event_agenda` · `time_offsets` |
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
@@ -68,6 +69,8 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 **สามตารางเวลา แยกหน้าที่กันชัด ๆ ห้ามให้พร่า**
 
 - ซ้ำทุกสัปดาห์ → `project_schedules` · เกิดครั้งเดียว → `events` · รายละเอียดในงาน → `event_agenda`
+- **"ไม่ไป" ไม่ใช่ "ไม่มีคาบ"** — ไม่ไปลง `time_offsets` · ไม่มีคาบลง `week_offsets`
+  เอาไปปนกันจะทำลายข้อมูลถาวรโดยผลบนจอดูถูกต้อง (ดู `doc/TRAPS.md`)
 - อยากรู้ว่าช่วงไหนติดอะไร ให้เรียก **`calendar_entries()`** ห้ามดึง `events` มาปนเองฝั่งเว็บ
   ไม่งั้นตรรกะหั่นงานข้ามคืนจะมีสองชุดที่ต้องดูแลให้ตรงกัน
 
@@ -76,7 +79,6 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 > รายการนี้ตรงกับ [ARCHITECTURE.md §10](ARCHITECTURE.md#10--สิ่งที่ยังไม่ได้ทำ) — แก้ที่ไหนต้องแก้อีกที่ด้วย
 
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
-- **ตัดทอนเวลาที่ทับกัน (รอบ 2 ของงาน events)** — ตาราง `time_offsets` + ให้ Claude เป็นคนถามแล้วเขียนให้
 - **lint error ค้างหนึ่งจุด** ที่ `app/settings/NotificationSetup.tsx` (ของเดิม ไม่บล็อก build)
 
 ## สภาพแวดล้อม

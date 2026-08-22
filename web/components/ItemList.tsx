@@ -4,6 +4,7 @@ import { useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toggleDone, archiveItem, restoreItem, reorderItems } from '@/app/actions/items'
+import { clearTimeOffset } from '@/app/actions/timeOffsets'
 import ItemPanel, { type PanelItem } from './ItemPanel'
 
 export type Row = {
@@ -16,7 +17,7 @@ export type Row = {
   /** ช่องติ๊กมีเฉพาะ task (doc/DESIGN.md) */
   checkable: boolean
   /** ป้ายขวาสุด · `event` ใช้บอกว่างานชิ้นนี้เป็นของกิจกรรมไหน */
-  tag?: { text: string; kind: 'late' | 'soon' | 'sched' | 'event' } | null
+  tag?: { text: string; kind: 'late' | 'soon' | 'sched' | 'event' | 'skip' } | null
   /** ข้อมูลสำหรับแผงรายละเอียด · ไม่มี = แถวนี้เปิดแผงไม่ได้ (เช่น คาบเรียน) */
   panel?: PanelItem
   /**
@@ -24,6 +25,13 @@ export type Row = {
    * `panel` มาก่อนถ้าใส่มาทั้งคู่ เพราะแผงคือการแวะดูที่ไม่ทิ้งตำแหน่งเลื่อน
    */
   href?: string | null
+  /**
+   * ปุ่มคืนค่าการตัดทอนของวันนั้น · ใส่เฉพาะแถวที่ถูกตัดเวลาหรือตั้งใจไม่ไป
+   *
+   * เว็บ **ตั้ง** ค่าตัดทอนไม่ได้ (นั่นเป็นงานของ Claude เพราะต้องถามกลับ)
+   * แต่ต้อง **คืนค่า** ได้จากที่ที่เห็น ไม่งั้นจะขัดหลัก "ไม่มีอะไรหายเงียบ ๆ"
+   */
+  restore?: { kind: 'class' | 'event'; sourceId: string; occursOn: string } | null
   /**
    * ลากจัดลำดับได้ไหม — ตั้ง true เฉพาะแถวที่ `sort_order` เป็นตัวตัดสินลำดับจริง
    * ถ้าตั้งกับแถวที่เรียงด้วย due_at/remind_at ลากแล้วจะเด้งกลับตอนโหลดใหม่
@@ -98,6 +106,17 @@ export default function ItemList({ rows }: { rows: Row[] }) {
       const res = await restoreItem(id)
       if (!res.ok) { setError(res.error); return }
       setHidden((p) => { const n = new Set(p); n.delete(id); return n })
+      router.refresh()
+    })
+  }
+
+  /** คืนเวลาเดิมของคาบหรือกิจกรรมในวันนั้น — ลบแถวตัดทอนทิ้ง */
+  function onRestoreTime(r: Row) {
+    if (!r.restore) return
+    const { kind, sourceId, occursOn } = r.restore
+    startTransition(async () => {
+      const res = await clearTimeOffset(kind, sourceId, occursOn)
+      if (!res.ok) { setError(res.error); return }
       router.refresh()
     })
   }
@@ -249,6 +268,18 @@ export default function ItemList({ rows }: { rows: Row[] }) {
               )}
 
               {r.tag && <span className={`tag tag--${r.tag.kind}`}>{r.tag.text}</span>}
+
+              {r.restore && (
+                <button
+                  type="button"
+                  className="tagbtn"
+                  aria-label={`คืนค่าเวลาเดิมของ ${r.title}`}
+                  title="คืนค่าเวลาเดิม"
+                  onClick={() => onRestoreTime(r)}
+                >
+                  คืนค่า
+                </button>
+              )}
 
               {movable && (
                 <button

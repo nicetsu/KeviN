@@ -14,6 +14,8 @@ export type DayEntry = {
   /** "09:00–11:00" หรือ "14:30" · null = ไม่มีเวลา */
   time: string | null
   detail: string
+  /** ตั้งใจไม่ไป · ยังอยู่ในรายการข้างล่างแบบจาง แต่ไม่นับเป็นจุดบนช่องวัน */
+  skipped?: boolean
 }
 
 const COLOR: Record<EntryKind, string> = {
@@ -53,8 +55,11 @@ export default function MonthGrid({
   const kept = weeks.filter((w) => w.some((d) => d.slice(0, 7) === monthKey.slice(0, 7)))
 
   const entriesOf = (d: string) => byDay[d] ?? []
+
+  // จุดบนช่องวันตอบคำถามว่า "วันนั้นติดอะไรไหม" · สิ่งที่ตั้งใจไม่ไปแล้วจึงไม่นับ
+  // แต่ยังอยู่ในรายการข้างล่างแบบจาง เพื่อให้ย้อนดูได้ว่าเคยตัดสินใจอะไรไว้
   const dotKinds = (d: string): EntryKind[] => {
-    const set = new Set(entriesOf(d).map((e) => e.kind))
+    const set = new Set(entriesOf(d).filter((e) => !e.skipped).map((e) => e.kind))
     return (['class', 'event', 'due', 'done'] as EntryKind[]).filter((k) => set.has(k))
   }
 
@@ -111,7 +116,7 @@ export default function MonthGrid({
         <p className="none">วันนี้ไม่มีอะไร</p>
       ) : (
         chosen.map((e, i) => (
-          <div className="row" key={`${e.title}-${i}`}>
+          <div className={`row${e.skipped ? ' row--skip' : ''}`} key={`${e.title}-${i}`}>
             <span className="row__stripe" style={{ background: COLOR[e.kind] }} />
             <div className="row__body">
               <div className="row__title">{e.title}</div>
@@ -119,6 +124,7 @@ export default function MonthGrid({
                 {[e.time, e.detail].filter(Boolean).join(' · ')}
               </div>
             </div>
+            {e.skipped && <span className="tag tag--skip">ไม่ไป</span>}
           </div>
         ))
       )}

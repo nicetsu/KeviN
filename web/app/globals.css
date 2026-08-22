@@ -151,6 +151,9 @@ html, body { margin: 0; padding: 0; }
 
 /* เสร็จแล้ว: จาง + ขีดฆ่า · ไม่ซ่อน */
 .row--done .row__title { text-decoration: line-through; }
+/* ใช้กับรายการในโหมดเดือน · หน้าวันนี้ใช้ row--done ที่มีอยู่แล้ว */
+.row--skip { opacity: 0.45; }
+.row--skip .row__title { text-decoration: line-through; }
 .row--done { opacity: 0.38; }
 
 /* ---- ช่องติ๊ก · มีเฉพาะ task ---- */
@@ -175,6 +178,7 @@ html, body { margin: 0; padding: 0; }
 .tag--soon { color: var(--due); border-color: rgba(224, 137, 126, 0.32); }
 .tag--sched { color: var(--sched); border-color: rgba(121, 194, 208, 0.32); }
 .tag--event { color: var(--event); border-color: rgba(213, 187, 109, 0.32); }
+.tag--skip  { color: var(--faint); border-color: var(--line); }
 .tag--task { color: var(--task); border-color: rgba(116, 198, 164, 0.32); }
 .tag--brand { color: var(--brand); border-color: rgba(165, 148, 255, 0.38); }
 
@@ -335,6 +339,14 @@ html, body { margin: 0; padding: 0; }
 }
 /* กิจกรรมใช้สีของตัวเอง · คาบเรียนกับกิจกรรมอยู่บนแกนเดียวกันจึงต้องแยกออกด้วยตา */
 .wk__blk--event { border-left-color: var(--event); background: var(--event-soft); }
+
+/* ตั้งใจไม่ไป · จางลงแต่ยังอยู่ที่เดิม (หลัก UX ข้อ 5 "ไม่มีอะไรหายเงียบ ๆ")
+   ถ้าซ่อนทิ้ง จะไม่มีทางรู้ว่าเคยตัดสินใจไว้ หรือกดผิดแล้วคาบหายไปเฉย ๆ */
+.wk__blk--skip { opacity: 0.4; }
+.wk__blk--skip b { text-decoration: line-through; }
+
+/* เวลาถูกตัด · ขอบประบอกว่าบล็อกนี้สั้นกว่าของจริง */
+.wk__blk--trim { border-left-style: dashed; border-left-width: 3px; }
 .wk__blk b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
 .wk__blk span { color: var(--muted); font-family: var(--f-mono); font-size: 0.62rem; }
 
@@ -424,6 +436,17 @@ html, body { margin: 0; padding: 0; }
 .hint { display: block; margin-top: 0.25rem; color: var(--faint);
         font-family: var(--f-mono); font-size: var(--s--2); }
 
+/* ปุ่มทรงเดียวกับป้าย .tag แต่กดได้
+   สีม่วงเพราะกฎ "ม่วงคือสิ่งที่กดได้ · สีที่เหลือคือข้อมูล" (doc/DESIGN.md)
+   ป้ายอย่าง "เลยกำหนด" เป็นข้อมูลจึงใช้สีชนิดข้อมูล ส่วนอันนี้เป็นการกระทำ */
+.tagbtn {
+  font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.06em;
+  line-height: 1.5; padding: 0.05rem 0.6rem; border-radius: var(--r-pill);
+  border: 1px solid rgba(165, 148, 255, 0.38); color: var(--brand);
+  background: none; cursor: pointer;
+  flex: none; align-self: center; white-space: nowrap;
+}
+.tagbtn:hover { border-color: var(--brand); background: var(--brand-soft); }
 .linkbtn { background: none; border: none; color: var(--due);
            font: inherit; font-size: var(--s--1); cursor: pointer; padding: 0; }
 

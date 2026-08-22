@@ -96,7 +96,12 @@ export default function WeekGrid({
           return (
             <div
               key={entryKey(entry)}
-              className={`wk__blk${entry.kind === 'event' ? ' wk__blk--event' : ''}`}
+              className={[
+                'wk__blk',
+                entry.kind === 'event' ? 'wk__blk--event' : '',
+                entry.skipped ? 'wk__blk--skip' : '',
+                entry.trimmed ? 'wk__blk--trim' : '',
+              ].filter(Boolean).join(' ')}
               style={{
                 gridRow: dow + 2,
                 gridColumn: `${colOf(s)} / span ${span}`,
@@ -107,6 +112,7 @@ export default function WeekGrid({
                 `${entry.title} ${spanLabel(entry)}`,
                 entry.kind === 'event' ? entry.project_name : null,
                 entry.location,
+                entry.skipped ? 'ตั้งใจไม่ไป' : entry.trimmed ? 'เวลาถูกตัด' : null,
               ]
                 .filter(Boolean)
                 .join(' · ')}

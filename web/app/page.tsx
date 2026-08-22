@@ -168,10 +168,18 @@ export default async function TodayPage() {
         ? [e.project_name, clock, e.location]
         : [clock, e.location, e.label]
       ).filter(Boolean).join(' · '),
-      done: false,
+      // ตั้งใจไม่ไปแล้ว ให้จางแบบเดียวกับงานที่ติ๊กเสร็จ — ยังอยู่ที่เดิม ไม่หายไป
+      done: e.skipped,
       checkable: false,
-      tag: null,
+      tag: e.skipped
+        ? { text: 'ไม่ไป', kind: 'skip' as const }
+        : e.trimmed
+          ? { text: 'ตัดเวลา', kind: 'sched' as const }
+          : null,
       href: eventHref(e),
+      restore: e.skipped || e.trimmed
+        ? { kind: e.kind, sourceId: e.source_id, occursOn: e.occurs_on }
+        : null,
     }
   })
 
@@ -183,7 +191,11 @@ export default async function TodayPage() {
   //
   // กฎเวลาชนกัน: อันที่เริ่มก่อนชนะ · เริ่มพร้อมกันให้อันที่จบก่อนชนะ
   // ไม่แยกว่าเป็น event หรือคาบเรียน กฎเดียวใช้ได้หมดและเดาผลได้เสมอ
+  //
+  // สิ่งที่ตั้งใจไม่ไปแล้วต้องไม่ถูกหยิบมาเป็น "ถัดไป" — ไม่งั้นการ์ดจะบอกให้ไป
+  // คาบที่เพิ่งบอกไปว่าจะไม่ไป · แต่มันยังอยู่ในรายการข้างล่างแบบจางเหมือนเดิม
   const timed = entries
+    .filter((e) => !e.skipped)
     .map((e) => ({ e, start: entryStartMs(e), end: entryEndMs(e) }))
     .sort((a, b) => a.start - b.start || a.end - b.end)
 

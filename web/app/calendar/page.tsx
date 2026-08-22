@@ -85,6 +85,7 @@ export default async function CalendarPage({
           ? [e.project_name, e.location]
           : [e.location, e.label]
         ).filter(Boolean).join(' · '),
+        skipped: e.skipped,
       })
     }
     for (const it of items) {
