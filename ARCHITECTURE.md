@@ -187,6 +187,7 @@ Next.js 16 · App Router · ไม่ใช้ Tailwind (ใช้ CSS custom pr
 | `/project/[id]/schedule` | S6 ตัวจัดการช่วงเวลา | สองโหมดการซ้ำ + ตัวอย่างสด |
 | `/project/[id]/event/[eventId]` | หน้ากิจกรรม | กำหนดการ + งานที่ผูกไว้ · **เป็น route ไม่ใช่ overlay เพราะต้องมี URL ให้ Claude ส่งลิงก์ได้** |
 | `/project/[id]/event/[eventId]/edit` · `/event/new` | ตัวแก้กิจกรรม | โครงเดียวกับ S6 · มีตัวอย่างสดว่าเวลาจบที่เว้นว่างถูกเติมเป็นอะไร |
+| `/kevin` | ประตูที่สาม | แชต + โหมดโทร · สลับโหมดได้ · ดู `doc/CHAT.md` |
 | `/settings` | S9 ตั้งค่าแจ้งเตือน | ขอสิทธิ์ + ปุ่มทดสอบ |
 
 S7 แผงรายละเอียด และ S8 เพิ่มเร็ว เป็น **overlay** ไม่ใช่ route
@@ -222,7 +223,7 @@ S7 แผงรายละเอียด และ S8 เพิ่มเร็
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 185 เคส · ใช้เวลาไม่ถึงวินาที
+npm test --prefix web        # 220 เคส · ใช้เวลาไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เทสต์ | เคส |
@@ -234,9 +235,12 @@ npm test --prefix web        # 185 เคส · ใช้เวลาไม่�
 | `lib/agenda.ts` | เติมเวลาจบของกำหนดการที่เว้นว่าง | `test/agenda.test.ts` | 15 |
 | `lib/calendar.ts` | เวลาของบล็อกปฏิทิน รวมบล็อกที่ชนเที่ยงคืน | `test/calendar.test.ts` | 11 |
 | `lib/layout.ts` | จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์ | `test/layout.test.ts` | 10 |
-| `lib/ai/tools.ts` | ชั้น tool อ่านอย่างเดียวของประตูที่สาม | `test/tools.test.ts` | 20 |
+| `lib/ai/tools.ts` | ชั้น tool อ่านอย่างเดียวของประตูที่สาม | `test/tools.test.ts` | 25 |
+| `lib/ai/lang.ts` | ล็อกภาษาไทย/อังกฤษ | `test/lang.test.ts` | 13 |
 | `lib/ai/visibility.ts` | Area ไหนออกจากเครื่องไปหาโมเดลได้ | `test/visibility.test.ts` | 11 |
-| `lib/ai/prompt.ts` | prompt ของประตูแอป | `test/prompt.test.ts` | 7 |
+| `lib/ai/prompt.ts` | prompt ของประตูแอป | `test/prompt.test.ts` | 9 |
+| `lib/chat/links.ts` | กันผู้ช่วยยื่นลิงก์ที่ไม่มีอยู่จริง | `test/links.test.ts` | 9 |
+| *(ด่านกันเขียน)* | อ่านซอร์ส `lib/ai/**` หาทางเขียนที่หลุดเข้ามา | `test/guard.test.ts` | 6 |
 
 ไฟล์กลุ่มนี้เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ · **แก้เมื่อไหร่ให้รันเทสต์ทุกครั้ง**
 และถ้าเพิ่มพฤติกรรมใหม่ ให้เขียนเคสก่อนแก้
@@ -371,7 +375,7 @@ Safari บน iPhone ไม่ให้เว็บทั่วไปส่ง p
 # รันเว็บในเครื่อง (พอร์ต 3001)
 npm run dev --prefix web
 
-# รันเทสต์ตรรกะแกน (185 เคส)
+# รันเทสต์ตรรกะแกน (220 เคส)
 npm test --prefix web
 
 # deploy  (--scope ขาดไม่ได้ ไม่งั้นตอบ Not authorized เพราะ project อยู่ใต้ team
@@ -417,7 +421,12 @@ KeviN/
 └── web/                     Next.js app
     ├── vercel.json          ตรึง region ไว้ที่โตเกียว ห้ามลบ
     ├── tsconfig.test.json   คอนฟิกคอมไพล์เทสต์เป็น CommonJS ลง .test-build/
-    ├── test/                เทสต์ตรรกะแกน 185 เคส · `npm test`
+    ├── test/                เทสต์ตรรกะแกน 220 เคส · `npm test`
+    ├── lib/ai/              ชั้น tool อ่านอย่างเดียว · ตัวกรอง Area · prompt · ภาษา
+    ├── lib/chat/            เรียก Gemini · เก็บบทสนทนา · ด่านตรวจลิงก์
+    ├── lib/voice/           สายคุยกับ Live API (ไมค์ · ws · เล่นเสียง · tool)
+    ├── app/kevin/           หน้าประตูที่สาม
+    ├── app/api/             read/[tool] · chat · voice/token · voice/transcript
     ├── app/*/loading.tsx    โครงร่างระหว่างรอ · มีครบทุกหน้า
     ├── components/Skeleton.tsx   ชิ้นส่วนของโครงร่างข้างบน
     ├── app/project/[id]/event/   หน้ากิจกรรม · ตัวแก้ · ปุ่มเพิ่มงานที่ผูกกับกิจกรรม
