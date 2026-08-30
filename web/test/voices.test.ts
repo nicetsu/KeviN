@@ -9,9 +9,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readVoice, resolveVoice, VOICES, VOICE_AUTO } from '../lib/ai/voices'
 
-test('ค่าตั้งต้น: ไทยได้เสียงเริ่มต้นของโมเดล อังกฤษได้ Fenrir', () => {
-  assert.equal(resolveVoice(VOICE_AUTO, 'th'), '')
+test('ค่าตั้งต้น: ไทยได้ Charon อังกฤษได้ Fenrir', () => {
+  // เจ้าของฟังจริงแล้วเคาะทีละภาษา · เสียงที่เพราะในภาษาหนึ่งไม่ได้แปลว่าเพราะในอีกภาษา
+  assert.equal(resolveVoice(VOICE_AUTO, 'th'), 'Charon')
   assert.equal(resolveVoice(VOICE_AUTO, 'en'), 'Fenrir')
+})
+
+test('ค่าตั้งต้นให้เสียงต่างกันสองภาษา — ไม่งั้นแถวแรกไม่ต้องแยกตามภาษาก็ได้', () => {
+  assert.notEqual(resolveVoice(VOICE_AUTO, 'th'), resolveVoice(VOICE_AUTO, 'en'))
 })
 
 test('เสียงที่เลือกเองใช้ทั้งสองภาษาเหมือนกัน', () => {
@@ -21,10 +26,12 @@ test('เสียงที่เลือกเองใช้ทั้งส�
   }
 })
 
-test('เลือก Fenrir เองต่างจากค่าตั้งต้น — ไทยก็ได้ Fenrir ด้วย', () => {
+test('เลือกเสียงเองต่างจากค่าตั้งต้น — เลือก Fenrir แล้วไทยก็ได้ Fenrir ด้วย', () => {
   // ถ้าสองอย่างนี้ให้ผลเหมือนกัน แถวแรกในรายการก็ไม่มีความหมาย
   assert.notEqual(resolveVoice('Fenrir', 'th'), resolveVoice(VOICE_AUTO, 'th'))
   assert.equal(resolveVoice('Fenrir', 'th'), 'Fenrir')
+  // และเลือก Charon เองก็ต้องได้ Charon ทั้งสองภาษา ไม่ใช่แค่ไทย
+  assert.equal(resolveVoice('Charon', 'en'), 'Charon')
 })
 
 test('ค่าที่ไม่รู้จักถูกปัดกลับเป็นค่าตั้งต้น ไม่ส่งดิบไปหา Google', () => {
