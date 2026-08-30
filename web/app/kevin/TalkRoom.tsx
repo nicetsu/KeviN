@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import Link from 'next/link'
 import type { StoredMessage } from '@/lib/chat/store'
 import Autolink from '@/lib/autolink'
+import VoiceCall, { type VoiceTurn } from './VoiceCall'
 
 type Mode = 'chat' | 'voice'
 
@@ -117,6 +117,28 @@ export default function TalkRoom({
     setBusy(false)
   }
 
+  /*
+   * วางสายแล้วเก็บบทสนทนาลงประวัติเดียวกับแชต
+   *
+   * ทำให้สลับมาพิมพ์ต่อได้โดยมันจำว่าเมื่อกี้คุยอะไร — และเป็นเหตุผลที่
+   * สองโหมดเขียนลง `conversations` ใบเดียวกันตั้งแต่ออกแบบ
+   */
+  async function saveVoice(voiceTurns: VoiceTurn[]) {
+    setLines((prev) => [...prev, ...voiceTurns.map((t) => ({ ...t, via: 'voice' as const }))])
+    try {
+      const res = await fetch('/api/voice/transcript', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ conversationId, turns: voiceTurns }),
+      })
+      const data = await res.json()
+      if (data.ok && data.conversationId) setConversationId(data.conversationId)
+      else if (!data.ok) setError(`คุยจบแล้วแต่บันทึกไม่สำเร็จ · ${data.error ?? ''}`)
+    } catch {
+      setError('คุยจบแล้วแต่บันทึกไม่สำเร็จ')
+    }
+  }
+
   return (
     <div className="talk">
       <div className="seg seg--wide" role="tablist" aria-label="โหมดการคุย">
@@ -195,7 +217,7 @@ export default function TalkRoom({
           </form>
         </>
       ) : (
-        <VoiceIdle />
+        <VoiceCall onTranscript={saveVoice} />
       )}
     </div>
   )
@@ -207,41 +229,6 @@ function Bubble({ line }: { line: Line }) {
     <div className={`msg${mine ? ' msg--me' : ' msg--ai'}`}>
       <Autolink text={line.content} />
       {line.via === 'voice' && <span className="msg__via">จากสาย</span>}
-    </div>
-  )
-}
-
-/**
- * โหมดโทร — **ยังไม่ต่อสายจริงในขั้นนี้**
- *
- * หน้าจอถูกต้องตามดีไซน์แล้ว (สถานะนิ่งเป็นค่าตั้งต้น · ต้องกดก่อนถึงเริ่ม)
- * แต่ปุ่มยังไม่ทำงานจนกว่าจะทำขั้น 3 · บอกตรง ๆ ดีกว่าปุ่มที่กดแล้วเงียบ
- */
-function VoiceIdle() {
-  return (
-    <div className="stage">
-      <div className="orb" aria-hidden="true">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.6" strokeLinecap="round">
-          <rect x="9" y="2.5" width="6" height="11" rx="3" />
-          <path d="M5 11a7 7 0 0 0 14 0" />
-          <path d="M12 18v3.5" />
-        </svg>
-      </div>
-      <div className="stage__state">
-        พร้อมคุยแล้ว
-        <small>ไมค์ยังปิดอยู่</small>
-      </div>
-      <p className="muted stage__note">
-        ถามเรื่องตาราง งาน และกิจกรรมได้
-        <br />
-        <span className="mono-hint">ยังแก้ข้อมูลไม่ได้จากที่นี่</span>
-      </p>
-
-      <p className="alert alert--gap" style={{ maxWidth: '22rem' }}>
-        โหมดโทรยังต่อสายไม่ได้ในเวอร์ชันนี้ — หน้าจอพร้อมแล้ว แต่ยังไม่ได้ต่อกับ Live API
-        <br />
-        <Link href="/kevin">ใช้โหมดแชตไปก่อนได้</Link>
-      </p>
     </div>
   )
 }

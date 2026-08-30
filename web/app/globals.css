@@ -870,3 +870,41 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 .stage__note { font-size: var(--s--1); }
 .mono-hint { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
+/* ---- โหมดโทร ---- */
+.stage__go { margin-top: 0.4rem; padding-left: 1.6rem; padding-right: 1.6rem; }
+
+.call__timer {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--sched);
+  letter-spacing: 0.04em;
+}
+.call__dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--sched);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+@media (prefers-reduced-motion: reduce) { .call__dot { animation: none } }
+
+/* ฟ้า = กำลังฟัง (ความหมายเดียวกับ "กำลังเกิดขึ้น" บนการ์ดใหญ่) · ม่วง = กำลังตอบ */
+.orb--live  { border-color: #21444C; background: var(--sched-soft); }
+.orb--think { border-color: var(--line); background: var(--raised); }
+
+.wave { display: flex; align-items: center; gap: 4px; height: 42px; }
+.wave u { display: block; width: 4px; border-radius: 2px; }
+
+.caption {
+  width: 100%; max-width: 22rem; text-align: left;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-tile); padding: 0.6rem 0.75rem;
+  font-size: var(--s--1); line-height: 1.6;
+}
+.caption b {
+  display: block; font-family: var(--f-mono); font-size: var(--s--2);
+  font-weight: 400; color: var(--faint); letter-spacing: 0.04em; margin-bottom: 0.15rem;
+}
+
+.call__bar { display: flex; gap: 0.6rem; width: 100%; max-width: 22rem; margin-top: 0.3rem; }
+.call__bar > * { flex: 1; }
+.btn--end { background: var(--due-soft); color: var(--due); border-color: rgba(224,137,126,0.4); }
+.btn--end:hover { background: var(--due-soft); box-shadow: 0 6px 24px -8px rgba(224,137,126,0.5); }
