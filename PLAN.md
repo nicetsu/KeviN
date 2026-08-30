@@ -318,8 +318,8 @@ Orientation Day · รับ Booklet · Mentoring Session · Final Round Pitchin
 - [x] `/api/chat` + วน tool ได้สูงสุด 4 รอบ · `runtime = 'nodejs'`
 - [x] `lib/chat/store.ts` เขียนประวัติ (อยู่นอก `lib/ai/**` เพราะไฟล์นี้เขียนข้อมูล)
 - [x] `lib/chat/gemini.ts` เรียก REST ตรง ไม่เพิ่ม dependency · key อยู่ฝั่งเซิร์ฟเวอร์เท่านั้น
-- [x] migration `20260830120000_conversations.sql` — **เขียนแล้วแต่ยังไม่ได้รัน**
-- [ ] **ยังรัน migration ไม่ได้** จนกว่าเจ้าของจะอนุมัติ (แตะ DB จริง)
+- [x] migration `20260830120000_conversations.sql` — **รันบน DB จริงแล้ว 30 ส.ค.** RLS + policy ครบ 3 ตาราง
+- [x] `doc/SCHEMA.sql` อัปเดตให้ตรงกับของจริงแล้ว (11 ตาราง)
 - [ ] **ยังไม่มี `GEMINI_API_KEY`** ใน env จึงยังทดสอบคำตอบจริงไม่ได้
 - [ ] streaming ทีละคำ — ตอนนี้รอคำตอบเต็มก้อนก่อนแสดง
 - [ ] การ์ดทางลัด — คำปฏิเสธพาไปหน้าที่แก้ได้ (ตอนนี้ prompt สั่งให้ส่งลิงก์เป็นข้อความ
@@ -327,7 +327,7 @@ Orientation Day · รับ Booklet · Mentoring Session · Final Round Pitchin
 
 **เสร็จเมื่อ:** พิมพ์ถามบนมือถือแล้วได้คำตอบที่ตรงกับ DB · **ใช้งานได้จริงโดยไม่ต้องรอเสียง**
 
-⚠️ **โค้ดครบแล้วแต่ยังรันไม่ได้** ติดสองอย่างที่ต้องให้เจ้าของทำ — รัน migration และใส่ API key
+⚠️ **โค้ดครบ ตารางพร้อม เหลืออย่างเดียวคือ `GEMINI_API_KEY`**
 
 ### ขั้น 3 · โหมดโทร
 
