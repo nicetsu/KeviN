@@ -502,11 +502,14 @@ grant execute on function public.claim_due_reminders() to service_role;
 -- SEED · Area ทั้งสี่
 -- แทน <YOUR_USER_ID> ด้วย uuid ของบัญชีตัวเอง (จาก auth.users)
 -- =====================================================================
+-- ⚠️ `color` เป็นคีย์ gradient เก็บแยกจาก `name` โดยตั้งใจ
+--    เปลี่ยนชื่อ Area ได้โดยไม่กระทบสี · คีย์จึงไม่ตรงกับชื่อแล้วหลังเปลี่ยนชื่อ
+--    เมื่อ 31 ส.ค. 2026 (Hackathon→Competition · Financial→Personal · Personal→General)
 -- insert into public.areas (user_id, name, color, sort_order) values
---   ('<YOUR_USER_ID>', 'Class',     'class', 0),
---   ('<YOUR_USER_ID>', 'Hackathon', 'hack',  1),
---   ('<YOUR_USER_ID>', 'Financial', 'fin',   2),
---   ('<YOUR_USER_ID>', 'Personal',  'pers',  3);
+--   ('<YOUR_USER_ID>', 'Class',       'class', 0),
+--   ('<YOUR_USER_ID>', 'Competition', 'hack',  1),
+--   ('<YOUR_USER_ID>', 'Personal',    'fin',   2),
+--   ('<YOUR_USER_ID>', 'General',     'pers',  3);
 
 
 -- =====================================================================
