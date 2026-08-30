@@ -2,29 +2,30 @@
  * lib/ai/visibility.ts — เส้นแบ่งว่า Area ไหนออกจากเครื่องไปหาโมเดลได้
  *
  * ไฟล์นี้พลาดแล้วไม่มีอะไรฟ้อง — ข้อมูลไหลออกไปโดยหน้าจอยังดูปกติทุกอย่าง
- * เคสที่สำคัญที่สุดคือเคส "ไม่รู้จัก" ซึ่งต้องตอบว่าไม่ปล่อย ไม่ใช่ปล่อย
+ *
+ * ⚠️ **เทสต์กลไกแยกจากเทสต์นโยบาย** — ของเดิมฝังรายชื่อ Area ปัจจุบันไว้ใน
+ *    หลายเคส พอเจ้าของเปลี่ยนใจว่า Area ไหนเห็นได้ ต้องแก้เทสต์ทั้งกอง
+ *    ทั้งที่กลไกไม่ได้เปลี่ยนเลย · เคสกลไกจึงใช้ชื่อสมมติที่ไม่มีในรายการ
+ *    และมีเคสนโยบายแค่เคสเดียวที่แก้ง่ายเมื่อเจ้าของเปลี่ยนใจ
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { areaIsVisible, keepVisible, VISIBLE_AREAS } from '../lib/ai/visibility'
 
-test('Area ที่อนุญาตผ่านได้', () => {
-  assert.equal(areaIsVisible('Class'), true)
-  assert.equal(areaIsVisible('Competition'), true)
+/** Area สมมติที่ยังไม่ได้อยู่ในรายการ — แทน "Area ที่สร้างใหม่วันหน้า" */
+const UNLISTED = 'Health'
+
+// ---- กลไก ----
+
+test('Area ที่ไม่อยู่ในรายการไม่ผ่าน — นี่คือทั้งหมดที่ allowlist ทำ', () => {
+  // ประโยชน์ที่แท้จริงของ allowlist ไม่ใช่การกรอง Area ที่มีอยู่วันนี้
+  // แต่คือ Area ที่สร้างใหม่วันหน้าถูกซ่อนไว้ก่อนโดยไม่ต้องมีใครไปสั่ง
+  assert.equal(areaIsVisible(UNLISTED), false)
+  assert.equal(areaIsVisible('การเงินส่วนตัว'), false)
 })
 
-test('Personal ไม่ผ่าน', () => {
-  assert.equal(areaIsVisible('Personal'), false)
-})
-
-test('General ไม่ผ่าน', () => {
-  assert.equal(areaIsVisible('General'), false)
-})
-
-test('Area ที่ยังไม่รู้จักไม่ผ่าน — allowlist ต้องพลาดไปทางเงียบ', () => {
-  // ถ้าเป็น blocklist วันหนึ่งสร้าง Area "การเงินส่วนตัว" ขึ้นมาจะรั่วทันที
-  assert.equal(areaIsVisible('Hackathon'), false)  // ชื่อเก่าที่เลิกใช้แล้ว
-  assert.equal(areaIsVisible('Health'), false)
+test('Area ที่อยู่ในรายการผ่าน', () => {
+  for (const name of VISIBLE_AREAS) assert.equal(areaIsVisible(name), true, name)
 })
 
 test('เทียบชื่อแบบตรงตัว ตัวพิมพ์ต่างกันไม่ผ่าน', () => {
@@ -42,9 +43,8 @@ test('null · undefined · สตริงเปล่า ไม่ผ่าน'
 test('keepVisible คัดเฉพาะแถวที่ปล่อยได้', () => {
   const rows = [
     { id: 'a', area: 'Class' },
-    { id: 'b', area: 'Personal' },
-    { id: 'c', area: 'Competition' },
-    { id: 'd', area: 'General' },
+    { id: 'b', area: UNLISTED },
+    { id: 'c', area: 'General' },
   ]
   assert.deepEqual(
     keepVisible(rows, (r) => r.area).map((r) => r.id),
@@ -61,7 +61,7 @@ test('keepVisible ตัดแถวที่หา Area ไม่เจอท�
 })
 
 test('keepVisible ไม่แก้อาร์เรย์ต้นฉบับ', () => {
-  const rows = [{ area: 'Class' }, { area: 'General' }]
+  const rows = [{ area: 'Class' }, { area: UNLISTED }]
   keepVisible(rows, (r) => r.area)
   assert.equal(rows.length, 2)
 })
@@ -70,8 +70,15 @@ test('รายการว่างได้รายการว่าง', ()
   assert.deepEqual(keepVisible([], () => 'Class'), [])
 })
 
-test('VISIBLE_AREAS ไม่มี Personal หรือ General หลุดเข้าไป', () => {
-  // เทสต์ตัวนี้มีไว้ให้พังตอนมีคนเผลอเติมชื่อผิดลงในรายการ
-  assert.equal(VISIBLE_AREAS.includes('Personal'), false)
-  assert.equal(VISIBLE_AREAS.includes('General'), false)
+// ---- นโยบายปัจจุบัน · เคสเดียว แก้ที่นี่ที่เดียวเมื่อเจ้าของเปลี่ยนใจ ----
+
+test('นโยบายวันนี้: เปิดครบทั้งสี่ Area ที่มีอยู่จริง', () => {
+  // เจ้าของยืนยัน 31 ส.ค. 2026 ว่าไม่มีข้อมูลสำคัญใน Personal กับ General
+  assert.deepEqual([...VISIBLE_AREAS].sort(), ['Class', 'Competition', 'General', 'Personal'])
+})
+
+test('ชื่อ Area เก่าที่เลิกใช้แล้วไม่หลงเหลืออยู่ในรายการ', () => {
+  for (const old of ['Hackathon', 'Financial']) {
+    assert.equal(VISIBLE_AREAS.includes(old), false, `${old} เป็นชื่อเก่า`)
+  }
 })
