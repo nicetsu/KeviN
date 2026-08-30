@@ -12,6 +12,7 @@
 import { createClient, currentUserId } from '@/lib/supabase/server'
 import { toolDeclarations } from '@/lib/ai/tools'
 import { systemPrompt } from '@/lib/ai/prompt'
+import { readLangs } from '@/lib/ai/lang'
 import { bangkokToday } from '@/lib/time'
 
 export const runtime = 'nodejs'
@@ -24,7 +25,7 @@ const VOICE_MODEL = process.env.GEMINI_VOICE_MODEL ?? 'gemini-3.1-flash-live-pre
 const START_WINDOW_MS = 60_000
 const LIFETIME_MS = 30 * 60_000
 
-export async function POST() {
+export async function POST(request: Request) {
   const supabase = await createClient()
   const userId = await currentUserId(supabase)
   if (!userId) {
@@ -34,6 +35,15 @@ export async function POST() {
   const key = process.env.GEMINI_API_KEY
   if (!key) {
     return Response.json({ ok: false, error: 'ยังไม่ได้ตั้ง GEMINI_API_KEY ฝั่งเซิร์ฟเวอร์' }, { status: 500 })
+  }
+
+  // ภาษาถูกล็อกไปกับ token ด้วย · เปลี่ยนภาษาระหว่างสายไม่ได้ ต้องวางแล้วโทรใหม่
+  // ซึ่งถูกแล้ว เพราะ setup ของ Live API แก้กลางสายไม่ได้อยู่แล้ว
+  let langs
+  try {
+    langs = readLangs(((await request.json()) as { langs?: unknown }).langs)
+  } catch {
+    langs = readLangs(undefined)
   }
 
   const now = Date.now()
@@ -51,7 +61,7 @@ export async function POST() {
       bidiGenerateContentSetup: {
         model: `models/${VOICE_MODEL}`,
         generationConfig: { responseModalities: ['AUDIO'] },
-        systemInstruction: { parts: [{ text: systemPrompt('voice', bangkokToday().dateKey) }] },
+        systemInstruction: { parts: [{ text: systemPrompt('voice', bangkokToday().dateKey, langs) }] },
         tools: [{ functionDeclarations: toolDeclarations() }],
         // ได้ transcript ทั้งสองฝั่งมาฟรี — เอาไปขึ้นคำบรรยายและเก็บลงประวัติ
         inputAudioTranscription: {},

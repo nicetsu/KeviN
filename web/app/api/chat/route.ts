@@ -9,6 +9,7 @@ import { createClient, currentUserId } from '@/lib/supabase/server'
 import { readOnlyDb } from '@/lib/ai/supabaseDb'
 import { runTool, toolDeclarations } from '@/lib/ai/tools'
 import { systemPrompt } from '@/lib/ai/prompt'
+import { readLangs } from '@/lib/ai/lang'
 import { generate, GeminiError, type Content } from '@/lib/chat/gemini'
 import { sanitizeLinks } from '@/lib/chat/links'
 import {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ ok: false, error: 'ยังไม่ได้ล็อกอิน' }, { status: 401 })
   }
 
-  let body: { text?: unknown; conversationId?: unknown; history?: unknown }
+  let body: { text?: unknown; conversationId?: unknown; history?: unknown; langs?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest) {
 
   const db = await readOnlyDb()
   const tools = toolDeclarations()
-  const system = systemPrompt('chat', today)
+  // ภาษาที่ผู้ใช้ตั้งไว้ · ค่าที่ไม่รู้จักถูกปัดกลับเป็นค่าตั้งต้น ไม่ใช่ส่งดิบเข้า prompt
+  const system = systemPrompt('chat', today, readLangs(body.langs))
 
   let reply = ''
   try {

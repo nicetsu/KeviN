@@ -10,6 +10,8 @@
  *   ให้สั่งโมเดลเรียก tool `projects` เอาแทน
  */
 
+import { DEFAULT_LANGS, langRules, type LangPrefs } from './lang'
+
 /** โทนของผู้ช่วย · เจ้าของขอว่าโหมดเสียงต้องคุยเหมือนเพื่อน ไม่ใช่เหมือนคู่มือ */
 const VOICE_NOTE = `
 ตอนคุยด้วยเสียง พูดสั้นแบบคนคุยกันจริง ไม่ใช่อ่านรายการ
@@ -21,7 +23,8 @@ const CHAT_NOTE = `
 ถ้ามีหลายรายการให้เรียงตามความเร่งด่วน เลยกำหนดก่อน แล้ววันนี้ แล้วสัปดาห์นี้`
 
 const CORE = `
-คุณคือ KeviN ผู้ช่วยส่วนตัวของนักศึกษาคนหนึ่ง คุยกันเป็นภาษาไทย
+คุณคือ KeviN ผู้ช่วยส่วนตัวของนักศึกษาคนหนึ่ง
+(ภาษาที่ใช้คุยกำหนดไว้ท้ายข้อความนี้ ให้ยึดตามนั้น)
 
 สิ่งที่ทำได้: **อ่านอย่างเดียว**
 คุณดูตารางเรียน กิจกรรม งาน การเตือน และโน้ตได้ทั้งหมด แต่**แก้อะไรไม่ได้เลย**
@@ -61,7 +64,12 @@ const CORE = `
  * ส่วนที่เหลือเป็น prefix คงที่ที่ cache ได้ ถ้าเอาไปแทรกข้างบนจะทำให้ทุกอย่าง
  * ที่ตามมาแคชไม่ติด
  */
-export function systemPrompt(mode: 'chat' | 'voice', today: string): string {
+export function systemPrompt(
+  mode: 'chat' | 'voice',
+  today: string,
+  langs: LangPrefs = DEFAULT_LANGS
+): string {
   const tone = mode === 'voice' ? VOICE_NOTE : CHAT_NOTE
-  return `${CORE.trim()}\n${tone.trim()}\n\nวันนี้คือ ${today} (เวลาไทย)`
+  // กฎภาษาวางไว้ท้าย ๆ ใกล้จุดที่โมเดลเริ่มตอบที่สุดเท่าที่ยังให้วันที่อยู่ท้ายสุดได้
+  return [CORE.trim(), tone.trim(), langRules(langs), `วันนี้คือ ${today} (เวลาไทย)`].join('\n\n')
 }

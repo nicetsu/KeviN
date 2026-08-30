@@ -5,6 +5,8 @@ import type { StoredMessage } from '@/lib/chat/store'
 import Autolink from '@/lib/autolink'
 import VoiceCall from './VoiceCall'
 import { useCall } from '@/components/CallProvider'
+import { useLangs } from '@/lib/langPrefs'
+import LangPicker from './LangPicker'
 
 type Mode = 'chat' | 'voice'
 
@@ -69,6 +71,7 @@ export default function TalkRoom({
 }) {
   const stored = useMode()
   const call = useCall()
+  const langs = useLangs()
 
   /*
    * โควตาเสียงหมด = **ดันไปโหมดแชตให้เลย** ไม่ใช่แค่ขึ้นข้อความ
@@ -110,6 +113,7 @@ export default function TalkRoom({
           text: trimmed,
           conversationId,
           history: history.map((l) => ({ role: l.role, content: l.content })),
+          langs,
         }),
       })
       const data = await res.json()
@@ -142,6 +146,9 @@ export default function TalkRoom({
           </button>
         ))}
       </div>
+
+      {/* ล็อกตอนกำลังคุย — setup ของ Live API แก้กลางสายไม่ได้ */}
+      <LangPicker langs={langs} locked={call.state !== 'idle'} />
 
       {call.quotaOut && (
         <p className="alert alert--gap" role="status">

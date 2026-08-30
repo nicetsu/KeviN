@@ -9,6 +9,8 @@
  *    ถ้าตัวจับเวลาเด้งกลับเป็น 00:00 ผู้ใช้จะอ่านว่าสายหลุด ทั้งที่บทสนทนาต่อเนื่องอยู่
  */
 
+import type { LangPrefs } from '@/lib/ai/lang'
+
 export type CallState =
   | 'idle'
   | 'connecting'
@@ -90,7 +92,7 @@ export class VoiceCall {
   /** เวลาที่เริ่มสายจริง ๆ · **ห้ามรีเซ็ตตอนต่อสายใหม่** */
   readonly startedAt = Date.now()
 
-  constructor(private hooks: CallHooks) {}
+  constructor(private langs: LangPrefs, private hooks: CallHooks) {}
 
   // ---- วงจรชีวิต -------------------------------------------------------
 
@@ -152,7 +154,11 @@ export class VoiceCall {
   // ---- สาย -------------------------------------------------------------
 
   private async token_() {
-    const res = await fetch('/api/voice/token', { method: 'POST' })
+    const res = await fetch('/api/voice/token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ langs: this.langs }),
+    })
     const data = await res.json()
     if (!data.ok) throw new Error(data.error ?? 'ขอ token ไม่สำเร็จ')
     this.token = data.token

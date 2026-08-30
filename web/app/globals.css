@@ -924,3 +924,21 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 @media (min-width: 768px) {
   .callbar { left: calc(200px + 50%); bottom: 1.2rem; transform: translateX(-50%); }
 }
+
+/* ---- ตั้งค่าภาษา · ยุบไว้เป็นบรรทัดเดียว ---- */
+.lang { display: flex; flex-direction: column; gap: 0.5rem; }
+.lang__toggle {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 0.35rem;
+  font: inherit; font-family: var(--f-mono); font-size: var(--s--2);
+  color: var(--faint); background: none; border: 0; padding: 0.1rem 0; cursor: pointer;
+}
+.lang__toggle:hover { color: var(--muted); }
+.lang__body {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  border: 1px solid var(--line); border-radius: var(--r-tile);
+  background: var(--surface); padding: 0.7rem 0.8rem;
+}
+.lang__row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.lang__label { font-size: var(--s--1); color: var(--muted); }
+.lang__note { margin: 0; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); line-height: 1.55; }
+.lang .seg button:disabled { opacity: 0.45; cursor: default; }
