@@ -6,6 +6,7 @@ import {
 import { usePathname, useRouter } from 'next/navigation'
 import { VoiceCall as Session, type CallState, type Caption } from '@/lib/voice/session'
 import { useLangs } from '@/lib/langPrefs'
+import { redactVoiceTurns } from '@/lib/voice/transcript'
 
 export type VoiceTurn = { role: 'user' | 'assistant'; content: string }
 
@@ -79,11 +80,13 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   const flush = useCallback(() => {
     const { user, kevin } = buffer.current
     const next: VoiceTurn[] = []
+    // สิ่งที่พูดออกไปไม่ถูกเก็บ — ลงเป็นคำว่า voice แทน (lib/voice/transcript.ts)
+    // คำบรรยายสด ๆ ระหว่างสายยังโชว์ข้อความจริงอยู่ แค่ไม่ถูกบันทึก
     if (user.trim()) next.push({ role: 'user', content: user.trim() })
     if (kevin.trim()) next.push({ role: 'assistant', content: kevin.trim() })
     buffer.current = { user: '', kevin: '' }
     if (next.length) {
-      collected.current = [...collected.current, ...next]
+      collected.current = [...collected.current, ...redactVoiceTurns(next)]
       setTurns(collected.current)
     }
   }, [])

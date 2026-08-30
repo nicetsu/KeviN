@@ -11,6 +11,7 @@ import type { NextRequest } from 'next/server'
 import { createClient, currentUserId } from '@/lib/supabase/server'
 import { sanitizeLinks } from '@/lib/chat/links'
 import { saveMessages, startConversation } from '@/lib/chat/store'
+import { redactVoiceTurns } from '@/lib/voice/transcript'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
   }
 
   const raw = Array.isArray(body.turns) ? body.turns : []
-  const turns = raw
+  const spoken = raw
     .slice(0, MAX_TURNS)
     .filter((t): t is { role: 'user' | 'assistant'; content: string } =>
       !!t && typeof t === 'object' &&
@@ -46,6 +47,10 @@ export async function POST(request: NextRequest) {
       // ผ่านด่านลิงก์เหมือนฝั่งแชต — โมเดลพูดลิงก์ปลอมออกมาได้เหมือนกัน
       content: sanitizeLinks(t.content.trim()).text.slice(0, 20000),
     }))
+
+  // ⚠️ **บังคับที่นี่อีกชั้น ไม่ใช่เชื่อว่าเบราว์เซอร์ส่งมาถูกแล้ว**
+  // สิ่งที่ผู้ใช้พูดต้องไม่ไหลลง DB ไม่ว่าฝั่งจอจะถูกแก้ไปยังไงในอนาคต
+  const turns = redactVoiceTurns(spoken)
 
   if (turns.length === 0) return Response.json({ ok: true, conversationId: null, saved: 0 })
 
