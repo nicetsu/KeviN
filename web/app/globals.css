@@ -234,6 +234,27 @@ html, body { margin: 0; padding: 0; }
 .nav__item--on { color: var(--brand); font-weight: 600; }
 .nav__item--off { color: var(--faint); opacity: 0.45; cursor: default; }
 
+/*
+ * ช่อง KeviN — แคปซูล ไม่ใช่วงกลมยกขึ้น
+ *
+ * ปุ่มเพิ่มเร็วสีม่วงอยู่มุมขวาล่างของหน้าวันนี้แล้ว วงกลมม่วงอีกวงที่ห่างกัน
+ * ไม่ถึงนิ้วจะแย่งกันเป็นปุ่มหลัก และทำให้กฎ "ม่วงคือสิ่งที่กดได้" หมดความหมาย
+ * แคปซูลเด่นพอให้ตาไปเจอโดยไม่แข่ง · และเป็นช่องเดียวที่ **เปลี่ยนรูป** ตอนถูกเลือก
+ * ไม่ใช่แค่เปลี่ยนสีอักษร เพราะมันเป็นปลายทางคนละชนิดกับอีกสี่ช่อง
+ */
+.nav__item--talk {
+  color: var(--brand);
+  background: var(--brand-soft);
+  border: 1px solid #362F5C;
+  font-weight: 500;
+}
+.nav__item--talkOn {
+  color: #14121F;
+  background: var(--brand);
+  border-color: var(--brand);
+  font-weight: 600;
+}
+
 @media (min-width: 768px) {
   .nav {
     top: 0; right: auto; bottom: 0; width: 200px;
@@ -756,3 +777,101 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .newproj:hover { border-color: var(--brand); background: var(--brand-soft); }
 .newproj__form { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.5rem; align-items: center; }
 .newproj__form .input { flex: 1; min-width: 10rem; }
+
+/* =====================================================================
+   ห้องคุยกับ KeviN (ประตูที่สาม)
+   ไม่มีสี ฟอนต์ หรือรูปทรงใหม่เข้าระบบ — ยืมความหมายเดิมมาทั้งหมด
+   ฟ้า = กำลังเกิดขึ้นตอนนี้ · ม่วง = สิ่งที่กดได้ · mono = ป้ายระบบ
+   ===================================================================== */
+.talk { display: flex; flex-direction: column; gap: 0.9rem; min-height: 60vh; }
+
+/* ตัวสลับโหมด */
+.seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+}
+.seg__b {
+  font: inherit; font-size: var(--s--1); font-weight: 500;
+  padding: 0.42rem 0; border: 0; border-radius: var(--r-pill);
+  background: transparent; color: var(--faint); cursor: pointer;
+}
+.seg__b--on { background: var(--brand); color: #14121F; font-weight: 600; }
+
+/* สายข้อความ */
+.thread { display: flex; flex-direction: column; gap: 0.55rem; flex: 1; }
+
+.msg {
+  max-width: 86%; padding: 0.55rem 0.8rem;
+  border-radius: var(--r-card); font-size: var(--s-0); line-height: 1.62;
+  overflow-wrap: anywhere;
+}
+.msg--me {
+  align-self: flex-end; background: var(--brand-soft);
+  border: 1px solid #322B52; border-bottom-right-radius: 5px;
+}
+.msg--ai {
+  align-self: flex-start; background: var(--raised);
+  border: 1px solid var(--line-soft); border-bottom-left-radius: 5px;
+}
+.msg__via {
+  display: block; margin-top: 0.3rem;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+}
+
+.talk__typing {
+  align-self: flex-start; display: flex; align-items: center; gap: 0.45rem;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+  background: var(--surface); border: 1px solid var(--line-soft);
+  border-radius: var(--r-pill); padding: 0.22rem 0.7rem;
+}
+.talk__dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--sched); flex: none;
+}
+
+/* หน้าว่างตอนเปิดครั้งแรก */
+.talk__empty { padding: 2.2rem 0 1rem; text-align: center; }
+.talk__empty strong { display: block; font-size: var(--s-1); margin-bottom: 0.4rem; }
+.talk__starters { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.1rem; }
+.talk__starter {
+  font: inherit; font-size: var(--s--1); text-align: left;
+  padding: 0.6rem 0.8rem; border-radius: var(--r-tile);
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink); cursor: pointer;
+}
+.talk__starter:hover { border-color: var(--brand); }
+
+/* ช่องพิมพ์ */
+.composer {
+  display: flex; align-items: center; gap: 0.5rem;
+  position: sticky; bottom: 0; padding: 0.6rem 0 0.2rem;
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+}
+.composer__field {
+  flex: 1; min-width: 0; font: inherit; font-size: var(--s-0);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 0.6rem 0.9rem; color: var(--ink);
+}
+.composer__field::placeholder { color: var(--faint); }
+.composer__field:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+/* โหมดโทร */
+.stage {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1.05rem; text-align: center; padding: 2rem 0;
+}
+.orb {
+  width: 132px; height: 132px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+}
+.stage__state { font-size: var(--s-1); font-weight: 600; }
+.stage__state small {
+  display: block; margin-top: 0.3rem;
+  font-family: var(--f-mono); font-size: var(--s--2);
+  font-weight: 400; color: var(--faint);
+}
+.stage__note { font-size: var(--s--1); }
+.mono-hint { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
