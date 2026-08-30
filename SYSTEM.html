@@ -93,13 +93,15 @@ a{color:var(--brand)}
   <div class="kick">เอกสารระบบ</div>
   <h1>KeviN ทำงานยังไง</h1>
   <p class="lead">ผู้ช่วยส่วนตัวของนักศึกษาคนเดียว เก็บตารางเรียน งาน การเตือน และโน้ตไว้ที่เดียว
-    แล้วเปิดสองประตูให้เข้าถึง — คุยกับ Claude และเว็บแอป</p>
+    แล้วเปิด <b>สามประตู</b> ให้เข้าถึง — คุยกับ Claude ผ่าน MCP · เว็บแอป PWA ·
+    และผู้ช่วยในแอปที่ <b>อ่านอย่างเดียว</b> ทั้งพิมพ์และพูด</p>
   <div class="toc">
     <a href="#arch">สถาปัตยกรรม</a>
     <a href="#data">โครงสร้างข้อมูล</a>
     <a href="#rules">กติกาที่บังคับใน DB</a>
     <a href="#repeat">การซ้ำของตารางเรียน</a>
     <a href="#events">กิจกรรมและการตัดทอน</a>
+    <a href="#kevin">ประตูที่สาม</a>
     <a href="#push">เส้นทางแจ้งเตือน</a>
     <a href="#sec">ความปลอดภัย</a>
     <a href="#traps">กับดัก</a>
@@ -108,7 +110,8 @@ a{color:var(--brand)}
 
 <h2 id="arch"><span class="n">01</span>สถาปัตยกรรม</h2>
 <p class="sub">ทุกอย่างหมุนรอบฐานข้อมูลเดียว ไม่มีการ sync ไม่มีข้อมูลสองชุด —
-  เพราะทั้งสองประตูอ่านเขียนตารางเดียวกันตรง ๆ</p>
+  เพราะทุกประตูอ่านตารางเดียวกันตรง ๆ · ผังนี้เป็นสองประตูที่<b>เขียนข้อมูลได้</b>
+  ส่วนประตูที่สามที่อ่านอย่างเดียวอยู่ที่หัวข้อ 06</p>
 
 <div class="diagram">
 <svg viewBox="0 0 900 470" role="img" aria-label="แผนภาพสถาปัตยกรรม KeviN">
@@ -338,7 +341,86 @@ week_offsets  = [0,1,2,...] สัปดาห์ที่มีคาบนี�
 <p>แต่<b>การคืนค่าต้องมีบนเว็บ</b> เพราะหลัก UX ข้อ 5 "ไม่มีอะไรหายเงียบ ๆ" —
   ถ้าเห็นบนจอว่าคาบถูกตัด ต้องกดคืนได้จากที่เดียวกัน</p>
 
-<h2 id="push"><span class="n">06</span>เส้นทางแจ้งเตือน</h2>
+
+<h2 id="kevin"><span class="n">06</span>ประตูที่สาม — ผู้ช่วยในแอป</h2>
+<p class="sub">แชตกับโหมดโทรในหน้า <code>/kevin</code> · <b>อ่านข้อมูลได้อย่างเดียว</b> ·
+  ใช้ Gemini free tier จึงไม่มีค่าใช้จ่ายรายเดือน</p>
+
+<div class="diagram">
+<svg viewBox="0 0 900 330" role="img" aria-label="ประตูที่สาม — สองช่องทางลงมาที่ชั้น tool ชุดเดียว">
+  <defs>
+    <marker id="ar3" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#6E6B83"/>
+    </marker>
+  </defs>
+  <rect x="40" y="18" width="330" height="74" rx="14" fill="#14131F" stroke="#79C2D0"/>
+  <text x="205" y="46" text-anchor="middle" class="boxlbl">โหมดโทร</text>
+  <text x="205" y="66" text-anchor="middle" class="boxsub">เบราว์เซอร์ ↔ Gemini Live ตรง (WebSocket)</text>
+  <text x="205" y="83" text-anchor="middle" class="boxsub">ยืนยันด้วย ephemeral token ที่ล็อก config แล้ว</text>
+
+  <rect x="530" y="18" width="330" height="74" rx="14" fill="#14131F" stroke="#D5BB6D"/>
+  <text x="695" y="46" text-anchor="middle" class="boxlbl">โหมดแชต</text>
+  <text x="695" y="66" text-anchor="middle" class="boxsub">/api/chat → Gemini Flash-Lite</text>
+  <text x="695" y="83" text-anchor="middle" class="boxsub">ยืนยันด้วย cookie เดิม</text>
+
+  <path d="M205 92 L205 132 L370 132" fill="none" stroke="#6E6B83" stroke-width="1.4" marker-end="url(#ar3)"/>
+  <path d="M695 92 L695 132 L530 132" fill="none" stroke="#6E6B83" stroke-width="1.4" marker-end="url(#ar3)"/>
+  <text x="215" y="115" class="boxsub">tool call เด้งกลับมาที่เบราว์เซอร์ก่อน</text>
+  <text x="685" y="115" text-anchor="end" class="boxsub">เรียกในเซิร์ฟเวอร์ตรง ๆ</text>
+
+  <rect x="370" y="110" width="160" height="60" rx="14" fill="#14131F" stroke="#A594FF"/>
+  <text x="450" y="136" text-anchor="middle" class="boxlbl">runTool()</text>
+  <text x="450" y="156" text-anchor="middle" class="boxsub">tool อ่านอย่างเดียว</text>
+
+  <path d="M450 170 L450 200" fill="none" stroke="#6E6B83" stroke-width="1.4" marker-end="url(#ar3)"/>
+  <rect x="330" y="200" width="240" height="54" rx="14" fill="#172A24" stroke="#74C6A4"/>
+  <text x="450" y="224" text-anchor="middle" class="boxlbl">ตัวกรอง Area</text>
+  <text x="450" y="243" text-anchor="middle" class="boxsub">allowlist · Area ใหม่ถูกซ่อนไว้ก่อน</text>
+
+  <path d="M450 254 L450 282" fill="none" stroke="#6E6B83" stroke-width="1.4" marker-end="url(#ar3)"/>
+  <rect x="330" y="282" width="240" height="40" rx="14" fill="#14131F" stroke="#26253A"/>
+  <text x="450" y="308" text-anchor="middle" class="boxlbl">Supabase · RLS เดิม</text>
+</svg>
+</div>
+
+<p class="sub">เสียงต้องต่อตรงเพราะ Vercel เป็น serverless ถือ WebSocket ยาว ๆ ไม่ได้
+  แต่ API key ลงเบราว์เซอร์ก็ไม่ได้ — ephemeral token แก้ทั้งสองข้อพร้อมกัน
+  <b>แต่ tool ต้องวิ่งกลับมาที่เซิร์ฟเวอร์เราเสมอ</b> เพราะตัวกรอง Area อยู่ตรงนั้น
+  ให้เบราว์เซอร์ถาม Supabase ตรง ๆ ง่ายกว่ามาก แต่นั่นคือการข้ามตัวกรอง</p>
+
+<div class="grid2">
+  <div class="panel">
+    <h3 style="margin-top:0">สามชั้นที่กันการเขียน</h3>
+    <table style="margin:0">
+      <tr><td><code>tools.ts</code></td><td>ไม่มี tool ที่เขียนอยู่ในชุดเลย</td></tr>
+      <tr><td><code>db.ts</code></td><td>interface ไม่มีเมธอดเขียน — คอมไพล์ไม่ผ่าน</td></tr>
+      <tr><td><code>guard.test.ts</code></td><td>อ่านซอร์สจริง พังถ้ามีทางเขียนโผล่มา</td></tr>
+    </table>
+    <p style="margin:.6rem 0 0;color:var(--muted);font-size:var(--s--1)">
+      ชั้นที่ 3 <b>ไม่ใช่ role ของ Postgres</b> โดยตั้งใจ — role อ่านอย่างเดียวจะเก็บภาษี
+      ทุก migration ในอนาคต และกันได้แค่ประตูเดียวทั้งที่ประตู MCP เขียนได้อยู่แล้ว</p>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">สายเสียง</h3>
+    <table style="margin:0">
+      <tr><td>ความยาวสาย</td><td>15 นาที · ต่อใหม่ด้วย resumption handle</td></tr>
+      <tr><td>token</td><td>30 นาที — ยาวกว่าสายเท่าตัว</td></tr>
+      <tr><td>ตัวจับเวลา</td><td><b>ห้ามรีเซ็ตตอนต่อสาย</b></td></tr>
+      <tr><td>ล็อกหน้าจอ</td><td>วางสายให้เลย</td></tr>
+      <tr><td>เจ้าของสาย</td><td><code>CallProvider</code> ระดับ layout</td></tr>
+    </table>
+  </div>
+</div>
+
+<p class="note"><b>ผู้ช่วยไม่บันทึกสิ่งที่ผู้ใช้พูด</b> — เก็บเฉพาะที่ KeviN ตอบ
+  ฝั่งผู้ใช้ลงเป็น <code>- voice -</code> · บังคับสองชั้น ทั้งฝั่งเบราว์เซอร์และฝั่งเซิร์ฟเวอร์
+  ที่ยังลงแถวไว้แทนที่จะตัดทิ้ง เพราะยังเห็นจังหวะว่าคุยกันกี่รอบ</p>
+
+<p class="warn"><b>ล็อกภาษาได้แค่ที่ระดับ prompt</b> — Live API ไม่รับ language code เลย
+  จึงเป็นแรงกด ไม่ใช่การล็อก · และ <code>voiceName</code> มีผลไม่เท่ากันในแต่ละภาษา
+  ตั้งแล้วไทยเปลี่ยนแต่อังกฤษไม่เปลี่ยน จึงต้องเลือกเสียงแยกตามภาษาในโหมดค่าตั้งต้น</p>
+
+<h2 id="push"><span class="n">07</span>เส้นทางแจ้งเตือน</h2>
 
 <div class="diagram">
 <svg viewBox="0 0 900 150" role="img" aria-label="ลำดับการส่งการแจ้งเตือน">
@@ -392,7 +474,7 @@ returning *;</code></pre>
   ลงไปใน<b>คำสั่งเดียวกับที่เลือกแถว</b> ทำให้อ้างสิทธิ์ได้แค่รอบเดียว
   <b>ห้ามแยกเป็น SELECT แล้วค่อย UPDATE เด็ดขาด</b></p>
 
-<h2 id="sec"><span class="n">07</span>ความปลอดภัย</h2>
+<h2 id="sec"><span class="n">08</span>ความปลอดภัย</h2>
 
 <div class="grid2">
   <div class="panel">
@@ -402,14 +484,20 @@ returning *;</code></pre>
       <tr><td>VAPID <b>public</b></td><td>Vercel env</td></tr>
       <tr><td>service_role</td><td>Supabase Vault</td></tr>
       <tr><td>anon key</td><td>Vercel env · อยู่ในเบราว์เซอร์ได้</td></tr>
+      <tr><td>Gemini key</td><td>Vercel env · <b>ห้ามขึ้นต้น <code>NEXT_PUBLIC_</code></b></td></tr>
     </table>
+    <p style="margin:.6rem 0 0;color:var(--muted);font-size:var(--s--1)">
+      โหมดโทรต่อ Google ตรงจากเบราว์เซอร์ แต่ไม่เคยเห็น Gemini key —
+      เซิร์ฟเวอร์แลกเป็น <b>ephemeral token อายุ 30 นาที</b> ที่ล็อกโมเดลและ config ไว้แล้วให้แทน</p>
   </div>
   <div class="panel">
-    <h3 style="margin-top:0">สี่ชั้นที่กันไว้</h3>
+    <h3 style="margin-top:0">ชั้นที่กันไว้</h3>
     <p style="margin:0;color:var(--muted);font-size:var(--s--1)">
       RLS ทุกตาราง · anon key เท่านั้นฝั่งเว็บ ·
       MCP จำกัดขอบเขต <code>features=database,docs</code> ·
-      prompt สั่งให้ทวนก่อนเขียนและถามก่อนลบ
+      prompt สั่งให้ทวนก่อนเขียนและถามก่อนลบ ·
+      ประตูที่สามกันการเขียนด้วย <b>ชนิดข้อมูล</b> ไม่ใช่ prompt (หัวข้อ 06)
+      และกรอง Area ด้วย allowlist ก่อนส่งออกจากเครื่อง
     </p>
   </div>
 </div>
@@ -429,7 +517,7 @@ returning *;</code></pre>
   ต้องให้ผู้ใช้ไปกดเปิดใหม่ทุกเครื่อง สำเนาอยู่ที่ <code>web/.vapid-backup.json</code> (gitignore)
 </div>
 
-<h2 id="traps"><span class="n">08</span>กับดักที่เคยเสียเวลาไปแล้ว</h2>
+<h2 id="traps"><span class="n">09</span>กับดักที่เคยเสียเวลาไปแล้ว</h2>
 <p class="sub">ทุกข้อคือของที่เกิดขึ้นจริงในโปรเจกต์นี้ ไม่ใช่ทฤษฎี</p>
 
 <table>
@@ -446,6 +534,11 @@ returning *;</code></pre>
   <tr><td>CHECK กับ <code>at time zone</code></td><td>เป็น STABLE ไม่ใช่ IMMUTABLE — ใส่ใน CHECK ไม่ได้ กฎอย่าง "ห้ามข้ามเที่ยงคืน" จึงบังคับที่ DB ไม่ได้</td></tr>
   <tr><td><code>"24:00:00"</code></td><td><code>new Date()</code> คืน Invalid Date เงียบ ๆ ไม่ throw</td></tr>
   <tr><td><code>week_offsets</code> ≠ "ไม่ไป"</td><td>เอาไปปนกันแล้วผลบนจอถูก แต่ข้อมูลเสียถาวรและกู้ไม่ได้</td></tr>
+  <tr><td>ตัวจับเวลาสาย</td><td>ต่อสายใหม่ทุก 15 นาทีแล้ว<b>อย่ารีเซ็ต</b> ไม่งั้นคุยยาวไม่รู้ตัวจนโควตาหมด</td></tr>
+  <tr><td><code>thoughtSignature</code></td><td>ประกอบ turn ของโมเดลขึ้นใหม่เองแล้วรอบแรกผ่าน <b>รอบสองถึงพัง</b> — ต้องส่ง <code>parts</code> คืนทั้งก้อน</td></tr>
+  <tr><td><code>voiceName</code></td><td>มีผลกับบางภาษาเท่านั้น ตั้งแล้วไทยเปลี่ยนแต่อังกฤษไม่เปลี่ยน</td></tr>
+  <tr><td>ล็อกภาษา</td><td>Live API ไม่รับ language code — prompt เป็น<b>แรงกด ไม่ใช่การล็อก</b></td></tr>
+  <tr><td>โมเดลแต่งลิงก์</td><td>ห้ามใน prompt แล้วมันคิดเส้นทางใหม่ให้แทน ต้องกรอง URL ที่ระดับโค้ด</td></tr>
   <tr><td><code>next build</code> ทับ dev server</td><td>ใช้ <code>.next</code> ร่วมกัน แล้วเสิร์ฟของค้างต่อโดยขึ้น 200 ปกติ</td></tr>
 </table>
 
@@ -455,17 +548,25 @@ returning *;</code></pre>
   ตั้งแต่ก่อนเขียนโค้ดบรรทัดแรก
 </div>
 
-<h2><span class="n">09</span>ตรรกะที่มีเทสต์กำกับ</h2>
+<h2><span class="n">10</span>ตรรกะที่มีเทสต์กำกับ</h2>
 <p class="sub">ไฟล์เหล่านี้เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ — <b>แก้แล้วต้องรันเทสต์</b></p>
 
 <table>
   <tr><th>ไฟล์</th><th>ทำอะไร</th><th>เทสต์</th></tr>
-  <tr><td><code>lib/layout.ts</code></td><td>จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์</td><td>7 เคส</td></tr>
-  <tr><td><code>lib/weeks.ts</code></td><td>ตรรกะการซ้ำ + คลี่เป็นวันที่จริง</td><td>20 เคส</td></tr>
-  <tr><td><code>lib/parse.ts</code></td><td>ตีความบรรทัดเดียวเป็น item ภาษาไทย</td><td>15 เคส</td></tr>
-  <tr><td><code>lib/libraryOpen.ts</code></td><td>สถานะกาง/หุบของหน้าคลัง เก็บใน cookie</td><td>16 เคส</td></tr>
+  <tr><td><code>lib/time.ts</code></td><td>เวลาไทย · ขอบวัน · ข้ามเที่ยงคืน</td><td>44 เคส</td></tr>
+  <tr><td><code>lib/weeks.ts</code></td><td>ตรรกะการซ้ำ + คลี่เป็นวันที่จริง</td><td>28 เคส</td></tr>
+  <tr><td><code>lib/ai/tools.ts</code></td><td>ชั้น tool ของประตูที่สาม · ตรวจ input · กรอง Area</td><td>25 เคส</td></tr>
+  <tr><td><code>lib/parse.ts</code></td><td>ตีความบรรทัดเดียวเป็น item ภาษาไทย</td><td>21 เคส</td></tr>
+  <tr><td><code>lib/libraryOpen.ts</code></td><td>สถานะกาง/หุบของหน้าคลัง เก็บใน cookie</td><td>18 เคส</td></tr>
   <tr><td><code>lib/calendar.ts</code> + <code>lib/agenda.ts</code></td><td>เวลาของบล็อกปฏิทิน · การเติมเวลาจบของกำหนดการ · กิจกรรมชนคาบเรียน</td><td>26 เคส</td></tr>
+  <tr><td><code>lib/ai/lang.ts</code> · <code>voices.ts</code> · <code>prompt.ts</code></td><td>ภาษา · เสียง · prompt ที่ต้องไม่มีชื่อวิชาโผล่</td><td>30 เคส</td></tr>
+  <tr><td><code>lib/ai/visibility.ts</code></td><td>allowlist ของ Area — พลาดแล้วไม่มีอะไรฟ้อง</td><td>10 เคส</td></tr>
+  <tr><td><code>lib/layout.ts</code></td><td>จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์</td><td>10 เคส</td></tr>
+  <tr><td><code>lib/chat/links.ts</code></td><td>ตัดลิงก์ที่โมเดลแต่งขึ้นเอง</td><td>9 เคส</td></tr>
+  <tr><td><code>lib/voice/transcript.ts</code></td><td>แทนที่สิ่งที่ผู้ใช้พูดด้วย <code>- voice -</code></td><td>7 เคส</td></tr>
+  <tr><td><b><code>test/guard.test.ts</code></b></td><td><b>อ่านซอร์สจริง</b> · พังถ้ามีทางเขียนข้อมูลโผล่ในประตูที่สาม</td><td>6 เคส</td></tr>
 </table>
+<p><b>รวม 234 เคส</b> · <code>npm test --prefix web</code></p>
 <p>ฝั่ง DB มีชุดทดสอบ constraint ที่รันกับฐานข้อมูลจริงอีก <b>18 เคส</b> —
   8 เคสของกิจกรรม และ 10 เคสของการตัดทอนเวลา</p>
 

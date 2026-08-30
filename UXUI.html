@@ -165,6 +165,37 @@ td{padding:.6rem .6rem .6rem 0;border-bottom:1px solid var(--line-soft);vertical
 .wk .blk.trim{border-left-style:dashed;border-left-width:3px}
 .wk .nowline{width:2px;background:var(--brand);justify-self:start;margin-left:-1px}
 
+/* แท็บ KeviN */
+.bub{max-width:82%;padding:.45rem .7rem;border-radius:14px;font-size:var(--s--1);line-height:1.45}
+.bub.me{align-self:flex-end;background:var(--brand-soft);border:1px solid rgba(165,148,255,.3)}
+.bub.k{align-self:flex-start;background:var(--surface);border:1px solid var(--line)}
+.bub.voice{font-family:var(--f-mono);color:var(--faint);font-size:var(--s--2)}
+.bub a{color:var(--brand)}
+.compose{display:flex;gap:.5rem;align-items:center;margin-top:auto;padding-top:.7rem;
+  border-top:1px solid var(--line-soft)}
+.compose .fld{flex:1;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:.4rem .8rem;color:var(--faint);font-size:var(--s--1)}
+.compose .snd{width:1.9rem;height:1.9rem;border-radius:50%;background:var(--brand);
+  flex:none;display:flex;align-items:center;justify-content:center;color:#14131F;font-size:.8rem}
+.seg2{display:flex;gap:.3rem;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:.15rem;margin:.5rem 0}
+.seg2 span{flex:1;text-align:center;font-size:var(--s--1);padding:.25rem;border-radius:var(--r-pill);
+  color:var(--muted)}
+.seg2 span.on{background:var(--brand-soft);color:var(--brand)}
+.dial{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;gap:.5rem;padding:1.6rem 0}
+.dial .orb{width:74px;height:74px;border-radius:50%;background:var(--brand-soft);
+  border:1px solid rgba(165,148,255,.4)}
+.dial .st{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);letter-spacing:.1em}
+.dial .btn{border-radius:var(--r-pill);padding:.45rem 1.5rem;font-size:var(--s--1)}
+.dial .btn.go{background:var(--brand);color:#14131F}
+.dial .btn.stop{border:1px solid rgba(224,137,126,.45);color:var(--due)}
+.tabbar{display:flex;justify-content:space-between;align-items:flex-end;
+  border-top:1px solid var(--line);margin-top:.8rem;padding:.6rem .2rem 0}
+.tabbar span{font-size:var(--s--2);color:var(--faint);text-align:center;flex:1}
+.tabbar span.mid{color:var(--brand);border:1px solid rgba(165,148,255,.45);
+  background:var(--brand-soft);border-radius:var(--r-pill);padding:.28rem 0;flex:0 0 4.6rem}
+
 .cmp{display:grid;gap:1.1rem;margin:1.5rem 0}
 @media(min-width:700px){.cmp{grid-template-columns:1fr 1fr}}
 .box{border-left:2px solid var(--line);padding:.35rem 0 .35rem 1.1rem}
@@ -193,6 +224,7 @@ a{color:var(--brand)}
     <a href="#color">จานสี</a>
     <a href="#area">Area gradient</a>
     <a href="#screens">หน้าจอ</a>
+    <a href="#kevin">แท็บ KeviN</a>
     <a href="#events">กิจกรรมและการตัดทอน</a>
     <a href="#week">ปฏิทินกลับแกน</a>
     <a href="#row">องค์ประกอบรายการ</a>
@@ -400,7 +432,93 @@ a{color:var(--brand)}
 
 </div>
 
-<h2 id="events"><span class="n">05</span>กิจกรรมและการตัดทอนเวลา</h2>
+
+<h2 id="kevin"><span class="n">05</span>แท็บ KeviN — แชตกับโหมดโทร</h2>
+<p class="sub">ประตูที่สาม · <b>อ่านข้อมูลได้อย่างเดียว</b> — ผู้ช่วยตอบและชี้ทางไปหน้าที่แก้ได้
+  แต่ไม่แตะข้อมูลเอง จึงไม่ต้องมีขั้นยืนยันสักขั้นเดียวในหน้านี้</p>
+
+<div class="phones">
+
+  <div class="phone">
+    <div class="cap"><span>S10 · KeviN แชต</span><span>375px</span></div>
+    <div class="scr" style="min-height:430px">
+      <div class="seg2"><span class="on">แชต</span><span>โทร</span></div>
+      <div style="display:flex;flex-direction:column;gap:.45rem;flex:1">
+        <div class="bub me">พรุ่งนี้มีอะไรบ้าง</div>
+        <div class="bub k">พรุ่งนี้มีคาบเดียว — <b>ดิสครีต</b> 13:00–15:00 ที่ E11-S604<br>
+          และมีงานค้าง <b>แบบฝึกหัดบทที่ 4</b> ส่ง 22 ส.ค. 23:59 ·
+          <a href="#kevin">เปิดในคลัง</a></div>
+        <div class="bub me">งานนั้นทำถึงไหนแล้ว</div>
+        <div class="bub k">ยังไม่ติ๊กเสร็จนะ · แก้สถานะได้ที่หน้าคลัง เราแก้ให้ไม่ได้</div>
+      </div>
+      <div class="compose"><div class="fld">พิมพ์ข้อความ</div><div class="snd">↑</div></div>
+      <div class="tabbar"><span>วันนี้</span><span>ปฏิทิน</span>
+        <span class="mid">KeviN</span><span>คลัง</span><span>ตั้งค่า</span></div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="cap"><span>S11 · KeviN โทร · ก่อนเริ่ม</span><span>375px</span></div>
+    <div class="scr" style="min-height:430px">
+      <div class="seg2"><span>แชต</span><span class="on">โทร</span></div>
+      <div class="dial">
+        <div class="orb"></div>
+        <div class="st">พร้อมโทร</div>
+        <div class="btn go">เริ่มโทร</div>
+        <div style="font-size:var(--s--2);color:var(--faint);text-align:center">
+          ไมค์เปิดเมื่อกดเริ่มเท่านั้น</div>
+      </div>
+      <div class="tabbar"><span>วันนี้</span><span>ปฏิทิน</span>
+        <span class="mid">KeviN</span><span>คลัง</span><span>ตั้งค่า</span></div>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="cap"><span>S12 · KeviN โทร · กำลังคุย</span><span>375px</span></div>
+    <div class="scr" style="min-height:430px">
+      <div class="seg2"><span>แชต</span><span class="on">โทร</span></div>
+      <div class="dial" style="padding:1rem 0">
+        <div class="orb" style="background:rgba(116,198,164,.16);border-color:rgba(116,198,164,.45)"></div>
+        <div class="st" style="color:var(--sched)">กำลังคุย · 02:14</div>
+        <div class="btn stop">วางสาย</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.4rem">
+        <div class="bub voice me">- voice -</div>
+        <div class="bub k">พรุ่งนี้มีคาบเดียวนะ ดิสครีตบ่ายโมง</div>
+        <div class="bub voice me">- voice -</div>
+      </div>
+      <div class="tabbar"><span>วันนี้</span><span>ปฏิทิน</span>
+        <span class="mid">KeviN</span><span>คลัง</span><span>ตั้งค่า</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmp">
+  <div class="box good"><h5>ปุ่มเดียวตรงกลาง ไม่ใช่สองปุ่ม</h5>
+    <p>แชตกับโทรคือ<b>เรื่องเดียวกันคนละวิธีพูด</b> ไม่ใช่คนละที่
+      แถบล่างจึงเป็น 5 ช่องโดยช่องกลางเป็นแคปซูลเด่นระหว่างปฏิทินกับคลัง
+      แล้วสลับโหมดข้างในเอา</p></div>
+  <div class="box good"><h5>เข้าหน้าโทรแล้วยังไม่โทร</h5>
+    <p>ต้องกดเริ่มก่อนเสมอ — ไมค์ที่เปิดเองตอนเปลี่ยนแท็บคือสิ่งที่ไม่มีใครอยากได้
+      และโควตาฟรีมีจำกัดพอที่การกดพลาดจะเสียของจริง</p></div>
+  <div class="box good"><h5>ช่องพิมพ์ติดขอบล่างเสมอ</h5>
+    <p>ใช้ <code>100dvh</code> กับให้แถบข้อความเป็นส่วนที่เลื่อน
+      ไม่ใช่ <code>min-height</code> บนตัวหน้า · <code>vh</code> บนมือถือไม่นับแถบเบราว์เซอร์
+      แล้วช่องพิมพ์จะลอยขึ้นมากลางจอ</p></div>
+  <div class="box good"><h5>ฝั่งเราลงเป็น <code>- voice -</code></h5>
+    <p>ตอนโทรไม่เก็บสิ่งที่ผู้ใช้พูด เก็บเฉพาะที่ KeviN ตอบ
+      ที่ยังลงแถวไว้แทนที่จะตัดทิ้ง เพราะยังต้องเห็นจังหวะว่าคุยกันกี่รอบ</p></div>
+</div>
+
+<div class="note">
+  <b>ตั้งค่าอยู่ในหน้านี้ ไม่ได้อยู่หน้าตั้งค่า</b> — ปุ่มเฟืองมุมบนเปิดแผงเลือก
+  <b>ภาษา</b> (ไทย/อังกฤษ · ค่าเดียวคุมทั้งที่เราพูดและที่ KeviN ตอบ) และ
+  <b>เสียง</b> 9 ตัวพร้อมปุ่มลองฟัง · เพราะทั้งสองอย่างเป็นของที่อยากปรับ
+  <i>ระหว่าง</i>คุย ไม่ใช่ของที่ตั้งครั้งเดียวแล้วลืม
+</div>
+
+<h2 id="events"><span class="n">06</span>กิจกรรมและการตัดทอนเวลา</h2>
 <p class="sub">งานที่เกิดครั้งเดียวมีหน้าของตัวเอง เพราะมันมีกำหนดการข้างใน —
   และเพราะมันต้องมี URL ให้ Claude ส่งลิงก์มาให้กดได้</p>
 
@@ -489,7 +607,7 @@ a{color:var(--brand)}
   แล้วรอคำตอบคือบทสนทนา ไม่ใช่ฟอร์ม จึงเป็นงานของ Claude
   ส่วนเว็บรับหน้าที่แสดงผลกับกดคืน</p>
 
-<h2 id="week"><span class="n">06</span>ปฏิทินสัปดาห์ที่กลับแกน</h2>
+<h2 id="week"><span class="n">07</span>ปฏิทินสัปดาห์ที่กลับแกน</h2>
 <div class="rule">วัน = แกนตั้ง · เวลา = แกนนอน — ตรงข้ามกับ Google Calendar โดยตั้งใจ</div>
 <p class="sub">7 แถวสูงรวมราว 280px ลงจอมือถือได้ครบ ไม่ต้องตัดเหลือ 3 วัน ·
   บล็อกวางแนวนอนจึงมีที่พอเขียนชื่อวิชาเต็มพร้อมเลขห้อง</p>
@@ -572,7 +690,7 @@ a{color:var(--brand)}
       <td>ตารางเปล่าคือคำตอบว่า "ว่างทั้งสัปดาห์"</td></tr>
 </table>
 
-<h2 id="row"><span class="n">07</span>องค์ประกอบของรายการหนึ่งแถว</h2>
+<h2 id="row"><span class="n">08</span>องค์ประกอบของรายการหนึ่งแถว</h2>
 
 <table>
   <tr><th>ส่วน</th><th>กติกา</th></tr>
@@ -588,7 +706,7 @@ a{color:var(--brand)}
 <p>เลิกใส่กล่องซ้อนกล่อง ใช้เส้นคั่นบางแทน — ลดชั้นพื้นผิวจาก 3 เหลือ 2
   ทำให้หน้าจอโปร่งขึ้นมากโดยไม่เสียการแบ่งกลุ่ม</p>
 
-<h2 id="principle"><span class="n">08</span>หลักการห้าข้อ</h2>
+<h2 id="principle"><span class="n">09</span>หลักการห้าข้อ</h2>
 <p class="sub">ใช้ตัดสินทุกครั้งที่ลังเล</p>
 
 <div class="cmp">
@@ -600,10 +718,11 @@ a{color:var(--brand)}
   <div class="box good"><h5>3 · งานที่ทำบ่อยต้องกดน้อยที่สุด</h5>
     <p>เพิ่มเร็วอยู่ทุกหน้า กด N บนคอม · ติ๊กเสร็จขยับทันทีไม่รอเซิร์ฟเวอร์</p></div>
   <div class="box good"><h5>4 · ปฏิทินไว้ดู คลังไว้แก้</h5>
-    <p>ไม่พยายามให้ทุกหน้าทำได้ทุกอย่าง</p></div>
+    <p>ไม่พยายามให้ทุกหน้าทำได้ทุกอย่าง — แท็บ KeviN ก็ตามกฎนี้
+      มันตอบและชี้ทาง แต่การแก้ยังอยู่ที่คลังเสมอ</p></div>
   <div class="box good"><h5>5 · ไม่มีอะไรหายเงียบ ๆ</h5>
     <p>ลบต้องยืนยัน · archive กู้คืนได้ · แถบเลิกทำค้าง 8 วินาที ·
-      Claude เขียนอะไรต้องบอก</p></div>
+      Claude เขียนอะไรต้องบอก · สายที่หลุดต้องขึ้นเหตุผลจริง ไม่ใช่ "เกิดข้อผิดพลาด"</p></div>
 </div>
 
 <div class="note">
@@ -612,18 +731,19 @@ a{color:var(--brand)}
   หรือการเตือนที่ถูกทำเครื่องหมายว่าส่งแล้วทั้งที่ไม่มีเครื่องรับ
 </div>
 
-<h2><span class="n">08</span>มือถือกับเดสก์ท็อป</h2>
+<h2><span class="n">10</span>มือถือกับเดสก์ท็อป</h2>
 <table>
   <tr><th>เรื่อง</th><th>มือถือ (&lt; 768px)</th><th>เดสก์ท็อป</th></tr>
-  <tr><td>การนำทาง</td><td>แถบล่าง 4 ปุ่ม</td><td>แถบข้างซ้ายค้างไว้</td></tr>
+  <tr><td>การนำทาง</td><td>แถบล่าง 5 ช่อง · ช่องกลางเป็นแคปซูล KeviN</td><td>แถบข้างซ้ายค้างไว้</td></tr>
   <tr><td>ปฏิทินสัปดาห์</td><td>7 วันครบ · ปัดซ้ายขวาเลื่อนเวลา</td><td>เห็นช่วงเวลากว้างขึ้น</td></tr>
   <tr><td>ปฏิทินเดือน</td><td>2 รายการต่อวัน</td><td>3 รายการต่อวัน</td></tr>
   <tr><td>การ์ด Area</td><td>2 คอลัมน์</td><td>4 คอลัมน์</td></tr>
   <tr><td>แผงรายละเอียด</td><td>เลื่อนขึ้นจากด้านล่าง</td><td>กล่องกลางจอ</td></tr>
+  <tr><td>แท็บ KeviN</td><td>เต็มจอ <code>100dvh</code> · ช่องพิมพ์ติดขอบล่าง</td><td>คอลัมน์กลาง กว้างจำกัด</td></tr>
   <tr><td>เพิ่มเร็ว</td><td>ปุ่มลอยมุมขวาล่าง</td><td>กด <code>N</code></td></tr>
 </table>
 
-<h2><span class="n">09</span>คำที่ใช้บนหน้าจอ</h2>
+<h2><span class="n">11</span>คำที่ใช้บนหน้าจอ</h2>
 <table>
   <tr><th>ใน DB</th><th>บนหน้าจอ</th></tr>
   <tr><td><code>area</code></td><td>ด้าน</td></tr>

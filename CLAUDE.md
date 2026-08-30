@@ -1,7 +1,7 @@
 # KeviN — คำแนะนำสำหรับ Claude
 
 ผู้ช่วยส่วนตัวของเจ้าของโปรเจกต์ (นักศึกษา) เก็บข้อมูลบน Supabase
-สั่งงานได้สองทาง — คุยกับ Claude ผ่าน MCP และเว็บแอป PWA
+สั่งงานได้สามทาง — คุยกับ Claude ผ่าน MCP · เว็บแอป PWA · และแท็บ **KeviN** ในเว็บที่คุยได้ทั้งพิมพ์และพูด (อ่านอย่างเดียว)
 
 **สถานะปัจจุบัน: ใช้งานได้จริงครบวงแล้ว** — https://kevin-rose.vercel.app
 
@@ -42,14 +42,27 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 
 เอกสารออกแบบเป็น HTML เปิดดูได้ (เป็นทั้งไฟล์ในเครื่องและ artifact บนคลาวด์):
 
+**ฉบับปัจจุบัน — ตรงกับของจริง ดูอันนี้**
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| `SYSTEM.html` | ระบบทำงานยังไง 10 หัวข้อ · รวมประตูที่สาม |
+| `UXUI.html` | ภาษาภาพ · หน้าจอ · แท็บ KeviN · หลักการห้าข้อ |
+
+**ฉบับภาพของประตูที่สาม (artifact บนคลาวด์)**
+
+| หัวข้อ | ลิงก์ |
+|---|---|
+| pipeline · เส้นทางข้อมูล · โควตา · สิ่งที่ร่างเดาไม่ถูก | https://claude.ai/code/artifact/0453a1ca-a08e-4c7f-b845-314aba3d26a9 |
+| UX/UI ของแท็บ KeviN · ที่ต่างจากร่างหลังใช้จริง | https://claude.ai/code/artifact/0106dd44-993c-48fc-ad90-513c7fcae7b6 |
+
+**ฉบับเก่า อยู่ใน `archive/` — เก็บไว้อ้างอิงเฉย ๆ อย่าใช้ตัดสินใจ**
+
 | ไฟล์ | เนื้อหา | ลิงก์ |
 |---|---|---|
-| `proposal.html` | ข้อเสนอโปรเจกต์ · สถาปัตยกรรม · แผน 6 เฟส | https://claude.ai/code/artifact/6f50ef21-9670-40e0-84dd-86b29852ec36 |
-| `ux.html` | UX ทุกหน้าจอ S1–S9 · กฎการแสดงผล | https://claude.ai/code/artifact/06b0354f-7284-4f28-9b6a-c70b078855dc |
-| `ui-kit.html` | ภาษาภาพ · design token · หน้าจอตัวอย่าง | https://claude.ai/code/artifact/2c6a95f6-e51a-4e9a-a80a-b398bdc43046 |
-
-> ✅ `ux.html` ทาสีใหม่เป็น Nightfall แล้ว (18 ส.ค.) จานสีตรงกับ `ui-kit.html` และ `doc/DESIGN.md`
-> ตอนนี้ทั้งสามไฟล์ใช้ภาษาภาพเดียวกัน · ดูสรุปสิ่งที่แก้ได้ท้าย `doc/DESIGN.md`
+| `archive/proposal.html` | ข้อเสนอโปรเจกต์ · แผน 6 เฟส | https://claude.ai/code/artifact/6f50ef21-9670-40e0-84dd-86b29852ec36 |
+| `archive/ux.html` | UX หน้าจอ S1–S9 ฉบับก่อน | https://claude.ai/code/artifact/06b0354f-7284-4f28-9b6a-c70b078855dc |
+| `archive/ui-kit.html` | ภาษาภาพ · design token | https://claude.ai/code/artifact/2c6a95f6-e51a-4e9a-a80a-b398bdc43046 |
 
 ---
 
