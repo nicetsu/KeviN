@@ -1,9 +1,61 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { saveSubscription, removeSubscription, sendTestReminder } from '@/app/actions/push'
 
 type State = 'checking' | 'unsupported' | 'ios-needs-install' | 'default' | 'granted' | 'denied'
+
+/**
+ * ความสามารถของเบราว์เซอร์คือ **แหล่งข้อมูลภายนอก** ไม่ใช่สถานะของ React
+ *
+ * ของเดิมอ่านค่าใน `useEffect` แล้ว `setState` ทันที ซึ่งเป็น cascading render
+ * (`react-hooks/set-state-in-effect`) — เฟรมแรกวาด 'checking' เสมอแล้วค่อยเด้ง
+ * รูปแบบเดียวกับที่ `components/Hero.tsx` แก้ไปแล้วด้วย `useSyncExternalStore`
+ *
+ * ⚠️ `getSnapshot` ต้องคืนค่าที่เท่ากันเป๊ะเมื่อไม่มีอะไรเปลี่ยน ไม่งั้น React
+ *    re-render ไม่รู้จบ · ที่นี่คืนสตริงจึงเทียบด้วยค่าได้ตรง ๆ
+ */
+const envListeners = new Set<() => void>()
+
+/**
+ * บอกว่าสภาพแวดล้อมเปลี่ยนแล้ว
+ *
+ * `Notification.permission` ไม่มี event ให้สมัครรับ (Permissions API มี แต่
+ * Safari รองรับไม่ครบ) — หลังเรียก `requestPermission()` เองจึงต้องเคาะบอก
+ */
+function notifyEnvChanged() {
+  for (const listener of envListeners) listener()
+}
+
+function subscribeEnv(onChange: () => void) {
+  envListeners.add(onChange)
+  // ผู้ใช้ติดตั้งลงหน้าจอโฮมระหว่างเปิดหน้านี้ค้างไว้ได้ — คือขั้นตอนที่หน้านี้สอนพอดี
+  const standalone = window.matchMedia('(display-mode: standalone)')
+  standalone.addEventListener('change', onChange)
+  return () => {
+    envListeners.delete(onChange)
+    standalone.removeEventListener('change', onChange)
+  }
+}
+
+function readEnv(): State {
+  const ua = navigator.userAgent
+  const isIOS = /iPhone|iPad|iPod/.test(ua)
+  const installed =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    // iOS ใช้ property เฉพาะตัว
+    (navigator as unknown as { standalone?: boolean }).standalone === true
+
+  // iOS ไม่ให้เว็บทั่วไปส่ง push — ต้องติดตั้งลงหน้าจอโฮมก่อน (doc/TRAPS.md)
+  if (isIOS && !installed) return 'ios-needs-install'
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported'
+  return Notification.permission as State
+}
+
+/** 'checking' เฉพาะตอนเรนเดอร์ฝั่งเซิร์ฟเวอร์ ซึ่งไม่มี navigator ให้ถาม */
+function useNotificationEnv(): State {
+  return useSyncExternalStore(subscribeEnv, readEnv, () => 'checking')
+}
 
 function urlBase64ToUint8Array(base64: string) {
   const padding = '='.repeat((4 - (base64.length % 4)) % 4)
@@ -33,34 +85,30 @@ export default function NotificationSetup({
   /** มีแถวใน push_subscriptions แล้วหรือยัง — สำคัญกว่าสถานะ permission */
   serverHasSubscription: boolean
 }) {
-  const [state, setState] = useState<State>('checking')
+  const state = useNotificationEnv()
   // อนุญาตแล้ว ≠ สมัครรับแล้ว · ต้องมี subscription จริงทั้งในเบราว์เซอร์และใน DB
   const [subscribed, setSubscribed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // ตรวจว่ามี subscription จริงไหม ไม่ใช่แค่ permission
+  //
+  // อันนี้ยังเป็น effect เพราะเป็นงาน async จริง ๆ (ถาม service worker แล้วรอ)
+  // setState อยู่ใน callback ไม่ใช่ในตัว effect จึงไม่ใช่ cascading render
+  //
+  // ⚠️ dep ต้องไม่มี `state` — ไม่งั้นตอน `enable()` เคาะให้สิทธิ์เปลี่ยนเป็น granted
+  // effect จะรันซ้ำแล้วเอา `serverHasSubscription` ที่ยังค้างอยู่ที่ false
+  // มาทับ `subscribed` ที่เพิ่งตั้งเป็น true ไปหมาด ๆ
   useEffect(() => {
-    const ua = navigator.userAgent
-    const isIOS = /iPhone|iPad|iPod/.test(ua)
-    const installed =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      // iOS ใช้ property เฉพาะตัว
-      (navigator as unknown as { standalone?: boolean }).standalone === true
-
-    // iOS ไม่ให้เว็บทั่วไปส่ง push — ต้องติดตั้งลงหน้าจอโฮมก่อน (doc/TRAPS.md)
-    if (isIOS && !installed) { setState('ios-needs-install'); return }
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setState('unsupported'); return
-    }
-    setState(Notification.permission as State)
-
-    // ตรวจว่ามี subscription จริงไหม ไม่ใช่แค่ permission
+    if (!('serviceWorker' in navigator)) return
+    let cancelled = false
     navigator.serviceWorker
       .getRegistration()
       .then((reg) => reg?.pushManager.getSubscription())
-      .then((sub) => setSubscribed(Boolean(sub) && serverHasSubscription))
-      .catch(() => setSubscribed(false))
+      .then((sub) => { if (!cancelled) setSubscribed(Boolean(sub) && serverHasSubscription) })
+      .catch(() => { if (!cancelled) setSubscribed(false) })
+    return () => { cancelled = true }
   }, [serverHasSubscription])
 
   async function enable() {
@@ -70,7 +118,7 @@ export default function NotificationSetup({
       await navigator.serviceWorker.ready
 
       const permission = await Notification.requestPermission()
-      setState(permission as State)
+      notifyEnvChanged() // สิทธิ์เปลี่ยนแล้ว ให้ทุกที่ที่สมัครรับอ่านค่าใหม่
       if (permission !== 'granted') {
         setBusy(false)
         setError('ยังไม่ได้รับอนุญาต — เปิดสิทธิ์แจ้งเตือนของเว็บนี้ในตั้งค่าเบราว์เซอร์')

@@ -222,11 +222,12 @@ S7 แผงรายละเอียด และ S8 เพิ่มเร็
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 103 เคส · ใช้เวลาไม่ถึงวินาที
+npm test --prefix web        # 147 เคส · ใช้เวลาไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เทสต์ | เคส |
 |---|---|---|---|
+| `lib/time.ts` | เวลาไทยทั้งหมด · ป้ายบอกเวลา | `test/time.test.ts` | 44 |
 | `lib/weeks.ts` | ตรรกะการซ้ำ + คลี่เป็นวันที่ | `test/weeks.test.ts` | 28 |
 | `lib/parse.ts` | ตีความบรรทัดเดียวเป็น item (ภาษาไทย) | `test/parse.test.ts` | 21 |
 | `lib/libraryOpen.ts` | สถานะกางของหน้าคลังใน cookie | `test/libraryOpen.test.ts` | 18 |
@@ -234,7 +235,7 @@ npm test --prefix web        # 103 เคส · ใช้เวลาไม่�
 | `lib/calendar.ts` | เวลาของบล็อกปฏิทิน รวมบล็อกที่ชนเที่ยงคืน | `test/calendar.test.ts` | 11 |
 | `lib/layout.ts` | จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์ | `test/layout.test.ts` | 10 |
 
-ทั้งหกไฟล์เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ · **แก้เมื่อไหร่ให้รันเทสต์ทุกครั้ง**
+ไฟล์กลุ่มนี้เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ · **แก้เมื่อไหร่ให้รันเทสต์ทุกครั้ง**
 และถ้าเพิ่มพฤติกรรมใหม่ ให้เขียนเคสก่อนแก้
 
 > ⚠️ ชุดนี้**เขียนขึ้นใหม่ 30 ส.ค. 2026** ของเดิม 81 เคสรันนอก repo แล้วหายไปกับเครื่อง
@@ -367,7 +368,7 @@ Safari บน iPhone ไม่ให้เว็บทั่วไปส่ง p
 # รันเว็บในเครื่อง (พอร์ต 3001)
 npm run dev --prefix web
 
-# รันเทสต์ตรรกะแกน (103 เคส)
+# รันเทสต์ตรรกะแกน (147 เคส)
 npm test --prefix web
 
 # deploy  (--scope ขาดไม่ได้ ไม่งั้นตอบ Not authorized เพราะ project อยู่ใต้ team
@@ -386,9 +387,9 @@ npx supabase db push
 ## 10 · สิ่งที่ยังไม่ได้ทำ
 
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
-- **lint error ค้างหนึ่งจุด** — `app/settings/NotificationSetup.tsx` เรียก `setState` ใน effect
-  (`react-hooks/set-state-in-effect`) เป็นของเดิมก่อนงาน events · `next build` ไม่ได้รัน eslint
-  จึงไม่บล็อก deploy แต่ควรแก้แบบเดียวกับที่ `components/Hero.tsx` ทำ (`useSyncExternalStore`)
+
+> `npm run lint --prefix web` สะอาด 0 error 0 warning (30 ส.ค.) · `next build` ไม่ได้รัน eslint
+> จึงไม่มีอะไรบล็อก deploy ให้เลย — **ต้องรันเอง ไม่งั้นหนี้จะสะสมโดยไม่มีใครรู้**
 
 ---
 
@@ -413,7 +414,7 @@ KeviN/
 └── web/                     Next.js app
     ├── vercel.json          ตรึง region ไว้ที่โตเกียว ห้ามลบ
     ├── tsconfig.test.json   คอนฟิกคอมไพล์เทสต์เป็น CommonJS ลง .test-build/
-    ├── test/                เทสต์ตรรกะแกน 103 เคส · `npm test`
+    ├── test/                เทสต์ตรรกะแกน 147 เคส · `npm test`
     ├── app/*/loading.tsx    โครงร่างระหว่างรอ · มีครบทุกหน้า
     ├── components/Skeleton.tsx   ชิ้นส่วนของโครงร่างข้างบน
     ├── app/project/[id]/event/   หน้ากิจกรรม · ตัวแก้ · ปุ่มเพิ่มงานที่ผูกกับกิจกรรม

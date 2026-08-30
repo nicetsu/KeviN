@@ -250,13 +250,22 @@ Orientation Day · รับ Booklet · Mentoring Session · Final Round Pitchin
 เทสต์ที่กำกับตรรกะแกนเคยรันนอก repo (`tsc` + `node` ตอนพัฒนา) แล้ว**หายไปกับเครื่อง** —
 เอกสารอ้าง 81 เคสที่ไม่มีใครรันซ้ำได้จาก checkout สด ซึ่งเท่ากับไม่มีเทสต์เลย
 
-- [x] `web/test/` · 103 เคส ครอบ 6 ไฟล์ (`weeks` 28 · `parse` 21 · `libraryOpen` 18 · `agenda` 15 · `calendar` 11 · `layout` 10)
+- [x] `web/test/` · 147 เคส ครอบ 7 ไฟล์ (`time` 44 · `weeks` 28 · `parse` 21 · `libraryOpen` 18 · `agenda` 15 · `calendar` 11 · `layout` 10)
 - [x] `npm test --prefix web` — คอมไพล์ด้วย `tsconfig.test.json` แล้วรันด้วย `node --test`
 - [x] ไม่เพิ่ม dependency สักตัว (ใช้ `node:test` + `node:assert` ที่มากับ node)
 - [x] ตรวจว่าเทสต์กัดจริงด้วย mutation 3 จุด (24:00 · ขอบบล็อกชนกัน · null/[] ของ cookie) → พัง 6 เคสตามคาด
 
 **ชุดนี้เขียนขึ้นใหม่ ไม่ใช่ของเดิมที่กู้กลับมา** — ไล่ตามกับดักใน `doc/TRAPS.md` ทุกข้อแล้ว
 แต่ไม่รับประกันว่าครอบเท่าของเดิมทุกเคส
+
+`lib/time.ts` เดิมไม่เคยมีเทสต์เลยทั้งที่เป็นไฟล์ที่ทุกหน้าจอเรียกใช้ — เคสที่คุ้มที่สุดคือ
+**ช่วง 17:00–24:00 UTC** ที่วันไทยเดินไปข้างหน้าแล้วแต่วัน UTC ยังไม่เปลี่ยน
+ถ้าพลาดตรงนั้น หน้าวันนี้จะโชว์ของเมื่อวานจนถึงเจ็ดโมงเช้าโดยไม่มีอะไรฟ้อง
+
+**เก็บ lint ที่ค้าง** — `app/settings/NotificationSetup.tsx` อ่านความสามารถของเบราว์เซอร์
+ใน `useEffect` แล้ว `setState` ทันที (cascading render) · ย้ายไป `useSyncExternalStore`
+แบบเดียวกับ `components/Hero.tsx` · เก็บ `no-unused-expressions` ใน `LibraryTree.tsx` ด้วย
+· `npm run lint` เหลือ **0 error 0 warning**
 
 ---
 

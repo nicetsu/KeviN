@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // ผลคอมไพล์ของเทสต์ — เป็น CommonJS โดยตั้งใจ ไม่ใช่โค้ดที่คนเขียน
+    ".test-build/**",
   ]),
 ]);
 
