@@ -358,7 +358,7 @@ export async function runTool(
   name: string,
   rawInput: Record<string, unknown>,
   ctx: ToolCtx
-): Promise<{ ok: true; rows: unknown[] } | { ok: false; error: string }> {
+): Promise<{ ok: true; rows: unknown[]; hidden: number } | { ok: false; error: string }> {
   if (!isToolName(name)) return { ok: false, error: `ไม่มี tool ชื่อ ${name}` }
   const tool = REGISTRY[name]
 
@@ -372,7 +372,14 @@ export async function runTool(
   try {
     const raw = await tool.fetch(input, ctx)
     const visible = keepVisible(raw, tool.areaOf)
-    return { ok: true, rows: visible.map(tool.shape) }
+
+    // จำนวนแถวที่ถูกกรองออก — ต้องบอกโมเดลไปด้วย ไม่ใช่หายเงียบ ๆ
+    //
+    // ตัวกรองเป็น allowlist ที่พลาดไปทางไม่ปล่อย ซึ่งถูกแล้วสำหรับความเป็นส่วนตัว
+    // แต่ถ้าไม่บอกว่ากรองไปกี่แถว ผู้ช่วยจะตอบว่า "ไม่มีอะไร" ทั้งที่ความจริงคือ
+    // "มี แต่ผมดูไม่ได้" ซึ่งเป็นคนละเรื่องกัน · prompt สั่งให้พูดออกมาเมื่อ hidden > 0
+    // โดยไม่บอกว่าเป็นอะไร (doc/CHAT.md §5)
+    return { ok: true, rows: visible.map(tool.shape), hidden: raw.length - visible.length }
   } catch (e) {
     // ต้องบอกว่าดึงข้อมูลไม่ได้ ห้ามคืนรายการว่างแล้วให้โมเดลไปสรุปว่า "ไม่มีอะไร"
     const why = e instanceof ToolFetchError || e instanceof Error ? e.message : 'ไม่ทราบสาเหตุ'

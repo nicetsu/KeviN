@@ -213,3 +213,35 @@ test('event · ปฏิเสธ id ที่ไม่ใช่รูป uuid',
   const r = await runTool('event', { event_id: '1; drop table items' }, ctx(fakeDb([])))
   assert.equal(r.ok, false)
 })
+
+// ---- hidden · บอกว่ามีของที่มองไม่เห็น ไม่ใช่หายเงียบ ๆ ----
+
+test('hidden นับแถวที่ถูกกรองออก', async () => {
+  const db = fakeDb([
+    entry({ area_name: 'Class' }),
+    entry({ area_name: 'Personal', source_id: 's2' }),
+    entry({ area_name: 'Financial', source_id: 's3' }),
+  ])
+  const r = await runTool('calendar', {}, ctx(db))
+  assert.equal(r.ok, true)
+  if (!r.ok) return
+  assert.equal(r.rows.length, 1)
+  assert.equal(r.hidden, 2)
+})
+
+test('hidden เป็น 0 เมื่อไม่มีอะไรถูกกรอง', async () => {
+  const r = await runTool('calendar', {}, ctx(fakeDb([entry()])))
+  assert.equal(r.ok, true)
+  if (!r.ok) return
+  assert.equal(r.hidden, 0)
+})
+
+test('hidden ไม่บอกว่าของที่ซ่อนคืออะไร — บอกแค่จำนวน', async () => {
+  // ถ้าเผลอส่งชื่อหรือ Area ของแถวที่ซ่อนไปด้วย ตัวกรองก็เสียของทั้งอัน
+  const db = fakeDb([entry({ area_name: 'Financial', title: 'จ่ายค่าหอ 12,000' })])
+  const r = await runTool('calendar', {}, ctx(db))
+  assert.equal(r.ok, true)
+  if (!r.ok) return
+  assert.equal(JSON.stringify(r).includes('จ่ายค่าหอ'), false)
+  assert.equal(JSON.stringify(r).includes('Financial'), false)
+})
