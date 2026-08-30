@@ -12,14 +12,15 @@
 | 5 PWA + แจ้งเตือน | เสร็จ · push ส่งออกจริงแล้ว |
 | 6 Cowork | เสร็จ · สรุปเช้า 06:30 + สรุปรายสัปดาห์ อาทิตย์ 19:00 |
 | กิจกรรม + ตัดทอนเวลา | เสร็จ · `events` · `event_agenda` · `time_offsets` |
-| ประตูที่สาม (แชต + เสียงในเว็บ) | **เสร็จครบ 4 ขั้น · ขึ้น production แล้ว** · ดู [doc/CHAT.md](doc/CHAT.md) |
+| ประตูที่สาม (แชต + เสียงในเว็บ) | **เสร็จ · ใช้งานจริงบนมือถือแล้ว** · ดู [doc/CHAT.md](doc/CHAT.md) |
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (220 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (234 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
-`web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (ชั้น tool + ตัวกรอง Area ของประตูที่สาม)
+`web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ตัวกรอง Area · ภาษา · เสียง)
+`web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด)
 
 **ความลับเก็บที่ไหน**
 VAPID private key → Supabase secrets · VAPID public key → Vercel env (`NEXT_PUBLIC_`)
@@ -77,9 +78,18 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 - อยากรู้ว่าช่วงไหนติดอะไร ให้เรียก **`calendar_entries()`** ห้ามดึง `events` มาปนเองฝั่งเว็บ
   ไม่งั้นตรรกะหั่นงานข้ามคืนจะมีสองชุดที่ต้องดูแลให้ตรงกัน
 
+**ประตูที่สาม (`/kevin`) — สามข้อที่ห้ามพลาด**
+
+- **ผู้ช่วยในแอปเขียนข้อมูลไม่ได้เลย** ชั้น tool ไม่มี tool ที่เขียน · `lib/ai/db.ts` ไม่มีเมธอดเขียน
+  · `test/guard.test.ts` อ่านซอร์สแล้วพังถ้ามีทางเขียนโผล่เข้ามา — **ประตู MCP ยังเขียนได้เหมือนเดิม**
+- **`VISIBLE_AREAS` ผูกกับชื่อ Area ไม่ใช่ id** เปลี่ยนชื่อใน DB แล้วลืมแก้ = ผู้ช่วยมองไม่เห็น
+  Area นั้นทันทีโดยไม่มี error
+- **`doc/CLAUDE-PROJECT-PROMPT.md` กับ `doc/SCHEMA.sql` ต้องเอาไปวางใน Claude Project ด้วยมือ**
+  แก้ไฟล์แล้วของจริงบน claude.ai ยังไม่เปลี่ยนจนกว่าจะไปวางเอง
+
 ## สิ่งที่ยังไม่ได้ทำ (งานค้างที่รู้แล้ว)
 
-> รายการนี้ตรงกับ [ARCHITECTURE.md §10](ARCHITECTURE.md#10--สิ่งที่ยังไม่ได้ทำ) — แก้ที่ไหนต้องแก้อีกที่ด้วย
+> รายการนี้ตรงกับ [ARCHITECTURE.md §11](ARCHITECTURE.md#11--สิ่งที่ยังไม่ได้ทำ) — แก้ที่ไหนต้องแก้อีกที่ด้วย
 
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
 
@@ -91,6 +101,7 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 - git remote `origin` → https://github.com/nicetsu/KeviN (private)
 - `gh.exe` อยู่ที่ `C:\Users\LENOVO\AppData\Local\gh\` และอยู่ใน PATH ของผู้ใช้แล้ว
   git credential helper ชี้มาที่ไฟล์นี้ — **ถ้าไฟล์หาย `git push` จะพัง**
-- `npm run dev --prefix web` เปิดที่ **พอร์ต 3001**
+- `npm run dev --prefix web` เปิดที่ **พอร์ต 3000**
+- ความลับเพิ่มบน Vercel: `GEMINI_API_KEY` (Secret) — **ห้ามมี `NEXT_PUBLIC_` นำหน้า**
 - deploy ต้องใส่ `--scope nicetsuuu` ทุกครั้ง ไม่งั้น Vercel CLI ตอบ `Not authorized`
   เพราะ scope เริ่มต้นเป็นบัญชีส่วนตัว แต่ project อยู่ใต้ team
