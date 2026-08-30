@@ -12,6 +12,7 @@
 | 5 PWA + แจ้งเตือน | เสร็จ · push ส่งออกจริงแล้ว |
 | 6 Cowork | เสร็จ · สรุปเช้า 06:30 + สรุปรายสัปดาห์ อาทิตย์ 19:00 |
 | กิจกรรม + ตัดทอนเวลา | เสร็จ · `events` · `event_agenda` · `time_offsets` |
+| ประตูที่สาม (แชต + เสียงในเว็บ) | **ออกแบบแล้ว ยังไม่เริ่ม** · รอเจ้าของเคาะ 2 ข้อ ดู [doc/CHAT.md](doc/CHAT.md) §0 |
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
@@ -35,6 +36,7 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 2. **[doc/DECISIONS.md](doc/DECISIONS.md)** — ทุกข้อที่เคาะไปแล้วพร้อมเหตุผล **อย่าเปลี่ยนโดยไม่ถามเจ้าของก่อน**
 3. **[doc/TRAPS.md](doc/TRAPS.md)** — กับดักที่รู้ล่วงหน้า อ่านก่อนเขียนโค้ดส่วนที่เกี่ยว
 4. **[doc/SCHEMA.sql](doc/SCHEMA.sql)** — schema จริงที่จะ deploy
+5. **[doc/CHAT.md](doc/CHAT.md)** — ดีไซน์ประตูที่สาม (แชต + เสียง) **ยังไม่ได้ลงมือ อย่าเพิ่งเขียนโค้ดตามจนกว่าเจ้าของจะเคาะ §0**
 
 เอกสารออกแบบเป็น HTML เปิดดูได้ (เป็นทั้งไฟล์ในเครื่องและ artifact บนคลาวด์):
 
