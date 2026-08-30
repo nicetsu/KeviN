@@ -5,14 +5,14 @@
  * Vercel เป็น serverless ถือ WebSocket ยาว ๆ ไม่ได้ · แต่ API key ก็ลงเบราว์เซอร์ไม่ได้
  * ephemeral token แก้ทั้งสองข้อพร้อมกัน (doc/CHAT.md §3)
  *
- * ⚠️ **config ถูกล็อกตายไปกับ token ตอนสร้าง** (`liveConnectConstraints`)
+ * ⚠️ **config ถูกล็อกตายไปกับ token ตอนสร้าง** (`bidiGenerateContentSetup`)
  *    คนที่ขโมย token ไปจึงสั่ง prompt อื่นหรือเปลี่ยนชุด tool ไม่ได้
  *    ทำได้แค่คุยกับ KeviN ที่อ่านข้อมูลอย่างเดียว ในหน้าต่างเวลาสั้น ๆ
  */
 import { createClient, currentUserId } from '@/lib/supabase/server'
 import { toolDeclarations } from '@/lib/ai/tools'
 import { systemPrompt } from '@/lib/ai/prompt'
-import { readLangs } from '@/lib/ai/lang'
+import { readLangs, type Lang } from '@/lib/ai/lang'
 import { bangkokToday } from '@/lib/time'
 
 export const runtime = 'nodejs'
@@ -22,16 +22,21 @@ export const dynamic = 'force-dynamic'
 const VOICE_MODEL = process.env.GEMINI_VOICE_MODEL ?? 'gemini-3.1-flash-live-preview'
 
 /**
- * เสียงของ KeviN — เจ้าของเลือก `Fenrir` (ตื่นเต้น มีชีวิตชีวา) 31 ส.ค. 2026
+ * เสียงของ KeviN — **แยกตามภาษาที่ตอบ** เพราะของจริงให้ผลไม่เท่ากัน
  *
- * เลือกจาก 30 เสียงของ Gemini TTS · ที่ไม่เอา `Kore` ซึ่งเอกสารยกเป็นตัวอย่าง
- * เพราะมันเป็นแนว "หนักแน่น" ซึ่งออกทางการ ไม่ใช่โทนเพื่อนที่เจ้าของขอไว้
+ * ที่ทดสอบมาได้ (31 ส.ค. 2026): ตั้ง `voiceName` เป็น `Fenrir` แล้ว
+ * **เสียงตอนพูดไทยเปลี่ยนตาม แต่ตอนพูดอังกฤษไม่เปลี่ยน**
+ * แปลว่า `speechConfig` ถูกใช้จริง แต่โมเดล native audio มีเสียงของตัวเอง
+ * สำหรับบางภาษาที่ไปทับค่าที่เราตั้ง
  *
- * ⚠️ ถ้าเปลี่ยนเสียงแล้วอยากรู้ว่าใช้ได้จริงไหม **ต้องลองเปิดสายจริง**
- *    เอกสารบอกว่า Live API รองรับเสียงเดียวกับ TTS ทั้งหมด แต่มีหมายเหตุกำกับว่า
- *    ชุดเสียงอาจต่างกัน · ถ้าชื่อผิด setup จะไม่ผ่านตั้งแต่ต้นสาย
+ * เจ้าของฟังแล้วเคาะว่า **ไทยเอาเสียงเริ่มต้น · อังกฤษเอา `Fenrir`**
+ * ค่าว่างแปลว่า "ไม่ต้องส่ง speechConfig เลย" ซึ่งได้เสียงเริ่มต้นของโมเดล
+ * — ต่างจากการส่งชื่อเสียงที่บังเอิญเหมือนค่าเริ่มต้น
  */
-const VOICE_NAME = process.env.GEMINI_VOICE_NAME ?? 'Fenrir'
+const VOICE_BY_LANG: Record<Lang, string> = {
+  th: process.env.GEMINI_VOICE_TH ?? '',
+  en: process.env.GEMINI_VOICE_EN ?? 'Fenrir',
+}
 
 /** ค่าเริ่มต้นของ Google: เปิดสายได้ภายใน 1 นาที · คุยต่อได้ 30 นาที */
 const START_WINDOW_MS = 60_000
@@ -58,6 +63,8 @@ export async function POST(request: Request) {
     langs = readLangs(undefined)
   }
 
+  const voice = VOICE_BY_LANG[langs.reply]
+
   const now = Date.now()
   const res = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
     method: 'POST',
@@ -74,7 +81,8 @@ export async function POST(request: Request) {
         model: `models/${VOICE_MODEL}`,
         generationConfig: {
           responseModalities: ['AUDIO'],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_NAME } } },
+          // ไม่ส่ง speechConfig เลยเมื่อไม่ได้ตั้งชื่อเสียง — ปล่อยให้โมเดลใช้ของตัวเอง
+          ...(voice ? { speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } : {}),
         },
         systemInstruction: { parts: [{ text: systemPrompt('voice', bangkokToday().dateKey, langs) }] },
         tools: [{ functionDeclarations: toolDeclarations() }],
@@ -109,6 +117,7 @@ export async function POST(request: Request) {
     ok: true,
     token: json.name,
     model: VOICE_MODEL,
+    voice: voice || 'default',
     // เบราว์เซอร์ใช้ตัดสินว่าต้องขอใบใหม่ก่อนต่อสายรอบถัดไปไหม
     expiresAt: new Date(now + LIFETIME_MS).toISOString(),
   })
