@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { StoredMessage } from '@/lib/chat/store'
 import Autolink from '@/lib/autolink'
-import VoiceCall, { type VoiceTurn } from './VoiceCall'
+import VoiceCall from './VoiceCall'
+import { useCall } from '@/components/CallProvider'
 
 type Mode = 'chat' | 'voice'
 
@@ -66,7 +67,16 @@ export default function TalkRoom({
   initialMessages: StoredMessage[]
   loadError: string | null
 }) {
-  const mode = useMode()
+  const stored = useMode()
+  const call = useCall()
+
+  /*
+   * โควตาเสียงหมด = **ดันไปโหมดแชตให้เลย** ไม่ใช่แค่ขึ้นข้อความ
+   *
+   * สองช่องทางใช้คนละรุ่นจึงคนละโควตา · เสียงหมดแล้วแชตยังใช้ได้ปกติ
+   * การปล่อยให้ค้างอยู่หน้าโทรที่กดไม่ได้ ไม่ช่วยอะไรเลย (doc/CHAT.md §8)
+   */
+  const mode: Mode = call.quotaOut ? 'chat' : stored
   const [conversationId, setConversationId] = useState(initialId)
   const [lines, setLines] = useState<Line[]>(
     initialMessages.map((m) => ({ role: m.role, content: m.content, via: m.via }))
@@ -117,28 +127,6 @@ export default function TalkRoom({
     setBusy(false)
   }
 
-  /*
-   * วางสายแล้วเก็บบทสนทนาลงประวัติเดียวกับแชต
-   *
-   * ทำให้สลับมาพิมพ์ต่อได้โดยมันจำว่าเมื่อกี้คุยอะไร — และเป็นเหตุผลที่
-   * สองโหมดเขียนลง `conversations` ใบเดียวกันตั้งแต่ออกแบบ
-   */
-  async function saveVoice(voiceTurns: VoiceTurn[]) {
-    setLines((prev) => [...prev, ...voiceTurns.map((t) => ({ ...t, via: 'voice' as const }))])
-    try {
-      const res = await fetch('/api/voice/transcript', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ conversationId, turns: voiceTurns }),
-      })
-      const data = await res.json()
-      if (data.ok && data.conversationId) setConversationId(data.conversationId)
-      else if (!data.ok) setError(`คุยจบแล้วแต่บันทึกไม่สำเร็จ · ${data.error ?? ''}`)
-    } catch {
-      setError('คุยจบแล้วแต่บันทึกไม่สำเร็จ')
-    }
-  }
-
   return (
     <div className="talk">
       <div className="seg seg--wide" role="tablist" aria-label="โหมดการคุย">
@@ -154,6 +142,12 @@ export default function TalkRoom({
           </button>
         ))}
       </div>
+
+      {call.quotaOut && (
+        <p className="alert alert--gap" role="status">
+          โควตาเสียงของวันนี้หมดแล้ว — พิมพ์คุยต่อได้ตามปกติ คนละโควตากัน
+        </p>
+      )}
 
       {loadError && (
         <p className="alert alert--gap" role="alert">
@@ -184,6 +178,11 @@ export default function TalkRoom({
 
             {lines.map((l, i) => (
               <Bubble key={i} line={l} />
+            ))}
+
+            {/* ข้อความจากสายที่ยังคุยอยู่ · จะถูกบันทึกจริงตอนวางสาย */}
+            {call.turns.map((t, i) => (
+              <Bubble key={`v${i}`} line={{ ...t, via: 'voice' }} />
             ))}
 
             {busy && (
@@ -217,7 +216,7 @@ export default function TalkRoom({
           </form>
         </>
       ) : (
-        <VoiceCall onTranscript={saveVoice} />
+        <VoiceCall />
       )}
     </div>
   )

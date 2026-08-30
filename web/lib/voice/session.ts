@@ -54,6 +54,22 @@ const fromBase64 = (b64: string) => {
   return bytes
 }
 
+/**
+ * แปลงสาเหตุที่เปิดไมค์ไม่ได้เป็นคำที่บอกทางออก
+ *
+ * "เริ่มสายไม่สำเร็จ" เฉย ๆ ไม่ช่วยอะไรเลยทั้งที่เรารู้สาเหตุจริง —
+ * แนวเดียวกับหน้า /settings ที่แยก "ยังไม่ได้ขอสิทธิ์" ออกจาก "ถูกปฏิเสธ"
+ */
+export function micReason(e: unknown): string {
+  const name = e instanceof DOMException ? e.name : ''
+  if (name === 'NotAllowedError' || name === 'SecurityError') {
+    return 'ไม่ได้รับอนุญาตให้ใช้ไมค์ — เปิดสิทธิ์ไมโครโฟนของเว็บนี้ในตั้งค่าเบราว์เซอร์แล้วลองใหม่'
+  }
+  if (name === 'NotFoundError') return 'ไม่พบไมโครโฟนบนเครื่องนี้'
+  if (name === 'NotReadableError') return 'ไมโครโฟนถูกแอปอื่นใช้อยู่ ปิดแอปนั้นแล้วลองใหม่'
+  return e instanceof Error && e.message ? e.message : 'เริ่มสายไม่สำเร็จ'
+}
+
 export class VoiceCall {
   private ws: WebSocket | null = null
   private micCtx: AudioContext | null = null
@@ -84,8 +100,8 @@ export class VoiceCall {
       await this.openMic()
       await this.connect()
     } catch (e) {
-      this.hooks.onError(e instanceof Error ? e.message : 'เริ่มสายไม่สำเร็จ')
-      await this.stop('เริ่มสายไม่สำเร็จ')
+      this.hooks.onError(micReason(e))
+      await this.stop('')
     }
   }
 
@@ -99,6 +115,7 @@ export class VoiceCall {
     await this.micCtx?.close().catch(() => {})
     await this.outCtx?.close().catch(() => {})
     this.micCtx = this.outCtx = null
+    // เหตุผลว่าง = ล้มตั้งแต่ยังไม่ได้สาย · onError บอกไปแล้ว ไม่ต้องทับด้วยข้อความกว้าง ๆ
     this.hooks.onEnded(reason)
   }
 

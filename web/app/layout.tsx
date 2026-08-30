@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Noto_Sans_Thai } from 'next/font/google'
 import Nav from '@/components/Nav'
 import QuickAddMount from '@/components/QuickAddMount'
+import CallProvider from '@/components/CallProvider'
 import './globals.css'
 
 // ทรงตัวอักษรคือครึ่งหนึ่งของบุคลิกสไตล์นี้ (doc/TRAPS.md) — ต้องโหลดจริง
@@ -39,9 +40,15 @@ export default function RootLayout({
   return (
     <html lang="th" className={`${inter.variable} ${notoThai.variable}`}>
       <body>
-        <Nav />
-        {children}
-        <QuickAddMount />
+        {/*
+          สายเสียงอยู่ระดับนี้ ไม่ใช่ในหน้า KeviN — ถ้าเก็บไว้ในหน้า พอสลับไปดู
+          ปฏิทินกลางสาย คอมโพเนนต์จะถูก unmount แล้วสายตายทันที
+        */}
+        <CallProvider>
+          <Nav />
+          {children}
+          <QuickAddMount />
+        </CallProvider>
       </body>
     </html>
   )

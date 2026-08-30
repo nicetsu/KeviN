@@ -30,7 +30,13 @@ export default async function KevinPage() {
       <div className="page-head">
         <h1>KeviN</h1>
       </div>
+      {/*
+        key เปลี่ยนเมื่อประวัติจากเซิร์ฟเวอร์เปลี่ยน — วางสายแล้ว provider เรียก
+        router.refresh() ทำให้ข้อความจากสายไหลลงมา · ถ้าไม่ remount
+        useState ของ TalkRoom จะค้างค่าเดิมตั้งแต่ตอน mount ครั้งแรก
+      */}
       <TalkRoom
+        key={`${conversationId ?? 'new'}:${messages.length}`}
         conversationId={conversationId}
         initialMessages={messages}
         loadError={loadError}

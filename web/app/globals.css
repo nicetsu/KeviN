@@ -908,3 +908,19 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .call__bar > * { flex: 1; }
 .btn--end { background: var(--due-soft); color: var(--due); border-color: rgba(224,137,126,0.4); }
 .btn--end:hover { background: var(--due-soft); box-shadow: 0 6px 24px -8px rgba(224,137,126,0.5); }
+
+/* แถบ "กำลังคุย" ที่ตามไปทุกหน้า · ไมค์ที่เปิดค้างต้องมองเห็นตลอด */
+.callbar {
+  position: fixed; z-index: 30;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(4.2rem + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 0.5rem;
+  font: inherit; font-family: var(--f-mono); font-size: var(--s--2);
+  color: var(--sched); background: var(--sched-soft);
+  border: 1px solid #21444C; border-radius: var(--r-pill);
+  padding: 0.4rem 0.9rem; cursor: pointer; white-space: nowrap;
+}
+.callbar__hint { color: var(--faint); }
+@media (min-width: 768px) {
+  .callbar { left: calc(200px + 50%); bottom: 1.2rem; transform: translateX(-50%); }
+}
