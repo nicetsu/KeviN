@@ -27,9 +27,6 @@ export default async function KevinPage() {
 
   return (
     <main className="wrap">
-      <div className="page-head">
-        <h1>KeviN</h1>
-      </div>
       {/*
         key เปลี่ยนเมื่อประวัติจากเซิร์ฟเวอร์เปลี่ยน — วางสายแล้ว provider เรียก
         router.refresh() ทำให้ข้อความจากสายไหลลงมา · ถ้าไม่ remount

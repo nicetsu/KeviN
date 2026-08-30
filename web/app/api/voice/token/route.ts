@@ -12,7 +12,8 @@
 import { createClient, currentUserId } from '@/lib/supabase/server'
 import { toolDeclarations } from '@/lib/ai/tools'
 import { systemPrompt } from '@/lib/ai/prompt'
-import { readLangs, type Lang } from '@/lib/ai/lang'
+import { readLang } from '@/lib/ai/lang'
+import { resolveVoice } from '@/lib/ai/voices'
 import { bangkokToday } from '@/lib/time'
 
 export const runtime = 'nodejs'
@@ -20,23 +21,6 @@ export const dynamic = 'force-dynamic'
 
 /** แยกรุ่นจากฝั่งแชตเพื่อให้ **โควตาแยกกัน** — เสียงหมดแล้วแชตยังใช้ได้ */
 const VOICE_MODEL = process.env.GEMINI_VOICE_MODEL ?? 'gemini-3.1-flash-live-preview'
-
-/**
- * เสียงของ KeviN — **แยกตามภาษาที่ตอบ** เพราะของจริงให้ผลไม่เท่ากัน
- *
- * ที่ทดสอบมาได้ (31 ส.ค. 2026): ตั้ง `voiceName` เป็น `Fenrir` แล้ว
- * **เสียงตอนพูดไทยเปลี่ยนตาม แต่ตอนพูดอังกฤษไม่เปลี่ยน**
- * แปลว่า `speechConfig` ถูกใช้จริง แต่โมเดล native audio มีเสียงของตัวเอง
- * สำหรับบางภาษาที่ไปทับค่าที่เราตั้ง
- *
- * เจ้าของฟังแล้วเคาะว่า **ไทยเอาเสียงเริ่มต้น · อังกฤษเอา `Fenrir`**
- * ค่าว่างแปลว่า "ไม่ต้องส่ง speechConfig เลย" ซึ่งได้เสียงเริ่มต้นของโมเดล
- * — ต่างจากการส่งชื่อเสียงที่บังเอิญเหมือนค่าเริ่มต้น
- */
-const VOICE_BY_LANG: Record<Lang, string> = {
-  th: process.env.GEMINI_VOICE_TH ?? '',
-  en: process.env.GEMINI_VOICE_EN ?? 'Fenrir',
-}
 
 /** ค่าเริ่มต้นของ Google: เปิดสายได้ภายใน 1 นาที · คุยต่อได้ 30 นาที */
 const START_WINDOW_MS = 60_000
@@ -54,16 +38,24 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: 'ยังไม่ได้ตั้ง GEMINI_API_KEY ฝั่งเซิร์ฟเวอร์' }, { status: 500 })
   }
 
-  // ภาษาถูกล็อกไปกับ token ด้วย · เปลี่ยนภาษาระหว่างสายไม่ได้ ต้องวางแล้วโทรใหม่
-  // ซึ่งถูกแล้ว เพราะ setup ของ Live API แก้กลางสายไม่ได้อยู่แล้ว
-  let langs
+  /*
+   * ภาษาและเสียงถูกล็อกไปกับ token · เปลี่ยนกลางสายไม่ได้ ต้องวางแล้วโทรใหม่
+   * ซึ่งถูกแล้ว เพราะ setup ของ Live API แก้กลางสายไม่ได้อยู่แล้ว
+   *
+   * `preview` = สายทดสอบเสียงสั้น ๆ จากหน้าตั้งค่า ใช้ config ชุดเดียวกับสายจริง
+   * เพราะ TTS ให้เสียงไม่เหมือน Live — ฟังจาก TTS แล้วตัดสินใจคือหลอกตัวเอง
+   */
+  let lang = readLang(undefined)
+  let voiceChoice: unknown
   try {
-    langs = readLangs(((await request.json()) as { langs?: unknown }).langs)
+    const body = (await request.json()) as { lang?: unknown; voice?: unknown }
+    lang = readLang(body.lang)
+    voiceChoice = body.voice
   } catch {
-    langs = readLangs(undefined)
+    // ไม่มี body ก็ได้ · ใช้ค่าตั้งต้น
   }
 
-  const voice = VOICE_BY_LANG[langs.reply]
+  const voice = resolveVoice(voiceChoice as string, lang)
 
   const now = Date.now()
   const res = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
@@ -84,7 +76,7 @@ export async function POST(request: Request) {
           // ไม่ส่ง speechConfig เลยเมื่อไม่ได้ตั้งชื่อเสียง — ปล่อยให้โมเดลใช้ของตัวเอง
           ...(voice ? { speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } } : {}),
         },
-        systemInstruction: { parts: [{ text: systemPrompt('voice', bangkokToday().dateKey, langs) }] },
+        systemInstruction: { parts: [{ text: systemPrompt('voice', bangkokToday().dateKey, lang) }] },
         tools: [{ functionDeclarations: toolDeclarations() }],
         // ได้ transcript ทั้งสองฝั่งมาฟรี — เอาไปขึ้นคำบรรยายและเก็บลงประวัติ
         inputAudioTranscription: {},

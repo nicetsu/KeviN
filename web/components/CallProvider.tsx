@@ -5,7 +5,7 @@ import {
 } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { VoiceCall as Session, type CallState, type Caption } from '@/lib/voice/session'
-import { useLangs } from '@/lib/langPrefs'
+import { useTalkPrefs } from '@/lib/talkPrefs'
 import { redactVoiceTurns } from '@/lib/voice/transcript'
 
 export type VoiceTurn = { role: 'user' | 'assistant'; content: string }
@@ -46,7 +46,7 @@ export function useCall(): CallApi {
 export default function CallProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const path = usePathname()
-  const langs = useLangs()
+  const prefs = useTalkPrefs()
 
   const [state, setState] = useState<CallState | 'idle'>('idle')
   const [live, setLive] = useState<Caption | null>(null)
@@ -118,7 +118,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
     buffer.current = { user: '', kevin: '' }
     setTurns([])
 
-    const s = new Session(langs, {
+    const s = new Session(prefs, {
       onState: setState,
       onCaption: (c) => {
         const slot = c.who === 'user' ? 'user' : 'kevin'
@@ -145,7 +145,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
 
     session.current = s
     await s.start()
-  }, [flush, persist, langs])
+  }, [flush, persist, prefs])
 
   const hangUp = useCallback(async (reason?: string) => {
     await session.current?.stop(reason)

@@ -942,3 +942,42 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .lang__label { font-size: var(--s--1); color: var(--muted); }
 .lang__note { margin: 0; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); line-height: 1.55; }
 .lang .seg button:disabled { opacity: 0.45; cursor: default; }
+
+/* ---- หัวหน้า KeviN + ปุ่มฟันเฟือง ---- */
+.talk__head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.talk__head h1 { margin: 0; font-size: var(--s-2); font-weight: 600; letter-spacing: -0.025em; }
+.gear {
+  flex: none; display: grid; place-items: center;
+  width: 2.2rem; height: 2.2rem; padding: 0;
+  background: none; border: 1px solid var(--line); border-radius: 50%;
+  color: var(--muted); cursor: pointer;
+}
+.gear:hover { color: var(--brand); border-color: var(--brand); }
+
+/* ---- แผงตั้งค่าการคุย ---- */
+.set { display: flex; flex-direction: column; gap: 0.85rem; }
+.set__row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.set__label { font-size: var(--s--1); color: var(--muted); }
+.set__label--block { display: block; margin-top: 0.35rem; }
+
+.voices { display: flex; flex-direction: column; gap: 0.3rem; }
+.voice {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+  font: inherit; font-size: var(--s--1); text-align: left;
+  padding: 0.5rem 0.75rem; border-radius: var(--r-tile);
+  background: var(--surface); border: 1px solid var(--line);
+  color: var(--muted); cursor: pointer;
+}
+.voice:hover:not(:disabled) { border-color: var(--brand); }
+.voice--on { border-color: var(--brand); background: var(--brand-soft); color: var(--ink); }
+.voice__name { font-weight: 500; }
+.voice__desc { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+.voice:disabled { opacity: 0.45; cursor: default; }
+
+.set__try { display: flex; gap: 0.5rem; margin-top: 0.35rem; }
+.set__try > * { flex: 1; }
+.set__note {
+  margin: 0; font-family: var(--f-mono); font-size: var(--s--2);
+  color: var(--faint); line-height: 1.55;
+}
+.set .seg button:disabled { opacity: 0.45; cursor: default; }

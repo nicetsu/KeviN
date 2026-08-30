@@ -9,7 +9,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { DEFAULT_LANGS, isLang, langRules, readLangs } from '../lib/ai/lang'
+import { DEFAULT_LANG, isLang, langRules, readLang } from '../lib/ai/lang'
 import { systemPrompt } from '../lib/ai/prompt'
 
 const TODAY = '2026-08-31'
@@ -19,72 +19,61 @@ test('isLang รับเฉพาะ th กับ en', () => {
   assert.equal(isLang('en'), true)
   assert.equal(isLang('zh'), false)
   assert.equal(isLang('ko'), false)
-  assert.equal(isLang(''), false)
   assert.equal(isLang(undefined), false)
 })
 
-test('readLangs ปัดค่าที่ไม่รู้จักกลับเป็นค่าตั้งต้น ไม่ส่งดิบเข้า prompt', () => {
-  assert.deepEqual(readLangs({ input: 'zh', reply: 'hi' }), DEFAULT_LANGS)
-  assert.deepEqual(readLangs(null), DEFAULT_LANGS)
-  assert.deepEqual(readLangs('en'), DEFAULT_LANGS)
+test('readLang ปัดค่าที่ไม่รู้จักกลับเป็นค่าตั้งต้น ไม่ส่งดิบเข้า prompt', () => {
+  assert.equal(readLang('zh'), DEFAULT_LANG)
+  assert.equal(readLang(null), DEFAULT_LANG)
+  assert.equal(readLang({ input: 'en' }), DEFAULT_LANG)
 })
 
-test('readLangs รับค่าที่ถูกต้อง และรับแบบผสมได้', () => {
-  assert.deepEqual(readLangs({ input: 'th', reply: 'en' }), { input: 'th', reply: 'en' })
-  assert.deepEqual(readLangs({ input: 'en' }), { input: 'en', reply: 'th' })
+test('readLang รับค่าที่ถูกต้อง', () => {
+  assert.equal(readLang('en'), 'en')
+  assert.equal(readLang('th'), 'th')
 })
 
-test('ค่าตั้งต้นเป็นไทยทั้งคู่', () => {
-  assert.deepEqual(DEFAULT_LANGS, { input: 'th', reply: 'th' })
+test('ค่าตั้งต้นเป็นไทย', () => {
+  assert.equal(DEFAULT_LANG, 'th')
 })
 
 test('กฎภาษาห้ามใช้ภาษาอื่นชัดเจน', () => {
-  const rules = langRules({ input: 'th', reply: 'th' })
-  assert.match(rules, /ห้ามใช้ภาษาอื่นนอกจากไทยกับอังกฤษ/)
+  assert.match(langRules('th'), /ห้ามใช้ภาษาอื่นนอกจากไทยกับอังกฤษ/)
 })
 
 test('กฎภาษาสั่งให้ถามซ้ำเมื่อฟังไม่ชัด แทนที่จะเดาเป็นภาษาอื่น', () => {
   // นี่คือจุดที่ของจริงพัง — พอฟังไม่ออก มันไปเดาเป็นจีน/เกาหลีแทนที่จะถาม
-  const rules = langRules(DEFAULT_LANGS)
+  const rules = langRules('th')
   assert.match(rules, /ให้ถามซ้ำ/)
   assert.match(rules, /ห้ามเดาว่าเป็นภาษาอื่น/)
 })
 
-test('ตั้งพูดไทยตอบอังกฤษได้ และกฎบอกว่าให้ตอบอังกฤษแม้ผู้ใช้พูดไทย', () => {
-  const rules = langRules({ input: 'th', reply: 'en' })
-  assert.match(rules, /ผู้ใช้พูดและพิมพ์เป็น\*\*ภาษาไทยเท่านั้น\*\*/)
-  assert.match(rules, /ตอบเป็น\*\*ภาษาอังกฤษเท่านั้น\*\*/)
-  assert.match(rules, /แม้ผู้ใช้จะพูดภาษาไทย/)
-})
-
-test('ภาษาเดียวกันทั้งสองฝั่งไม่มีวลี "แม้ผู้ใช้จะพูด" ให้รก', () => {
-  assert.equal(langRules({ input: 'th', reply: 'th' }).includes('แม้ผู้ใช้จะพูด'), false)
+test('ภาษาเดียวใช้ทั้งฟังและตอบ — ไม่แยกสองค่าแล้ว', () => {
+  assert.match(langRules('en'), /ภาษาอังกฤษเท่านั้น/)
+  assert.match(langRules('en'), /ทั้งตอนผู้ใช้พูดและตอนคุณตอบ/)
 })
 
 test('ชื่อวิชาและรหัสห้องต้องไม่ถูกแปล', () => {
-  assert.match(langRules(DEFAULT_LANGS), /ไม่ต้องแปล/)
+  assert.match(langRules('th'), /ไม่ต้องแปล/)
 })
 
 test('systemPrompt ใส่กฎภาษาเข้าไปจริงทั้งสองโหมด', () => {
   for (const mode of ['chat', 'voice'] as const) {
-    const p = systemPrompt(mode, TODAY, { input: 'en', reply: 'en' })
+    const p = systemPrompt(mode, TODAY, 'en')
     assert.match(p, /ภาษาอังกฤษเท่านั้น/)
     assert.match(p, /ห้ามใช้ภาษาอื่น/)
   }
 })
 
-test('systemPrompt ไม่ใส่ langs ก็ยังได้กฎภาษาแบบไทย', () => {
+test('systemPrompt ไม่ใส่ภาษาก็ยังได้กฎแบบไทย', () => {
   assert.match(systemPrompt('chat', TODAY), /ภาษาไทยเท่านั้น/)
 })
 
 test('วันที่ยังอยู่ท้ายสุด แม้จะแทรกกฎภาษาเข้ามา', () => {
-  // ส่วนที่เหลือต้องเป็น prefix คงที่ที่แคชได้
-  const p = systemPrompt('chat', TODAY, { input: 'th', reply: 'en' })
+  const p = systemPrompt('chat', TODAY, 'en')
   assert.ok(p.trimEnd().endsWith(`วันนี้คือ ${TODAY} (เวลาไทย)`))
 })
 
 test('เปลี่ยนภาษาแล้ว prompt เปลี่ยนจริง ไม่ใช่เงียบ ๆ ใช้ค่าเดิม', () => {
-  const th = systemPrompt('voice', TODAY, { input: 'th', reply: 'th' })
-  const en = systemPrompt('voice', TODAY, { input: 'th', reply: 'en' })
-  assert.notEqual(th, en)
+  assert.notEqual(systemPrompt('voice', TODAY, 'th'), systemPrompt('voice', TODAY, 'en'))
 })

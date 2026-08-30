@@ -10,7 +10,7 @@
  *   ให้สั่งโมเดลเรียก tool `projects` เอาแทน
  */
 
-import { DEFAULT_LANGS, langRules, type LangPrefs } from './lang'
+import { DEFAULT_LANG, langRules, type Lang } from './lang'
 
 /** โทนของผู้ช่วย · เจ้าของขอว่าโหมดเสียงต้องคุยเหมือนเพื่อน ไม่ใช่เหมือนคู่มือ */
 const VOICE_NOTE = `
@@ -67,9 +67,9 @@ const CORE = `
 export function systemPrompt(
   mode: 'chat' | 'voice',
   today: string,
-  langs: LangPrefs = DEFAULT_LANGS
+  lang: Lang = DEFAULT_LANG
 ): string {
   const tone = mode === 'voice' ? VOICE_NOTE : CHAT_NOTE
   // กฎภาษาวางไว้ท้าย ๆ ใกล้จุดที่โมเดลเริ่มตอบที่สุดเท่าที่ยังให้วันที่อยู่ท้ายสุดได้
-  return [CORE.trim(), tone.trim(), langRules(langs), `วันนี้คือ ${today} (เวลาไทย)`].join('\n\n')
+  return [CORE.trim(), tone.trim(), langRules(lang), `วันนี้คือ ${today} (เวลาไทย)`].join('\n\n')
 }

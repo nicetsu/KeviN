@@ -5,8 +5,8 @@ import type { StoredMessage } from '@/lib/chat/store'
 import Autolink from '@/lib/autolink'
 import VoiceCall from './VoiceCall'
 import { useCall } from '@/components/CallProvider'
-import { useLangs } from '@/lib/langPrefs'
-import LangPicker from './LangPicker'
+import { useTalkPrefs } from '@/lib/talkPrefs'
+import Settings from './Settings'
 
 type Mode = 'chat' | 'voice'
 
@@ -71,7 +71,8 @@ export default function TalkRoom({
 }) {
   const stored = useMode()
   const call = useCall()
-  const langs = useLangs()
+  const prefs = useTalkPrefs()
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   /*
    * โควตาเสียงหมด = **ดันไปโหมดแชตให้เลย** ไม่ใช่แค่ขึ้นข้อความ
@@ -113,7 +114,7 @@ export default function TalkRoom({
           text: trimmed,
           conversationId,
           history: history.map((l) => ({ role: l.role, content: l.content })),
-          langs,
+          lang: prefs.lang,
         }),
       })
       const data = await res.json()
@@ -133,6 +134,33 @@ export default function TalkRoom({
 
   return (
     <div className="talk">
+      {settingsOpen && (
+        <Settings
+          prefs={prefs}
+          locked={call.state !== 'idle'}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
+      {/* หัวข้ออยู่ในนี้ ไม่ได้อยู่ใน page เพราะปุ่มฟันเฟืองต้องอยู่แถวเดียวกัน
+          และมันเป็นคอมโพเนนต์ฝั่ง client ที่ถือสถานะการเปิดแผง */}
+      <div className="talk__head">
+        <h1>KeviN</h1>
+        <button
+          className="gear"
+          onClick={() => setSettingsOpen(true)}
+          aria-label="ตั้งค่าการคุย"
+          title="ตั้งค่าการคุย"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
+               aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.5.55.87 1.06.99H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+      </div>
+
       <div className="seg seg--wide" role="tablist" aria-label="โหมดการคุย">
         {(['chat', 'voice'] as const).map((m) => (
           <button
@@ -146,9 +174,6 @@ export default function TalkRoom({
           </button>
         ))}
       </div>
-
-      {/* ล็อกตอนกำลังคุย — setup ของ Live API แก้กลางสายไม่ได้ */}
-      <LangPicker langs={langs} locked={call.state !== 'idle'} />
 
       {call.quotaOut && (
         <p className="alert alert--gap" role="status">
