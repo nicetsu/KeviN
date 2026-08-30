@@ -222,7 +222,7 @@ S7 แผงรายละเอียด และ S8 เพิ่มเร็
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 147 เคส · ใช้เวลาไม่ถึงวินาที
+npm test --prefix web        # 185 เคส · ใช้เวลาไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เทสต์ | เคส |
@@ -234,6 +234,9 @@ npm test --prefix web        # 147 เคส · ใช้เวลาไม่�
 | `lib/agenda.ts` | เติมเวลาจบของกำหนดการที่เว้นว่าง | `test/agenda.test.ts` | 15 |
 | `lib/calendar.ts` | เวลาของบล็อกปฏิทิน รวมบล็อกที่ชนเที่ยงคืน | `test/calendar.test.ts` | 11 |
 | `lib/layout.ts` | จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์ | `test/layout.test.ts` | 10 |
+| `lib/ai/tools.ts` | ชั้น tool อ่านอย่างเดียวของประตูที่สาม | `test/tools.test.ts` | 20 |
+| `lib/ai/visibility.ts` | Area ไหนออกจากเครื่องไปหาโมเดลได้ | `test/visibility.test.ts` | 11 |
+| `lib/ai/prompt.ts` | prompt ของประตูแอป | `test/prompt.test.ts` | 7 |
 
 ไฟล์กลุ่มนี้เคยมีบั๊กที่ตามองไม่เห็นแต่เทสต์จับได้ · **แก้เมื่อไหร่ให้รันเทสต์ทุกครั้ง**
 และถ้าเพิ่มพฤติกรรมใหม่ ให้เขียนเคสก่อนแก้
@@ -368,7 +371,7 @@ Safari บน iPhone ไม่ให้เว็บทั่วไปส่ง p
 # รันเว็บในเครื่อง (พอร์ต 3001)
 npm run dev --prefix web
 
-# รันเทสต์ตรรกะแกน (147 เคส)
+# รันเทสต์ตรรกะแกน (185 เคส)
 npm test --prefix web
 
 # deploy  (--scope ขาดไม่ได้ ไม่งั้นตอบ Not authorized เพราะ project อยู่ใต้ team
@@ -414,7 +417,7 @@ KeviN/
 └── web/                     Next.js app
     ├── vercel.json          ตรึง region ไว้ที่โตเกียว ห้ามลบ
     ├── tsconfig.test.json   คอนฟิกคอมไพล์เทสต์เป็น CommonJS ลง .test-build/
-    ├── test/                เทสต์ตรรกะแกน 147 เคส · `npm test`
+    ├── test/                เทสต์ตรรกะแกน 185 เคส · `npm test`
     ├── app/*/loading.tsx    โครงร่างระหว่างรอ · มีครบทุกหน้า
     ├── components/Skeleton.tsx   ชิ้นส่วนของโครงร่างข้างบน
     ├── app/project/[id]/event/   หน้ากิจกรรม · ตัวแก้ · ปุ่มเพิ่มงานที่ผูกกับกิจกรรม

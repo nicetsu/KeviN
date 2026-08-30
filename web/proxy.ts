@@ -39,6 +39,15 @@ export default async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   if (!user && path !== '/login') {
+    // เส้นทาง /api ต้องตอบเป็น JSON ไม่ใช่พาไปหน้า login
+    //
+    // โหมดโทรเรียก /api/read/* จากฝั่งเบราว์เซอร์ระหว่างสาย ถ้า session หมดอายุ
+    // กลางทางแล้วได้ HTML ของหน้า login กลับไป ตัวเรียกจะ parse JSON ไม่ผ่าน
+    // แล้วรายงานเป็น "ดึงข้อมูลไม่สำเร็จ" ซึ่งไม่ได้บอกสาเหตุจริงเลย
+    if (path.startsWith('/api/')) {
+      return NextResponse.json({ ok: false, error: 'ยังไม่ได้ล็อกอิน' }, { status: 401 })
+    }
+
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
