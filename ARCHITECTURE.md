@@ -56,7 +56,7 @@
 ## 3 · โครงสร้างข้อมูล
 
 ```
-Area (Class / Hackathon / Financial / Personal)
+Area (Class / Competition / Personal / General)
 └── Project (ใน Class เรียก "วิชา")
     ├── project_schedules   ช่วงเวลาที่ซ้ำรายสัปดาห์ · ไม่แจ้งเตือน
     │   └── time_offsets ↘  ตัดทอนรายวัน — ชี้ได้ทั้งคาบเรียนและกิจกรรม

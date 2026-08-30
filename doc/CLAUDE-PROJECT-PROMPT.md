@@ -4,7 +4,7 @@
 แนบ `doc/SCHEMA.sql` เข้า project knowledge ด้วย — จะได้ไม่ต้องเสีย tool call ไปสำรวจ schema ทุกครั้งที่เปิดแชตใหม่
 
 > **พร้อมใช้แล้ว** — `user_id` เติมไว้ให้เรียบร้อย และชื่อ Area ตรงกับที่สร้างจริงบน Supabase
-> (Class · Hackathon · Financial · Personal)
+> (Class · Competition · Personal · General)
 
 ---
 
@@ -21,7 +21,7 @@ areas  →  projects  →  items (task | reminder | shortnote)
 time_offsets  →  ชี้ไปที่คาบเรียนหรือกิจกรรม บอกว่า "วันนั้นวันเดียว" ไม่ไป หรือไปแค่บางช่วง
 ```
 
-Area มีสี่อัน: **Class** (รายวิชา) · **Hackathon** · **Financial** · **Personal**
+Area มีสี่อัน: **Class** (รายวิชา) · **Competition** · **Personal** · **General**
 
 `items.type` แยกความหมายด้วยเวลา:
 

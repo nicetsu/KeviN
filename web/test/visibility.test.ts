@@ -10,20 +10,20 @@ import { areaIsVisible, keepVisible, VISIBLE_AREAS } from '../lib/ai/visibility'
 
 test('Area ที่อนุญาตผ่านได้', () => {
   assert.equal(areaIsVisible('Class'), true)
-  assert.equal(areaIsVisible('Hackathon'), true)
-})
-
-test('Financial ไม่ผ่าน', () => {
-  assert.equal(areaIsVisible('Financial'), false)
+  assert.equal(areaIsVisible('Competition'), true)
 })
 
 test('Personal ไม่ผ่าน', () => {
   assert.equal(areaIsVisible('Personal'), false)
 })
 
+test('General ไม่ผ่าน', () => {
+  assert.equal(areaIsVisible('General'), false)
+})
+
 test('Area ที่ยังไม่รู้จักไม่ผ่าน — allowlist ต้องพลาดไปทางเงียบ', () => {
   // ถ้าเป็น blocklist วันหนึ่งสร้าง Area "การเงินส่วนตัว" ขึ้นมาจะรั่วทันที
-  assert.equal(areaIsVisible('การเงินส่วนตัว'), false)
+  assert.equal(areaIsVisible('Hackathon'), false)  // ชื่อเก่าที่เลิกใช้แล้ว
   assert.equal(areaIsVisible('Health'), false)
 })
 
@@ -42,9 +42,9 @@ test('null · undefined · สตริงเปล่า ไม่ผ่าน'
 test('keepVisible คัดเฉพาะแถวที่ปล่อยได้', () => {
   const rows = [
     { id: 'a', area: 'Class' },
-    { id: 'b', area: 'Financial' },
-    { id: 'c', area: 'Hackathon' },
-    { id: 'd', area: 'Personal' },
+    { id: 'b', area: 'Personal' },
+    { id: 'c', area: 'Competition' },
+    { id: 'd', area: 'General' },
   ]
   assert.deepEqual(
     keepVisible(rows, (r) => r.area).map((r) => r.id),
@@ -61,7 +61,7 @@ test('keepVisible ตัดแถวที่หา Area ไม่เจอท�
 })
 
 test('keepVisible ไม่แก้อาร์เรย์ต้นฉบับ', () => {
-  const rows = [{ area: 'Class' }, { area: 'Financial' }]
+  const rows = [{ area: 'Class' }, { area: 'General' }]
   keepVisible(rows, (r) => r.area)
   assert.equal(rows.length, 2)
 })
@@ -70,8 +70,8 @@ test('รายการว่างได้รายการว่าง', ()
   assert.deepEqual(keepVisible([], () => 'Class'), [])
 })
 
-test('VISIBLE_AREAS ไม่มี Financial หรือ Personal หลุดเข้าไป', () => {
+test('VISIBLE_AREAS ไม่มี Personal หรือ General หลุดเข้าไป', () => {
   // เทสต์ตัวนี้มีไว้ให้พังตอนมีคนเผลอเติมชื่อผิดลงในรายการ
-  assert.equal(VISIBLE_AREAS.includes('Financial'), false)
   assert.equal(VISIBLE_AREAS.includes('Personal'), false)
+  assert.equal(VISIBLE_AREAS.includes('General'), false)
 })

@@ -48,9 +48,15 @@
 | Area | คีย์ | gradient |
 |---|---|---|
 | Class | `class` | `#79C2D0` → `#8878F0` |
-| Hackathon | `hack` | `#E0897E` → `#A594FF` |
-| Financial | `fin` | `#74C6A4` → `#79C2D0` |
-| Personal | `pers` | `#A594FF` → `#D98BB4` |
+| Competition | `hack` | `#E0897E` → `#A594FF` |
+| Personal | `fin` | `#74C6A4` → `#79C2D0` |
+| General | `pers` | `#A594FF` → `#D98BB4` |
+
+> ⚠️ **คีย์สีไม่ตรงกับชื่อ Area แล้ว** — เปลี่ยนชื่อ Area ไปเมื่อ 31 ส.ค. 2026
+> แต่ `areas.color` ยังเป็นค่าเดิม (`hack` `fin` `pers`) **โดยตั้งใจ**
+> เพราะคีย์สีผูกกับ gradient ไม่ได้ผูกกับชื่อ · ถ้าไปแก้ให้ตรงกันต้องแก้ทั้ง
+> `areas.color` ใน DB · `AREA_CLASS` ใน `app/library/page.tsx` · และ CSS ทั้งสองไฟล์
+> ซึ่งเป็นงานที่ไม่ได้อะไรกลับมานอกจากชื่อที่อ่านแล้วสบายใจขึ้น
 
 ## ตัวอักษร
 

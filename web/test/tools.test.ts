@@ -96,9 +96,9 @@ test('parseCalendar ปฏิเสธช่วงที่ยาวเกิน
 test('calendar · แถวของ Area ที่ไม่อนุญาตถูกตัดทิ้ง', async () => {
   const db = fakeDb([
     entry({ area_name: 'Class', title: 'แคลคูลัส 1' }),
-    entry({ area_name: 'Personal', title: 'นัดหมอ', source_id: 's2' }),
-    entry({ area_name: 'Financial', title: 'จ่ายค่าหอ', source_id: 's3' }),
-    entry({ area_name: 'Hackathon', title: 'UniHack', source_id: 's4', kind: 'event' }),
+    entry({ area_name: 'General', title: 'นัดหมอ', source_id: 's2' }),
+    entry({ area_name: 'Personal', title: 'จ่ายค่าหอ', source_id: 's3' }),
+    entry({ area_name: 'Competition', title: 'UniHack', source_id: 's4', kind: 'event' }),
   ])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
@@ -109,7 +109,7 @@ test('calendar · แถวของ Area ที่ไม่อนุญาต�
 test('items · กรองผ่าน projects.areas.name ที่ซ้อนสองชั้น', async () => {
   const db = fakeDb([
     item({ title: 'ส่งรายงาน' }),
-    item({ id: 'i2', title: 'โอนค่าเทอม', projects: { name: 'ทั่วไป', areas: { name: 'Financial' } } }),
+    item({ id: 'i2', title: 'โอนค่าเทอม', projects: { name: 'ทั่วไป', areas: { name: 'Personal' } } }),
     item({ id: 'i3', title: 'หา join ไม่เจอ', projects: null }),
   ])
   const r = await runTool('items', {}, ctx(db))
@@ -122,7 +122,7 @@ test('event · กิจกรรมของ Area ที่ไม่อนุ�
   const db = fakeDb([{
     id: 'e1', title: 'ตรวจสุขภาพ', body: null,
     starts_at: '2026-09-01T02:00:00Z', ends_at: '2026-09-01T05:00:00Z',
-    location: null, projects: { name: 'ทั่วไป', areas: { name: 'Personal' } },
+    location: null, projects: { name: 'ทั่วไป', areas: { name: 'General' } },
     event_agenda: [],
   }])
   const r = await runTool('event', { event_id: '11111111-2222-3333-4444-555555555555' }, ctx(db))
@@ -195,7 +195,7 @@ test('event · เรียงกำหนดการตามวันแล�
   const db = fakeDb([{
     id: 'e1', title: 'UniHack', body: null,
     starts_at: '2026-09-05T02:00:00Z', ends_at: '2026-09-06T10:00:00Z',
-    location: 'ห้องประชุม', projects: { name: 'UniHack 2026', areas: { name: 'Hackathon' } },
+    location: 'ห้องประชุม', projects: { name: 'UniHack 2026', areas: { name: 'Competition' } },
     event_agenda: [
       { id: 'a3', day_offset: 1, start_time: '09:00:00', end_time: null, title: 'Pitching' },
       { id: 'a1', day_offset: 0, start_time: '09:30:00', end_time: '09:50:00', title: 'Registration' },
@@ -219,8 +219,8 @@ test('event · ปฏิเสธ id ที่ไม่ใช่รูป uuid',
 test('hidden นับแถวที่ถูกกรองออก', async () => {
   const db = fakeDb([
     entry({ area_name: 'Class' }),
-    entry({ area_name: 'Personal', source_id: 's2' }),
-    entry({ area_name: 'Financial', source_id: 's3' }),
+    entry({ area_name: 'General', source_id: 's2' }),
+    entry({ area_name: 'Personal', source_id: 's3' }),
   ])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
@@ -238,12 +238,12 @@ test('hidden เป็น 0 เมื่อไม่มีอะไรถูก�
 
 test('hidden ไม่บอกว่าของที่ซ่อนคืออะไร — บอกแค่จำนวน', async () => {
   // ถ้าเผลอส่งชื่อหรือ Area ของแถวที่ซ่อนไปด้วย ตัวกรองก็เสียของทั้งอัน
-  const db = fakeDb([entry({ area_name: 'Financial', title: 'จ่ายค่าหอ 12,000' })])
+  const db = fakeDb([entry({ area_name: 'Personal', title: 'จ่ายค่าหอ 12,000' })])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
   if (!r.ok) return
   assert.equal(JSON.stringify(r).includes('จ่ายค่าหอ'), false)
-  assert.equal(JSON.stringify(r).includes('Financial'), false)
+  assert.equal(JSON.stringify(r).includes('Personal'), false)
 })
 
 // ---- ลิงก์ต้องมาจาก tool เท่านั้น ----

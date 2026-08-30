@@ -19,7 +19,7 @@
 ## โครงสร้างข้อมูล
 
 ```
-Area (Class / Hackathon / Financial / Personal)
+Area (Class / Competition / Personal / General)
 └── Project (รายวิชา / โปรเจกต์)
     ├── Schedule    ช่วงเวลาประจำ · ใส่ได้หลายช่วง · ไม่แจ้งเตือน
     ├── Task        มีสถานะเสร็จ · due_at ไม่บังคับ
@@ -56,7 +56,7 @@ Area (Class / Hackathon / Financial / Personal)
 
 **เสร็จเมื่อ:** query `schedule_occurrences(current_date, current_date + 7)` คืนคาบเรียนสัปดาห์นี้ได้ถูกต้อง
 
-✅ **ผ่านแล้ว 18 ส.ค. 2026** — 8 วิชา 11 คาบ 187 occurrence ทั้งเทอม · บวก project UniHack 2026 ใน Area Hackathon
+✅ **ผ่านแล้ว 18 ส.ค. 2026** — 8 วิชา 11 คาบ 187 occurrence ทั้งเทอม · บวก project UniHack 2026 ใน Area Competition
 
 ---
 
@@ -296,7 +296,7 @@ Orientation Day · รับ Booklet · Mentoring Session · Final Round Pitchin
 ### ขั้น 1 · ชั้น tool อ่านอย่างเดียว
 
 - [x] `lib/ai/tools.ts` — นิยาม tool ครั้งเดียว 4 ตัว (`calendar` · `items` · `projects` · `event`)
-- [x] ตัวกรอง Area (`lib/ai/visibility.ts`) — **allowlist** `Class` + `Hackathon` · Area ใหม่มองไม่เห็นไว้ก่อน
+- [x] ตัวกรอง Area (`lib/ai/visibility.ts`) — **allowlist** `Class` + `Competition` · Area ใหม่มองไม่เห็นไว้ก่อน
 - [x] `lib/ai/db.ts` — interface ที่**ไม่มีเมธอดเขียนเลย** ชั้น tool จึงเขียนข้อมูลไม่ได้ตั้งแต่ตอนคอมไพล์
 - [x] `/api/read/[tool]` รับเฉพาะชื่อใน allowlist · ตรวจล็อกอินซ้ำ · คืน JSON ไม่ใช่ redirect
 - [x] `proxy.ts` ตอบ 401 JSON สำหรับ `/api/*` แทนการเด้งไป login (กันสาย voice ได้ HTML กลับไป)

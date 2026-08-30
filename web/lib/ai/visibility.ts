@@ -16,8 +16,18 @@
  *    แม้ระบบจะไม่มีข้อมูลให้ตอบก็ตาม
  */
 
-/** ชื่อ Area ตรงตามที่อยู่ใน DB จริง (doc/DECISIONS.md — Class · Hackathon · Financial · Personal) */
-export const VISIBLE_AREAS: readonly string[] = ['Class', 'Hackathon']
+/**
+ * ชื่อ Area ตรงตามที่อยู่ใน DB จริง — `Class` · `Competition` · `Personal` · `General`
+ *
+ * ⚠️ **ผูกกับชื่อ ไม่ใช่ id** ถ้าเปลี่ยนชื่อ Area ใน DB ต้องมาแก้ที่นี่ด้วย
+ *    ไม่งั้นผู้ช่วยจะมองไม่เห็น Area นั้นทันที **โดยไม่มี error** — แค่ตอบว่าไม่มีข้อมูล
+ *    (เปลี่ยนชื่อไปรอบหนึ่งแล้ว 31 ส.ค. 2026: Hackathon → Competition ·
+ *     Financial → Personal · Personal → General)
+ *
+ * ที่ยังผูกกับชื่อแทน id เพราะ id เป็น uuid ที่อ่านไม่รู้เรื่อง
+ * และไฟล์นี้ต้องอ่านออกทันทีว่าอะไรออกจากเครื่องได้บ้าง
+ */
+export const VISIBLE_AREAS: readonly string[] = ['Class', 'Competition']
 
 /** `null`/`undefined` = ไม่รู้ว่าอยู่ Area ไหน ซึ่งแปลว่า **ไม่ปล่อย** */
 export function areaIsVisible(name: string | null | undefined): boolean {
