@@ -190,16 +190,27 @@ export class VoiceCall {
 
     ws.onerror = () => this.hooks.onError('สายมีปัญหา')
 
-    ws.onclose = () => {
+    ws.onclose = (e) => {
       if (this.closing) return
+
       // ครบ 15 นาที หรือเน็ตสะดุด — ต่อใหม่ด้วย handle เดิม ผู้ใช้ไม่ต้องรู้
       if (this.handle) {
         this.hooks.onState('reconnecting')
         // token อายุ 30 นาที ยาวกว่าสายหนึ่งเส้นเท่าตัว รอบแรกจึงไม่ต้องขอใหม่
         this.connect().catch(() => this.stop('สายหลุด ต่อใหม่ไม่ได้'))
-      } else {
-        this.stop('สายหลุด')
+        return
       }
+
+      /*
+       * ยังไม่เคยได้ handle = สายตายก่อนจะเริ่มคุยด้วยซ้ำ
+       *
+       * เคสนี้มักเป็น **setup ถูกปฏิเสธ** เช่นชื่อเสียงหรือชื่อรุ่นไม่ถูกต้อง
+       * ซึ่ง Google ใส่เหตุผลมาใน `reason` ของ close event
+       * ถ้าไม่เอาออกมาแสดง ผู้ใช้จะเห็นแค่ "สายหลุด" ซึ่งไม่บอกอะไรเลย
+       * ทั้งที่เรารู้สาเหตุอยู่ในมือ
+       */
+      const why = (e.reason ?? '').trim()
+      this.stop(why ? `เปิดสายไม่ได้ · ${why.slice(0, 200)}` : 'สายหลุด')
     }
   }
 

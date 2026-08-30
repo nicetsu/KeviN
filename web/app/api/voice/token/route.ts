@@ -21,6 +21,18 @@ export const dynamic = 'force-dynamic'
 /** แยกรุ่นจากฝั่งแชตเพื่อให้ **โควตาแยกกัน** — เสียงหมดแล้วแชตยังใช้ได้ */
 const VOICE_MODEL = process.env.GEMINI_VOICE_MODEL ?? 'gemini-3.1-flash-live-preview'
 
+/**
+ * เสียงของ KeviN — เจ้าของเลือก `Fenrir` (ตื่นเต้น มีชีวิตชีวา) 31 ส.ค. 2026
+ *
+ * เลือกจาก 30 เสียงของ Gemini TTS · ที่ไม่เอา `Kore` ซึ่งเอกสารยกเป็นตัวอย่าง
+ * เพราะมันเป็นแนว "หนักแน่น" ซึ่งออกทางการ ไม่ใช่โทนเพื่อนที่เจ้าของขอไว้
+ *
+ * ⚠️ ถ้าเปลี่ยนเสียงแล้วอยากรู้ว่าใช้ได้จริงไหม **ต้องลองเปิดสายจริง**
+ *    เอกสารบอกว่า Live API รองรับเสียงเดียวกับ TTS ทั้งหมด แต่มีหมายเหตุกำกับว่า
+ *    ชุดเสียงอาจต่างกัน · ถ้าชื่อผิด setup จะไม่ผ่านตั้งแต่ต้นสาย
+ */
+const VOICE_NAME = process.env.GEMINI_VOICE_NAME ?? 'Fenrir'
+
 /** ค่าเริ่มต้นของ Google: เปิดสายได้ภายใน 1 นาที · คุยต่อได้ 30 นาที */
 const START_WINDOW_MS = 60_000
 const LIFETIME_MS = 30 * 60_000
@@ -60,7 +72,10 @@ export async function POST(request: Request) {
       //     ตอบ 400 Unknown name · ชื่อที่ถูกอยู่ในหน้า API reference)
       bidiGenerateContentSetup: {
         model: `models/${VOICE_MODEL}`,
-        generationConfig: { responseModalities: ['AUDIO'] },
+        generationConfig: {
+          responseModalities: ['AUDIO'],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_NAME } } },
+        },
         systemInstruction: { parts: [{ text: systemPrompt('voice', bangkokToday().dateKey, langs) }] },
         tools: [{ functionDeclarations: toolDeclarations() }],
         // ได้ transcript ทั้งสองฝั่งมาฟรี — เอาไปขึ้นคำบรรยายและเก็บลงประวัติ
