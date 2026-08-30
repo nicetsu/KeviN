@@ -783,7 +783,23 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
    ไม่มีสี ฟอนต์ หรือรูปทรงใหม่เข้าระบบ — ยืมความหมายเดิมมาทั้งหมด
    ฟ้า = กำลังเกิดขึ้นตอนนี้ · ม่วง = สิ่งที่กดได้ · mono = ป้ายระบบ
    ===================================================================== */
-.talk { display: flex; flex-direction: column; gap: 0.9rem; min-height: 60vh; }
+/*
+ * สูงเต็มจอ — เป็นรากของสองอย่างพร้อมกัน
+ *
+ * ถ้ากล่องเตี้ย โหมดโทรจะจัดกลางของ "กล่องเตี้ย" ไม่ใช่กลางจอ (ดูลอยไปข้างบน)
+ * และช่องพิมพ์ในโหมดแชตจะลอยตามเนื้อหาแทนที่จะติดล่าง
+ *
+ * ลบ 6.25rem = padding บนล่างของ `.wrap` (1.25 + 5) จะได้ไม่ดันให้ทั้งหน้าเลื่อน
+ *
+ * ⚠️ ใช้ `dvh` ไม่ใช่ `vh` — บนมือถือ `vh` ไม่หดตามแถบเบราว์เซอร์และคีย์บอร์ด
+ *    พอคีย์บอร์ดเด้งขึ้นมา ช่องพิมพ์จะถูกดันไปอยู่ใต้คีย์บอร์ด
+ *    (`vh` ไว้เป็นค่าสำรองให้เบราว์เซอร์ที่ยังไม่รู้จัก `dvh`)
+ */
+.talk {
+  display: flex; flex-direction: column; gap: 0.9rem;
+  min-height: calc(100vh - 6.25rem);
+  min-height: calc(100dvh - 6.25rem);
+}
 
 /*
  * ตัวสลับโหมด — **ใช้ `.seg` ตัวเดิมของโปรเจกต์** ที่ปฏิทินและหน้าตารางเวลาใช้อยู่
@@ -794,7 +810,15 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .seg--wide button { flex: 1; text-align: center; padding-top: 0.45rem; padding-bottom: 0.45rem; }
 
 /* สายข้อความ */
-.thread { display: flex; flex-direction: column; gap: 0.55rem; flex: 1; }
+/*
+ * เลื่อนในตัวเอง ไม่ให้ทั้งหน้าเลื่อน — หัวข้อ ปุ่มฟันเฟือง และช่องพิมพ์จึงนิ่ง
+ * `min-height: 0` จำเป็นสำหรับ flex item ที่ต้อง scroll ไม่งั้นมันยืดตามเนื้อหา
+ * แทนที่จะหดแล้วเลื่อน
+ */
+.thread {
+  display: flex; flex-direction: column; gap: 0.55rem;
+  flex: 1; min-height: 0; overflow-y: auto;
+}
 
 .msg {
   max-width: 86%; padding: 0.55rem 0.8rem;
@@ -838,10 +862,15 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .talk__starter:hover { border-color: var(--brand); }
 
 /* ช่องพิมพ์ */
+/*
+ * แถวล่างสุดของกล่อง — ไม่ใช้ `sticky` แล้ว
+ *
+ * `sticky` เกาะได้เฉพาะตอนมีอะไรให้เลื่อน · ข้อความน้อย ๆ มันจึงลอยตามเนื้อหา
+ * พอ `.thread` เลื่อนในตัวเองแล้ว ช่องพิมพ์เป็นแถวล่างสุดโดยธรรมชาติ
+ */
 .composer {
   display: flex; align-items: center; gap: 0.5rem;
-  position: sticky; bottom: 0; padding: 0.6rem 0 0.2rem;
-  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  flex: none; padding: 0.6rem 0 0.2rem;
 }
 .composer__field {
   flex: 1; min-width: 0; font: inherit; font-size: var(--s-0);
