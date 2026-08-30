@@ -119,13 +119,13 @@ export default function TalkRoom({
 
   return (
     <div className="talk">
-      <div className="seg" role="tablist" aria-label="โหมดการคุย">
+      <div className="seg seg--wide" role="tablist" aria-label="โหมดการคุย">
         {(['chat', 'voice'] as const).map((m) => (
           <button
             key={m}
             role="tab"
             aria-selected={mode === m}
-            className={`seg__b${mode === m ? ' seg__b--on' : ''}`}
+            data-on={mode === m}
             onClick={() => writeMode(m)}
           >
             {m === 'chat' ? 'แชต' : 'โทร'}

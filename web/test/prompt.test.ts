@@ -62,3 +62,11 @@ test('สั่งให้บอกจำนวนของที่มอง�
   assert.match(p, /ดูไม่ได้/)
   assert.match(p, /ห้ามเดาว่ามันคืออะไร/)
 })
+
+test('ห้ามแต่งลิงก์เอง และลิงก์ต้องเป็น path ภายใน', () => {
+  // เจอจริงตอนทดสอบ: โมเดลปฏิเสธถูกแล้วแต่ยื่น https://tasks.google.com/ ให้
+  const p = systemPrompt('chat', TODAY)
+  assert.match(p, /ห้ามแต่งขึ้นเอง/)
+  assert.match(p, /ห้ามส่งลิงก์ไปเว็บอื่น/)
+  assert.match(p, /ขึ้นต้นด้วย \//)
+})

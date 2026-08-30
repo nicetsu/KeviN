@@ -10,6 +10,7 @@ import { readOnlyDb } from '@/lib/ai/supabaseDb'
 import { runTool, toolDeclarations } from '@/lib/ai/tools'
 import { systemPrompt } from '@/lib/ai/prompt'
 import { generate, GeminiError, type Content } from '@/lib/chat/gemini'
+import { sanitizeLinks } from '@/lib/chat/links'
 import {
   HISTORY_LIMIT,
   logToolCall,
@@ -86,7 +87,10 @@ export async function POST(request: NextRequest) {
         break
       }
 
-      contents.push({ role: 'model', parts: out.calls.map((c) => ({ functionCall: c })) })
+      // ส่ง parts ชุดเดิมกลับไปทั้งก้อน **ห้ามประกอบใหม่จาก out.calls**
+      // Gemini 3 แนบ thoughtSignature มากับ functionCall และบังคับให้ส่งกลับครบ
+      // ถ้าหล่นไปจะได้ 400 ในรอบถัดไป โดยรอบแรกดูเหมือนทำงานปกติทุกอย่าง
+      contents.push({ role: 'model', parts: out.parts })
 
       const responses = await Promise.all(
         out.calls.map(async (call) => {
@@ -123,6 +127,14 @@ export async function POST(request: NextRequest) {
   }
 
   if (!reply) reply = 'ผมยังตอบคำถามนี้ไม่ได้ครับ ลองถามใหม่อีกแบบได้ไหม'
+
+  // ตัดลิงก์ที่ไม่ใช่เส้นทางจริงของแอปทิ้งก่อนส่งออก
+  // prompt ห้ามได้แค่สิ่งที่โมเดลตั้งใจ · ด่านนี้กันได้ทุกกรณี (lib/chat/links.ts)
+  const cleaned = sanitizeLinks(reply)
+  if (cleaned.removed > 0) {
+    console.warn(`[chat] ตัดลิงก์ปลอมทิ้ง ${cleaned.removed} จุด`)
+  }
+  reply = cleaned.text
 
   try {
     await saveMessages(userId, conversationId, 'chat', [

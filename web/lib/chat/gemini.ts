@@ -13,10 +13,20 @@ const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models'
  */
 export const CHAT_MODEL = process.env.GEMINI_CHAT_MODEL ?? 'gemini-3.1-flash-lite'
 
-export type Part =
-  | { text: string }
-  | { functionCall: { name: string; args?: Record<string, unknown> } }
-  | { functionResponse: { name: string; response: Record<string, unknown> } }
+/**
+ * ⚠️ `Part` มีฟิลด์อื่นที่เราไม่ได้ประกาศไว้ด้วย และ**ต้องส่งกลับไปครบ**
+ *
+ * Gemini 3 แนบ `thoughtSignature` มากับ part ที่เป็น `functionCall`
+ * ถ้าประกอบ turn ของโมเดลขึ้นมาใหม่เองแล้วใส่แค่ `functionCall` รอบถัดไปจะได้
+ * **400 Function call is missing a thought_signature** · จึงใช้ index signature
+ * ไว้รับฟิลด์ที่ไม่รู้จัก แล้วส่ง `parts` ชุดเดิมกลับไปทั้งก้อน ไม่แกะประกอบใหม่
+ */
+export type Part = {
+  text?: string
+  functionCall?: { name: string; args?: Record<string, unknown> }
+  functionResponse?: { name: string; response: Record<string, unknown> }
+  [extra: string]: unknown
+}
 
 export type Content = { role: 'user' | 'model'; parts: Part[] }
 
@@ -33,7 +43,12 @@ export class GeminiError extends Error {
   }
 }
 
-type Reply = { text: string; calls: { name: string; args: Record<string, unknown> }[] }
+type Reply = {
+  text: string
+  calls: { name: string; args: Record<string, unknown> }[]
+  /** parts ดิบของ turn นี้ · ต้อง push กลับเข้า contents ทั้งก้อน ห้ามประกอบใหม่ */
+  parts: Part[]
+}
 
 export async function generate(opts: {
   system: string
@@ -74,10 +89,10 @@ export async function generate(opts: {
   }
 
   const parts = json.candidates?.[0]?.content?.parts ?? []
-  const text = parts.map((p) => ('text' in p ? p.text : '')).join('').trim()
+  const text = parts.map((p) => p.text ?? '').join('').trim()
   const calls = parts
-    .filter((p): p is Extract<Part, { functionCall: unknown }> => 'functionCall' in p)
-    .map((p) => ({ name: p.functionCall.name, args: p.functionCall.args ?? {} }))
+    .flatMap((p) => (p.functionCall ? [p.functionCall] : []))
+    .map((c) => ({ name: c.name, args: c.args ?? {} }))
 
-  return { text, calls }
+  return { text, calls, parts }
 }

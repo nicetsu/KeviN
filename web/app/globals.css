@@ -785,18 +785,13 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
    ===================================================================== */
 .talk { display: flex; flex-direction: column; gap: 0.9rem; min-height: 60vh; }
 
-/* ตัวสลับโหมด */
-.seg {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px;
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-}
-.seg__b {
-  font: inherit; font-size: var(--s--1); font-weight: 500;
-  padding: 0.42rem 0; border: 0; border-radius: var(--r-pill);
-  background: transparent; color: var(--faint); cursor: pointer;
-}
-.seg__b--on { background: var(--brand); color: #14121F; font-weight: 600; }
+/*
+ * ตัวสลับโหมด — **ใช้ `.seg` ตัวเดิมของโปรเจกต์** ที่ปฏิทินและหน้าตารางเวลาใช้อยู่
+ * ไม่ได้สร้างของใหม่ · รอบแรกเผลอตั้งชื่อคลาสซ้ำแล้วโดน `.seg button` ที่เฉพาะเจาะจง
+ * กว่าทับจนปุ่มที่เลือกอยู่ไม่ขึ้นสี — ของเดิมทำงานได้อยู่แล้ว แค่ต้องการให้เต็มความกว้าง
+ */
+.seg--wide { display: flex; width: 100%; }
+.seg--wide button { flex: 1; text-align: center; padding-top: 0.45rem; padding-bottom: 0.45rem; }
 
 /* สายข้อความ */
 .thread { display: flex; flex-direction: column; gap: 0.55rem; flex: 1; }

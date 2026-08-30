@@ -113,6 +113,7 @@ type EntryRow = {
 
 type ItemRow = {
   id: string
+  project_id: string
   type: 'task' | 'reminder' | 'shortnote'
   title: string
   body: string | null
@@ -208,7 +209,7 @@ const items: ToolDef<{ scope: 'overdue' | 'open' | 'done' | 'notes' }, ItemRow> 
   },
   parse: (raw) => ({ scope: oneOf(raw, 'scope', ['overdue', 'open', 'done', 'notes'] as const, 'open') }),
   fetch: async (input, ctx) => {
-    const columns = 'id, type, title, body, due_at, remind_at, done_at, projects(name, areas(name))'
+    const columns = 'id, project_id, type, title, body, due_at, remind_at, done_at, projects(name, areas(name))'
     const base = { table: 'items', columns, limit: 80 }
 
     if (input.scope === 'notes') {
@@ -260,6 +261,9 @@ const items: ToolDef<{ scope: 'overdue' | 'open' | 'done' | 'notes' }, ItemRow> 
     กำหนดส่ง: row.due_at ?? undefined,
     เวลาเตือน: row.remind_at ?? undefined,
     เสร็จแล้ว: row.done_at ? true : undefined,
+    // ต้องมีเสมอ — ไม่มีหน้าเฉพาะของ item เดี่ยว ๆ จึงพาไปหน้าวิชาที่มันอยู่
+    // ถ้าไม่ให้ลิงก์มา โมเดลจะแต่ง URL ขึ้นเองเวลาต้องปฏิเสธ (เจอจริงตอนทดสอบ)
+    ลิงก์: `/project/${row.project_id}`,
   }),
 }
 

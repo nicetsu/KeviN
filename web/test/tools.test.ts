@@ -245,3 +245,33 @@ test('hidden ไม่บอกว่าของที่ซ่อนคือ�
   assert.equal(JSON.stringify(r).includes('จ่ายค่าหอ'), false)
   assert.equal(JSON.stringify(r).includes('Financial'), false)
 })
+
+// ---- ลิงก์ต้องมาจาก tool เท่านั้น ----
+
+test('items · ทุกแถวมีลิงก์ และเป็น path ภายในเสมอ', async () => {
+  // ตอนทดสอบจริงเจอว่าถ้าไม่ให้ลิงก์มา โมเดลจะแต่ง URL ขึ้นเอง
+  // (ตอบ https://tasks.google.com/ ซึ่งไม่ใช่ของระบบนี้เลย)
+  const r = await runTool('items', {}, ctx(fakeDb([item(), item({ id: 'i2' })])))
+  assert.equal(r.ok, true)
+  if (!r.ok) return
+  for (const row of r.rows) {
+    const link = (row as { ลิงก์?: string }).ลิงก์
+    assert.ok(link, 'ทุกแถวต้องมีลิงก์')
+    assert.ok(link!.startsWith('/'), `ลิงก์ต้องเป็น path ภายใน ไม่ใช่ ${link}`)
+  }
+})
+
+test('ไม่มี tool ไหนคืนลิงก์ที่ออกไปนอกระบบ', async () => {
+  const dbs = [
+    ['calendar', fakeDb([entry({ kind: 'event' })])],
+    ['items', fakeDb([item()])],
+    ['projects', fakeDb([{ id: 'p1', name: 'แคล', description: null, status: 'active', areas: { name: 'Class' } }])],
+  ] as const
+  for (const [name, db] of dbs) {
+    const r = await runTool(name, {}, ctx(db))
+    assert.equal(r.ok, true, name)
+    if (!r.ok) continue
+    const text = JSON.stringify(r.rows)
+    assert.equal(/https?:\/\//.test(text), false, `${name} คืนลิงก์ภายนอกมา`)
+  }
+})

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { parseQuickAdd } from '@/lib/parse'
 import { thaiDateLabel } from '@/lib/time'
 import { createItem } from '@/app/actions/items'
@@ -22,6 +22,7 @@ export default function QuickAdd({
   today: string
 }) {
   const router = useRouter()
+  const path = usePathname()
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -93,7 +94,18 @@ export default function QuickAdd({
     router.refresh()
   }
 
+  /*
+   * ซ่อนปุ่มลอยในหน้า KeviN
+   *
+   * หน้านั้นมีปุ่มหลักของตัวเองอยู่แล้วคือปุ่มส่งข้อความ · ถ้าปล่อยปุ่มลอยไว้
+   * จะได้ม่วงสองก้อนที่แย่งกันเป็นปุ่มหลักในจอเดียว ซึ่งเป็นเหตุผลเดียวกับที่
+   * ช่อง KeviN ในแถบล่างไม่ได้ทำเป็นวงกลมยกขึ้น (doc/CHAT.md §8)
+   *
+   * แผ่นเพิ่มเร็วที่เปิดค้างอยู่ยังแสดงต่อ — ปิดกลางคันเพราะเปลี่ยนหน้าจะทำให้
+   * สิ่งที่พิมพ์ไว้หายโดยไม่ได้ตั้งใจ
+   */
   if (!open) {
+    if (path.startsWith('/kevin')) return null
     return (
       <button className="fab" onClick={() => setOpen(true)} aria-label="เพิ่มเร็ว" title="เพิ่มเร็ว (N)">
         +
