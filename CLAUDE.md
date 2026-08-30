@@ -15,9 +15,9 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย**
-`web/lib/layout.ts` (คาบชนกัน 7 เคส) · `web/lib/weeks.ts` (การซ้ำ 20 เคส) · `web/lib/parse.ts` (ตีความภาษาไทย 15 เคส)
-`web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง 16 เคส) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม 23 เคส)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (103 เคส · อยู่ใน `web/test/`)
+`web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
+`web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
 
 **ความลับเก็บที่ไหน**
 VAPID private key → Supabase secrets · VAPID public key → Vercel env (`NEXT_PUBLIC_`)

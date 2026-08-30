@@ -1,0 +1,30 @@
+/*
+ * คอนฟิกเฉพาะการรันเทสต์
+ *
+ * ทำไมต้องคอมไพล์ก่อนแทนที่จะให้ node รัน .ts ตรง ๆ:
+ * type stripping ของ node ทำงานในโหมด ESM ซึ่ง **บังคับให้ import ต้องมีนามสกุล**
+ * แต่โค้ดในแอปเขียนแบบ bundler (`from './time'`) ตามที่ Next.js ใช้
+ * คอมไพล์เป็น CommonJS แล้ว `require('./time')` หาไฟล์เจอเอง — และได้ตรวจ type ของเทสต์ฟรีไปด้วย
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": ".test-build",
+    "incremental": false,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "lib/agenda.ts",
+    "lib/calendar.ts",
+    "lib/layout.ts",
+    "lib/libraryOpen.ts",
+    "lib/parse.ts",
+    "lib/time.ts",
+    "lib/weeks.ts",
+    "test/**/*.ts"
+  ]
+}
