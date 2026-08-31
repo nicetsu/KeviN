@@ -83,7 +83,10 @@ export default async function TodayPage() {
       .or(
         `and(due_at.gte.${start.toISOString()},due_at.lt.${end.toISOString()}),` +
           `and(remind_at.gte.${start.toISOString()},remind_at.lt.${end.toISOString()}),` +
-          `and(due_at.lt.${start.toISOString()},done_at.is.null)`
+          `and(due_at.lt.${start.toISOString()},done_at.is.null),` +
+          // reminder ที่เลยเวลาแล้ว — เดิมไม่มีเงื่อนไขคู่กับ due_at ทำให้พลาดแล้ว
+          // หายจากทุกหน้าทันทีที่ข้ามวัน · ยิ่งหายเร็วขึ้นตั้งแต่มีเก็บกวาดอัตโนมัติ
+          `remind_at.lt.${start.toISOString()}`
       ),
   ])
 
@@ -256,6 +259,14 @@ export default async function TodayPage() {
   // ---- งานและการเตือน ---------------------------------------------------
   const overdue: Line[] = []
   const today: Line[] = []
+  /*
+   * reminder ที่เลยเวลาแล้ว — แยกจาก "เลยกำหนด" เพราะคนละเรื่อง
+   *
+   * งานที่เลยกำหนดยัง **ทำได้อยู่** ส่วนการเตือนที่ผ่านไปแล้ว **ทำอะไรไม่ได้แล้ว**
+   * มันแค่ยังไม่ถูกเก็บ · เอามาปนกันจะทำให้กลุ่ม "เลยกำหนด" ยาวขึ้นด้วยของ
+   * ที่กดอะไรไม่ได้ แล้วผู้ใช้จะเลิกอ่านกลุ่มนั้นทั้งกลุ่ม
+   */
+  const missed: Line[] = []
 
   for (const it of items) {
     const when = it.type === 'reminder' ? it.remind_at : it.due_at
@@ -291,16 +302,21 @@ export default async function TodayPage() {
       },
     }
 
-    if (isOverdue) overdue.push(line)
+    if (it.type === 'reminder' && new Date(when).getTime() < start.getTime()) {
+      // คืนนี้ตีสาม `archive_stale()` จะเก็บอันนี้เข้าคลัง — บอกไว้ก่อน
+      // ให้มีโอกาสจัดการ ดีกว่าให้หายไปเฉย ๆ แล้วค่อยไปหาในคลัง
+      missed.push({ ...line, tag: { text: 'เก็บคืนนี้', kind: 'skip' }, past: true })
+    } else if (isOverdue) overdue.push(line)
     else today.push(line)
   }
 
   // เสร็จแล้วร่วงท้ายกลุ่ม · ไม่ซ่อน (doc/DECISIONS.md)
   const byTime = (a: Line, b: Line) => Number(a.done) - Number(b.done) || a.sortAt - b.sortAt
   overdue.sort(byTime)
+  missed.sort((a, b) => b.sortAt - a.sortAt)   // ล่าสุดก่อน · ที่พลาดเมื่อกี้สำคัญกว่าที่พลาดนานแล้ว
   const timeline = [...bookedLines, ...today].sort(byTime)
 
-  const nothing = overdue.length === 0 && timeline.length === 0
+  const nothing = overdue.length === 0 && timeline.length === 0 && missed.length === 0
 
   return (
     <Content>
@@ -316,7 +332,17 @@ export default async function TodayPage() {
           </div>
         )}
 
-        {overdue.length > 0 && (
+        {missed.length > 0 && (
+        <>
+          <div className="sec">
+            <span>พลาดไปแล้ว</span>
+            <span>{missed.length}</span>
+          </div>
+          <ItemList rows={missed} />
+        </>
+      )}
+
+      {overdue.length > 0 && (
           <>
             <div className="sec">
               <span>เลยกำหนด</span>

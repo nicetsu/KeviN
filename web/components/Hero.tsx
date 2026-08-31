@@ -105,6 +105,25 @@ export default function Hero({ info }: { info: HeroInfo }) {
       <div className="hero__time">{main.spanText}</div>
       {main.sub && <div className="hero__sub">{main.sub}</div>}
 
+      {/*
+        แถบความคืบหน้า — ขึ้นเฉพาะตอนกำลังเกิดขึ้นจริง
+        ตอนอยู่ในคาบ สิ่งที่อยากรู้คือ "เหลืออีกเท่าไหร่" ซึ่งตัวเลขบอกแล้ว
+        แต่แถบทำให้รู้ได้จากการชำเลืองโดยไม่ต้องอ่าน · เดินเองทุกนาที
+        เพราะ useNow() เดินอยู่แล้ว ไม่ได้เพิ่มต้นทุนอะไร
+      */}
+      {live && now !== null && end > start && (
+        <div
+          className="hero__bar"
+          role="progressbar"
+          aria-label="ความคืบหน้าของคาบนี้"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(((now - start) / (end - start)) * 100)}
+        >
+          <span style={{ width: `${Math.min(100, ((now - start) / (end - start)) * 100)}%` }} />
+        </div>
+      )}
+
       {after && <AfterLine {...after} />}
     </div>
   )

@@ -253,6 +253,22 @@ html, body { margin: 0; padding: 0; }
 .row--link { text-decoration: none; color: inherit; }
 .row--link:hover .row__title { color: var(--brand); }
 .row__go { color: var(--faint); align-self: center; font-size: 0.9rem; flex: none; }
+
+/*
+ * แถบความคืบหน้าของคาบที่กำลังเกิดขึ้น
+ * เดินทีละนาทีตาม useNow() · transition ยาวกว่าปกติเพราะระยะที่ขยับต่อครั้งเล็กมาก
+ * ถ้าใช้ --t-fast จะกระตุกเป็นขั้นแทนที่จะไหล
+ */
+.hero__bar {
+  height: 3px; margin-top: 0.6rem; border-radius: 2px;
+  background: var(--line-soft); overflow: hidden;
+}
+.hero__bar span {
+  display: block; height: 100%; border-radius: 2px;
+  background: var(--sched);
+  transition: width 900ms linear;
+}
+@media (prefers-reduced-motion: reduce) { .hero__bar span { transition: none; } }
 @media (prefers-reduced-motion: reduce) { .archive-link { transition: none; } }
 
 /*
