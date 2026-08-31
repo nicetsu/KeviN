@@ -809,6 +809,13 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .acard__ct { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
+
+/*
+ * หัวของหน้า Area — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง
+ * ปลายทางของการเดินทาง เบราว์เซอร์คำนวณระยะและขนาดให้เองจากสองฝั่ง
+ */
+.acard--head { min-height: 76px; margin-bottom: 0.6rem; }
+.acard--head .acard__nm { font-size: var(--s-1); }
 .acard__badge {
   position: absolute; top: 0.7rem; right: 0.7rem;
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--due);
