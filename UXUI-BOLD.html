@@ -1,11 +1,11 @@
-<title>KeviN กล้าขึ้น</title>
+<title>KeviN ทาสีใหม่</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 
 <style>
-  /* Nightfall เดิม + โทนที่รับมาจากภาพอ้างอิง
-     ธีมมืดอย่างเดียวโดยตั้งใจ (doc/DECISIONS.md) ทุกสีทาไว้ชัด */
+  /* Nightfall เดิมทุกสี — เปลี่ยนแค่พื้นที่อุ่นขึ้นนิดเดียว
+     ธีมมืดอย่างเดียวโดยตั้งใจ (doc/DECISIONS.md) */
   :root {
     --bg:        #0A0912;
     --surface:   #14131F;
@@ -27,54 +27,46 @@
     --task:       #74C6A4;  --task-soft:  #172A24;
     --note:       #8E88A8;  --note-soft:  #1B1A28;
 
-    /* พื้นที่อุ่นขึ้นตามภาพอ้างอิง — ใช้เฉพาะในตัวอย่าง "แบบใหม่" */
+    --g-class: linear-gradient(135deg, #79C2D0 0%, #8878F0 100%);
+    --g-comp:  linear-gradient(135deg, #E0897E 0%, #A594FF 100%);
+    --g-pers:  linear-gradient(135deg, #74C6A4 0%, #79C2D0 100%);
+    --g-gen:   linear-gradient(135deg, #A594FF 0%, #D98BB4 100%);
+
+    /* พื้นในจอ "แบบใหม่" — อุ่นขึ้นจาก #0A0912 เท่านี้ ไม่มากกว่านี้ */
     --bg-warm:      #120E22;
     --surface-warm: #1B1630;
+    --edge:         rgba(255, 255, 255, 0.055);
 
     --f: "Inter", "Noto Sans Thai", system-ui, sans-serif;
     --f-mono: "Geist Mono", Consolas, ui-monospace, monospace;
 
-    --s--2: 0.70rem;
-    --s--1: 0.80rem;
-    --s-0:  0.94rem;
-    --s-1:  1.10rem;
-    --s-2:  clamp(1.25rem, 1rem + 0.85vw, 1.65rem);
-    --s-3:  clamp(1.85rem, 1.35rem + 2.1vw, 2.85rem);
+    --s--2: 0.70rem; --s--1: 0.80rem; --s-0: 0.94rem; --s-1: 1.10rem;
+    --s-2: clamp(1.25rem, 1rem + 0.85vw, 1.65rem);
+    --s-3: clamp(1.85rem, 1.35rem + 2.1vw, 2.85rem);
 
-    --r-card: 14px;
-    --r-tile: 10px;
-    --r-pill: 999px;
-
-    --measure: 66ch;
-    --gutter: clamp(1.1rem, 4vw, 2.5rem);
-    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --r-card: 14px; --r-tile: 10px; --r-pill: 999px;
+    --measure: 66ch; --gutter: clamp(1.1rem, 4vw, 2.5rem);
   }
 
   * { box-sizing: border-box; }
-
   body {
     margin: 0; background: var(--bg); color: var(--ink);
     font-family: var(--f); font-size: var(--s-0); line-height: 1.75;
     letter-spacing: -0.005em; -webkit-font-smoothing: antialiased;
   }
-
   .page {
-    max-width: 66rem; margin: 0 auto;
+    max-width: 72rem; margin: 0 auto;
     padding: clamp(2.5rem, 7vw, 5rem) var(--gutter) 6rem;
-    display: flex; flex-direction: column; gap: 3.25rem;
+    display: flex; flex-direction: column; gap: 3rem;
   }
   .prose { max-width: var(--measure); }
 
   header { display: flex; flex-direction: column; gap: 0.9rem; }
-  .eyebrow {
-    font-family: var(--f-mono); font-size: var(--s--2);
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint);
-  }
+  .eyebrow { font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
   h1 { margin: 0; font-size: var(--s-3); font-weight: 600; line-height: 1.12; letter-spacing: -0.025em; text-wrap: balance; }
   .lede { margin: 0; max-width: var(--measure); font-size: var(--s-1); color: var(--muted); }
   .thesis { border-left: 2px solid var(--brand); padding: 0.2rem 0 0.2rem 1.1rem; max-width: var(--measure); font-size: var(--s-1); }
   .thesis b { color: var(--brand); font-weight: 600; }
-
   .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
   .tag {
     font-family: var(--f-mono); font-size: var(--s--2); padding: 0.18rem 0.6rem;
@@ -82,45 +74,29 @@
     background: var(--surface); color: var(--faint);
   }
 
-  section { display: flex; flex-direction: column; gap: 1.1rem; }
+  section { display: flex; flex-direction: column; gap: 1rem; }
   h2 {
     margin: 0; font-size: var(--s-2); font-weight: 600; line-height: 1.25;
-    letter-spacing: -0.02em; text-wrap: balance;
-    display: flex; align-items: baseline; gap: 0.7rem;
+    letter-spacing: -0.02em; text-wrap: balance; display: flex; align-items: baseline; gap: 0.7rem;
   }
   h2 .n { font-family: var(--f-mono); font-size: var(--s--1); font-weight: 500; color: var(--brand); flex: none; }
-  h3 { margin: 0.7rem 0 0; font-size: var(--s-1); font-weight: 600; letter-spacing: -0.01em; }
-
+  h3 { margin: 0.6rem 0 0; font-size: var(--s-1); font-weight: 600; letter-spacing: -0.01em; }
   p { margin: 0; max-width: var(--measure); }
-  p + p { margin-top: 0.7rem; }
   .sub { color: var(--muted); font-size: var(--s--1); max-width: var(--measure); }
   strong { font-weight: 600; color: var(--ink); }
   em { font-style: normal; color: var(--sched); }
-
-  code {
-    font-family: var(--f-mono); font-size: 0.86em; background: var(--raised);
-    border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.08em 0.36em; color: var(--ink);
-  }
-  a { color: var(--brand); text-underline-offset: 3px; }
+  code { font-family: var(--f-mono); font-size: 0.86em; background: var(--raised); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.08em 0.36em; }
 
   .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
   table { width: 100%; border-collapse: collapse; font-size: var(--s--1); min-width: 30rem; }
-  th, td { text-align: left; padding: 0.58rem 0.9rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; line-height: 1.55; }
-  thead th {
-    font-size: var(--s--2); font-weight: 500; letter-spacing: 0.09em;
-    text-transform: uppercase; color: var(--faint); background: var(--raised); white-space: nowrap;
-  }
+  th, td { text-align: left; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; line-height: 1.55; }
+  thead th { font-size: var(--s--2); font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); background: var(--raised); white-space: nowrap; }
   tbody tr:last-child td { border-bottom: 0; }
-
-  .pill { display: inline-block; font-family: var(--f-mono); font-size: var(--s--2); padding: 0.06rem 0.5rem; border-radius: var(--r-pill); white-space: nowrap; }
-  .pill--yes { color: var(--task); background: var(--task-soft); border: 1px solid #23453A; }
-  .pill--bend { color: var(--event); background: var(--event-soft); border: 1px solid #4A4023; }
-  .pill--no { color: var(--due); background: var(--due-soft); border: 1px solid #4A2E2B; }
 
   .note {
     border: 1px solid var(--line); border-left: 2px solid var(--sched);
     background: var(--surface); border-radius: 0 12px 12px 0;
-    padding: 0.9rem 1.1rem; max-width: var(--measure);
+    padding: 0.85rem 1.05rem; max-width: var(--measure);
     font-size: var(--s--1); color: var(--muted); line-height: 1.7;
   }
   .note strong { color: var(--sched); }
@@ -128,116 +104,179 @@
   .note--brand { border-left-color: var(--brand); } .note--brand strong { color: var(--brand); }
 
   ul { margin: 0; padding-left: 1.15rem; max-width: var(--measure); }
-  li { margin-bottom: 0.32rem; }
+  li { margin-bottom: 0.3rem; }
   li::marker { color: var(--faint); }
 
-  /* ---------- โทรศัพท์ ---------- */
-  .phones { display: grid; gap: 1.1rem; grid-template-columns: 1fr; margin-top: 0.3rem; }
-  @media (min-width: 620px) { .phones { grid-template-columns: 1fr 1fr; } }
+  /* ---------- กริดจอ ---------- */
+  .screens { display: grid; gap: 1.1rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .screens { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .screens--3 { grid-template-columns: repeat(3, 1fr); } }
 
-  .phone { border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; background: var(--bg); }
-  .phone--new { background: var(--bg-warm); }
+  .phone {
+    border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
+    display: flex; flex-direction: column; background: var(--bg-warm); min-height: 21rem;
+  }
+  .phone--old { background: var(--bg); }
   .phone__cap {
     font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--faint);
-    padding: 0.6rem 0.85rem 0.1rem; display: flex; justify-content: space-between; gap: 0.5rem;
+    padding: 0.55rem 0.8rem 0.05rem; display: flex; justify-content: space-between; gap: 0.5rem;
   }
   .phone__cap b { color: var(--brand); font-weight: 500; }
-  .scr { padding: 0.4rem 0.85rem 0.8rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
-
-  .greet { font-size: var(--s--2); color: var(--brand); font-weight: 500; margin-top: 0.3rem; }
-  .big {
-    font-size: 1.42rem; font-weight: 700; line-height: 1.22; letter-spacing: -0.035em;
-    margin: 0.15rem 0 0.7rem;
-  }
-  .big i { font-style: normal; background: linear-gradient(92deg, var(--brand) 0%, #D98BB4 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .scr { padding: 0.35rem 0.8rem 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; flex: 1; }
+  .scr h4 { margin: 0.3rem 0 0.1rem; font-size: var(--s-1); font-weight: 600; letter-spacing: -0.025em; }
+  .scr .backlink { font-size: var(--s--2); color: var(--brand); }
+  .scr .subline { font-size: var(--s--2); color: var(--faint); margin-bottom: 0.2rem; }
 
   .sec {
     font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--faint);
-    display: flex; justify-content: space-between; margin-top: 0.6rem;
+    display: flex; justify-content: space-between; margin: 0.55rem 0 0.15rem;
   }
-  .sec b { color: var(--brand); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
-  /* แถวแบบเดิม — เส้นคั่น + แถบสีบาง */
-  .row { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.42rem 0; border-top: 1px solid var(--line-soft); font-size: var(--s--1); }
+  /* ---- แถวแบบเดิม (จอ "ตอนนี้") ---- */
+  .row { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.4rem 0; border-top: 1px solid var(--line-soft); font-size: var(--s--1); }
   .row:first-child { border-top: 0; }
   .row__stripe { width: 2px; align-self: stretch; border-radius: 2px; flex: none; }
-  .row__body { flex: 1; min-width: 0; }
-  .row__meta { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: 0.05rem; }
+  .row__b { flex: 1; min-width: 0; }
+  .row__m { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: 0.05rem; }
   .cb { width: 0.9rem; height: 0.9rem; margin-top: 0.2rem; flex: none; border: 1.5px solid var(--line); border-radius: 5px; }
+  .cb--on { background: var(--task); border-color: var(--task); }
 
-  /* แถวแบบใหม่ — การ์ดยกพื้น + ไอคอนสี่เหลี่ยมมน */
+  /* ---- การ์ดแบบใหม่ ---- */
   .card {
-    display: flex; align-items: center; gap: 0.7rem;
-    background: var(--surface-warm); border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 15px; padding: 0.7rem 0.75rem; margin-bottom: 0.5rem;
-    font-size: var(--s--1);
+    display: flex; align-items: center; gap: 0.65rem;
+    background: var(--surface-warm); border: 1px solid var(--edge);
+    border-radius: 15px; padding: 0.62rem 0.7rem; margin-bottom: 0.42rem; font-size: var(--s--1);
   }
-  .card__ico {
-    width: 2.15rem; height: 2.15rem; border-radius: 11px; flex: none;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .card__ico svg { width: 1.05rem; height: 1.05rem; }
-  .card__body { flex: 1; min-width: 0; }
-  .card__t { font-weight: 600; letter-spacing: -0.01em; }
-  .card__m { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: 0.05rem; }
+  .card--flat { background: rgba(255,255,255,0.035); }
+  .card--late { border-color: rgba(224,137,126,0.34); }
+  .card--done { opacity: 0.4; }
+  .card--done .card__t { text-decoration: line-through; }
+  .card--past { opacity: 0.46; }
+  .card__ico { width: 2.05rem; height: 2.05rem; border-radius: 11px; flex: none; display: flex; align-items: center; justify-content: center; }
+  .card__ico svg { width: 1rem; height: 1rem; }
+  .card__b { flex: 1; min-width: 0; }
+  .card__t { font-weight: 600; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card__m { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: 0.02rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .card__go { color: var(--faint); flex: none; font-size: 0.95rem; }
-  .card--talk { background: rgba(255,255,255,0.035); }
+  .card__tag { font-family: var(--f-mono); font-size: var(--s--2); padding: 0.02rem 0.45rem; border-radius: var(--r-pill); white-space: nowrap; flex: none; }
+  .t--late { color: var(--due); border: 1px solid rgba(224,137,126,0.34); }
+  .t--gone { color: var(--faint); border: 1px solid var(--line); }
+  .t--soon { color: var(--sched); border: 1px solid rgba(121,194,208,0.34); }
 
-  .ico--task  { background: var(--task-soft);  color: var(--task);  }
+  .ico--task  { background: var(--task-soft);  color: var(--task); }
   .ico--sched { background: var(--sched-soft); color: var(--sched); }
-  .ico--due   { background: var(--due-soft);   color: var(--due);   }
+  .ico--due   { background: var(--due-soft);   color: var(--due); }
   .ico--event { background: var(--event-soft); color: var(--event); }
-  .ico--note  { background: var(--note-soft);  color: var(--note);  }
-  .ico--flat  { background: rgba(165,148,255,0.14); color: var(--brand); }
+  .ico--note  { background: var(--note-soft);  color: var(--note); }
+  .ico--brand { background: rgba(165,148,255,0.14); color: var(--brand); }
 
-  /* หัวจอ */
-  .top { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0 0.2rem; }
-  .top__btn {
-    width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,0.06); color: var(--muted);
-  }
+  /* ---- หัวจอ ---- */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 0.25rem 0 0.1rem; }
+  .top__btn { width: 1.95rem; height: 1.95rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); color: var(--muted); }
+  .top__btn svg { width: 1rem; height: 1rem; }
   .top__ai { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); color: #14131F; }
 
-  /* ช่องถาม */
-  .ask {
-    display: flex; align-items: center; gap: 0.5rem; margin-top: auto;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: var(--r-pill); padding: 0.4rem 0.45rem 0.4rem 0.9rem;
-  }
-  .ask__f { flex: 1; color: var(--faint); font-size: var(--s--1); }
-  .ask__s {
-    width: 1.9rem; height: 1.9rem; border-radius: 50%; flex: none;
-    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
-    display: flex; align-items: center; justify-content: center; color: #14131F;
-  }
+  /* ---- hero ---- */
+  .hero { border: 1px solid var(--edge); background: var(--surface-warm); border-radius: 16px; padding: 0.7rem 0.8rem; margin-bottom: 0.15rem; }
+  .hero--old { border-color: var(--line); background: var(--surface); border-radius: var(--r-card); }
+  .hero__k { font-family: var(--f-mono); font-size: var(--s--2); color: var(--brand); letter-spacing: 0.04em; }
+  .hero__k--live { color: var(--sched); }
+  .hero__n { font-size: var(--s-1); font-weight: 600; line-height: 1.2; margin: 0.2rem 0 0.1rem; letter-spacing: -0.025em; }
+  .hero__t { font-family: var(--f-mono); font-size: var(--s--1); }
+  .hero__s { font-size: var(--s--2); color: var(--muted); }
+  .bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-top: 0.45rem; }
+  .bar u { display: block; height: 100%; background: var(--sched); border-radius: 2px; }
 
-  /* แถบล่าง */
-  .nav { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--line-soft); padding: 0.5rem 0.2rem 0.1rem; margin-top: 0.6rem; }
-  .nav i { font-style: normal; font-size: var(--s--2); color: var(--faint); flex: 1; text-align: center; }
-  .nav i.on { color: var(--brand); }
-  .nav i.mid { flex: 0 0 4rem; color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.42); border-radius: var(--r-pill); padding: 0.2rem 0; }
-  .nav--ico { align-items: center; }
-  .nav--ico span { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; flex: 1; color: var(--faint); font-size: var(--s--2); }
-  .nav--ico span.on { color: var(--brand); }
-  .nav--ico svg { width: 1.05rem; height: 1.05rem; }
-  .nav--ico .mid {
-    flex: 0 0 3.6rem; color: var(--brand);
-    background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.42);
-    border-radius: var(--r-pill); padding: 0.25rem 0;
-  }
+  /* ---- การ์ด Area ---- */
+  .areas { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; margin-top: 0.15rem; }
+  .acard { position: relative; border-radius: 15px; padding: 0.6rem 0.65rem; min-height: 4.1rem; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; border: 1px solid var(--edge); background: var(--surface-warm); }
+  .acard::before { content: ""; position: absolute; inset: 0; opacity: 0.15; }
+  .acard--class::before { background: var(--g-class); }
+  .acard--comp::before  { background: var(--g-comp); }
+  .acard--pers::before  { background: var(--g-pers); }
+  .acard--gen::before   { background: var(--g-gen); }
+  .acard--head { min-height: 3.3rem; margin-bottom: 0.5rem; }
+  .acard span { position: relative; }
+  .acard__n { font-weight: 600; font-size: var(--s--1); }
+  .acard__c { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
+  .acard__badge { position: absolute; top: 0.5rem; right: 0.55rem; font-family: var(--f-mono); font-size: var(--s--2); color: var(--due); border: 1px solid rgba(224,137,126,0.4); border-radius: var(--r-pill); padding: 0 0.4rem; }
 
-  .swatch { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.2rem; }
-  .swatch div {
-    display: flex; align-items: center; gap: 0.45rem; font-size: var(--s--2);
-    font-family: var(--f-mono); color: var(--muted);
-    border: 1px solid var(--line); border-radius: var(--r-pill); padding: 0.2rem 0.7rem 0.2rem 0.3rem;
-  }
-  .swatch u { width: 1.15rem; height: 1.15rem; border-radius: 6px; display: block; }
+  /* ---- ปฏิทิน ---- */
+  .mo { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-top: 0.3rem; }
+  .mo i { font-style: normal; text-align: center; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+  .mo b { font-weight: 400; background: var(--surface-warm); border: 1px solid transparent; border-radius: 9px; min-height: 2.15rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
+  .mo b.out { opacity: 0.3; }
+  .mo b.now { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+  .mo u { display: flex; gap: 2px; min-height: 4px; }
+  .mo u s { width: 4px; height: 4px; border-radius: 50%; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.5rem 0 0; font-size: var(--s--2); color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .legend s { width: 5px; height: 5px; border-radius: 50%; display: block; }
 
-  .foot { font-size: var(--s--1); color: var(--faint); max-width: var(--measure); border-top: 1px solid var(--line-soft); padding-top: 1.4rem; }
+  .wk { display: grid; grid-template-columns: 1.9rem repeat(8, minmax(0,1fr)); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 12px; overflow: hidden; margin-top: 0.3rem; }
+  .wk > * { background: var(--bg-warm); }
+  .wk .hh { font-family: var(--f-mono); font-size: 0.6rem; color: var(--faint); display: flex; align-items: center; justify-content: center; padding: 0.2rem 0; }
+  .wk .dd { background: var(--surface-warm); font-family: var(--f-mono); font-size: 0.62rem; color: var(--muted); display: flex; align-items: center; padding-left: 0.3rem; }
+  .wk .dd.now { color: var(--brand); }
+  .wk .blk { margin: 2px; border-radius: 7px; font-size: 0.58rem; padding: 0.1rem 0.25rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; background: var(--sched-soft); color: var(--sched); border-left: 2px solid var(--sched); }
+  .wk .blk.ev { background: var(--event-soft); color: var(--event); border-left-color: var(--event); }
+  .wk .nowline { background: var(--brand); width: 2px; justify-self: center; }
+
+  /* ---- แชต ---- */
+  .seg { display: flex; gap: 0.25rem; background: rgba(255,255,255,0.05); border-radius: var(--r-pill); padding: 0.14rem; margin: 0.25rem 0 0.35rem; }
+  .seg span { flex: 1; text-align: center; font-size: var(--s--2); padding: 0.24rem; border-radius: var(--r-pill); color: var(--faint); }
+  .seg span.on { background: var(--brand-soft); color: var(--brand); }
+  .msg { max-width: 84%; padding: 0.45rem 0.65rem; border-radius: 15px; font-size: var(--s--1); line-height: 1.5; margin-bottom: 0.3rem; }
+  .msg--me { align-self: flex-end; background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.28); border-bottom-right-radius: 5px; }
+  .msg--ai { align-self: flex-start; background: var(--surface-warm); border: 1px solid var(--edge); border-bottom-left-radius: 5px; }
+  .msg small { display: block; font-family: var(--f-mono); font-size: 0.62rem; color: var(--faint); margin-top: 0.15rem; }
+  .ask { display: flex; align-items: center; gap: 0.45rem; margin-top: auto; background: rgba(255,255,255,0.05); border: 1px solid var(--edge); border-radius: var(--r-pill); padding: 0.35rem 0.4rem 0.35rem 0.85rem; }
+  .ask u { flex: 1; color: var(--faint); font-size: var(--s--1); font-style: normal; text-decoration: none; }
+  .ask s { width: 1.75rem; height: 1.75rem; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); display: flex; align-items: center; justify-content: center; color: #14131F; }
+  .ask s svg { width: 0.85rem; height: 0.85rem; }
+
+  .orb { width: 4.2rem; height: 4.2rem; border-radius: 50%; margin: 0.6rem auto 0.4rem; background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.4); display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .orb--live { background: var(--sched-soft); border-color: rgba(121,194,208,0.45); }
+  .orb i { width: 3px; border-radius: 2px; background: var(--brand); display: block; font-style: normal; }
+  .orb--live i { background: var(--sched); }
+  .callstate { text-align: center; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+  .callstate.live { color: var(--sched); }
+  .callbar { display: flex; gap: 0.4rem; justify-content: center; margin-top: 0.5rem; }
+  .btn { font-size: var(--s--2); border-radius: var(--r-pill); padding: 0.3rem 0.9rem; border: 1px solid var(--line); color: var(--muted); }
+  .btn--go { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); color: #14131F; border: 0; font-weight: 600; }
+  .btn--end { color: var(--due); border-color: rgba(224,137,126,0.45); }
+
+  /* ---- กำหนดการ ---- */
+  .agenda { display: grid; grid-template-columns: auto 1fr; gap: 0 0.6rem; font-size: var(--s--1); }
+  .agenda > div { padding: 0.32rem 0; border-bottom: 1px solid var(--edge); }
+  .agenda .tm { font-family: var(--f-mono); color: var(--sched); white-space: nowrap; font-size: var(--s--2); }
+  .pills { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.3rem 0; }
+  .pills span { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); background: rgba(255,255,255,0.05); border: 1px solid var(--edge); border-radius: var(--r-pill); padding: 0.1rem 0.55rem; }
+  .pills span.tm { color: var(--sched); }
+
+  .empty { border: 1px dashed var(--line); border-radius: 15px; padding: 0.8rem; text-align: center; font-size: var(--s--2); color: var(--muted); }
+  .none { font-size: var(--s--2); color: var(--faint); padding: 0.3rem 0; }
+  .linkrow { font-size: var(--s--2); color: var(--brand); padding: 0.3rem 0; }
+
+  /* ---- แถบล่าง ---- */
+  .nav { display: flex; align-items: center; border-top: 1px solid var(--edge); padding: 0.45rem 0.1rem 0.1rem; margin-top: auto; }
+  .nav span { display: flex; flex-direction: column; align-items: center; gap: 0.12rem; flex: 1; color: var(--faint); font-size: 0.62rem; }
+  .nav span.on { color: var(--brand); }
+  .nav svg { width: 1rem; height: 1rem; }
+  .nav .mid { flex: 0 0 3.4rem; color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.42); border-radius: var(--r-pill); padding: 0.22rem 0; font-size: 0.62rem; }
+  .nav--old { justify-content: space-between; border-top-color: var(--line); }
+  .nav--old i { font-style: normal; font-size: var(--s--2); color: var(--faint); flex: 1; text-align: center; }
+  .nav--old i.on { color: var(--brand); }
+  .nav--old i.mid { flex: 0 0 3.6rem; color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.42); border-radius: var(--r-pill); padding: 0.2rem 0; }
+
+  .swatch { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .swatch div { display: flex; align-items: center; gap: 0.4rem; font-size: var(--s--2); font-family: var(--f-mono); color: var(--muted); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 0.16rem 0.65rem 0.16rem 0.25rem; }
+  .swatch u { width: 1.5rem; height: 1.5rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .swatch svg { width: 0.8rem; height: 0.8rem; }
+
+  .foot { font-size: var(--s--1); color: var(--faint); max-width: var(--measure); border-top: 1px solid var(--line-soft); padding-top: 1.3rem; }
 
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
 </style>
@@ -245,303 +284,603 @@
 <div class="page">
 
   <header>
-    <div class="eyebrow">KeviN · ภาษาภาพรุ่นกล้า · 1 ก.ย. 2026</div>
-    <h1>รับความสดมาโดยไม่ทิ้งความหมาย</h1>
+    <div class="eyebrow">KeviN · ทาสีใหม่ · ข้อเสนอ 1 ก.ย. 2026</div>
+    <h1>โครงเดิมทุกหน้า เปลี่ยนแค่ผิว</h1>
     <p class="lede">
-      อ่านภาพอ้างอิงที่เจ้าของส่งมาแล้วแยกออกเป็นสี่อย่าง —
-      สามอย่างรับมาได้ทันที หนึ่งอย่างต้องดัดก่อน ไม่งั้นจะทำลายกฎที่แอปนี้ยืนอยู่
+      ทุกจอในหน้านี้มีข้อมูลชุดเดิม ลำดับเดิม กลุ่มเดิม ปุ่มเดิม —
+      ไม่ย้ายอะไร ไม่เพิ่มอะไร ไม่ตัดอะไร
     </p>
     <div class="thesis">
-      ภาพนั้นสวยเพราะ<b>ทุกการ์ดสำคัญเท่ากัน</b><br>
-      แต่แอปนี้มีของที่<b>เลยกำหนดแล้ว</b>ปนกับของที่<b>ยังไม่ถึงเวลา</b> — ความเท่ากันจึงเป็นการโกหก
+      เปลี่ยนสามอย่าง — <b>แถวเป็นการ์ด</b> · <b>ไอคอนแทนแถบสี</b> · <b>แถบล่างมีไอคอน</b><br>
+      ไม่มีสีใหม่เข้าระบบสักสี ทุกสีมาจาก <code>doc/DESIGN.md</code> เดิม
     </div>
     <div class="tags">
-      <span class="tag">ไม่เพิ่มสีใหม่สักสี</span>
-      <span class="tag">กฎม่วง = กดได้ ยังอยู่</span>
-      <span class="tag">เทียบของจริงทุกจอ</span>
+      <span class="tag">11 จอ</span>
+      <span class="tag">โครงเดิม 100%</span>
+      <span class="tag">แก้ 3 ไฟล์หลัก</span>
     </div>
   </header>
 
   <!-- ============ 01 ============ -->
   <section>
-    <h2><span class="n">01</span> แยกสี่อย่างออกจากกัน</h2>
+    <h2><span class="n">01</span> เปลี่ยนอะไรบ้าง</h2>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>สิ่งที่เห็นในภาพ</th><th>รับได้ไหม</th><th>เพราะ</th></tr></thead>
+        <thead><tr><th>องค์ประกอบ</th><th>เดิม</th><th>ใหม่</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>การ์ดยกพื้น มีขอบมน แทนแถวคั่นเส้น</strong></td>
-            <td><span class="pill pill--yes">รับเลย</span></td>
-            <td>ไม่ขัดกฎอะไร และทำให้แตะง่ายขึ้นบนมือถือ — พื้นที่แตะใหญ่ขึ้นราวเท่าตัว</td>
-          </tr>
-          <tr>
-            <td><strong>ไอคอนสี่เหลี่ยมมนสีสดหน้าแถว</strong></td>
-            <td><span class="pill pill--bend">ต้องดัด</span></td>
-            <td><strong>ในภาพสีไอคอนไม่มีความหมาย</strong> เป็นแค่การไล่สีให้สวย · ที่นี่ทุกสีมีความหมายผูกไว้แล้ว ต้องให้สีไอคอน<em>ตรงกับชนิดของข้อมูล</em> ไม่ใช่ไล่ตามลำดับ</td>
-          </tr>
-          <tr>
-            <td><strong>หัวข้อใหญ่ตัวหนา มีคำเน้นไล่สี</strong></td>
-            <td><span class="pill pill--yes">รับเลย</span></td>
-            <td>ตอนนี้หัวหน้าวันนี้เป็นแค่วันที่ตัวเล็ก · การมีประโยคที่บอกว่า “วันนี้ต้องสนใจอะไร” ทำงานแทน hero ได้เลย</td>
-          </tr>
-          <tr>
-            <td><strong>แถบล่างมีไอคอน</strong></td>
-            <td><span class="pill pill--yes">รับเลย</span></td>
-            <td>ตอนนี้เป็นข้อความล้วนห้าช่อง ซึ่งบนจอ 360px ตัวอักษรเล็กจนอ่านยาก · ไอคอนช่วยให้จำตำแหน่งได้โดยไม่ต้องอ่าน</td>
-          </tr>
-          <tr>
-            <td><strong>ช่องถามลอยอยู่ล่างทุกหน้า</strong></td>
-            <td><span class="pill pill--no">ไม่รับ</span></td>
-            <td>แท็บ KeviN มีอยู่แล้วและอยู่กลางแถบล่าง · ใส่ช่องถามซ้ำอีกจะมีสองทางไปที่เดียวกัน และกินที่ถาวรจากเนื้อหา</td>
-          </tr>
+          <tr><td>แถวรายการ</td><td>เส้นคั่นบาง + แถบสี 2px ซ้ายมือ</td><td><strong>การ์ดยกพื้น ขอบมน 15px</strong> · พื้นที่แตะใหญ่ขึ้นเท่าตัว</td></tr>
+          <tr><td>ตัวบอกชนิด</td><td>แถบสีด้านซ้าย</td><td><strong>ไอคอนสี่เหลี่ยมมน</strong> สีเดียวกับแถบเดิม + รูปที่ต่างกัน</td></tr>
+          <tr><td>แถบล่าง</td><td>ข้อความล้วน 5 ช่อง</td><td><strong>ไอคอน + ข้อความ</strong> · แคปซูล KeviN ตรงกลางเหมือนเดิม</td></tr>
+          <tr><td>พื้นหลัง</td><td><code>#0A0912</code></td><td><code>#120E22</code> — อุ่นขึ้นนิดเดียว ยังอ่านกลางแดดได้</td></tr>
+          <tr><td>การ์ด Area</td><td>gradient ทึบ 11%</td><td>ทึบ 15% + ขอบเรืองบาง ๆ · ชื่อและตัวเลขเหมือนเดิม</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <h3>ไอคอนได้สีจากชนิดข้อมูล ไม่ใช่ไล่ให้สวย</h3>
+    <div class="swatch">
+      <div><u class="ico--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></u> คาบเรียน</div>
+      <div><u class="ico--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></u> กิจกรรม</div>
+      <div><u class="ico--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></u> เตือน/เลยกำหนด</div>
+      <div><u class="ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></u> งาน</div>
+      <div><u class="ico--note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></u> โน้ต</div>
+    </div>
+    <div class="note note--warn">
+      <strong>รูปต้องต่างกัน ไม่ใช่แค่สี</strong> — คนตาบอดสีเห็นสี่เหลี่ยมเทาเหมือนกันหมด
+      นาฬิกา · ปฏิทิน · อัศเจรีย์ · ถูก · กระดาษ ห้าแบบนี้แยกออกจากกันได้ด้วยรูปล้วน ๆ
     </div>
   </section>
 
   <!-- ============ 02 ============ -->
   <section>
-    <h2><span class="n">02</span> หน้าวันนี้ — เทียบของจริง</h2>
-    <p class="sub">ข้อมูลชุดเดียวกันทั้งสองจอ ต่างกันแค่วิธีวาง</p>
+    <h2><span class="n">02</span> หน้าวันนี้</h2>
+    <p class="sub">กลุ่มเดิมทุกกลุ่ม ลำดับเดิม — พลาดไปแล้ว · เลยกำหนด · วันนี้</p>
 
-    <div class="phones">
-      <div class="phone">
+    <div class="screens">
+      <div class="phone phone--old">
         <div class="phone__cap"><span>ตอนนี้</span><span>375px</span></div>
         <div class="scr">
-          <div style="font-size:var(--s-1);font-weight:600;margin:.4rem 0 .5rem">อังคาร 1 ก.ย.</div>
-
-          <div style="border:1px solid var(--line);background:var(--surface);border-radius:var(--r-card);padding:.65rem .75rem">
-            <div style="font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand)">คาบถัดไป · อีก 40 นาที</div>
-            <div style="font-size:var(--s-1);font-weight:600;margin:.2rem 0 .1rem">สถาปัตยกรรมเครือข่ายฯ</div>
-            <div style="font-family:var(--f-mono);font-size:var(--s--1)">09:00 – 12:00</div>
+          <h4>อังคาร 1 ก.ย.</h4>
+          <div class="hero hero--old">
+            <div class="hero__k">คาบถัดไป · อีก 40 นาที</div>
+            <div class="hero__n">สถาปัตยกรรมเครือข่ายฯ</div>
+            <div class="hero__t">09:00 – 12:00</div>
+            <div class="hero__s">E11-S604 · บรรยาย</div>
           </div>
-
+          <div class="sec"><span>พลาดไปแล้ว</span><span>1</span></div>
+          <div class="row" style="opacity:.46">
+            <span class="row__stripe" style="background:var(--due)"></span>
+            <div class="row__b"><div>เตือนประชุมทีม</div><div class="row__m">เมื่อวาน 14:00</div></div>
+          </div>
           <div class="sec"><span>เลยกำหนด</span><span>1</span></div>
           <div class="row">
             <span class="row__stripe" style="background:var(--due)"></span><span class="cb"></span>
-            <div class="row__body"><div>ส่งใบสมัครชมรม</div><div class="row__meta">General · เลย 2 วัน</div></div>
+            <div class="row__b"><div>ส่งใบสมัครชมรม</div><div class="row__m">General · เลย 2 วัน</div></div>
           </div>
           <div class="sec"><span>วันนี้</span><span>3</span></div>
           <div class="row">
             <span class="row__stripe" style="background:var(--sched)"></span>
-            <div class="row__body"><div>เกษตรศาสตร์ฯ</div><div class="row__meta">15:00–17:00 · ONLINE</div></div>
+            <div class="row__b"><div>เกษตรศาสตร์ฯ</div><div class="row__m">15:00–17:00 · ONLINE</div></div>
           </div>
           <div class="row">
             <span class="row__stripe" style="background:var(--task)"></span><span class="cb"></span>
-            <div class="row__body"><div>อ่านสรุปบทที่ 3</div><div class="row__meta">ดิสครีต</div></div>
+            <div class="row__b"><div>อ่านสรุปบทที่ 3</div><div class="row__m">ดิสครีต</div></div>
           </div>
-          <div class="nav"><i class="on">วันนี้</i><i>ปฏิทิน</i><i class="mid">KeviN</i><i>คลัง</i><i>ตั้งค่า</i></div>
+          <div class="nav nav--old"><i class="on">วันนี้</i><i>ปฏิทิน</i><i class="mid">KeviN</i><i>คลัง</i><i>ตั้งค่า</i></div>
         </div>
       </div>
 
-      <div class="phone phone--new">
-        <div class="phone__cap"><span>แบบใหม่</span><b>เทียบภาพอ้างอิง</b></div>
+      <div class="phone">
+        <div class="phone__cap"><span>ทาสีใหม่</span><b>โครงเดิม</b></div>
         <div class="scr">
           <div class="top">
-            <div class="top__btn" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <path d="M4 7h16M4 12h16M4 17h10"/></svg>
-            </div>
-            <div class="top__btn top__ai" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.6 4.9L18.5 9.5l-4.9 1.6L12 16l-1.6-4.9L5.5 9.5l4.9-1.6z"/></svg>
-            </div>
+            <div class="top__btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+            <div class="top__btn top__ai"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.6 4.9L18.5 9.5l-4.9 1.6L12 16l-1.6-4.9L5.5 9.5l4.9-1.6z"/></svg></div>
           </div>
-
-          <div class="greet">อังคาร 1 ก.ย. · สวัสดีตอนเช้า</div>
-          <div class="big">วันนี้ต้องสนใจ<br><i>สามอย่าง</i></div>
-
+          <h4>อังคาร 1 ก.ย.</h4>
+          <div class="hero">
+            <div class="hero__k">คาบถัดไป · อีก 40 นาที</div>
+            <div class="hero__n">สถาปัตยกรรมเครือข่ายฯ</div>
+            <div class="hero__t">09:00 – 12:00</div>
+            <div class="hero__s">E11-S604 · บรรยาย</div>
+          </div>
+          <div class="sec"><span>พลาดไปแล้ว</span><span>1</span></div>
+          <div class="card card--past">
+            <div class="card__ico ico--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="card__b"><div class="card__t">เตือนประชุมทีม</div><div class="card__m">เมื่อวาน 14:00</div></div>
+            <span class="card__tag t--gone">เก็บคืนนี้</span>
+          </div>
+          <div class="sec"><span>เลยกำหนด</span><span>1</span></div>
+          <div class="card card--late">
+            <div class="card__ico ico--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="card__b"><div class="card__t">ส่งใบสมัครชมรม</div><div class="card__m">General · เลย 2 วัน</div></div>
+            <span class="card__tag t--late">เลยกำหนด</span>
+          </div>
+          <div class="sec"><span>วันนี้</span><span>3</span></div>
           <div class="card">
-            <div class="card__ico ico--due" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <path d="M12 8v5M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></svg>
-            </div>
-            <div class="card__body">
-              <div class="card__t">ส่งใบสมัครชมรม</div>
-              <div class="card__m">เลย 2 วัน · General</div>
-            </div>
-            <span class="card__go">›</span>
+            <div class="card__ico ico--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="card__b"><div class="card__t">เกษตรศาสตร์ฯ</div><div class="card__m">15:00–17:00 · ONLINE</div></div>
           </div>
-
           <div class="card">
-            <div class="card__ico ico--sched" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            </div>
-            <div class="card__body">
-              <div class="card__t">สถาปัตยกรรมเครือข่ายฯ</div>
-              <div class="card__m">อีก 40 นาที · E11-S604</div>
-            </div>
-            <span class="card__go">›</span>
+            <div class="card__ico ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="card__b"><div class="card__t">อ่านสรุปบทที่ 3</div><div class="card__m">ดิสครีต</div></div>
           </div>
-
-          <div class="card">
-            <div class="card__ico ico--task" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4.5 12.5l5 5 10-11"/></svg>
-            </div>
-            <div class="card__body">
-              <div class="card__t">อ่านสรุปบทที่ 3</div>
-              <div class="card__m">ดิสครีต</div>
-            </div>
-            <span class="card__go">›</span>
-          </div>
-
-          <div class="sec"><span>คุยล่าสุด</span><b>ดูทั้งหมด</b></div>
-          <div class="card card--talk">
-            <div class="card__ico ico--flat" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 5h16v11H9l-5 4z"/></svg>
-            </div>
-            <div class="card__body">
-              <div class="card__t">พรุ่งนี้มีอะไรบ้าง</div>
-              <div class="card__m">เมื่อวาน 21:40</div>
-            </div>
-            <span class="card__go">›</span>
-          </div>
-
-          <div class="nav nav--ico">
-            <span class="on">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>
-              วันนี้</span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
-              ปฏิทิน</span>
+          <div class="nav">
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>ปฏิทิน</span>
             <span class="mid">KeviN</span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>
-              คลัง</span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5L18 18M18 6l-1.5 1.5M7.5 16.5L6 18"/></svg>
-              ตั้งค่า</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5L18 18M18 6l-1.5 1.5M7.5 16.5L6 18"/></svg>ตั้งค่า</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="note note--brand">
-      <strong>ประโยคหัวจอทำงานแทน hero ได้</strong> — “วันนี้ต้องสนใจสามอย่าง” บอกได้ทั้ง
-      <em>มีอะไรรออยู่</em> และ <em>เท่าไหร่</em> ในบรรทัดเดียว · ตัวเลขมาจากของที่ต้องสนใจจริง
-      (เลยกำหนด + ครบวันนี้ + คาบที่ยังไม่เริ่ม) ไม่ใช่จำนวนแถวทั้งหมด
+    <div class="note">
+      <strong>ป้าย "เลยกำหนด" กับขอบส้มบาง ๆ ยังอยู่</strong> — ของที่เลยกำหนดต้องดูไม่เท่ากับของอื่น
+      ถ้าทำให้ทุกการ์ดเหมือนกันหมดตามภาพอ้างอิง การจัดลำดับความสำคัญที่ทำมาจะหายไปกับความสวย
     </div>
   </section>
 
   <!-- ============ 03 ============ -->
   <section>
-    <h2><span class="n">03</span> ไอคอนสี — จุดเดียวที่ต้องดัด</h2>
-    <p class="prose">
-      ในภาพอ้างอิง ไอคอนสามใบเป็นม่วง ฟ้า ชมพู ไล่ลงมาสวยงาม
-      <strong>แต่สีนั้นไม่ได้บอกอะไรเลย</strong> — สลับที่กันก็ยังสวยเหมือนเดิม
-    </p>
-    <p class="prose">
-      ที่นี่ทำแบบนั้นไม่ได้ เพราะกฎข้อเดียวของแอปคือ <em>ม่วงคือสิ่งที่กดได้ สีที่เหลือคือข้อมูล</em>
-      ถ้าไอคอนไล่สีสวย ๆ กฎนั้นตายทันที · ทางออกคือ<strong>ให้สีไอคอนมาจากชนิดของข้อมูล
-      ที่กำหนดไว้อยู่แล้ว</strong> — ได้ความสดมาโดยไม่เสียความหมาย
-    </p>
+    <h2><span class="n">03</span> ปฏิทิน — เดือนและสัปดาห์</h2>
+    <p class="sub">แกนกลับด้านเหมือนเดิม วัน = แกนตั้ง เวลา = แกนนอน · เส้น “ตอนนี้” ยังเลื่อนเองทุกครึ่งนาที</p>
 
-    <div class="swatch">
-      <div><u style="background:var(--sched-soft);border:1px solid var(--sched)"></u> คาบเรียน · ฟ้า</div>
-      <div><u style="background:var(--event-soft);border:1px solid var(--event)"></u> กิจกรรม · เหลือง</div>
-      <div><u style="background:var(--due-soft);border:1px solid var(--due)"></u> เลยกำหนด · ส้ม</div>
-      <div><u style="background:var(--task-soft);border:1px solid var(--task)"></u> งาน · เขียว</div>
-      <div><u style="background:var(--note-soft);border:1px solid var(--note)"></u> โน้ต · เทา</div>
-    </div>
+    <div class="screens">
+      <div class="phone">
+        <div class="phone__cap"><span>ปฏิทิน · เดือน</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <h4>กันยายน 2569</h4>
+          <div class="seg"><span class="on">เดือน</span><span>สัปดาห์</span></div>
+          <div class="mo">
+            <i>จ</i><i>อ</i><i>พ</i><i>พฤ</i><i>ศ</i><i>ส</i><i>อา</i>
+            <b class="out">31<u></u></b>
+            <b class="now">1<u><s style="background:var(--sched)"></s></u></b>
+            <b>2<u><s style="background:var(--sched)"></s></u></b>
+            <b>3<u><s style="background:var(--sched)"></s><s style="background:var(--due)"></s></u></b>
+            <b>4<u><s style="background:var(--sched)"></s></u></b>
+            <b>5<u></u></b>
+            <b>6<u></u></b>
+            <b>7<u><s style="background:var(--sched)"></s></u></b>
+            <b>8<u><s style="background:var(--sched)"></s></u></b>
+            <b>9<u><s style="background:var(--sched)"></s></u></b>
+            <b>10<u><s style="background:var(--sched)"></s></u></b>
+            <b>11<u><s style="background:var(--sched)"></s></u></b>
+            <b>12<u></u></b>
+            <b>13<u></u></b>
+            <b>14<u><s style="background:var(--sched)"></s></u></b>
+            <b>15<u><s style="background:var(--sched)"></s></u></b>
+            <b>16<u><s style="background:var(--event)"></s></u></b>
+            <b>17<u><s style="background:var(--sched)"></s></u></b>
+            <b>18<u><s style="background:var(--sched)"></s></u></b>
+            <b>19<u></u></b>
+            <b>20<u></u></b>
+          </div>
+          <div class="legend">
+            <span><s style="background:var(--sched)"></s>คาบ</span>
+            <span><s style="background:var(--event)"></s>กิจกรรม</span>
+            <span><s style="background:var(--due)"></s>กำหนดส่ง</span>
+          </div>
+          <div class="sec"><span>อังคาร 1 ก.ย.</span><span>2</span></div>
+          <div class="card">
+            <div class="card__ico ico--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="card__b"><div class="card__t">สถาปัตยกรรมเครือข่ายฯ</div><div class="card__m">09:00–12:00 · E11-S604</div></div>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
 
-    <div class="note">
-      <strong>ผลพลอยได้ที่ไม่ได้ตั้งใจ</strong> — พอไอคอนมีสีตามชนิด
-      <em>แถบสีบางด้านซ้ายก็ไม่ต้องมีแล้ว</em> เพราะมันบอกเรื่องเดียวกัน
-      แถวจึงสะอาดขึ้นทั้งที่ข้อมูลเท่าเดิม
-    </div>
-    <div class="note note--warn">
-      <strong>สิ่งที่ต้องระวัง</strong> — ไอคอนต้องต่างกันด้วย<strong>รูป</strong> ไม่ใช่แค่สี
-      คนตาบอดสีจะเห็นสี่เหลี่ยมเทาเหมือนกันหมด · นาฬิกา = คาบ · เครื่องหมายถูก = งาน ·
-      วงกลมอัศเจรีย์ = เลยกำหนด
+      <div class="phone">
+        <div class="phone__cap"><span>ปฏิทิน · สัปดาห์</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <h4>1 – 7 ก.ย.</h4>
+          <div class="seg"><span>เดือน</span><span class="on">สัปดาห์</span></div>
+          <div class="wk">
+            <div class="hh"></div><div class="hh">09</div><div class="hh">10</div><div class="hh">11</div><div class="hh">12</div><div class="hh">13</div><div class="hh">14</div><div class="hh">15</div><div class="hh">16</div>
+            <div class="dd now">จ</div><div class="blk" style="grid-column:2/5">สถาปัตย์ฯ</div><div></div><div></div><div></div><div class="blk" style="grid-column:8/10">เกษตรฯ</div>
+            <div class="dd">อ</div><div></div><div></div><div></div><div></div><div class="blk" style="grid-column:6/8">ดิสครีต</div><div></div><div></div>
+            <div class="dd">พ</div><div class="blk" style="grid-column:2/4">ซอฟต์แวร์</div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div class="dd">พฤ</div><div class="blk" style="grid-column:2/4">ดิสครีต</div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div class="dd">ศ</div><div></div><div></div><div class="blk ev" style="grid-column:4/7">Workshop</div><div></div><div></div><div></div>
+          </div>
+          <p class="none" style="margin-top:.5rem">ปฏิทินไว้ดู · แก้ที่หน้าคลัง</p>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============ 04 ============ -->
   <section>
-    <h2><span class="n">04</span> “คุยล่าสุด” — ของที่มีอยู่แล้วแต่ไม่เคยได้ใช้</h2>
-    <p class="prose">
-      ส่วนที่น่าสนใจที่สุดในภาพอ้างอิงคือ <em>Recent conversations</em> —
-      เพราะตอนนี้ใน DB มีบทสนทนา <strong>17 รายการ</strong> เก็บไว้ครบทั้งข้อความและ tool ที่เรียก
-      แต่<strong>ไม่มีหน้าไหนเปิดดูได้เลย</strong>
-    </p>
-    <p class="prose">
-      ตารางถูกสร้างตอนทำประตูที่สาม พร้อม index <code>conversations_recent</code>
-      ที่เรียงตามเวลาให้แล้ว — ของพร้อมใช้ ขาดแค่ที่แสดง
-    </p>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>ทำอะไร</th><th>ต้นทุน</th><th>ได้อะไร</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>โชว์ 2 บทสนทนาล่าสุดในหน้าวันนี้</td>
-            <td>query เดียว · ใช้ index ที่มีอยู่</td>
-            <td>กลับไปคุยต่อจากที่ค้างไว้ได้โดยไม่ต้องเข้าแท็บ KeviN แล้วเลื่อนหา</td>
-          </tr>
-          <tr>
-            <td>หน้า <code>/kevin/history</code></td>
-            <td>หน้าใหม่หนึ่งหน้า</td>
-            <td>ย้อนดูว่าเคยถามอะไรไปแล้ว · ตอนนี้ประวัติหายไปกับตาทุกครั้งที่ปิดแอป</td>
-          </tr>
-        </tbody>
-      </table>
+    <h2><span class="n">04</span> คลัง · หน้า Area · ของที่เก็บไว้</h2>
+    <p class="sub">สามหน้าในเส้นทางเดียว โครงเดิมทั้งหมด</p>
+
+    <div class="screens screens--3">
+      <div class="phone">
+        <div class="phone__cap"><span>คลัง</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <h4>คลัง</h4>
+          <div class="subline">แตะเพื่อเปิด Area</div>
+          <div class="areas">
+            <div class="acard acard--class"><span class="acard__n">Class</span><span class="acard__c">8 วิชา</span><span class="acard__badge">2</span></div>
+            <div class="acard acard--comp"><span class="acard__n">Competition</span><span class="acard__c">ว่าง</span></div>
+            <div class="acard acard--pers"><span class="acard__n">Personal</span><span class="acard__c">ว่าง</span></div>
+            <div class="acard acard--gen"><span class="acard__n">General</span><span class="acard__c">3 โปรเจกต์</span></div>
+          </div>
+          <div class="sec"><span>กิจกรรมที่จะถึง</span><span>1</span></div>
+          <div class="card">
+            <div class="card__ico ico--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="card__b"><div class="card__t">KBTG Techtopia</div><div class="card__m">16 ก.ย. 08:30 · QSNCC</div></div>
+            <span class="card__go">›</span>
+          </div>
+          <div class="card card--flat" style="margin-top:.6rem">
+            <div class="card__b"><div class="card__t" style="font-weight:400;color:var(--muted)">ของที่เก็บไว้</div></div>
+            <span class="card__m">9</span><span class="card__go">›</span>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="phone__cap"><span>หน้า Area</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="backlink">‹ คลัง</div>
+          <div class="acard acard--class acard--head"><span class="acard__n">Class</span><span class="acard__c">8 วิชา</span><span class="acard__badge">2</span></div>
+          <div class="card card--flat">
+            <span class="card__go">›</span>
+            <div class="card__b"><div class="card__t">ดิสครีต</div><div class="card__m">อ. 13:00 · พฤ. 09:00</div></div>
+            <span class="card__tag t--late">2</span>
+          </div>
+          <div class="card card--flat">
+            <span class="card__go">›</span>
+            <div class="card__b"><div class="card__t">ซอฟต์แวร์</div><div class="card__m">จ. 13:00 · อ. 09:00</div></div>
+          </div>
+          <div class="card card--flat">
+            <span class="card__go">›</span>
+            <div class="card__b"><div class="card__t">สถาปัตยกรรมเครือข่ายฯ</div><div class="card__m">พ. 09:00</div></div>
+          </div>
+          <div class="linkrow">+ วิชาใหม่</div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="phone__cap"><span>ของที่เก็บไว้</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="backlink">‹ คลัง</div>
+          <h4>ของที่เก็บไว้</h4>
+          <div class="subline">ลบถาวรเมื่อครบ 7 วัน · กดคืนได้ทุกแถว</div>
+          <div class="sec"><span>เหลืออีกไม่ถึงวัน</span><span>2</span></div>
+          <div class="card card--late">
+            <div class="card__ico ico--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="card__b"><div class="card__t">เตือนส่งใบสมัคร</div><div class="card__m">25 ส.ค. · ระบบเก็บให้</div></div>
+            <span class="card__tag t--late">อีก 4 ชม.</span>
+          </div>
+          <div class="card card--late">
+            <div class="card__ico ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="card__b"><div class="card__t">แบบฝึกหัดบทที่ 3</div><div class="card__m">25 ส.ค. · คุณกดเก็บเอง</div></div>
+            <span class="card__tag t--late">อีก 9 ชม.</span>
+          </div>
+          <div class="sec"><span>ยังมีเวลา</span><span>7</span></div>
+          <div class="card">
+            <div class="card__ico ico--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="card__b"><div class="card__t">Workshop: Equity</div><div class="card__m">29 ส.ค. · คุณกดเก็บเอง</div></div>
+            <span class="card__tag t--gone">อีก 5 วัน</span>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============ 05 ============ -->
   <section>
-    <h2><span class="n">05</span> สิ่งที่ตั้งใจไม่รับมา</h2>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>ในภาพ</th><th>ทำไมไม่รับ</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>ช่องถามลอยล่างทุกหน้า</td>
-            <td>แท็บ KeviN อยู่กลางแถบล่างอยู่แล้ว · มีสองทางไปที่เดียวกันทำให้ต้องคิดว่าจะใช้ทางไหน ทั้งที่ผลเหมือนกัน</td>
-          </tr>
-          <tr>
-            <td>ทุกการ์ดหน้าตาเท่ากัน</td>
-            <td><strong>ข้อสำคัญที่สุด</strong> — ของที่เลยกำหนดกับของที่ยังไม่ถึงเวลาต้องดูไม่เท่ากัน ไม่งั้นการจัดลำดับความสำคัญที่ทำมาทั้งหมดหายไปกับความสวย</td>
-          </tr>
-          <tr>
-            <td>ทักทาย “สวัสดีตอนเช้า, ชื่อ”</td>
-            <td>เก็บไว้แต่<strong>ย่อลงเป็นบรรทัดเล็ก</strong>คู่กับวันที่ · ผู้ใช้คนเดียวที่รู้ชื่อตัวเองอยู่แล้ว การทักทายเต็มบรรทัดกินที่ของข้อมูลจริง</td>
-          </tr>
-          <tr>
-            <td>พื้นหลังม่วงอิ่มกว่าเดิม</td>
-            <td>รับมา<strong>เล็กน้อย</strong> (<code>#0A0912</code> → <code>#120E22</code>) พอให้อุ่นขึ้นแต่ยังอ่านกลางแดดได้ · อิ่มกว่านี้คอนทราสต์จะตกจนตัวอักษรสีจางอ่านไม่ออกนอกห้อง</td>
-          </tr>
-        </tbody>
-      </table>
+    <h2><span class="n">05</span> หน้าวิชา และหน้ากิจกรรม</h2>
+    <p class="sub">กลุ่มเดิม — กิจกรรม · ที่ผ่านแล้ว · งาน · เตือน · โน้ต</p>
+
+    <div class="screens">
+      <div class="phone">
+        <div class="phone__cap"><span>หน้าวิชา</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="backlink">‹ Class</div>
+          <h4>ดิสครีต</h4>
+          <div class="subline">01219118-65 · อ. 13:00–15:00 · พฤ. 09:00–11:00</div>
+          <div class="linkrow">แก้ช่วงเวลาประจำ ›</div>
+
+          <div class="sec"><span>กิจกรรม</span><span>1</span></div>
+          <div class="card">
+            <div class="card__ico ico--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="card__b"><div class="card__t">สอบกลางภาค</div><div class="card__m">12 ต.ค. 09:00 – 11:00</div></div>
+            <span class="card__go">›</span>
+          </div>
+          <div class="sec"><span>ที่ผ่านแล้ว</span><span>1</span></div>
+          <div class="card card--past">
+            <div class="card__ico ico--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="card__b"><div class="card__t">ติวก่อนสอบย่อย</div><div class="card__m">28 ส.ค. 18:00</div></div>
+            <span class="card__go">›</span>
+          </div>
+          <div class="linkrow">+ กิจกรรมใหม่</div>
+
+          <div class="sec"><span>งาน</span><span>1 / 3</span></div>
+          <div class="card card--late">
+            <div class="card__ico ico--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="card__b"><div class="card__t">แบบฝึกหัดบทที่ 4</div><div class="card__m">22 ส.ค. 23:59</div></div>
+            <span class="card__tag t--late">เลยกำหนด</span>
+          </div>
+          <div class="card">
+            <div class="card__ico ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="card__b"><div class="card__t">อ่านสรุปบทที่ 5</div><div class="card__m">ยังไม่กำหนดวัน</div></div>
+          </div>
+          <div class="card card--done">
+            <div class="card__ico ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="card__b"><div class="card__t">ทำสรุปบทที่ 3</div><div class="card__m">เสร็จ 28 ส.ค. 14:20</div></div>
+          </div>
+          <div class="sec"><span>โน้ต</span><span>1</span></div>
+          <div class="card">
+            <div class="card__ico ico--note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6"/></svg></div>
+            <div class="card__b"><div class="card__t">อ.ชอบออกจากสไลด์</div></div>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="phone__cap"><span>หน้ากิจกรรม</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="backlink">‹ Career Events</div>
+          <h4>KBTG Techtopia</h4>
+          <div class="pills">
+            <span class="tm">16 ก.ย. 08:30 – 18:30</span>
+            <span>QSNCC Hall 3-4</span>
+            <span>onsite</span>
+          </div>
+          <div class="linkrow">แก้กิจกรรม ›</div>
+
+          <div class="sec"><span>กำหนดการ</span><span>4</span></div>
+          <div class="agenda">
+            <div class="tm">08:30</div><div>ลงทะเบียน</div>
+            <div class="tm">09:30</div><div>Keynote · Human of Tomorrow</div>
+            <div class="tm">12:00</div><div>พักกลางวัน</div>
+            <div class="tm">13:30</div><div>Workshop สาย AI</div>
+          </div>
+
+          <div class="sec"><span>ที่เกี่ยวข้อง</span><span>2</span></div>
+          <div class="card">
+            <div class="card__ico ico--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="card__b"><div class="card__t">เตือนออกจากบ้าน</div><div class="card__m">16 ก.ย. 06:30</div></div>
+          </div>
+          <div class="card">
+            <div class="card__ico ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="card__b"><div class="card__t">เตรียมพอร์ต</div><div class="card__m">15 ก.ย. 23:59</div></div>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ============ 06 ============ -->
   <section>
-    <h2><span class="n">06</span> ลำดับการทำ</h2>
+    <h2><span class="n">06</span> แท็บ KeviN — แชตและโทร</h2>
+    <p class="sub">ฟองข้อความ ปุ่มเฟือง ช่องพิมพ์ติดล่าง และ <code>- voice -</code> ฝั่งเรา เหมือนเดิมหมด</p>
+
+    <div class="screens">
+      <div class="phone">
+        <div class="phone__cap"><span>KeviN · แชต</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="top">
+            <div style="font-weight:600">KeviN</div>
+            <div class="top__btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5L18 18"/></svg></div>
+          </div>
+          <div class="seg"><span class="on">แชต</span><span>โทร</span></div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="msg msg--me">- voice -<small>จากสาย</small></div>
+            <div class="msg msg--ai">พรุ่งนี้มีคาบเดียวนะ ดิสครีตบ่ายโมง<small>จากสาย</small></div>
+            <div class="msg msg--me">แก้ข้อมูลได้ไหม</div>
+            <div class="msg msg--ai">ผมแก้ให้ไม่ได้ครับ จัดการได้ที่ <span style="color:var(--brand)">/library</span></div>
+          </div>
+          <div class="ask">
+            <u>พิมพ์ข้อความ</u>
+            <s><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></s>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="phone__cap"><span>KeviN · โทร</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="top">
+            <div style="font-weight:600">KeviN</div>
+            <div class="top__btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></div>
+          </div>
+          <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+            <div class="callstate live">● กำลังคุย 02:14</div>
+            <div class="orb orb--live"><i style="height:14px"></i><i style="height:26px"></i><i style="height:36px"></i><i style="height:22px"></i><i style="height:12px"></i></div>
+            <div class="callstate live">กำลังฟัง<br><span style="color:var(--faint)">พูดแทรกได้ตลอด</span></div>
+            <div class="card card--flat" style="margin-top:.6rem">
+              <div class="card__ico ico--brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
+              <div class="card__b"><div class="card__t" style="font-weight:400">พรุ่งนี้มีสื่อสารสนเทศ 10:00 ที่ E 17501</div></div>
+            </div>
+            <div style="text-align:center;margin-top:.5rem"><span class="btn">ไมค์ · อัตโนมัติ</span></div>
+            <div class="callbar"><span class="btn">ปิดไมค์</span><span class="btn btn--end">วางสาย</span></div>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 07 ============ -->
+  <section>
+    <h2><span class="n">07</span> ตั้งค่า และหน้าเปล่า</h2>
+
+    <div class="screens">
+      <div class="phone">
+        <div class="phone__cap"><span>ตั้งค่า</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <h4>ตั้งค่า</h4>
+          <div class="sec"><span>การแจ้งเตือน</span><span>1 เครื่อง</span></div>
+          <div class="card">
+            <div class="card__ico ico--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9a6 6 0 1112 0v5l2 3H4l2-3z"/><path d="M10 20h4"/></svg></div>
+            <div class="card__b"><div class="card__t">Android · Chrome</div><div class="card__m">เปิดอยู่</div></div>
+          </div>
+
+          <div class="sec"><span>คุยกับ KeviN</span><span></span></div>
+          <div class="card card--flat">
+            <div class="card__b"><div class="card__t" style="font-weight:400">ภาษา</div><div class="card__m">ไทย</div></div>
+            <span class="card__go">›</span>
+          </div>
+          <div class="card card--flat">
+            <div class="card__b"><div class="card__t" style="font-weight:400">เสียง</div><div class="card__m">ค่าตั้งต้น · Charon</div></div>
+            <span class="card__go">›</span>
+          </div>
+          <div class="card card--flat">
+            <div class="card__b"><div class="card__t" style="font-weight:400">ไมโครโฟน</div><div class="card__m">อัตโนมัติ</div></div>
+            <span class="card__go">›</span>
+          </div>
+
+          <div class="sec"><span>การเก็บกวาด</span><span></span></div>
+          <div class="card card--flat">
+            <div class="card__b"><div class="card__t" style="font-weight:400">เก็บของที่ผ่านไปแล้ว</div><div class="card__m">ทุกคืน 03:00</div></div>
+          </div>
+          <div class="card card--flat">
+            <div class="card__b"><div class="card__t" style="font-weight:400">ลบถาวรหลัง 7 วัน</div><div class="card__m">กู้คืนไม่ได้</div></div>
+          </div>
+          <div class="card card--flat">
+            <div class="card__b"><div class="card__t" style="font-weight:400;color:var(--muted)">ดูของที่เก็บไว้</div></div>
+            <span class="card__m">9</span><span class="card__go">›</span>
+          </div>
+          <div class="nav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="phone__cap"><span>วันนี้ · ว่าง</span><b>ทาสีใหม่</b></div>
+        <div class="scr">
+          <div class="top">
+            <div class="top__btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+            <div class="top__btn top__ai"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.6 4.9L18.5 9.5l-4.9 1.6L12 16l-1.6-4.9L5.5 9.5l4.9-1.6z"/></svg></div>
+          </div>
+          <h4>อาทิตย์ 6 ก.ย.</h4>
+          <div class="empty" style="margin-top:.5rem">
+            <strong style="color:var(--ink);display:block;margin-bottom:.15rem">วันนี้ว่าง</strong>
+            ไม่มีคาบเรียน กิจกรรม งาน หรือการเตือนในวันนี้
+          </div>
+          <p class="none" style="margin-top:1rem">
+            หน้าเปล่ายังเป็นข้อความเหมือนเดิม — ไม่ใส่ภาพประกอบ
+            เพราะจอว่างที่มีของประดับอ่านว่า “แอปพัง” มากกว่า “วันนี้ไม่มีอะไร”
+          </p>
+          <div class="nav">
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 ============ -->
+  <section>
+    <h2><span class="n">08</span> สิ่งที่ไม่แตะเลย</h2>
+    <ul>
+      <li><strong>ลำดับและกลุ่มทุกหน้า</strong> — พลาดไปแล้ว · เลยกำหนด · วันนี้ ยังเรียงแบบเดิม</li>
+      <li><strong>ปฏิทินสัปดาห์กลับแกน</strong> — วันเป็นแกนตั้ง เวลาเป็นแกนนอน</li>
+      <li><strong>กฎม่วง = สิ่งที่กดได้</strong> — ไอคอนใช้สีชนิดข้อมูล ไม่ใช่ม่วง จึงไม่แย่งความหมาย</li>
+      <li><strong>หลักการห้าข้อ</strong> — รวมข้อ 5 “ไม่มีอะไรหายเงียบ ๆ” ที่ป้ายเลยกำหนดกับแถบเลิกทำยังทำหน้าที่เดิม</li>
+      <li><strong>ตรรกะทั้งหมด</strong> — FLIP · แถบเลิกทำ · Odometer · สั่น · โครงร่างตอนโหลด ทำงานเหมือนเดิมทุกอย่าง</li>
+      <li><strong>schema และ query</strong> — ไม่แตะสักบรรทัด</li>
+    </ul>
+  </section>
+
+  <!-- ============ 09 ============ -->
+  <section>
+    <h2><span class="n">09</span> แก้กี่ไฟล์</h2>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>ขั้น</th><th>ทำอะไร</th><th>กระทบกี่หน้า</th></tr></thead>
+        <thead><tr><th>ไฟล์</th><th>แก้อะไร</th><th>กระทบ</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>แถบล่างใส่ไอคอน</td><td>ทุกหน้า · แต่แก้ไฟล์เดียว (<code>Nav.tsx</code>)</td></tr>
-          <tr><td>2</td><td>แถวกลายเป็นการ์ด + ไอคอนสีตามชนิด</td><td><code>ItemList.tsx</code> ไฟล์เดียว ทุกหน้าที่ใช้มันได้ตาม</td></tr>
-          <tr><td>3</td><td>หัวจอหน้าวันนี้เป็นประโยค + ปุ่มบน</td><td>หน้าวันนี้</td></tr>
-          <tr><td>4</td><td>“คุยล่าสุด” ในหน้าวันนี้</td><td>หน้าวันนี้ + query เดียว</td></tr>
-          <tr><td>5</td><td>พื้นหลังอุ่นขึ้นนิดเดียว</td><td>token เดียวใน <code>globals.css</code></td></tr>
+          <tr><td><code>components/ItemList.tsx</code></td><td>แถวเป็นการ์ด + ไอคอนตามชนิด</td><td><strong>หน้าวันนี้ · หน้าวิชา · หน้ากิจกรรม · ปฏิทินเดือน</strong> พร้อมกัน</td></tr>
+          <tr><td><code>components/Nav.tsx</code></td><td>ใส่ไอคอน 5 ช่อง</td><td>ทุกหน้า</td></tr>
+          <tr><td><code>app/globals.css</code></td><td>โทนพื้น · สไตล์การ์ด · ไอคอน</td><td>ทุกหน้า</td></tr>
+          <tr><td>หน้าที่วาดแถวเอง</td><td><code>archive/ArchiveList.tsx</code> · <code>[areaId]/ProjectTree.tsx</code> · <code>settings/page.tsx</code></td><td>เฉพาะหน้านั้น</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="note">
-      <strong>ขั้น 2 คือขั้นที่คุ้มที่สุด</strong> — <code>ItemList</code> ถูกใช้ในหน้าวันนี้ หน้าวิชา
-      หน้ากิจกรรม และหน้าคลังของเก่า · แก้ที่เดียวเปลี่ยนทั้งแอป
-      และ FLIP กับแถบเลิกทำที่ทำไว้แล้วยังทำงานเหมือนเดิมเพราะไม่ได้แตะตรรกะ
+    <div class="note note--brand">
+      <strong><code>ItemList.tsx</code> คือไฟล์เดียวที่ให้ผลมากที่สุด</strong> — สี่หน้าใช้มันร่วมกัน
+      แก้ที่เดียวเปลี่ยนพร้อมกันหมด และตรรกะข้างในไม่ต้องแตะเลย เปลี่ยนแค่ JSX กับ CSS
     </div>
   </section>
 
   <p class="foot">
-    ไฟล์นี้เป็น<strong>ข้อเสนอ ยังไม่ได้ลงมือ</strong> · คู่กับ <code>UXUI.html</code> ที่เป็นภาษาภาพปัจจุบัน<br>
-    ทุกสีในหน้านี้มาจาก token ที่มีอยู่แล้วใน <code>doc/DESIGN.md</code> — ไม่มีสีใหม่เข้าระบบสักสี
+    ข้อเสนอ · ยังไม่ได้แตะโค้ดแอป · คู่กับ <code>UXUI.html</code> ที่เป็นภาษาภาพปัจจุบัน<br>
+    ทุกสีมาจาก token เดิมใน <code>doc/DESIGN.md</code> — ไม่มีสีใหม่เข้าระบบสักสี
   </p>
 
 </div>
