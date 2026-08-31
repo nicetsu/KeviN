@@ -1,4 +1,5 @@
 import { Content } from '@/components/Reveal'
+import { ViewTransition } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -137,7 +138,10 @@ export default async function ProjectPage({
       <main className="wrap">
         <div className="page-head">
           <Link href="/library" className="back">‹ {project.areas?.name ?? 'คลัง'}</Link>
+          {/* ปลายทางของ morph จากหน้าคลัง — ชื่อต้องตรงกับฝั่งโน้นเป๊ะ */}
+        <ViewTransition name={`project-${id}`}>
           <h1>{project.name}</h1>
+        </ViewTransition>
           {project.description && <div className="sub">{project.description}</div>}
           {project.archived_at && <div className="sub">เก็บเข้าคลังแล้ว</div>}
         </div>

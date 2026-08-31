@@ -85,6 +85,17 @@
 @keyframes reveal-rise { from { transform: translateY(6px) } to { transform: none } }
 
 /*
+ * ชื่อวิชาที่เดินทางจากคลังไปเป็นหัวของหน้าวิชา
+ *
+ * ไม่ต้องเขียน keyframes เอง — เบราว์เซอร์คำนวณระยะและขนาดให้จาก
+ * ตำแหน่งจริงสองฝั่ง เราบอกแค่ว่าใช้เวลาเท่าไหร่และโค้งแบบไหน
+ */
+::view-transition-group(*) {
+  animation-duration: var(--t-slow);
+  animation-timing-function: var(--ease);
+}
+
+/*
  * ผู้ที่ตั้งค่าลดการเคลื่อนไหว — ตัด transition ของเบราว์เซอร์ทิ้งทั้งชุด
  * ไม่ใช่แค่ทำให้เร็วขึ้น เพราะการ crossfade เต็มจอก็ยังทำให้เวียนหัวได้
  */
@@ -237,6 +248,11 @@ html, body { margin: 0; padding: 0; }
 }
 .archive-link:hover { border-color: var(--brand); color: var(--ink); }
 .archive-link__n { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
+/* แถวที่ทั้งแถวเป็นลิงก์ — ใช้กับกิจกรรมที่จะถึงในหน้าคลัง */
+.row--link { text-decoration: none; color: inherit; }
+.row--link:hover .row__title { color: var(--brand); }
+.row__go { color: var(--faint); align-self: center; font-size: 0.9rem; flex: none; }
 @media (prefers-reduced-motion: reduce) { .archive-link { transition: none; } }
 
 /*

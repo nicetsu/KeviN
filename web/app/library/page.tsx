@@ -63,7 +63,7 @@ export default async function LibraryPage() {
   const jar = await cookies()
   const initialOpen = decodeOpen(jar.get(LIBRARY_OPEN_COOKIE)?.value)
 
-  const [areaRes, projRes, schedRes, itemRes, archivedRes] = await Promise.all([
+  const [areaRes, projRes, schedRes, itemRes, archivedRes, eventRes] = await Promise.all([
     supabase.from('areas').select('id, name, color, sort_order').is('archived_at', null).order('sort_order'),
     supabase.from('projects').select('id, area_id, name, status, archived_at, sort_order').order('sort_order'),
     supabase
@@ -78,9 +78,21 @@ export default async function LibraryPage() {
       .from('items')
       .select('id', { count: 'exact', head: true })
       .not('archived_at', 'is', null),
+    /*
+      กิจกรรมที่ยังไม่ผ่าน — หน้าคลังเคยไม่แสดงกิจกรรมเลย ทั้งที่มันคือ
+      "ต้องไปที่ไหนตอนไหน" ซึ่งเลื่อนไม่ได้ · ต้องเห็นก่อนงานที่จัดเวลาเองได้
+      เหมือนที่หน้าวิชาทำอยู่แล้ว
+    */
+    supabase
+      .from('events')
+      .select('id, project_id, title, starts_at, ends_at, location, projects(name)')
+      .is('archived_at', null)
+      .gte('ends_at', new Date().toISOString())
+      .order('starts_at')
+      .limit(4),
   ])
 
-  const err = areaRes.error ?? projRes.error ?? schedRes.error ?? itemRes.error
+  const err = areaRes.error ?? projRes.error ?? schedRes.error ?? itemRes.error ?? eventRes.error
   if (err) {
     return (
       <main className="wrap">
@@ -91,6 +103,14 @@ export default async function LibraryPage() {
   }
 
   const archivedCount = archivedRes.count ?? 0
+  const upcoming = (eventRes.data ?? []) as unknown as {
+    id: string
+    project_id: string
+    title: string
+    starts_at: string
+    location: string | null
+    projects: { name: string } | null
+  }[]
   const areas = (areaRes.data ?? []) as Area[]
   const projects = (projRes.data ?? []) as Project[]
   const slots = (schedRes.data ?? []) as (Slot & { project_id: string })[]
@@ -168,7 +188,30 @@ export default async function LibraryPage() {
           <div className="sub">Area › โปรเจกต์ › งาน</div>
         </div>
 
-        <LibraryTree areas={tree} initialOpen={initialOpen} />
+        {upcoming.length > 0 && (
+        <>
+          <div className="sec">
+            <span>กิจกรรมที่จะถึง</span>
+            <span>{upcoming.length}</span>
+          </div>
+          {upcoming.map((e) => (
+            <Link key={e.id} href={`/project/${e.project_id}/event/${e.id}`} className="row row--link">
+              <span className="row__stripe" style={{ background: 'var(--event)' }} />
+              <div className="row__body">
+                <div className="row__title">{e.title}</div>
+                <div className="row__meta">
+                  {stamp(e.starts_at)}
+                  {e.projects?.name ? ` · ${e.projects.name}` : ''}
+                  {e.location ? ` · ${e.location}` : ''}
+                </div>
+              </div>
+              <span className="row__go" aria-hidden="true">›</span>
+            </Link>
+          ))}
+        </>
+      )}
+
+      <LibraryTree areas={tree} initialOpen={initialOpen} />
 
         {/*
           ทางเข้าของที่เก็บไว้ อยู่ล่างสุดเพราะเป็นที่ที่แวะนาน ๆ ครั้ง
