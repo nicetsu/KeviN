@@ -7,6 +7,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { systemPrompt } from '../lib/ai/prompt'
+import { isRealRoute } from '../lib/chat/links'
 
 const TODAY = '2026-08-30'
 
@@ -66,7 +67,28 @@ test('สั่งให้บอกจำนวนของที่มอง�
 test('ห้ามแต่งลิงก์เอง และลิงก์ต้องเป็น path ภายใน', () => {
   // เจอจริงตอนทดสอบ: โมเดลปฏิเสธถูกแล้วแต่ยื่น https://tasks.google.com/ ให้
   const p = systemPrompt('chat', TODAY)
-  assert.match(p, /ห้ามแต่งขึ้นเอง/)
+  assert.match(p, /ห้ามแต่งเส้นทางขึ้นเอง/)
   assert.match(p, /ห้ามส่งลิงก์ไปเว็บอื่น/)
   assert.match(p, /ขึ้นต้นด้วย \//)
+})
+
+test('บอกหน้าประจำที่ใช้ได้ ไม่ใช่แค่ห้าม', () => {
+  // เจอจริงบนมือถือ 31 ส.ค.: ผู้ใช้ถามลอย ๆ ว่า "แก้ข้อมูลได้ไหม"
+  // prompt เดิมสั่งว่า "ยื่นลิงก์ให้เลย" แต่ไม่เคยบอกว่ามีหน้าอะไรอยู่บ้าง
+  // โมเดลจึงต้องเลือกระหว่างขัดคำสั่งกับแต่งลิงก์ — แล้วมันเลือกแต่ง
+  const p = systemPrompt('chat', TODAY)
+  for (const route of ['/calendar', '/library', '/settings']) {
+    assert.ok(p.includes(route), `prompt ต้องบอกว่า ${route} มีอยู่`)
+  }
+})
+
+test('ทุกเส้นทางที่ prompt เอ่ยถึงต้องผ่านตัวกรองลิงก์จริง', () => {
+  // ผูกสองไฟล์เข้าด้วยกัน — เพิ่มหน้าใน prompt แล้วลืมเติมใน ROUTES
+  // จะได้ลิงก์ที่ผู้ช่วยกล้ายื่นแต่ตัวกรองตัดทิ้ง ซึ่งพังแบบเงียบสนิท
+  const p = systemPrompt('chat', TODAY)
+  const quoted = [...p.matchAll(/`(\/[\w/-]*)`/g)].map((m) => m[1])
+  assert.ok(quoted.length >= 4, 'ต้องมีเส้นทางถูกอ้างอยู่จริง')
+  for (const route of quoted) {
+    assert.ok(isRealRoute(route), `prompt เอ่ยถึง ${route} แต่ตัวกรองไม่รู้จัก`)
+  }
 })
