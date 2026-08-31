@@ -7,6 +7,7 @@ import { toggleDone, archiveItem, restoreItem, reorderItems } from '@/app/action
 import { archiveEvent } from '@/app/actions/events'
 import { clearTimeOffset } from '@/app/actions/timeOffsets'
 import ItemPanel, { type PanelItem } from './ItemPanel'
+import { useFlip } from '@/lib/useFlip'
 
 export type Row = {
   /** id ของ item · คาบเรียนไม่ใช่ item จึงเป็น null และแก้ไม่ได้ที่นี่ */
@@ -64,6 +65,17 @@ const UNDO_MS = 8000
  */
 function keyOf(r: Row): string | null {
   return r.id ?? r.event?.eventId ?? null
+}
+
+/**
+ * ตัวตนของแถวสำหรับ FLIP — ต้องมีทุกแถว **รวมแถวที่ไม่ใช่ item**
+ *
+ * คาบเรียนไม่มี `id` เพราะแก้จากที่นี่ไม่ได้ แต่มันก็ถูกดันขึ้นลงเวลาแถวอื่น
+ * ถูกเก็บเข้าคลัง — ถ้าไม่ให้ตัวตนไว้ ครึ่งรายการจะเดินทางส่วนอีกครึ่งกระโดด
+ * ซึ่งดูแย่กว่ากระโดดทั้งหมด · ชื่อกับสีรวมกันพอแยกแถวในหน้าเดียวได้
+ */
+function flipId(r: Row): string {
+  return keyOf(r) ?? `${r.color}|${r.title}`
 }
 
 export default function ItemList({ rows }: { rows: Row[] }) {
@@ -182,6 +194,16 @@ export default function ItemList({ rows }: { rows: Row[] }) {
 
   const canMove = order.length > 1
 
+  /*
+   * ให้แถวที่ย้ายตำแหน่งเดินทางแทนที่จะกระโดด
+   *
+   * การเรียงจริงเกิดฝั่งเซิร์ฟเวอร์ (`sink()` ในหน้าวิชา · `byTime()` ในหน้าวันนี้)
+   * ตำแหน่งใหม่จึงมาถึงตอน re-render หลัง `router.refresh()` ไม่ใช่ตอนกดปุ่ม —
+   * การวัดตำแหน่งทุกรอบ render จึงจับได้ทุกสาเหตุโดยไม่ต้องรู้ว่าใครสั่งย้าย
+   */
+  const listRef = useRef<HTMLDivElement | null>(null)
+  useFlip(listRef, shown.map(flipId).join('~'))
+
   function commit(next: string[], moved: string, title: string) {
     setMoveOrder(next)
     setSay(`ย้าย ${title} ไปตำแหน่งที่ ${next.indexOf(moved) + 1} จาก ${next.length}`)
@@ -250,7 +272,7 @@ export default function ItemList({ rows }: { rows: Row[] }) {
 
       {shown.length === 0 && <p className="none">ยังไม่มี</p>}
 
-      <div data-list>
+      <div data-list ref={listRef}>
         {shown.map((r, i) => {
           const done = isDone(r)
           const movable = Boolean(canMove && r.movable && r.id)
@@ -258,6 +280,7 @@ export default function ItemList({ rows }: { rows: Row[] }) {
             <div
               className={`row${done ? ' row--done' : ''}${r.past ? ' row--past' : ''}${dragId && dragId === r.id ? ' row--drag' : ''}`}
               key={keyOf(r) ?? `x${i}`}
+              data-flip={flipId(r)}
               data-movable={movable ? 'true' : undefined}
               data-id={r.id ?? undefined}
             >
