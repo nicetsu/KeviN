@@ -53,7 +53,8 @@ export async function archiveItem(itemId: string): Promise<Result> {
 
   const { data, error } = await supabase
     .from('items')
-    .update({ archived_at: new Date().toISOString() })
+    // ผู้ใช้กดเก็บเอง — ปลดธงอัตโนมัติเผื่อของชิ้นนี้เคยถูกระบบเก็บแล้วกดคืนมา
+    .update({ archived_at: new Date().toISOString(), archived_auto: false })
     .eq('id', itemId)
     .select('id')
 
@@ -69,7 +70,7 @@ export async function restoreItem(itemId: string): Promise<Result> {
 
   const { data, error } = await supabase
     .from('items')
-    .update({ archived_at: null })
+    .update({ archived_at: null, archived_auto: false })
     .eq('id', itemId)
     .select('id')
 

@@ -196,6 +196,31 @@ html, body { margin: 0; padding: 0; }
 .tag--skip  { color: var(--faint); border-color: var(--line); }
 .tag--task { color: var(--task); border-color: rgba(116, 198, 164, 0.32); }
 .tag--brand { color: var(--brand); border-color: rgba(165, 148, 255, 0.38); }
+.tag--gone  { color: var(--faint); border-color: var(--line); }
+
+/* ทางเข้าของที่เก็บไว้ · ท้ายหน้าคลัง — โทนเงียบเพราะไม่ใช่ปลายทางประจำวัน */
+.archive-link {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 1.6rem; padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line); border-radius: var(--r-card);
+  background: var(--surface); color: var(--muted);
+  font-size: var(--s--1); text-decoration: none;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.archive-link:hover { border-color: var(--brand); color: var(--ink); }
+.archive-link__n { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+@media (prefers-reduced-motion: reduce) { .archive-link { transition: none; } }
+
+/*
+ * แถวในคลังที่เหลือเวลาไม่ถึงวัน — หายใจเบา ๆ
+ *
+ * ⚠️ ช่วง opacity แคบมาก (8%) และรอบยาว 3 วินาทีโดยตั้งใจ · พอให้ตาจับได้ว่า
+ *    ต่างจากแถวอื่นเวลากวาดผ่าน แต่ไม่ถึงขั้นดึงความสนใจตลอดเวลา
+ *    ของที่กะพริบแรงในหน้าที่มีหลายแถวจะกลายเป็นสิ่งที่คนอยากปิดมากกว่าอยากอ่าน
+ */
+.row--urgent { animation: breathe 3s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1 } 50% { opacity: 0.92 } }
+@media (prefers-reduced-motion: reduce) { .row--urgent { animation: none; } }
 
 /* ---- สถานะว่าง ---- */
 .empty {

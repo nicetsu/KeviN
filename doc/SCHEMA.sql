@@ -102,6 +102,7 @@ create table public.events (
   location    text,
   label       text,                                  -- "onsite" / "ออนไลน์" / "รอบชิง"
   archived_at timestamptz,                           -- "ลบ" = เก็บเข้าคลัง ไม่ใช่ DELETE
+  archived_auto boolean not null default false,      -- ระบบเก็บให้ หรือผู้ใช้กดเก็บเอง
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
 
@@ -183,6 +184,11 @@ create table public.items (
   event_id    uuid,
 
   archived_at timestamptz,
+  -- ใครเป็นคนเก็บ — ระบบเก็บให้เองตอนตีสาม หรือผู้ใช้กดเก็บเอง
+  -- ของที่ระบบเก็บให้คือของที่หมดอายุไปเอง ผู้ใช้อาจไม่เคยรู้ตัวว่ามันหายไป
+  -- ⚠️ ต้องเป็นคอลัมน์จริง ไม่ใช่เดาจากเวลา — cron รันตีสามแต่ผู้ใช้ก็กดเก็บ
+  --    ตอนตีสามได้ การเดาจากนาฬิกาจึงผิดได้โดยไม่มีอะไรฟ้อง
+  archived_auto boolean not null default false,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
 
@@ -684,7 +690,7 @@ begin
   return query
   with done as (
     update public.items
-       set archived_at = stamp, updated_at = stamp
+       set archived_at = stamp, archived_auto = true, updated_at = stamp
      where archived_at is null
        and type = 'reminder'
        and remind_at < day_start
@@ -695,7 +701,7 @@ begin
   return query
   with done as (
     update public.items
-       set archived_at = stamp, updated_at = stamp
+       set archived_at = stamp, archived_auto = true, updated_at = stamp
      where archived_at is null
        and type = 'task'
        and done_at is not null

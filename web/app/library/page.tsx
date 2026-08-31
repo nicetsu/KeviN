@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { LIBRARY_OPEN_COOKIE, decodeOpen } from '@/lib/libraryOpen'
@@ -61,7 +62,7 @@ export default async function LibraryPage() {
   const jar = await cookies()
   const initialOpen = decodeOpen(jar.get(LIBRARY_OPEN_COOKIE)?.value)
 
-  const [areaRes, projRes, schedRes, itemRes] = await Promise.all([
+  const [areaRes, projRes, schedRes, itemRes, archivedRes] = await Promise.all([
     supabase.from('areas').select('id, name, color, sort_order').is('archived_at', null).order('sort_order'),
     supabase.from('projects').select('id, area_id, name, status, archived_at, sort_order').order('sort_order'),
     supabase
@@ -71,6 +72,11 @@ export default async function LibraryPage() {
       .from('items')
       .select('id, project_id, type, title, body, due_at, remind_at, done_at, sort_order')
       .is('archived_at', null),
+    // นับของในคลังเพื่อบอกจำนวนที่ทางเข้า · ไม่ดึงเนื้อ เพราะหน้านี้ไม่ได้แสดงมัน
+    supabase
+      .from('items')
+      .select('id', { count: 'exact', head: true })
+      .not('archived_at', 'is', null),
   ])
 
   const err = areaRes.error ?? projRes.error ?? schedRes.error ?? itemRes.error
@@ -83,6 +89,7 @@ export default async function LibraryPage() {
     )
   }
 
+  const archivedCount = archivedRes.count ?? 0
   const areas = (areaRes.data ?? []) as Area[]
   const projects = (projRes.data ?? []) as Project[]
   const slots = (schedRes.data ?? []) as (Slot & { project_id: string })[]
@@ -160,6 +167,18 @@ export default async function LibraryPage() {
       </div>
 
       <LibraryTree areas={tree} initialOpen={initialOpen} />
+
+      {/*
+        ทางเข้าของที่เก็บไว้ อยู่ล่างสุดเพราะเป็นที่ที่แวะนาน ๆ ครั้ง
+        แต่ต้องมีอยู่ — ตั้งแต่ 1 ก.ย. 2026 ระบบเก็บของเองทุกคืนแล้วลบถาวรใน 7 วัน
+        ถ้าไม่มีทางเข้า ผู้ใช้จะไม่มีวันเห็นของที่กำลังจะหาย
+      */}
+      <Link href="/library/archive" className="archive-link">
+        <span>ของที่เก็บไว้</span>
+        <span className="archive-link__n">
+          {archivedCount > 0 ? `${archivedCount} ›` : '›'}
+        </span>
+      </Link>
     </main>
   )
 }
