@@ -1,6 +1,9 @@
+import Link from 'next/link'
 import { Content } from '@/components/Reveal'
+import { KEEP_DAYS } from '@/lib/archive'
 import { createClient } from '@/lib/supabase/server'
 import NotificationSetup from './NotificationSetup'
+import TalkSummary from './TalkSummary'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,12 +16,23 @@ export default async function SettingsPage() {
 
   const vapid = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''
 
+  // นับของในคลังเพื่อบอกจำนวนที่ทางเข้า
+  const { count } = await supabase
+    .from('items')
+    .select('id', { count: 'exact', head: true })
+    .not('archived_at', 'is', null)
+  const archivedCount = count ?? 0
+
   return (
     <Content>
       <main className="wrap">
         <div className="page-head">
           <h1>ตั้งค่า</h1>
-          <div className="sub">การแจ้งเตือน</div>
+        </div>
+
+        <div className="sec">
+          <span>การแจ้งเตือน</span>
+          <span>{subs?.length ?? 0} เครื่อง</span>
         </div>
 
         {vapid ? (
@@ -27,7 +41,6 @@ export default async function SettingsPage() {
           <p className="alert">ยังไม่ได้ตั้งค่า VAPID public key</p>
         )}
 
-        <div className="sec"><span>เครื่องที่เปิดไว้</span><span>{subs?.length ?? 0}</span></div>
         {(subs ?? []).length === 0 ? (
           <p className="none">ยังไม่มีเครื่องไหนเปิดการแจ้งเตือน</p>
         ) : (
@@ -41,6 +54,38 @@ export default async function SettingsPage() {
             </div>
           ))
         )}
+
+        {/*
+          ค่าที่ตั้งไว้สำหรับการคุย — **ไม่ได้ย้ายตัวตั้งค่ามาที่นี่**
+          ปุ่มฟันเฟืองในหน้า KeviN ยังอยู่ เพราะเป็นของที่อยากปรับระหว่างคุย
+          ที่นี่เป็นที่ที่สองที่หาเจอ · หน้าที่ชื่อ "ตั้งค่า" ควรบอกได้ว่าตั้งอะไรไว้
+        */}
+        <div className="sec"><span>คุยกับ KeviN</span><span /></div>
+        <TalkSummary />
+
+        {/*
+          เก็บกวาดทำงานทุกคืนตีสามโดยไม่มีใครเห็น — อย่างน้อยต้องมีที่ให้รู้ว่า
+          มันทำอะไรอยู่ และของที่ถูกเก็บไปแล้วดูได้ที่ไหน
+        */}
+        <div className="sec"><span>การเก็บกวาด</span><span /></div>
+        <div className="row">
+          <span className="row__stripe" style={{ background: 'var(--faint)' }} />
+          <div className="row__body">
+            <div className="row__title">เก็บของที่ผ่านไปแล้วอัตโนมัติ</div>
+            <div className="row__meta">ทุกคืน 03:00 · การเตือนที่ข้ามวัน และงานที่เสร็จแล้วเลยวันส่ง</div>
+          </div>
+        </div>
+        <div className="row">
+          <span className="row__stripe" style={{ background: 'var(--due)' }} />
+          <div className="row__body">
+            <div className="row__title">ลบถาวรหลังเก็บไว้ครบ {KEEP_DAYS} วัน</div>
+            <div className="row__meta">กู้คืนไม่ได้ · กดคืนได้ก่อนถึงกำหนด</div>
+          </div>
+        </div>
+        <Link href="/library/archive" className="archive-link">
+          <span>ดูของที่เก็บไว้</span>
+          <span className="archive-link__n">{archivedCount > 0 ? `${archivedCount} ›` : '›'}</span>
+        </Link>
       </main>
     </Content>
   )
