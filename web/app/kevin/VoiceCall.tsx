@@ -2,6 +2,7 @@
 
 import { useCall, mmss } from '@/components/CallProvider'
 import type { CallState } from '@/lib/voice/session'
+import MicPicker from './MicPicker'
 
 const LABEL: Record<CallState, { title: string; hint: string }> = {
   idle:         { title: 'พร้อมคุยแล้ว',     hint: 'ไมค์ยังปิดอยู่' },
@@ -39,6 +40,9 @@ export default function VoiceCall() {
         </p>
 
         {call.error && <p className="alert alert--gap" role="alert">{call.error}</p>}
+
+        {/* ชื่ออุปกรณ์ยังโผล่ไม่ครบจนกว่าจะอนุญาตไมค์ครั้งแรก — MicPicker บอกไว้แล้ว */}
+        <MicPicker />
 
         {/* ขอสิทธิ์ไมค์ตอนกด ไม่ใช่ตอนเข้าหน้า — ป๊อปอัปที่เด้งโดยไม่ได้ขอมักโดนปฏิเสธ */}
         <button className="btn stage__go" onClick={call.start}>
@@ -83,6 +87,9 @@ export default function VoiceCall() {
       )}
 
       {call.error && <p className="alert alert--gap" role="alert">{call.error}</p>}
+
+      {/* สลับได้กลางสาย ไม่ต้องวางแล้วโทรใหม่ — ไมค์ไม่ได้ผูกกับ token */}
+      <MicPicker />
 
       <div className="call__bar">
         <button className="btn btn--quiet" onClick={call.toggleMute}>

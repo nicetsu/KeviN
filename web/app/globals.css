@@ -869,6 +869,39 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
 }
 
+/*
+ * ตัวเลือกไมค์ในหน้าโทร
+ *
+ * เป็นปุ่มเล็กโทนเงียบโดยตั้งใจ — ของที่แตะนาน ๆ ครั้ง ไม่ควรแย่งสายตา
+ * กับปุ่มวางสาย ซึ่งเป็นปุ่มเดียวที่ต้องหาเจอทันทีในหน้านี้
+ */
+.mic { position: relative; display: flex; flex-direction: column; align-items: center; }
+.mic__btn {
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted);
+  background: none; border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 0.25rem 0.8rem; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mic__btn:hover { color: var(--ink); border-color: var(--brand); }
+.mic__note { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin: 0; }
+
+/* เปิดขึ้นบนเพราะปุ่มอยู่ค่อนไปทางล่างจอ ถ้ากางลงจะโดนแถบปุ่มบัง */
+.mic__list {
+  position: absolute; bottom: calc(100% + 0.4rem); z-index: 5;
+  list-style: none; margin: 0; padding: 0.3rem;
+  min-width: 15rem; max-width: min(20rem, 90vw);
+  background: var(--raised); border: 1px solid var(--line);
+  border-radius: var(--r-card); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+.mic__list button {
+  display: flex; flex-direction: column; gap: 0.1rem; width: 100%; text-align: left;
+  background: none; border: 0; border-radius: 8px; padding: 0.45rem 0.6rem;
+  font-size: var(--s--1); color: var(--ink);
+}
+.mic__list button:hover { background: var(--surface); }
+.mic__list button[data-on='true'] { background: var(--brand-soft); color: var(--brand); }
+.mic__list small { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
 .talk__typing {
   align-self: flex-start; display: flex; align-items: center; gap: 0.45rem;
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);

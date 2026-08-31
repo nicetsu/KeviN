@@ -10,6 +10,7 @@
  */
 
 import type { TalkPrefs } from '@/lib/talkPrefs'
+import { micConstraints, MIC_AUTO } from './mic'
 
 export type CallState =
   | 'idle'
@@ -78,6 +79,7 @@ export class VoiceCall {
   private outCtx: AudioContext | null = null
   private stream: MediaStream | null = null
   private node: AudioWorkletNode | null = null
+  private micSource: MediaStreamAudioSourceNode | null = null
 
   /** จุดเวลาที่เสียงถัดไปควรเริ่มเล่น · ทำให้ก้อนเสียงต่อกันสนิทไม่ขาดเป็นห้วง */
   private playAt = 0
@@ -92,7 +94,21 @@ export class VoiceCall {
   /** เวลาที่เริ่มสายจริง ๆ · **ห้ามรีเซ็ตตอนต่อสายใหม่** */
   readonly startedAt = Date.now()
 
-  constructor(private prefs: TalkPrefs, private hooks: CallHooks) {}
+  /**
+   * ไมค์ที่ใช้อยู่ · `MIC_AUTO` = ให้เบราว์เซอร์เลือกเอง
+   *
+   * ไม่ได้อยู่ใน `prefs` เพราะ `prefs` ถูกส่งขึ้นเซิร์ฟเวอร์ไปกับคำขอ token
+   * ส่วนไมค์เป็นเรื่องของเบราว์เซอร์ล้วน (lib/voice/mic.ts)
+   */
+  private mic: string
+
+  constructor(
+    private prefs: TalkPrefs,
+    private hooks: CallHooks,
+    mic: string = MIC_AUTO
+  ) {
+    this.mic = mic
+  }
 
   // ---- วงจรชีวิต -------------------------------------------------------
 
@@ -112,6 +128,8 @@ export class VoiceCall {
     this.stopPlayback()
     try { this.ws?.close() } catch { /* ปิดไปแล้วก็ไม่เป็นไร */ }
     this.ws = null
+    this.micSource?.disconnect()
+    this.micSource = null
     this.node?.disconnect()
     this.stream?.getTracks().forEach((t) => t.stop())
     await this.micCtx?.close().catch(() => {})
@@ -129,9 +147,7 @@ export class VoiceCall {
   // ---- ไมค์ ------------------------------------------------------------
 
   private async openMic() {
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
-    })
+    this.stream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints(this.mic) })
 
     // บังคับ 16 kHz ตั้งแต่ต้นทาง เบราว์เซอร์รีแซมเปิลให้เอง
     this.micCtx = new AudioContext({ sampleRate: IN_RATE })
@@ -144,11 +160,42 @@ export class VoiceCall {
         realtimeInput: { audio: { data: toBase64(e.data), mimeType: `audio/pcm;rate=${IN_RATE}` } },
       }))
     }
-    this.micCtx.createMediaStreamSource(this.stream).connect(this.node)
+    this.micSource = this.micCtx.createMediaStreamSource(this.stream)
+    this.micSource.connect(this.node)
 
     // AudioContext ต้องเริ่มจาก user gesture — อีกเหตุผลที่หน้าโทรต้องมีปุ่ม "เริ่มโทร"
     this.outCtx = new AudioContext({ sampleRate: OUT_RATE })
     await this.outCtx.resume()
+  }
+
+  /**
+   * สลับไมค์ **โดยไม่ตัดสาย**
+   *
+   * ทำได้เพราะไมค์เป็นของฝั่งเบราว์เซอร์ล้วน ไม่ได้ผูกกับ token เหมือนภาษา
+   * และเสียง — เสียบหูฟังกลางสายแล้วสลับได้เลย ไม่ต้องวางแล้วโทรใหม่
+   *
+   * ⚠️ **เปิดตัวใหม่ให้ได้ก่อนค่อยปิดตัวเก่า** ถ้าเปิดไม่สำเร็จต้องคงของเดิมไว้
+   *    สายที่เงียบไปเพราะสลับไมค์พลาดคือสายที่ตายโดยดูเหมือนยังอยู่
+   */
+  async switchMic(deviceId: string): Promise<void> {
+    if (deviceId === this.mic) return
+    if (!this.micCtx || !this.node) { this.mic = deviceId; return }
+
+    const old = this.stream
+    const oldSource = this.micSource
+
+    const next = await navigator.mediaDevices.getUserMedia({ audio: micConstraints(deviceId) })
+
+    // ปิดเสียงอยู่ก็ต้องปิดต่อ — ไม่งั้นสลับไมค์กลายเป็นการเปิดไมค์โดยไม่ได้สั่ง
+    next.getAudioTracks().forEach((t) => { t.enabled = !this.muted })
+
+    oldSource?.disconnect()
+    this.micSource = this.micCtx.createMediaStreamSource(next)
+    this.micSource.connect(this.node)
+
+    this.stream = next
+    this.mic = deviceId
+    old?.getTracks().forEach((t) => t.stop())
   }
 
   // ---- สาย -------------------------------------------------------------

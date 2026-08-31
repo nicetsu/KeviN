@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { VoiceCall as Session, type CallState, type Caption } from '@/lib/voice/session'
 import { useTalkPrefs } from '@/lib/talkPrefs'
 import { redactVoiceTurns } from '@/lib/voice/transcript'
+import { setMic, useMic } from '@/lib/voice/micStore'
 
 export type VoiceTurn = { role: 'user' | 'assistant'; content: string }
 
@@ -22,6 +23,8 @@ type CallApi = {
   /** turn ที่ปิดก้อนแล้วในสายปัจจุบัน · หน้า KeviN เอาไปแสดงสด */
   turns: VoiceTurn[]
   start: () => Promise<void>
+  /** สลับไมค์ระหว่างสาย · ไม่มีสายอยู่ก็เรียกได้ ค่าจะไปมีผลตอนโทรครั้งถัดไป */
+  switchMic: (deviceId: string) => Promise<void>
   hangUp: (reason?: string) => Promise<void>
   toggleMute: () => void
   dismissError: () => void
@@ -47,6 +50,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   const router = useRouter()
   const path = usePathname()
   const prefs = useTalkPrefs()
+  const mic = useMic()
 
   const [state, setState] = useState<CallState | 'idle'>('idle')
   const [live, setLive] = useState<Caption | null>(null)
@@ -141,14 +145,29 @@ export default function CallProvider({ children }: { children: React.ReactNode }
         setMuted(false)
         if (reason && reason !== 'วางสายแล้ว') setError(reason)
       },
-    })
+    }, mic)
 
     session.current = s
     await s.start()
-  }, [flush, persist, prefs])
+  }, [flush, persist, prefs, mic])
 
   const hangUp = useCallback(async (reason?: string) => {
     await session.current?.stop(reason)
+  }, [])
+
+  /**
+   * สลับไมค์ทันทีถ้ามีสายอยู่ · ถ้าไม่มี ค่าใน localStorage จะไปมีผลตอนโทรครั้งหน้า
+   *
+   * ต่างจากภาษาและเสียงที่ล็อกไปกับ token แล้วแก้กลางสายไม่ได้ —
+   * ไมค์เป็นของฝั่งเบราว์เซอร์ล้วน เสียบหูฟังกลางสายแล้วสลับได้เลย
+   */
+  const switchMic = useCallback(async (deviceId: string) => {
+    setMic(deviceId)
+    try {
+      await session.current?.switchMic(deviceId)
+    } catch {
+      setError('สลับไมค์ไม่สำเร็จ — สายยังใช้ไมค์ตัวเดิมอยู่')
+    }
   }, [])
 
   const toggleMute = useCallback(() => {
@@ -174,9 +193,9 @@ export default function CallProvider({ children }: { children: React.ReactNode }
 
   const api = useMemo<CallApi>(() => ({
     state, live, elapsed, muted, error, quotaOut, turns,
-    start, hangUp, toggleMute,
+    start, hangUp, toggleMute, switchMic,
     dismissError: () => setError(null),
-  }), [state, live, elapsed, muted, error, quotaOut, turns, start, hangUp, toggleMute])
+  }), [state, live, elapsed, muted, error, quotaOut, turns, start, hangUp, toggleMute, switchMic])
 
   return (
     <Ctx.Provider value={api}>
