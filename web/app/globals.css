@@ -36,9 +36,9 @@
 
   /* ---- gradient ประจำ Area ---- */
   --g-class: linear-gradient(135deg, #79C2D0 0%, #8878F0 100%);
-  --g-hack:  linear-gradient(135deg, #E0897E 0%, #A594FF 100%);
-  --g-fin:   linear-gradient(135deg, #74C6A4 0%, #79C2D0 100%);
-  --g-pers:  linear-gradient(135deg, #A594FF 0%, #D98BB4 100%);
+  --g-comp:  linear-gradient(135deg, #E0897E 0%, #A594FF 100%);
+  --g-pers:  linear-gradient(135deg, #74C6A4 0%, #79C2D0 100%);
+  --g-gen:   linear-gradient(135deg, #A594FF 0%, #D98BB4 100%);
 
   /* ---- รูปทรง ---- */
   --r-card: 14px;
@@ -55,6 +55,15 @@
   --s-1:  1.08rem;
   --s-2:  clamp(1.35rem, 1.1rem + 0.9vw, 1.8rem);
   --s-3:  clamp(2rem, 1.5rem + 2.2vw, 3.1rem);
+
+  /* ---- จังหวะ ----
+     ค่าเดียวใช้ทั้งแอป · animation ที่ความเร็วไม่เท่ากันคือสิ่งที่ทำให้รู้สึกไม่เนียน
+     ไม่มีอะไรเกิน 320ms เพราะเกินกว่านั้นคนเริ่มรู้สึกว่า "รอ" แทนที่จะรู้สึกว่า "ลื่น"
+     และแอปที่ใช้ทุกวันต้องเร็วกว่าแอปที่เปิดดูครั้งเดียว */
+  --t-fast: 140ms;   /* ตอบสนองการแตะ · ติ๊ก · ปุ่มยุบ */
+  --t-base: 220ms;   /* แผงเปิดปิด · แถวเข้าออก */
+  --t-slow: 320ms;   /* เปลี่ยนหน้า · morph ข้ามหน้า */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);   /* ออกตัวเร็ว จบช้า */
 }
 
 html { color-scheme: dark; }
@@ -628,9 +637,9 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 }
 .acard::before { content: ""; position: absolute; inset: 0; opacity: 0.11; }
 .acard--class::before { background: var(--g-class); }
-.acard--hack::before  { background: var(--g-hack); }
-.acard--fin::before   { background: var(--g-fin); }
+.acard--comp::before  { background: var(--g-comp); }
 .acard--pers::before  { background: var(--g-pers); }
+.acard--gen::before   { background: var(--g-gen); }
 .acard > * { position: relative; }
 .acard__nm {
   font-weight: 600; font-size: var(--s-0);
