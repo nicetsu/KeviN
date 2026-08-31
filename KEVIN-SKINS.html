@@ -1,0 +1,353 @@
+<title>สิบหน้าตาห้องคุย KeviN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ค่าสีคัดจาก web/app/globals.css ของจริง (1 ก.ย. 2026)
+   ทั้งสิบแบบใช้ **โครงเดียวกัน** — หัว · แท็บสองโหมด · เนื้อ · ช่องพิมพ์
+   ต่างกันที่ภาษาภาพล้วน ๆ จึงเปลี่ยนได้โดยไม่แตะตรรกะสักบรรทัด
+
+   จอจำลองกว้าง 258px = 69% ของ 375px จริง · ตัวเลขข้างในเป็น px ที่ย่อแล้ว */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --sched:#79C2D0; --event:#D5BB6D; --due:#E0897E; --task:#74C6A4;
+  --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1240px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:46rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.facts{margin:1.8rem 0 0;padding:1.1rem 1.2rem;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.facts h2{font-size:var(--s-0);margin:0 0 .7rem;font-weight:600}
+.facts p{margin:0 0 .5rem;color:var(--muted);font-size:var(--s--1)}
+.facts p:last-child{margin-bottom:0}
+.facts b{color:var(--ink);font-weight:600}
+
+.list{display:flex;flex-direction:column;gap:1.1rem;margin-top:2rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color var(--t-base) var(--ease)}
+.card:hover{border-color:var(--capline)}
+.card__top{display:flex;align-items:baseline;gap:.6rem;padding:1rem 1.15rem .5rem;flex-wrap:wrap}
+.card__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);font-variant-numeric:tabular-nums}
+.card__name{font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
+.flag{margin-left:auto;font-size:var(--s--2);font-weight:500;padding:.12rem .55rem;border-radius:var(--r-pill);white-space:nowrap}
+.flag--now{color:var(--brand);background:var(--brand-soft)}
+.flag--ref{color:var(--sched);background:rgba(121,194,208,.12)}
+.flag--ok{color:#74C6A4;background:rgba(116,198,164,.1)}
+.flag--ask{color:#D5BB6D;background:rgba(213,187,109,.1)}
+.card__body{display:flex;gap:1.3rem;padding:.3rem 1.15rem 1.2rem;flex-wrap:wrap}
+.card__why{flex:1 1 19rem;min-width:min(100%,17rem)}
+.card__why p{font-size:var(--s--1);color:var(--muted);margin:.35rem 0 .8rem}
+.card__why b{color:var(--ink);font-weight:500}
+.card__cost{font-size:var(--s--2);color:var(--faint);font-family:var(--f-mono);line-height:1.7;margin:0;padding-top:.6rem;border-top:1px solid var(--line-soft)}
+.screens{display:flex;gap:.8rem;flex-wrap:wrap}
+.shot{display:flex;flex-direction:column;gap:.35rem}
+.shot__cap{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);text-align:center}
+
+/* =====================================================================
+   จอจำลอง — โครงเดียวกันทุกแบบ ต่างกันที่คลาส s1…s10 บน .phone
+   ===================================================================== */
+.phone{
+  width:258px;height:500px;flex:none;position:relative;overflow:hidden;
+  border:1px solid var(--line);border-radius:26px;
+  background:var(--bg);display:flex;flex-direction:column;
+  font-size:11px;line-height:1.5;
+}
+.phone *{font-size:inherit}
+.glow{position:absolute;inset:0;pointer-events:none}
+.p-body{flex:1;display:flex;flex-direction:column;min-height:0;padding:11px 11px 0;position:relative;z-index:1}
+.p-scroll{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:7px;min-height:0}
+
+.p-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px}
+.p-title{font-weight:600;font-size:15px;letter-spacing:-.02em}
+.p-gear{width:21px;height:21px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--faint);font-size:9px}
+
+/* --- แท็บสองโหมด · ของกลางที่ทุกแบบมี --- */
+.p-seg{display:flex;background:var(--raised);border-radius:var(--r-pill);padding:2px;margin-bottom:9px}
+.p-seg span{flex:1;text-align:center;padding:5px 0;border-radius:var(--r-pill);color:var(--faint);font-size:10px}
+.p-seg span[data-on]{background:var(--brand);color:var(--on-brand);font-weight:600}
+
+.b{max-width:78%;padding:6px 9px;border-radius:12px;font-size:10px;line-height:1.5}
+.b--me{align-self:flex-end;background:var(--brand-soft);border:1px solid var(--capline)}
+.b--ai{align-self:flex-start;background:var(--surface);border:1px solid var(--line)}
+.b__via{display:block;margin-top:3px;font-family:var(--f-mono);font-size:8px;color:var(--sched)}
+
+.p-composer{display:flex;gap:6px;align-items:center;padding:9px 0 11px}
+.p-field{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:7px 11px;color:var(--faint);font-size:10px}
+.p-send{width:28px;height:28px;flex:none;border-radius:50%;background:var(--grad);color:var(--on-brand);display:grid;place-items:center;font-size:12px;font-weight:700}
+.p-chips{display:flex;gap:5px;overflow:hidden;padding-bottom:3px}
+.p-chip{border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 9px;font-size:9px;color:var(--muted);white-space:nowrap}
+
+.orb{width:104px;height:104px;border-radius:50%;flex:none;background:radial-gradient(circle at 32% 28%,#D6CCFF 0%,#A594FF 38%,#6E5BD8 72%,#3A2E73 100%)}
+.p-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;text-align:center;min-height:0}
+.p-timer{display:flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:9px;color:var(--sched)}
+.p-dot{width:5px;height:5px;border-radius:50%;background:var(--sched)}
+.p-cap{font-size:10px;color:var(--muted);max-width:86%;line-height:1.6}
+.p-cap b{color:var(--brand);display:block;font-size:8px;font-family:var(--f-mono);letter-spacing:.1em;margin-bottom:3px}
+.wave{display:flex;align-items:center;gap:3px;height:32px}
+.wave u{width:4px;border-radius:2px;background:var(--sched)}
+.p-bar{display:flex;align-items:center;justify-content:center;gap:9px;padding:9px 0 12px}
+.p-btn{border-radius:var(--r-pill);padding:7px 15px;font-size:10px;font-weight:600;background:var(--grad);color:var(--on-brand)}
+.p-btn--quiet{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-weight:400}
+.p-btn--end{background:var(--due);color:#2A1210}
+
+.p-nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:5px 0 7px;position:relative;z-index:1}
+.p-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:8px}
+.p-tab i{width:13px;height:13px;border:1.4px solid currentColor;border-radius:3px;display:block;font-style:normal}
+.p-tab--talk{flex:1.6}
+.p-kevin{width:100%;min-height:32px;border-radius:var(--r-pill);background:var(--grad);color:var(--on-brand);display:grid;place-items:center;font-size:9px;font-weight:700;letter-spacing:.06em;box-shadow:0 0 16px -2px rgba(165,148,255,.55)}
+
+/* =====================================================================
+   01 · ของตอนนี้ — ไม่มีสไตล์เพิ่ม นั่นคือทั้งหมดของมัน
+   ===================================================================== */
+
+/* 02 · เรืองจากบน — แสงของ orb ตกลงมาบนบทสนทนา */
+.s2 .glow{background:radial-gradient(120% 52% at 50% -6%,rgba(165,148,255,.34) 0%,rgba(136,120,240,.12) 42%,transparent 72%)}
+.s2 .b--ai{background:rgba(27,22,48,.72);border-color:rgba(54,47,92,.8)}
+.s2 .b--me{background:rgba(165,148,255,.16);border-color:rgba(165,148,255,.4)}
+.s2 .p-field{background:rgba(27,22,48,.72)}
+.s2 .orb{box-shadow:0 0 60px -6px rgba(165,148,255,.75)}
+
+/* 03 · แก้วฝ้า — ทุกชิ้นเป็นแผ่นโปร่งบนพื้นไล่เฉด */
+.s3 .glow{background:
+  radial-gradient(80% 40% at 12% 4%,rgba(165,148,255,.3),transparent 70%),
+  radial-gradient(70% 36% at 92% 30%,rgba(121,194,208,.2),transparent 70%),
+  radial-gradient(90% 44% at 50% 104%,rgba(213,187,109,.14),transparent 72%)}
+.s3 .b,.s3 .p-field,.s3 .p-seg,.s3 .p-chip{backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.s3 .b--ai{background:rgba(241,240,247,.07);border-color:rgba(241,240,247,.14)}
+.s3 .b--me{background:rgba(241,240,247,.13);border-color:rgba(241,240,247,.2)}
+.s3 .p-field{background:rgba(241,240,247,.08);border-color:rgba(241,240,247,.16)}
+.s3 .p-seg{background:rgba(241,240,247,.08)}
+.s3 .p-chip{background:rgba(241,240,247,.06);border-color:rgba(241,240,247,.14)}
+
+/* 04 · ไล่เฉดอุ่น — พาสเทลที่มุมจอ ไล่ไปหาพื้นเดิม (จากภาพตัวอย่างแรก) */
+.s4 .glow{background:
+  radial-gradient(66% 30% at 4% 0%,rgba(224,137,126,.24),transparent 68%),
+  radial-gradient(72% 34% at 100% 12%,rgba(165,148,255,.28),transparent 70%),
+  radial-gradient(80% 40% at 40% 100%,rgba(121,194,208,.18),transparent 72%)}
+.s4 .b--ai{background:rgba(27,22,48,.8)}
+.s4 .b--me{background:linear-gradient(135deg,rgba(195,182,255,.9),rgba(136,120,240,.9));border-color:transparent;color:var(--on-brand)}
+.s4 .b--me .b__via{color:#2A2450}
+
+/* 05 · เส้นล้วน — ไม่มีพื้นทึบเลยสักชิ้น */
+.s5 .b{background:none}
+.s5 .b--ai{border-color:var(--line)}
+.s5 .b--me{border-color:var(--brand);color:var(--brand)}
+.s5 .p-field{background:none}
+.s5 .p-seg{background:none;border:1px solid var(--line)}
+.s5 .p-seg span[data-on]{background:none;color:var(--brand);border:1px solid var(--brand)}
+.s5 .p-send{background:none;border:1px solid var(--brand);color:var(--brand)}
+.s5 .orb{background:none;border:1px solid var(--brand);box-shadow:inset 0 0 30px rgba(165,148,255,.22)}
+.s5 .p-btn{background:none;border:1px solid var(--brand);color:var(--brand)}
+
+/* 06 · การ์ดนุ่ม — มนมาก ยกลอย เงาเข้ม */
+.s6 .b{border-radius:17px;border:0;box-shadow:0 6px 16px -8px rgba(0,0,0,.75)}
+.s6 .b--ai{background:var(--raised)}
+.s6 .b--me{background:var(--grad);color:var(--on-brand)}
+.s6 .b--me .b__via{color:#2A2450}
+.s6 .p-field{border:0;background:var(--raised);box-shadow:0 4px 14px -8px rgba(0,0,0,.8)}
+.s6 .p-seg{background:var(--surface);box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+.s6 .p-chip{border:0;background:var(--raised)}
+
+/* 07 · โมโน — จังหวะเหมือนบันทึกการสนทนา */
+.s7{font-family:var(--f-mono)}
+.s7 .p-title{font-family:var(--f-mono);letter-spacing:.04em;font-size:13px}
+.s7 .b{border-radius:5px;font-size:9.5px}
+.s7 .b--ai{background:var(--surface)}
+.s7 .b--me{background:none;border-color:var(--capline);color:var(--brand)}
+.s7 .p-seg{border-radius:5px;padding:1px}
+.s7 .p-seg span{border-radius:4px;letter-spacing:.06em}
+.s7 .p-field{border-radius:5px}
+.s7 .p-send{border-radius:5px}
+.s7 .p-chip{border-radius:4px;font-size:8.5px}
+
+/* 08 · แถบสีข้าง — ภาษาเดียวกับรายการงานในแอป */
+.s8 .b{max-width:88%;border:0;border-radius:0;background:none;padding:4px 0 4px 9px;border-left:2px solid var(--line)}
+.s8 .b--ai{border-left-color:var(--brand)}
+.s8 .b--me{align-self:stretch;border-left-color:var(--capline);color:var(--muted);text-align:right;padding-right:9px;padding-left:0;border-left:0;border-right:2px solid var(--capline)}
+.s8 .p-scroll{gap:10px}
+.s8 .p-field{border-radius:8px}
+.s8 .p-seg{border-radius:8px}
+.s8 .p-seg span{border-radius:6px}
+
+/* 09 · เต็มขอบ — ไม่มีการ์ด แยกด้วยระยะกับน้ำหนักอักษร */
+.s9 .p-body{padding-left:0;padding-right:0}
+.s9 .p-head,.s9 .p-seg,.s9 .p-composer,.s9 .p-chips{margin-left:11px;margin-right:11px}
+.s9 .b{max-width:100%;background:none;border:0;border-radius:0;padding:5px 11px}
+.s9 .b--ai{color:var(--ink)}
+.s9 .b--me{color:var(--brand);text-align:right}
+.s9 .p-scroll{gap:9px}
+.s9 .p-seg{background:none;border-bottom:1px solid var(--line);border-radius:0;padding:0}
+.s9 .p-seg span{border-radius:0;padding-bottom:6px;border-bottom:2px solid transparent}
+.s9 .p-seg span[data-on]{background:none;color:var(--brand);border-bottom-color:var(--brand)}
+
+/* 10 · ขอบเรือง — คมและมีไฟ */
+.s10 .glow{background:radial-gradient(90% 40% at 50% 100%,rgba(136,120,240,.22),transparent 70%)}
+.s10 .b--ai{background:#161228;border-color:rgba(165,148,255,.28);box-shadow:0 0 12px -6px rgba(165,148,255,.5)}
+.s10 .b--me{background:#161228;border-color:rgba(121,194,208,.4);box-shadow:0 0 12px -6px rgba(121,194,208,.5)}
+.s10 .p-field{background:#161228;border-color:rgba(165,148,255,.3)}
+.s10 .p-send{box-shadow:0 0 14px -2px rgba(165,148,255,.8)}
+.s10 .p-seg{background:#161228;border:1px solid rgba(165,148,255,.2)}
+.s10 .p-seg span[data-on]{box-shadow:0 0 14px -3px rgba(165,148,255,.9)}
+.s10 .orb{box-shadow:0 0 40px -4px rgba(165,148,255,.7),inset 0 0 22px rgba(255,255,255,.2)}
+
+.after{margin-top:2.6rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+.after code{font-family:var(--f-mono);font-size:.82em;color:var(--brand);background:var(--brand-soft);padding:.08rem .35rem;border-radius:5px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">ประตูที่สาม · หน้า /kevin</p>
+    <h1>สิบหน้าตา โครงเดียวกัน</h1>
+    <p>ทั้งสิบแบบใช้<strong>โครงแท็บสองโหมดเหมือนกันหมด</strong> — หัว · แท็บ แชต/โทร · เนื้อ · ช่องพิมพ์
+       ต่างกันที่ภาษาภาพล้วน ๆ <strong>จึงเปลี่ยนได้โดยไม่แตะตรรกะสักบรรทัด</strong></p>
+    <p>แต่ละแบบแสดงสองจอ เพราะแท็บสองโหมดคือหัวใจของโครงนี้ —
+       สไตล์ที่สวยเฉพาะจอแชตแต่ทำจอโทรพัง ไม่นับว่าใช้ได้</p>
+  </div>
+
+  <div class="facts">
+    <h2>สองอย่างที่ผมยึดจากภาพตัวอย่างที่ส่งมา</h2>
+    <p><b>orb เป็นตัวละคร ไม่ใช่ไอคอน</b> — ทรงกลมไล่เฉดที่มีความลึก ใช้เป็นจุดรวมสายตาของโหมดโทร (แบบ 02 · 04 · 10 เอามาเต็ม ๆ)</p>
+    <p><b>ช่องพิมพ์เป็นแคปซูลที่มีปุ่มวงกลมไล่เฉด</b> — เด่นกว่าของเดิมที่เป็นปุ่ม “ส่ง” สี่เหลี่ยม · ทุกแบบในไฟล์นี้ใช้ทรงนี้หมด เพราะมันดีกว่าจริง</p>
+    <p>ส่วนที่<b>ไม่</b>เอามาคือพื้นสว่าง — โปรเจกต์นี้เคาะไว้ว่าธีมมืดอย่างเดียว (doc/DECISIONS.md) แบบ 03 กับ 04 จึงเป็นการแปลความรู้สึกพาสเทลนั้นลงบนพื้นมืดแทน</p>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <div class="after">
+    <h2>ทั้งสิบแบบเปลี่ยนได้ที่ไฟล์เดียว</h2>
+    <p>ทุกแบบแตะแค่ <code>app/globals.css</code> ส่วนของห้องคุย — <code>TalkRoom.tsx</code> กับ <code>VoiceCall.tsx</code> ไม่ต้องแก้เลย
+       ยกเว้นแบบ 09 ที่ต้องขยับ padding ของ <code>.talk</code> ให้ข้อความชิดขอบได้</p>
+    <p><b>ข้อควรรู้เรื่องแก้วฝ้า (03)</b> — <code>backdrop-filter</code> กินแรงวาดจริงบนมือถือรุ่นเก่า ถ้าเลือกแบบนี้ผมจะวัด FPS ตอนเลื่อนบทสนทนายาว ๆ ก่อนปล่อย</p>
+    <p>บอกเลขมาได้เลย · ผสมก็ได้ เช่น “ฟองแบบ 06 แต่พื้นแบบ 02”</p>
+  </div>
+</div>
+
+<script>
+/* ---------- ชิ้นส่วนกลาง · ทุกแบบใช้ชุดเดียวกัน ---------- */
+const head = () => `<div class="p-head"><span class="p-title">KeviN</span><span class="p-gear">⚙</span></div>`
+const seg = (on) => `<div class="p-seg"><span${on === 'chat' ? ' data-on' : ''}>แชต</span><span${on === 'voice' ? ' data-on' : ''}>โทร</span></div>`
+
+const thread = () => `
+  <div class="b b--me">พรุ่งนี้ติดอะไรบ้าง</div>
+  <div class="b b--ai">พรุ่งนี้มีสองคาบ · 09:00 วิศวกรรมซอฟต์แวร์ ที่ E11-S601 แล้วต่อ 13:00 คณิตศาสตร์</div>
+  <div class="b b--me">คาบว่างยาวสุดสัปดาห์นี้</div>
+  <div class="b b--ai">พฤหัสบดี 10:00–15:00 ว่างยาวห้าชั่วโมง<span class="b__via">จากสาย</span></div>`
+
+const chips = () => `<div class="p-chips"><span class="p-chip">พรุ่งนี้ติดอะไรบ้าง</span><span class="p-chip">มีงานส่งไหม</span></div>`
+const composer = () => `<div class="p-composer"><span class="p-field">พิมพ์ข้อความ</span><span class="p-send">↑</span></div>`
+const wave = () => `<div class="wave">${[12, 26, 32, 18, 28, 15].map((v) => `<u style="height:${v}px"></u>`).join('')}</div>`
+
+const nav = () => `
+  <div class="p-nav">
+    <span class="p-tab"><i></i>วันนี้</span>
+    <span class="p-tab"><i></i>ปฏิทิน</span>
+    <span class="p-tab p-tab--talk"><span class="p-kevin">KEVIN</span></span>
+    <span class="p-tab"><i></i>คลัง</span>
+    <span class="p-tab"><i></i>ตั้งค่า</span>
+  </div>`
+
+const chatScreen = (cls) => `
+  <div class="phone ${cls}"><span class="glow"></span>
+    <div class="p-body">${head()}${seg('chat')}
+      <div class="p-scroll">${thread()}</div>
+      ${chips()}${composer()}
+    </div>${nav()}
+  </div>`
+
+const callScreen = (cls) => `
+  <div class="phone ${cls}"><span class="glow"></span>
+    <div class="p-body">${head()}${seg('voice')}
+      <div class="p-stage">
+        <div class="p-timer"><span class="p-dot"></span>กำลังคุย 01:24</div>
+        <div class="orb"></div>
+        ${wave()}
+        <div class="p-cap"><b>KEVIN</b>พฤหัสบดีว่างยาวห้าชั่วโมงครับ ตั้งแต่สิบโมงถึงบ่ายสาม</div>
+      </div>
+      <div class="p-bar"><span class="p-btn p-btn--quiet">ปิดไมค์</span><span class="p-btn p-btn--end">วางสาย</span></div>
+    </div>${nav()}
+  </div>`
+
+const S = [
+  { n: 1, cls: '', name: 'ของตอนนี้', flag: ['now', 'ตัวเทียบ'],
+    why: 'พื้นทึบ ฟองมีขอบบาง ปุ่มส่งเป็นแคปซูลคำว่า “ส่ง” · <b>อ่านง่ายและเบาที่สุด</b> แต่ไม่มีอะไรบอกว่าอีกฝั่งของบทสนทนาคือใคร — จอโทรกับจอแชตดูเหมือนคนละแอป',
+    cost: 'ไม่ต้องแก้อะไร' },
+
+  { n: 2, cls: 's2', name: 'เรืองจากบน', flag: ['ref', 'จากภาพที่ส่งมา'],
+    why: 'แสงม่วงตกจากขอบบนลงมาบนบทสนทนา · <b>ทำให้จอแชตกับจอโทรเป็นที่เดียวกัน</b> เพราะแสงนั้นคือแสงของ orb ที่อยู่อีกแท็บ · ฟองโปร่งขึ้นเล็กน้อยให้แสงผ่านได้',
+    cost: 'เพิ่มชั้นแสงหนึ่งชั้น + ปรับความทึบของฟอง' },
+
+  { n: 3, cls: 's3', name: 'แก้วฝ้า', flag: ['ask', 'ต้องวัดความลื่น'],
+    why: 'ทุกชิ้นเป็นแผ่นแก้วเบลอลอยบนพื้นไล่เฉดสามสี · <b>หรูที่สุดในไฟล์นี้</b> และเป็นแบบเดียวที่พื้นหลังมีชีวิตโดยไม่ต้องขยับ — แต่ <code>backdrop-filter</code> กินแรงวาดจริง',
+    cost: 'ต้องวัด FPS ตอนเลื่อนบทสนทนายาวก่อนปล่อย' },
+
+  { n: 4, cls: 's4', name: 'ไล่เฉดอุ่น', flag: ['ref', 'จากภาพที่ส่งมา'],
+    why: 'พาสเทลจากภาพตัวอย่างแปลลงพื้นมืด — ส้มมุมบนซ้าย ม่วงขวา ฟ้าล่าง · <b>ฟองฝั่งเราเป็นไล่เฉดทึบ</b> ทำให้สายตารู้ทันทีว่าใครพูด โดยไม่ต้องอ่าน',
+    cost: 'เพิ่มชั้นพื้น + เปลี่ยนฟองฝั่งผู้ใช้' },
+
+  { n: 5, cls: 's5', name: 'เส้นล้วน', flag: ['ok', 'เบาที่สุด'],
+    why: 'ไม่มีพื้นทึบเลยสักชิ้น เหลือแค่เส้น 1px กับตัวหนังสือ · <b>เบาที่สุดและอ่านง่ายที่สุดกลางแดด</b> · orb กลายเป็นวงแหวนที่เรืองจากข้างใน ซึ่งเข้ากับความคิดที่ว่า KeviN เป็นเสียงไม่ใช่รูป',
+    cost: 'เปลี่ยนพื้นเป็นเส้นทั้งชุด' },
+
+  { n: 6, cls: 's6', name: 'การ์ดนุ่ม', flag: ['ok', 'ปลอดภัย'],
+    why: 'ฟองมนมาก ไม่มีขอบ มีเงาลึกแทน · <b>ให้ความรู้สึกจับต้องได้เหมือนแอปแชตที่คุ้นเคย</b> · ฟองฝั่งเราเป็นไล่เฉดม่วงเต็มก้อน ซึ่งเป็นสีเดียวกับปุ่ม KeviN บนแถบล่างพอดี',
+    cost: 'เปลี่ยนความมนกับเงาของฟอง' },
+
+  { n: 7, cls: 's7', name: 'โมโน', flag: ['ask', 'คนละเสียงกับแอป'],
+    why: 'ทั้งจอเป็นฟอนต์โมโน มุมเกือบเหลี่ยม · <b>อ่านเหมือนบันทึกการสนทนามากกว่าห้องแชต</b> — เข้ากับตัวเลขและเวลาที่แอปใช้โมโนอยู่แล้ว แต่ทำให้ KeviN ฟังดูเป็นเครื่องมากกว่าเป็นใครสักคน',
+    cost: 'เปลี่ยนฟอนต์ทั้งห้องคุย' },
+
+  { n: 8, cls: 's8', name: 'แถบสีข้าง', flag: ['ok', 'กลืนกับแอปที่สุด'],
+    why: 'ไม่มีฟอง ใช้<b>เส้นสีข้างเหมือนรายการงานในหน้าวันนี้</b> · เป็นแบบเดียวที่ห้องคุยดูเป็นส่วนหนึ่งของแอป ไม่ใช่แอปแชตที่ฝังมา · ประหยัดพื้นที่แนวนอนที่สุดด้วย',
+    cost: 'เปลี่ยนฟองเป็นแถวแบบ ItemList' },
+
+  { n: 9, cls: 's9', name: 'เต็มขอบ', flag: ['ask', 'ต้องแก้โครงเล็กน้อย'],
+    why: 'ข้อความชิดขอบจอ ไม่มีกล่องอะไรเลย แยกฝั่งด้วยสีกับการจัดชิด · <b>ได้พื้นที่อ่านมากที่สุด</b> และแท็บกลายเป็นขีดใต้แทนแคปซูล — เงียบแต่ชัด',
+    cost: 'ต้องขยับ padding ของ .talk ให้ข้อความชิดขอบ' },
+
+  { n: 10, cls: 's10', name: 'ขอบเรือง', flag: ['ask', 'แรงที่สุด'],
+    why: 'พื้นเข้มลงกว่าเดิม ทุกขอบเรืองบาง ๆ ฝั่งเราเรืองฟ้า ฝั่ง KeviN เรืองม่วง · <b>แยกสองฝั่งได้โดยไม่ใช้พื้นทึบเลย</b> — แต่แรงกว่าทุกหน้าที่เหลือของแอปมาก ใช้ที่นี่ที่เดียวจะดูเหมือนหลงมา',
+    cost: 'ถ้าเอาแบบนี้ ควรลามไปหน้าอื่นด้วย ไม่งั้นจะโดดเดี่ยว' },
+]
+
+document.getElementById('list').innerHTML = S.map((v) => `
+  <article class="card">
+    <div class="card__top">
+      <span class="card__n">${String(v.n).padStart(2, '0')}</span>
+      <span class="card__name">${v.name}</span>
+      <span class="flag flag--${v.flag[0]}">${v.flag[1]}</span>
+    </div>
+    <div class="card__body">
+      <div class="card__why">
+        <p>${v.why}</p>
+        <p class="card__cost">ต้องแก้อะไร · ${v.cost}</p>
+      </div>
+      <div class="screens">
+        <div class="shot">${chatScreen(v.cls)}<span class="shot__cap">แชต</span></div>
+        <div class="shot">${callScreen(v.cls)}<span class="shot__cap">โทร</span></div>
+      </div>
+    </div>
+  </article>`).join('')
+</script>

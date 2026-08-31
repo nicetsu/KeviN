@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useCall, mmss } from '@/components/CallProvider'
 import type { CallState } from '@/lib/voice/session'
 
@@ -32,12 +33,18 @@ export default function VoiceCall() {
   const call = useCall()
   const running = call.state !== 'idle'
 
+  /*
+   * ⚠️ `going` มีไว้ให้ปุ่มยุบหายก่อนฉากจะเปลี่ยน **ไม่ใช่ตัวบอกสถานะสาย**
+   *    สถานะจริงคือ `call.state` ที่มาจาก provider · ตัวนี้ตายไปพร้อมการ remount
+   *    ซึ่งถูกแล้ว เพราะพอสายติดฉากนี้ก็หายไปทั้งก้อน
+   */
+  const [going, setGoing] = useState(false)
+
   if (!running) {
     return (
-      <div className="stage">
-        <div className="orb" aria-hidden="true">
-          <MicIcon color="var(--muted)" />
-        </div>
+      <div className={`stage${going ? ' stage--going' : ''}`}>
+        {/* วงเปล่า ไม่มีไอคอนไมค์ — นี่คือตัว KeviN ไม่ใช่ปุ่ม (doc/DECISIONS.md) */}
+        <div className="orb" aria-hidden="true" />
         <div className="stage__state">
           {LABEL.idle.title}
           <small>{LABEL.idle.hint}</small>
@@ -49,8 +56,11 @@ export default function VoiceCall() {
             ต่างจากภาษากับเสียงที่ยังอยู่ในหน้านี้เพราะปรับระหว่างคุย */}
 
         {/* ขอสิทธิ์ไมค์ตอนกด ไม่ใช่ตอนเข้าหน้า — ป๊อปอัปที่เด้งโดยไม่ได้ขอมักโดนปฏิเสธ */}
-        <button className="btn stage__go" onClick={call.start}>
-          <MicIcon color="#12102A" size={17} />
+        <button
+          className="btn stage__go"
+          onClick={() => { setGoing(true); void call.start() }}
+        >
+          <MicIcon color="var(--brand)" size={17} />
           เริ่มโทร
         </button>
       </div>
@@ -81,7 +91,9 @@ export default function VoiceCall() {
               key={i}
               style={{
                 height: answering ? shape.idle : 6 + Math.min(1, call.level * 4) * shape.gain,
-                background: answering ? 'var(--brand)' : 'var(--sched)',
+                /* ม่วงทั้งคู่ตามที่เจ้าของสั่ง — แยกสองสถานะด้วยความสว่าง
+                   ฟังเรา = ม่วงสว่าง · KeviN ตอบ = ม่วงเข้ม (globals.css) */
+                background: answering ? 'var(--brand-deep)' : 'var(--brand)',
                 transition: answering ? undefined : 'height 90ms linear',
               }}
             />
@@ -110,13 +122,49 @@ export default function VoiceCall() {
 
       {call.error && <p className="alert alert--gap" role="alert">{call.error}</p>}
 
-      <div className="call__bar">
-        <button className="btn btn--quiet" onClick={call.toggleMute}>
-          {call.muted ? 'เปิดไมค์' : 'ปิดไมค์'}
+      {/*
+        ⚠️ ปุ่มไม่มีตัวอักษรบนตัวมันแล้ว — `aria-label` คือทางเดียวที่คนใช้
+           screen reader จะรู้ว่าปุ่มไหนวางสาย · ป้ายใต้ปุ่มเป็นของสายตาอย่างเดียว
+      */}
+      <div className="callbtns">
+        <button
+          className={`callbtn${call.muted ? ' callbtn--muted' : ''}`}
+          onClick={call.toggleMute}
+          aria-label={call.muted ? 'เปิดไมค์' : 'ปิดไมค์'}
+        >
+          <i>{call.muted ? <MicOffIcon size={20} /> : <MicIcon color="currentColor" size={20} />}</i>
+          <span>{call.muted ? 'เปิดไมค์' : 'ปิดไมค์'}</span>
         </button>
-        <button className="btn btn--end" onClick={() => call.hangUp()}>วางสาย</button>
+        <button className="callbtn callbtn--end" onClick={() => call.hangUp()} aria-label="วางสาย">
+          <i><HangUpIcon size={20} /></i>
+          <span>วางสาย</span>
+        </button>
       </div>
     </div>
+  )
+}
+
+/*
+ * ⚠️ ไมค์ขีดทับกับหูโทรศัพท์คว่ำ **ต้องต่างกันด้วยรูปทรง ไม่ใช่แค่สี**
+ *    ถ้าใช้ไมค์ทั้งคู่แล้วต่างแค่แดง จะกดวางสายพลาดตอนตั้งใจจะปิดไมค์
+ */
+function MicOffIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+      <rect x="9" y="2.5" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0 0 14 0M12 18v3.5" />
+      <path d="M3.5 3.5l17 17" />
+    </svg>
+  )
+}
+
+function HangUpIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3.2 14.6c-.9-.9-.7-2.4.4-3.1C5.9 10 8.8 9.1 12 9.1s6.1.9 8.4 2.4c1.1.7 1.3 2.2.4 3.1l-1.4 1.4a1.7 1.7 0 0 1-2.1.2l-1.8-1.2a1.7 1.7 0 0 1-.7-1.4v-1.3c-1.9-.6-4-.6-5.9 0v1.3c0 .6-.3 1.1-.7 1.4l-1.8 1.2a1.7 1.7 0 0 1-2.1-.2z" />
+    </svg>
   )
 }
 

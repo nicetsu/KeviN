@@ -27,6 +27,10 @@
   --brand:      #A594FF;
   --brand-deep: #8878F0;
   --brand-soft: #1E1B33;
+  /* ไล่เฉดแบรนด์ · ใช้ที่ปุ่ม KeviN บนแถบล่าง ฟองข้อความฝั่งเรา และ orb
+     สามที่นี้ต้องเป็นค่าเดียวกันเสมอ ไม่งั้นจะรู้สึกเป็นม่วงคนละตัว */
+  --grad-brand: linear-gradient(135deg, #C3B6FF 0%, #8878F0 100%);
+  --on-brand:   #14121F;   /* ตัวอักษรบนพื้นไล่เฉด · คอนทราสต์ 5.27 ที่ปลายเข้มสุด */
 
   /* ---- สีชนิดข้อมูล · ลดความจัดลง ~45% จากสีอิ่มตัว ---- */
   --sched:      #79C2D0;   /* คาบเรียน  · 187° */
@@ -435,8 +439,8 @@ html, body { margin: 0; padding: 0; }
  * ถ้าม่วงตลอด ตัวบอกจะเหลือแค่แสงฟุ้งซึ่งกลางแดดแทบไม่เห็น
  */
 .nav__item--talkOn .nav__box {
-  color: #14121F;
-  background: linear-gradient(135deg, #C3B6FF 0%, #8878F0 100%);
+  color: var(--on-brand);
+  background: var(--grad-brand);
   box-shadow: 0 0 22px -2px rgba(165, 148, 255, 0.55);
 }
 
@@ -1086,12 +1090,44 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 
 /*
+ * แสงพื้นหลังของห้องคุย — ก้อนใหญ่จากล่าง บวกสองจุดจางที่ขอบบน
+ * (เจ้าของเลือกจากไฟล์เทียบ 1 ก.ย. 2026 · KEVIN-MIX.html)
+ *
+ * ⚠️ `position: fixed` ไม่ใช่ `absolute` — แสงต้องกินเต็มจอ ไม่ใช่แค่ในกรอบ
+ *    `.wrap` ที่มี padding อยู่ · z-index 0 จึงอยู่ใต้แถบล่าง (20) และปุ่มเพิ่มเร็ว (25)
+ *
+ * ⚠️ ลูกทุกตัวต้องมี `position: relative` ไม่งั้นจะจมอยู่ใต้ชั้นแสง
+ */
+.talk::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(58% 22% at 22% 2%,  rgba(165, 148, 255, 0.26), transparent 70%),
+    radial-gradient(52% 20% at 84% 6%,  rgba(121, 194, 208, 0.20), transparent 72%),
+    radial-gradient(96% 34% at 50% 103%, rgba(136, 120, 240, 0.40), transparent 74%);
+}
+.talk > * { position: relative; z-index: 1; }
+
+/*
  * ตัวสลับโหมด — **ใช้ `.seg` ตัวเดิมของโปรเจกต์** ที่ปฏิทินและหน้าตารางเวลาใช้อยู่
  * ไม่ได้สร้างของใหม่ · รอบแรกเผลอตั้งชื่อคลาสซ้ำแล้วโดน `.seg button` ที่เฉพาะเจาะจง
  * กว่าทับจนปุ่มที่เลือกอยู่ไม่ขึ้นสี — ของเดิมทำงานได้อยู่แล้ว แค่ต้องการให้เต็มความกว้าง
  */
-.seg--wide { display: flex; width: 100%; }
-.seg--wide button { flex: 1; text-align: center; padding-top: 0.45rem; padding-bottom: 0.45rem; }
+/*
+ * ⚠️ แต่งเฉพาะ `.seg--wide` ที่ห้องคุยใช้ **ห้ามแตะ `.seg` กลาง**
+ *    เพราะปฏิทินกับหน้าตารางเวลาใช้ตัวเดียวกันอยู่ และไม่ควรเรืองแสงตาม
+ */
+.seg--wide {
+  display: flex; width: 100%;
+  background: #161228; border-color: rgba(165, 148, 255, 0.2); padding: 3px;
+}
+.seg--wide button {
+  flex: 1; text-align: center; padding-top: 0.45rem; padding-bottom: 0.45rem;
+  border-radius: var(--r-pill);
+}
+.seg--wide button[data-on="true"] {
+  background: var(--grad-brand); color: var(--on-brand);
+  box-shadow: 0 0 15px -3px rgba(165, 148, 255, 0.9);
+}
 
 /* สายข้อความ */
 /*
@@ -1109,13 +1145,22 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   border-radius: var(--r-card); font-size: var(--s-0); line-height: 1.62;
   overflow-wrap: anywhere;
 }
+/*
+ * ฟองมนมาก ไม่มีขอบ ใช้เงาลึกแทน (เจ้าของเลือก 1 ก.ย. 2026)
+ * ฝั่งเราเป็นไล่เฉดม่วงเต็มก้อน = สีเดียวกับปุ่ม KeviN บนแถบล่างพอดี
+ *
+ * ⚠️ ฝั่งเราตัวอักษรเป็นสีเข้มบนพื้นสว่าง — **กลับด้านจากทั้งแอป**
+ *    ลิงก์กับ `.msg__via` ในนั้นจึงต้องเปลี่ยนสีตามด้วย ไม่งั้นจะจมหายไป
+ */
+.msg { border: 0; border-radius: 18px; box-shadow: 0 7px 18px -9px rgba(0, 0, 0, 0.8); }
 .msg--me {
-  align-self: flex-end; background: var(--brand-soft);
-  border: 1px solid #322B52; border-bottom-right-radius: 5px;
+  align-self: flex-end; background: var(--grad-brand); color: var(--on-brand);
+  border-bottom-right-radius: 6px;
 }
+.msg--me a { color: #2A2450; }
 .msg--ai {
   align-self: flex-start; background: var(--raised);
-  border: 1px solid var(--line-soft); border-bottom-left-radius: 5px;
+  border-bottom-left-radius: 6px;
 }
 /*
  * markdown ในฟองแชต
@@ -1160,6 +1205,14 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   display: block; margin-top: 0.3rem;
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
 }
+/*
+ * ⚠️ ฟองฝั่งเราเป็นพื้นม่วงสว่าง **กลับด้านจากทั้งแอป** — `--faint` บนพื้นนั้น
+ *    ได้คอนทราสต์แค่ 1.06 ที่ปลายเข้มของไล่เฉด คืออ่านไม่ออกเลย
+ *    ทุกอย่างที่วางบนฟองฝั่งเราต้องคิดสีใหม่ ห้ามใช้สีจางชุดเดิม
+ *    `#1E1A3B` ได้ 4.73 ที่ปลายเข้มสุดของไล่เฉด — **สีโปร่งใสไม่พอ** ลองแล้ว
+ *    ที่ความทึบ 85% ยังได้แค่ 4.39
+ */
+.msg--me .msg__via { color: #1E1A3B; }
 
 /*
  * ตัวเลือกไมค์ในหน้าโทร
@@ -1236,11 +1289,24 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   flex: none; padding: 0.6rem 0 0.2rem;
 }
 .composer__field {
+  border-color: rgba(165, 148, 255, 0.26); background: #161228;
   flex: 1; min-width: 0; font: inherit; font-size: var(--s-0);
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-pill); padding: 0.6rem 0.9rem; color: var(--ink);
 }
 .composer__field::placeholder { color: var(--faint); }
+/* ปุ่มส่งเป็นวงกลมไล่เฉด · เด่นกว่าปุ่มคำว่า "ส่ง" เดิมโดยกินที่น้อยกว่า */
+.composer__send {
+  width: 2.5rem; height: 2.5rem; flex: none; border-radius: 50%;
+  display: grid; place-items: center; border: 0; cursor: pointer;
+  background: var(--grad-brand); color: var(--on-brand);
+  box-shadow: 0 0 15px -2px rgba(165, 148, 255, 0.75);
+  transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+}
+.composer__send:active { transform: scale(0.92); }
+.composer__send:disabled { opacity: 0.4; box-shadow: none; cursor: default; }
+.composer__send:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .composer__send:active { transform: none; } }
 .composer__field:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 
 /* โหมดโทร */
@@ -1249,9 +1315,20 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   align-items: center; justify-content: center;
   gap: 1.05rem; text-align: center; padding: 2rem 0;
 }
+/*
+ * ⚠️ **orb ตอนยังไม่โทรคือวงสว่าง ปุ่มข้างล่างคือวงเงียบ** — สลับจากของเดิม
+ *    (เจ้าของเคาะ 1 ก.ย. 2026) · เหตุผลคือ orb เป็นตัวแทนของ KeviN ไม่ใช่ปุ่ม
+ *    ของที่สว่างที่สุดบนจอควรเป็นตัวเขา ไม่ใช่คำสั่งที่เรากดใส่เขา
+ *
+ * ⚠️ และ **ไม่มีไอคอนไมค์ข้างในแล้ว** — วงกลมเปล่าคือตัวเขา
+ *    ไอคอนไมค์ย้ายไปอยู่บนปุ่มข้างล่างที่เดียว ซึ่งเป็นที่ที่มันหมายถึงการกระทำจริง
+ */
 .orb {
   width: 132px; height: 132px; border-radius: 50%;
-  border: 1px solid var(--line); background: var(--surface);
+  border: 0; position: relative;
+  background: var(--grad-brand);
+  box-shadow: 0 0 46px -6px rgba(165, 148, 255, 0.55),
+              inset 0 0 26px rgba(255, 255, 255, 0.22);
   display: flex; align-items: center; justify-content: center;
 }
 .stage__state { font-size: var(--s-1); font-weight: 600; }
@@ -1264,7 +1341,14 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .mono-hint { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
 
 /* ---- โหมดโทร ---- */
-.stage__go { margin-top: 0.4rem; padding-left: 1.6rem; padding-right: 1.6rem; }
+/* ⚠️ ปุ่มนี้เป็น**วงเงียบ** เพราะ orb ข้างบนเป็นตัวสว่างแล้ว — สลับจากของเดิม
+   ถ้าทำให้ทั้งสองสว่างพร้อมกัน จอจะไม่มีจุดนำสายตา */
+.stage__go {
+  margin-top: 0.4rem; padding-left: 1.6rem; padding-right: 1.6rem;
+  background: #161228; color: var(--brand);
+  border: 1px solid rgba(165, 148, 255, 0.35);
+}
+.stage__go:hover { background: var(--brand-soft); box-shadow: 0 0 18px -6px rgba(165, 148, 255, 0.7); }
 
 .call__timer {
   display: flex; align-items: center; gap: 0.45rem;
@@ -1278,12 +1362,113 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 @keyframes livePulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
 @media (prefers-reduced-motion: reduce) { .call__dot { animation: none } }
 
-/* ฟ้า = กำลังฟัง (ความหมายเดียวกับ "กำลังเกิดขึ้น" บนการ์ดใหญ่) · ม่วง = กำลังตอบ */
-.orb--live  { border-color: #21444C; background: var(--sched-soft); }
-.orb--think { border-color: var(--line); background: var(--raised); }
+/*
+ * ระหว่างสาย orb เข้มลงเพื่อให้คลื่นข้างในอ่านออก · ไม่ได้เปลี่ยนสีเพื่อบอกสถานะ
+ *
+ * ⚠️ เดิมใช้ **ฟ้า = กำลังฟัง · ม่วง = กำลังตอบ** แต่เจ้าของขอให้คลื่นเป็นม่วงทั้งคู่
+ *    (1 ก.ย. 2026) · ตัวแยกสองสถานะจึงเหลือ **ความสว่างของคลื่น + ข้อความสถานะ**
+ *    ฟัง = ม่วงสว่าง (`--brand`) · ตอบ = ม่วงเข้ม (`--brand-deep`)
+ *    ถ้าจะเพิ่มตัวแยกอีก ให้เพิ่มที่การเคลื่อนไหว อย่ากลับไปใช้สองสี
+ */
+.orb--live  { background: radial-gradient(circle at 50% 45%, #2A2450 0%, #1D1838 70%); box-shadow: 0 0 34px -8px rgba(165, 148, 255, 0.5); }
+.orb--think { background: radial-gradient(circle at 50% 45%, #2A2450 0%, #1D1838 70%); box-shadow: 0 0 34px -8px rgba(136, 120, 240, 0.45); }
 
 .wave { display: flex; align-items: center; gap: 4px; height: 42px; }
 .wave u { display: block; width: 4px; border-radius: 2px; }
+
+/* =====================================================================
+   การเปลี่ยนฉากระหว่าง "ยังไม่โทร" กับ "กำลังคุย"
+   ===================================================================== */
+/*
+ * orb อยู่ตำแหน่งและขนาดเดียวกันทั้งสองฉาก จึงไม่ต้องทำให้มัน "เดินทาง"
+ * — สิ่งที่เปลี่ยนคือของรอบตัวมัน · ฉากใหม่จึงไหลเข้าทีละชิ้นจากล่างขึ้นบน
+ *
+ * ⚠️ ทุกอันเป็น `animation` ไม่ใช่ `transition` เพราะฉากใหม่ถูก mount ใหม่ทั้งก้อน
+ *    ไม่มีสถานะ "ก่อน" ให้เปลี่ยนจาก (บทเรียนเดียวกับ `.msg`)
+ */
+.stage > * { animation: stage-in var(--t-base) var(--ease) both; }
+.stage > *:nth-child(2) { animation-delay: 40ms; }
+.stage > *:nth-child(3) { animation-delay: 80ms; }
+.stage > *:nth-child(4) { animation-delay: 120ms; }
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(8px) }
+  to   { opacity: 1; transform: none }
+}
+
+/* orb ตื่นขึ้นตอนสายติด — ยุบนิดหนึ่งแล้วคืนตัว ให้รู้สึกว่ามันรับสาย */
+.orb--live, .orb--think { animation: orb-wake var(--t-slow) var(--ease) both; }
+@keyframes orb-wake {
+  0%   { transform: scale(0.9);  opacity: 0.6 }
+  60%  { transform: scale(1.03) }
+  100% { transform: scale(1);    opacity: 1 }
+}
+
+/*
+ * วงกระเพื่อมออกจาก orb ครั้งเดียวตอนสายติด
+ * `forwards` + ไม่วนซ้ำ เพราะการกระเพื่อมตลอดเวลาจะกลายเป็นของกวนสายตา
+ * ระหว่างที่ผู้ใช้กำลังอ่านคำบรรยาย
+ */
+.orb--live::after, .orb--think::after {
+  content: ""; position: absolute; inset: -2px; border-radius: 50%;
+  border: 1px solid rgba(165, 148, 255, 0.55);
+  animation: orb-ring 720ms var(--ease) both;
+}
+@keyframes orb-ring {
+  from { transform: scale(1);    opacity: 0.7 }
+  to   { transform: scale(1.55); opacity: 0 }
+}
+
+/* คลื่นงอกจากเส้นกลางออกไปบนล่าง แทนที่จะโผล่มาเต็มความสูงทันที */
+.orb--live .wave, .orb--think .wave { animation: wave-grow var(--t-slow) var(--ease) 90ms both; }
+@keyframes wave-grow {
+  from { transform: scaleY(0.15); opacity: 0 }
+  to   { transform: scaleY(1);    opacity: 1 }
+}
+
+/* ปุ่มเริ่มโทรยุบหายตอนกด — ทำงานผ่าน `.stage--going` ที่ติดตอนกดปุ่ม */
+.stage--going .stage__go { animation: go-out var(--t-fast) var(--ease) both; pointer-events: none; }
+@keyframes go-out {
+  to { opacity: 0; transform: scale(0.88) }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage > *, .orb--live, .orb--think,
+  .orb--live .wave, .orb--think .wave,
+  .stage--going .stage__go { animation: none; }
+  .orb--live::after, .orb--think::after { display: none; }
+}
+
+/* =====================================================================
+   ปุ่มระหว่างสาย · ไอคอนล้วน
+   ===================================================================== */
+/*
+ * ⚠️ **ไม่มีตัวอักษรบนปุ่มแล้ว** (เจ้าของเคาะ 1 ก.ย. 2026)
+ *    `aria-label` จึงเป็นทางเดียวที่คนใช้ screen reader จะรู้ว่าปุ่มไหนวางสาย
+ *
+ * ⚠️ สองปุ่มต้องแยกกันด้วย**รูปทรง** ไม่ใช่แค่สี — ไมค์ขีดทับกับหูโทรศัพท์คว่ำ
+ *    ต่างกันชัดแม้มองเร็ว · ถ้าใช้ไมค์ทั้งคู่แล้วต่างแค่สีแดง จะกดวางสายพลาด
+ *    ตอนตั้งใจจะปิดไมค์
+ */
+.callbtns { display: flex; justify-content: center; gap: 2.2rem; margin-top: 0.4rem; }
+.callbtn {
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  background: none; border: 0; padding: 0; font: inherit; cursor: pointer;
+  color: var(--muted);
+}
+.callbtn i {
+  width: 3rem; height: 3rem; border-radius: 50%; display: grid; place-items: center;
+  background: #161228; border: 1px solid rgba(165, 148, 255, 0.3);
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.callbtn:active i { transform: scale(0.92); }
+.callbtn span { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+.callbtn--muted { color: var(--due); }
+.callbtn--muted i { border-color: rgba(224, 137, 126, 0.45); }
+.callbtn--end i {
+  background: var(--due); border-color: var(--due); color: #2A1210;
+  box-shadow: 0 0 18px -3px rgba(224, 137, 126, 0.75);
+}
+@media (prefers-reduced-motion: reduce) { .callbtn:active i { transform: none; } }
 
 .caption {
   width: 100%; max-width: 22rem; text-align: left;

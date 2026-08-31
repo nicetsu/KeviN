@@ -1,0 +1,288 @@
+<title>ห้องคุยฉบับผสม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ฉบับผสมตามที่เจ้าของเลือก (1 ก.ย. 2026)
+   พื้นแบบ 10 แต่เรืองเฉพาะล่าง · เพิ่มสองจุดบนแบบ 03 · ฟองแบบ 06 · แท็บแบบ 10
+   ปุ่มปิดไมค์กับวางสายเป็นไอคอน ไม่ใช่ตัวอักษร
+
+   จอจำลองกว้าง 300px = 80% ของ 375px จริง */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --sched:#79C2D0; --due:#E0897E;
+  --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+  --deep:#161228;                    /* พื้นของชิ้นส่วนในแบบ 10 · เข้มกว่า --surface */
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1240px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:46rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.recipe{margin:1.8rem 0 0;padding:1.1rem 1.2rem;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.recipe h2{font-size:var(--s-0);margin:0 0 .7rem;font-weight:600}
+.recipe table{width:100%;border-collapse:collapse;font-size:var(--s--1)}
+.recipe td{padding:.32rem 0;vertical-align:top;color:var(--muted);border-bottom:1px solid var(--line-soft)}
+.recipe tr:last-child td{border-bottom:0}
+.recipe td:first-child{width:9.5rem;color:var(--ink);font-weight:500;padding-right:1rem}
+.recipe .from{font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand)}
+
+.tools{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:2rem 0 1.3rem;padding:.7rem 0;background:linear-gradient(var(--bg) 72%,transparent)}
+.btn{font:inherit;font-size:var(--s--1);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:.42rem .95rem;cursor:pointer;transition:color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.btn:hover{color:var(--ink);border-color:var(--capline)}
+.btn[aria-pressed="true"]{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tools__note{font-size:var(--s--2);color:var(--faint);margin-left:auto}
+
+.screens{display:flex;gap:1.1rem;flex-wrap:wrap;align-items:flex-start}
+.shot{display:flex;flex-direction:column;gap:.45rem}
+.shot__cap{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);text-align:center}
+
+/* =====================================================================
+   จอจำลอง 300px
+   ===================================================================== */
+.phone{
+  width:300px;height:600px;flex:none;position:relative;overflow:hidden;
+  border:1px solid var(--line);border-radius:30px;
+  background:#100C1E;                  /* เข้มกว่า --bg เล็กน้อยตามแบบ 10 */
+  display:flex;flex-direction:column;font-size:12px;line-height:1.5;
+}
+.phone *{font-size:inherit}
+
+/*
+ * แสงพื้นหลัง — สามก้อน
+ *   ล่าง  : ก้อนหลักตามที่เลือก (แบบ 10 เดิมเรืองล่างอยู่แล้ว แต่ตัวชิ้นส่วนก็เรืองด้วย
+ *           รอบนี้ **ถอดแสงออกจากฟองทั้งหมด** เหลือเรืองแค่พื้นล่างจริง ๆ)
+ *   บนสองจุด : ยืมจากแบบ 03 · ซ้ายม่วง ขวาฟ้า จางกว่าก้อนล่างเพื่อไม่ให้แย่งหัวข้อ
+ */
+.glow{position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(58% 22% at 22% 2%,rgba(165,148,255,var(--top,.26)),transparent 70%),
+    radial-gradient(52% 20% at 84% 6%,rgba(121,194,208,var(--top2,.2)),transparent 72%),
+    radial-gradient(96% 34% at 50% 103%,rgba(136,120,240,var(--bot,.4)),transparent 74%);
+}
+body.soft .glow{--top:.16;--top2:.12;--bot:.26}
+body.strong .glow{--top:.34;--top2:.28;--bot:.58}
+
+.p-body{flex:1;display:flex;flex-direction:column;min-height:0;padding:13px 13px 0;position:relative;z-index:1}
+.p-scroll{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:9px;min-height:0}
+
+.p-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
+.p-title{font-weight:600;font-size:17px;letter-spacing:-.02em}
+.p-gear{width:24px;height:24px;border-radius:50%;border:1px solid rgba(165,148,255,.28);display:grid;place-items:center;color:var(--faint)}
+.p-gear svg{width:13px;height:13px}
+
+/* --- แท็บ · แบบ 10 --- */
+.p-seg{display:flex;background:var(--deep);border:1px solid rgba(165,148,255,.2);border-radius:var(--r-pill);padding:3px;margin-bottom:11px}
+.p-seg span{flex:1;text-align:center;padding:6px 0;border-radius:var(--r-pill);color:var(--faint);font-size:11px}
+.p-seg span[data-on]{background:var(--grad);color:var(--on-brand);font-weight:600;box-shadow:0 0 15px -3px rgba(165,148,255,.9)}
+
+/* --- ฟอง · แบบ 06 (มนมาก ไม่มีขอบ เงาลึก) --- */
+.b{max-width:80%;padding:8px 11px;border-radius:18px;font-size:11px;line-height:1.55;border:0;
+   box-shadow:0 7px 18px -9px rgba(0,0,0,.8)}
+.b--ai{align-self:flex-start;background:var(--raised);border-bottom-left-radius:7px}
+.b--me{align-self:flex-end;background:var(--grad);color:var(--on-brand);border-bottom-right-radius:7px}
+.b__via{display:block;margin-top:4px;font-family:var(--f-mono);font-size:9px;color:var(--sched)}
+.b--me .b__via{color:#2A2450}
+
+.p-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;text-align:center}
+.p-empty strong{font-size:14px}
+.p-empty p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.6}
+.p-empty .mono{font-family:var(--f-mono);font-size:9.5px;color:var(--faint);display:block;margin-top:4px}
+
+.p-chips{display:flex;gap:6px;overflow:hidden;padding-bottom:3px}
+.p-chip{background:var(--deep);border:1px solid rgba(165,148,255,.22);border-radius:var(--r-pill);padding:5px 10px;font-size:10px;color:var(--muted);white-space:nowrap}
+.p-chips--wrap{flex-wrap:wrap;justify-content:center;overflow:visible}
+
+.p-composer{display:flex;gap:7px;align-items:center;padding:10px 0 13px}
+.p-field{flex:1;background:var(--deep);border:1px solid rgba(165,148,255,.26);border-radius:var(--r-pill);padding:8px 13px;color:var(--faint);font-size:11px}
+.p-send{width:32px;height:32px;flex:none;border-radius:50%;background:var(--grad);color:var(--on-brand);display:grid;place-items:center;box-shadow:0 0 15px -2px rgba(165,148,255,.85)}
+.p-send svg{width:15px;height:15px}
+
+/* --- โหมดโทร --- */
+.p-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;min-height:0}
+.orb{width:124px;height:124px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 32% 26%,#E2DBFF 0%,#A594FF 36%,#6E5BD8 70%,#332863 100%);
+  box-shadow:0 0 46px -6px rgba(165,148,255,.6),inset 0 0 26px rgba(255,255,255,.22)}
+.orb--idle{background:radial-gradient(circle at 32% 26%,#3A3266 0%,#2A2450 45%,#1D1838 100%);box-shadow:inset 0 0 26px rgba(165,148,255,.18)}
+.orb--idle svg{width:34px;height:34px;color:var(--faint)}
+.orb{display:grid;place-items:center}
+.p-state{font-size:13px;font-weight:600}
+.p-state small{display:block;margin-top:4px;font-family:var(--f-mono);font-size:10px;font-weight:400;color:var(--faint)}
+.p-timer{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10px;color:var(--sched)}
+.p-dot{width:6px;height:6px;border-radius:50%;background:var(--sched)}
+.p-cap{font-size:11px;color:var(--muted);max-width:86%;line-height:1.65}
+.p-cap b{color:var(--brand);display:block;font-size:9px;font-family:var(--f-mono);letter-spacing:.12em;margin-bottom:4px}
+.wave{display:flex;align-items:center;gap:4px;height:36px}
+.wave u{width:5px;border-radius:3px;background:var(--sched)}
+
+/* ⚠️ ปุ่มโทรเป็น**ไอคอนล้วน** ตามที่เจ้าของสั่ง — ไม่มีข้อความกำกับแล้ว
+   `aria-label` จึงเป็นทางเดียวที่คนใช้ screen reader จะรู้ว่าปุ่มไหนคืออะไร
+   และไอคอนสองอันต้องแยกกันออกด้วย**รูปทรง** ไม่ใช่แค่สี */
+.p-bar{display:flex;align-items:center;justify-content:center;gap:26px;padding:12px 0 16px}
+.p-round{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+  background:var(--deep);border:1px solid rgba(165,148,255,.3);color:var(--muted)}
+.p-round svg{width:20px;height:20px}
+.p-round--muted{color:var(--due);border-color:rgba(224,137,126,.45)}
+.p-round--end{background:var(--due);border-color:var(--due);color:#2A1210;box-shadow:0 0 18px -3px rgba(224,137,126,.8)}
+.p-round--go{width:56px;height:56px;background:var(--grad);border:0;color:var(--on-brand);box-shadow:0 0 22px -3px rgba(165,148,255,.9)}
+.p-round--go svg{width:24px;height:24px}
+.p-label{font-family:var(--f-mono);font-size:9px;color:var(--faint);margin-top:5px;text-align:center}
+.p-btncol{display:flex;flex-direction:column;align-items:center}
+
+/* แถบล่างของแอป */
+.p-nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:6px 0 8px;position:relative;z-index:1}
+.p-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:9px}
+.p-tab i{width:15px;height:15px;border:1.5px solid currentColor;border-radius:3px;display:block;font-style:normal}
+.p-tab--talk{flex:1.6}
+.p-kevin{width:100%;min-height:37px;border-radius:var(--r-pill);background:var(--grad);color:var(--on-brand);display:grid;place-items:center;font-size:10px;font-weight:700;letter-spacing:.06em;box-shadow:0 0 18px -2px rgba(165,148,255,.55)}
+
+.notes{margin-top:2.6rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.notes h2{font-size:1.05rem;margin:0 0 .8rem}
+.notes p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.notes p:last-child{margin-bottom:0}
+.notes b{color:var(--ink);font-weight:600}
+.notes code{font-family:var(--f-mono);font-size:.82em;color:var(--brand);background:var(--brand-soft);padding:.08rem .35rem;border-radius:5px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">ประตูที่สาม · ฉบับผสม</p>
+    <h1>ห้องคุยฉบับผสม</h1>
+    <p>ประกอบจากห้าอย่างที่เลือกมา — <strong>ไม่ใช่แบบใดแบบหนึ่งในไฟล์ก่อน</strong>
+       แต่เป็นของใหม่ที่หยิบส่วนที่ชอบจากแต่ละแบบมาต่อกัน</p>
+    <p>สี่จอข้างล่างคือสี่สถานะจริงที่หน้านี้มี · กดปุ่มด้านบนเพื่อลองความแรงของแสงสามระดับ
+       เพราะ<strong>แสงเป็นของที่ตัดสินยากจากภาพนิ่ง</strong> ต้องเห็นเทียบกัน</p>
+  </div>
+
+  <div class="recipe">
+    <h2>ส่วนผสม</h2>
+    <table>
+      <tr><td>พื้นหลัง</td><td>เรืองก้อนใหญ่จาก<b>ด้านล่าง</b> บวกสองจุดจาง ๆ ที่ขอบบน — ม่วงซ้าย ฟ้าขวา <span class="from">แบบ 10 + แบบ 03</span></td></tr>
+      <tr><td>ตัวฟองข้อความ</td><td>มนมาก ไม่มีขอบ เงาลึก · ฝั่งเราเป็นไล่เฉดม่วงเต็มก้อน <span class="from">แบบ 06</span></td></tr>
+      <tr><td>แท็บ แชต/โทร</td><td>พื้นเข้ม ขอบม่วงจาง ตัวที่เลือกอยู่มีไฟรอบ <span class="from">แบบ 10</span></td></tr>
+      <tr><td>ปุ่มในสาย</td><td><b>ไอคอนล้วน</b> ไม่มีตัวอักษร — ไมค์ขีดทับ กับ หูโทรศัพท์คว่ำ <span class="from">ตามที่สั่ง</span></td></tr>
+      <tr><td>ที่ถอดออก</td><td><b>ไฟรอบฟองทุกก้อน</b> ที่แบบ 10 มี — เหลือเรืองแค่พื้นตามที่ขอ ทำให้ตัวหนังสืออ่านง่ายขึ้นด้วย</td></tr>
+    </table>
+  </div>
+
+  <div class="tools">
+    <button class="btn" id="soft" aria-pressed="false">แสงจาง</button>
+    <button class="btn" id="normal" aria-pressed="true">แสงกลาง</button>
+    <button class="btn" id="strong" aria-pressed="false">แสงเข้ม</button>
+    <span class="tools__note">ค่าเริ่มต้นคือแสงกลาง · จอ 300px = 80% ของขนาดจริง</span>
+  </div>
+
+  <div class="screens" id="screens"></div>
+
+  <div class="notes">
+    <h2>สามอย่างที่ต้องรู้ก่อนลงมือจริง</h2>
+    <p><b>ปุ่มไอคอนล้วนต้องมี <code>aria-label</code></b> — ไม่มีตัวอักษรแล้ว นั่นคือทางเดียวที่คนใช้ screen reader จะรู้ว่าปุ่มไหนวางสาย · ผมใส่ป้ายชื่อเล็ก ๆ ใต้ปุ่มไว้ในตัวอย่างด้วย บอกได้ถ้าอยากให้เอาออก</p>
+    <p><b>ไอคอนสองอันแยกกันด้วยรูปทรง ไม่ใช่แค่สี</b> — ไมค์ขีดทับกับหูโทรศัพท์คว่ำต่างกันชัดแม้มองเร็ว ๆ · ถ้าใช้ไมค์ทั้งคู่แล้วต่างแค่สีแดง จะพลาดกดวางสายตอนตั้งใจจะปิดไมค์</p>
+    <p><b>แสงพื้นหลังไม่แตะตรรกะเลย</b> เป็น <code>::before</code> ชั้นเดียวใน <code>.talk</code> · เปลี่ยนความแรงทีหลังได้ตลอดโดยไม่กระทบอะไร</p>
+  </div>
+</div>
+
+<script>
+/* ---------- ไอคอน ---------- */
+const ico = {
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.5.55.87 1.06.99H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  mic: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/>',
+  /* ไมค์ขีดทับ — เส้นทแยงพาดทั้งอัน อ่านออกแม้เล็ก */
+  micOff: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/><path d="M3.5 3.5l17 17"/>',
+  /* หูโทรศัพท์คว่ำ — ทรงต่างจากไมค์ชัดเจน ไม่ต้องพึ่งสีแดงอย่างเดียว */
+  hangup: '<path d="M3.2 14.6c-.9-.9-.7-2.4.4-3.1C5.9 10 8.8 9.1 12 9.1s6.1.9 8.4 2.4c1.1.7 1.3 2.2.4 3.1l-1.4 1.4a1.7 1.7 0 0 1-2.1.2l-1.8-1.2a1.7 1.7 0 0 1-.7-1.4v-1.3c-1.9-.6-4-.6-5.9 0v1.3c0 .6-.3 1.1-.7 1.4l-1.8 1.2a1.7 1.7 0 0 1-2.1-.2z"/>',
+  up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+}
+const svg = (d, w = 1.7) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`
+
+/* ---------- ชิ้นส่วน ---------- */
+const head = () => `<div class="p-head"><span class="p-title">KeviN</span><span class="p-gear">${svg(ico.gear, 1.6)}</span></div>`
+const seg = (on) => `<div class="p-seg"><span${on === 'chat' ? ' data-on' : ''}>แชต</span><span${on === 'voice' ? ' data-on' : ''}>โทร</span></div>`
+const composer = () => `<div class="p-composer"><span class="p-field">พิมพ์ข้อความ</span><span class="p-send">${svg(ico.up, 2.1)}</span></div>`
+const chips = (wrap) => `<div class="p-chips${wrap ? ' p-chips--wrap' : ''}">
+    <span class="p-chip">พรุ่งนี้ติดอะไรบ้าง</span>
+    <span class="p-chip">มีงานส่งไหม</span>${wrap ? '<span class="p-chip">คาบว่างยาวสุด</span>' : ''}
+  </div>`
+const wave = () => `<div class="wave">${[13, 28, 36, 20, 31, 17].map((v) => `<u style="height:${v}px"></u>`).join('')}</div>`
+const nav = () => `<div class="p-nav">
+    <span class="p-tab"><i></i>วันนี้</span><span class="p-tab"><i></i>ปฏิทิน</span>
+    <span class="p-tab p-tab--talk"><span class="p-kevin">KEVIN</span></span>
+    <span class="p-tab"><i></i>คลัง</span><span class="p-tab"><i></i>ตั้งค่า</span>
+  </div>`
+const btn = (cls, icon, label) =>
+  `<span class="p-btncol"><span class="p-round ${cls}">${svg(icon)}</span><span class="p-label">${label}</span></span>`
+
+const shell = (inner) => `<div class="phone"><span class="glow"></span>${inner}${nav()}</div>`
+
+const SHOTS = [
+  ['แชต · ยังไม่คุย', shell(`<div class="p-body">${head()}${seg('chat')}
+      <div class="p-empty">
+        <strong>ถามอะไรก็ได้เรื่องตารางคุณ</strong>
+        <p>อ่านตาราง งาน กิจกรรม และเวลาที่ตัดทอนไว้ได้ทั้งหมด
+          <span class="mono">แก้ข้อมูลยังต้องทำในแอป</span></p>
+        ${chips(true)}
+      </div>${composer()}</div>`)],
+
+  ['แชต · คุยแล้ว', shell(`<div class="p-body">${head()}${seg('chat')}
+      <div class="p-scroll">
+        <div class="b b--me">พรุ่งนี้ติดอะไรบ้าง</div>
+        <div class="b b--ai">พรุ่งนี้มีสองคาบ · 09:00 วิศวกรรมซอฟต์แวร์ ที่ E11-S601 แล้วต่อ 13:00 คณิตศาสตร์</div>
+        <div class="b b--me">คาบว่างยาวสุดสัปดาห์นี้</div>
+        <div class="b b--ai">พฤหัสบดี 10:00–15:00 ว่างยาวห้าชั่วโมง<span class="b__via">จากสาย</span></div>
+      </div>${chips()}${composer()}</div>`)],
+
+  ['โทร · พร้อมคุย', shell(`<div class="p-body">${head()}${seg('voice')}
+      <div class="p-stage">
+        <div class="orb orb--idle">${svg(ico.mic)}</div>
+        <div class="p-state">พร้อมคุยแล้ว<small>ไมค์ยังปิดอยู่</small></div>
+      </div>
+      <div class="p-bar">${btn('p-round--go', ico.mic, 'เริ่มโทร')}</div></div>`)],
+
+  ['โทร · กำลังคุย', shell(`<div class="p-body">${head()}${seg('voice')}
+      <div class="p-stage">
+        <div class="p-timer"><span class="p-dot"></span>กำลังคุย 01:24</div>
+        <div class="orb"></div>
+        ${wave()}
+        <div class="p-cap"><b>KEVIN</b>พฤหัสบดีว่างยาวห้าชั่วโมงครับ ตั้งแต่สิบโมงถึงบ่ายสาม</div>
+      </div>
+      <div class="p-bar">${btn('p-round--muted', ico.micOff, 'ปิดไมค์')}${btn('p-round--end', ico.hangup, 'วางสาย')}</div></div>`)],
+]
+
+document.getElementById('screens').innerHTML = SHOTS
+  .map(([cap, html]) => `<div class="shot">${html}<span class="shot__cap">${cap}</span></div>`).join('')
+
+/* ปุ่มสามระดับ · เก็บค่าไว้เผื่อเปิดซ้ำ
+   ห่อ try/catch เพราะโหมดส่วนตัวของบางเบราว์เซอร์โยน error ตอนแตะ localStorage */
+const KEY = 'kevin-mix-glow'
+const ids = ['soft', 'normal', 'strong']
+function apply(pick) {
+  document.body.classList.remove('soft', 'strong')
+  if (pick !== 'normal') document.body.classList.add(pick)
+  ids.forEach((id) => document.getElementById(id).setAttribute('aria-pressed', String(id === pick)))
+  try { localStorage.setItem(KEY, pick) } catch (e) { /* ไม่จำก็ได้ */ }
+}
+let saved = 'normal'
+try { saved = localStorage.getItem(KEY) || 'normal' } catch (e) { /* ค่าเริ่มต้นพอ */ }
+apply(ids.includes(saved) ? saved : 'normal')
+ids.forEach((id) => document.getElementById(id).addEventListener('click', () => apply(id)))
+</script>

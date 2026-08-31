@@ -1,0 +1,350 @@
+<title>สิบโครงห้องคุย KeviN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ค่าสีทั้งหมดคัดจาก web/app/globals.css ของจริง (1 ก.ย. 2026)
+   จอจำลองกว้าง 264px = 70% ของ 375px จริง · ตัวเลขในนั้นจึงเป็น px ตรง ๆ ที่ย่อแล้ว
+   ไม่ได้ใช้ rem เพราะ rem ผูกกับ root ไม่ใช่กรอบจอ */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --sched:#79C2D0; --event:#D5BB6D; --due:#E0897E; --task:#74C6A4;
+  --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1240px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:46rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.facts{margin:1.8rem 0 0;padding:1.1rem 1.2rem;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.facts h2{font-size:var(--s-0);margin:0 0 .7rem;font-weight:600}
+.facts ol{margin:0;padding-left:1.15rem;color:var(--muted);font-size:var(--s--1)}
+.facts li{margin-bottom:.4rem}
+.facts li:last-child{margin-bottom:0}
+.facts b{color:var(--ink);font-weight:600}
+
+/* ---------- การ์ดของแต่ละโครง ---------- */
+.list{display:flex;flex-direction:column;gap:1.1rem;margin-top:2rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color var(--t-base) var(--ease)}
+.card:hover{border-color:var(--capline)}
+.card__top{display:flex;align-items:baseline;gap:.6rem;padding:1rem 1.15rem .5rem;flex-wrap:wrap}
+.card__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);font-variant-numeric:tabular-nums}
+.card__name{font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
+.flag{margin-left:auto;font-size:var(--s--2);font-weight:500;padding:.12rem .55rem;border-radius:var(--r-pill);white-space:nowrap}
+.flag--now{color:var(--brand);background:var(--brand-soft)}
+.flag--small{color:#74C6A4;background:rgba(116,198,164,.1)}
+.flag--mid{color:#D5BB6D;background:rgba(213,187,109,.1)}
+.flag--big{color:#E0897E;background:rgba(224,137,126,.1)}
+.card__body{display:flex;gap:1.3rem;padding:.3rem 1.15rem 1.2rem;flex-wrap:wrap}
+.card__why{flex:1 1 20rem;min-width:min(100%,18rem)}
+.card__why p{font-size:var(--s--1);color:var(--muted);margin:.35rem 0 .8rem}
+.card__why b{color:var(--ink);font-weight:500}
+.card__cost{font-size:var(--s--2);color:var(--faint);font-family:var(--f-mono);line-height:1.7;margin:0;padding-top:.6rem;border-top:1px solid var(--line-soft)}
+.screens{display:flex;gap:.85rem;flex-wrap:wrap}
+.shot{display:flex;flex-direction:column;gap:.35rem}
+.shot__cap{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);text-align:center}
+
+/* =====================================================================
+   จอจำลอง · 264px กว้าง
+   ===================================================================== */
+.phone{
+  width:264px;height:520px;flex:none;
+  border:1px solid var(--line);border-radius:26px;overflow:hidden;
+  background:var(--bg);display:flex;flex-direction:column;position:relative;
+  font-size:11px;line-height:1.5;
+}
+.phone *{font-size:inherit}
+.p-body{flex:1;display:flex;flex-direction:column;min-height:0;padding:11px 11px 0}
+.p-scroll{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:7px;min-height:0}
+
+/* หัวหน้า */
+.p-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px}
+.p-title{font-weight:600;font-size:15px;letter-spacing:-.02em}
+.p-gear{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--faint);font-size:9px}
+
+/* แท็บสองโหมด */
+.p-seg{display:flex;background:var(--raised);border-radius:var(--r-pill);padding:2px;margin-bottom:9px}
+.p-seg span{flex:1;text-align:center;padding:4px 0;border-radius:var(--r-pill);color:var(--faint);font-size:10px}
+.p-seg span[data-on]{background:var(--brand);color:var(--on-brand);font-weight:600}
+
+/* ฟองข้อความ */
+.b{max-width:78%;padding:6px 9px;border-radius:12px;font-size:10px;line-height:1.5}
+.b--me{align-self:flex-end;background:var(--brand-soft);border:1px solid var(--capline)}
+.b--ai{align-self:flex-start;background:var(--surface);border:1px solid var(--line)}
+.b--voice{border-color:rgba(121,194,208,.4)}
+.b__via{display:block;margin-top:3px;font-family:var(--f-mono);font-size:8px;color:var(--sched)}
+
+/* ช่องพิมพ์ */
+.p-composer{display:flex;gap:6px;align-items:center;padding:9px 0 11px}
+.p-field{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 10px;color:var(--faint);font-size:10px}
+.p-send{width:26px;height:26px;flex:none;border-radius:50%;background:var(--grad);color:var(--on-brand);display:grid;place-items:center;font-size:11px;font-weight:700}
+
+/* ชิปคำถามแนะนำ */
+.p-chips{display:flex;gap:5px;overflow:hidden;padding-bottom:2px}
+.p-chip{border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 8px;font-size:9px;color:var(--muted);white-space:nowrap}
+
+/* orb */
+.orb{border-radius:50%;flex:none;background:radial-gradient(circle at 32% 28%,#D6CCFF 0%,#A594FF 38%,#6E5BD8 72%,#3A2E73 100%);box-shadow:0 10px 34px -10px rgba(165,148,255,.6)}
+.orb--xl{width:132px;height:132px}
+.orb--l{width:96px;height:96px}
+.orb--m{width:58px;height:58px}
+.orb--s{width:30px;height:30px}
+.orb--flat{background:var(--surface);border:1px solid var(--line);box-shadow:none;display:grid;place-items:center;color:var(--faint)}
+
+/* เวที (โหมดโทร) */
+.p-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;text-align:center;min-height:0}
+.p-state{font-size:12px;font-weight:600}
+.p-state small{display:block;margin-top:3px;font-family:var(--f-mono);font-size:9px;font-weight:400;color:var(--faint)}
+.p-cap{font-size:10px;color:var(--muted);max-width:84%;line-height:1.6}
+.p-cap b{color:var(--brand);display:block;font-size:9px;font-family:var(--f-mono);margin-bottom:2px}
+.p-timer{display:flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:9px;color:var(--sched)}
+.p-dot{width:5px;height:5px;border-radius:50%;background:var(--sched)}
+
+/* คลื่นเสียง */
+.wave{display:flex;align-items:center;gap:3px;height:34px}
+.wave u{width:4px;border-radius:2px;background:var(--sched)}
+.wave--wide{gap:4px;height:52px}
+.wave--wide u{width:5px}
+
+/* ปุ่ม */
+.p-btn{border-radius:var(--r-pill);padding:7px 16px;font-size:10px;font-weight:600;background:var(--grad);color:var(--on-brand);display:inline-flex;align-items:center;gap:5px}
+.p-btn--quiet{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-weight:400}
+.p-btn--end{background:var(--due);color:#2A1210}
+.p-round{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:13px}
+.p-round--main{width:52px;height:52px;background:var(--grad);color:var(--on-brand);border:0;font-size:18px;box-shadow:0 8px 22px -8px rgba(165,148,255,.7)}
+.p-bar{display:flex;align-items:center;justify-content:center;gap:22px;padding:10px 0 14px}
+
+/* แถบล่างของแอป */
+.p-nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:5px 0 7px}
+.p-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:8px}
+.p-tab i{width:13px;height:13px;border:1.4px solid currentColor;border-radius:3px;display:block;font-style:normal}
+.p-tab--talk{flex:1.6}
+.p-kevin{width:100%;min-height:32px;border-radius:var(--r-pill);background:var(--raised);color:var(--faint);display:grid;place-items:center;font-size:9px;font-weight:700;letter-spacing:.06em}
+.p-kevin[data-on]{background:var(--grad);color:var(--on-brand);box-shadow:0 0 16px -2px rgba(165,148,255,.55)}
+
+/* ชิ้นส่วนเฉพาะบางโครง */
+.p-callbar{display:flex;align-items:center;gap:7px;background:rgba(121,194,208,.12);border:1px solid rgba(121,194,208,.35);border-radius:12px;padding:6px 9px;margin-bottom:8px}
+.p-callbar small{font-family:var(--f-mono);font-size:9px;color:var(--sched);margin-left:auto}
+.p-sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--capline);border-radius:20px 20px 0 0;padding:9px 13px 14px;display:flex;flex-direction:column;align-items:center;gap:9px;box-shadow:0 -14px 34px rgba(0,0,0,.5)}
+.p-grab{width:34px;height:3px;border-radius:2px;background:var(--capline)}
+.p-dim{position:absolute;inset:0;background:rgba(10,8,20,.55)}
+.p-split{display:flex;gap:7px;flex:1;min-height:0}
+.p-col{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;background:var(--bg);border:1px solid var(--line-soft);border-radius:12px;padding:7px}
+.p-col h4{margin:0;font-family:var(--f-mono);font-size:8px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+.p-stack{position:relative;flex:1;min-height:0}
+.p-cardl{position:absolute;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.p-time{font-family:var(--f-mono);font-size:8px;color:var(--faint);text-align:center;padding:3px 0}
+.p-hold{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--brand-soft);border:1px solid var(--capline);border-radius:var(--r-pill);padding:8px;color:var(--brand);font-size:10px;font-weight:600}
+.p-ring{position:absolute;border-radius:50%;border:1px solid rgba(165,148,255,.28)}
+
+.after{margin-top:2.6rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+.after code{font-family:var(--f-mono);font-size:.82em;color:var(--brand);background:var(--brand-soft);padding:.08rem .35rem;border-radius:5px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">ประตูที่สาม · หน้า /kevin</p>
+    <h1>สิบโครงห้องคุย</h1>
+    <p>สิบแบบนี้ต่างกันที่ <strong>โครง</strong> ไม่ใช่สี — ต่างกันตรงที่ว่า
+       <strong>แชตกับโทรอยู่ด้วยกันยังไง</strong> ซึ่งเป็นคำถามเดียวที่หน้านี้ต้องตอบ</p>
+    <p>ทุกจอใช้สีและสัดส่วนชุดเดียวกับแอปจริง ย่อเหลือ 70% · ข้อความในจอเป็นของจริงจากแอป
+       ไม่ใช่ข้อความสมมติ</p>
+  </div>
+
+  <div class="facts">
+    <h2>ห้าอย่างที่ทุกแบบต้องรองรับ — ไม่งั้นมันจะสวยแต่ใช้ไม่ได้</h2>
+    <ol>
+      <li><b>สองโหมดเขียนลงบทสนทนาเดียวกัน</b> วางสายแล้วเข้ามาพิมพ์ต่อต้องเห็นสิ่งที่เพิ่งคุยไป · ข้อความจากสายมีป้าย “จากสาย” กำกับ</li>
+      <li><b>สายไม่ตายเมื่อออกจากหน้านี้</b> สายอยู่ที่ layout ระดับแอป สลับไปดูปฏิทินกลางสายได้ — โครงไหนที่ผูกสายไว้กับหน้าจะพังข้อนี้</li>
+      <li><b>คำบรรยายขึ้นเฉพาะฝั่ง KeviN</b> ฝั่งเราไม่ขึ้นเลย (เคาะไปแล้ว) — โครงที่วางคำบรรยายไว้กลางจอต้องเผื่อว่ามันมีข้างเดียว</li>
+      <li><b>โควตาเสียงหมดแล้วต้องดันไปแชตให้</b> ไม่ใช่ค้างอยู่หน้าโทรที่กดไม่ได้ · สองช่องทางคนละโควตากัน</li>
+      <li><b>ปุ่มฟันเฟือง = ภาษา · ไมโครโฟน · เสียง</b> ต้องมีที่ยืนในทุกโครง</li>
+    </ol>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <div class="after">
+    <h2>เลือกยังไงดี</h2>
+    <p><b>ถ้าอยากได้ผลเร็วโดยไม่รื้อ</b> — 02 หรือ 03 แตะแค่ชั้นการแสดงผล ตรรกะเดิมทั้งหมดยังใช้ได้</p>
+    <p><b>ถ้าเชื่อว่าแชตคือบ้าน</b> — 04 กับ 05 ทำให้โทรเป็นสิ่งที่เกิด<i>บน</i>แชต ไม่ใช่หน้าคู่แข่ง · นี่คือกลุ่มที่ผมคิดว่าตรงกับพฤติกรรมจริงที่สุด</p>
+    <p><b>ถ้ากล้ารื้อ</b> — 07 ลบคำว่า “โหมด” ทิ้งทั้งคำ เหลือบทสนทนาเดียวที่พิมพ์ก็ได้พูดก็ได้ · ได้ของที่สะอาดที่สุดแต่ต้องแก้ตรรกะการบันทึกด้วย</p>
+    <p>บอกเลขมาได้เลย · ผสมกันก็ได้ เช่น “โครง 04 แต่ใช้ orb ของ 02” — ผมจะทำตัวอย่างเต็มจอให้ดูก่อนลงมือจริง</p>
+  </div>
+</div>
+
+<script>
+/* ---------- ชิ้นส่วนที่ใช้ซ้ำ · โครงต่างกันคือ "จัดชิ้นพวกนี้ใหม่" ---------- */
+const head = (title = 'KeviN', gear = true) =>
+  `<div class="p-head"><span class="p-title">${title}</span>${gear ? '<span class="p-gear">⚙</span>' : ''}</div>`
+
+const seg = (on) =>
+  `<div class="p-seg"><span${on === 'chat' ? ' data-on' : ''}>แชต</span><span${on === 'voice' ? ' data-on' : ''}>โทร</span></div>`
+
+const bubbles = (n = 3) => {
+  const all = [
+    `<div class="b b--me">พรุ่งนี้ติดอะไรบ้าง</div>`,
+    `<div class="b b--ai">พรุ่งนี้มีสองคาบ · 09:00 วิศวกรรมซอฟต์แวร์ ที่ E11-S601 แล้วต่อ 13:00 คณิตศาสตร์</div>`,
+    `<div class="b b--me">คาบว่างยาวสุดสัปดาห์นี้</div>`,
+    `<div class="b b--ai b--voice">พฤหัสบดี 10:00–15:00 ว่างยาวห้าชั่วโมง<span class="b__via">จากสาย</span></div>`,
+  ]
+  return all.slice(0, n).join('')
+}
+
+const chips = () =>
+  `<div class="p-chips">
+     <span class="p-chip">พรุ่งนี้ติดอะไรบ้าง</span>
+     <span class="p-chip">มีงานส่งอะไรไหม</span>
+   </div>`
+
+const composer = (extra = '') =>
+  `<div class="p-composer">${extra}<span class="p-field">พิมพ์ข้อความ</span><span class="p-send">↑</span></div>`
+
+const wave = (wide = false) => {
+  const h = [12, 26, 34, 20, 30, 16]
+  return `<div class="wave${wide ? ' wave--wide' : ''}">` +
+    h.map((v) => `<u style="height:${wide ? v * 1.5 : v}px"></u>`).join('') + '</div>'
+}
+
+const nav = (on = true) =>
+  `<div class="p-nav">
+     <span class="p-tab"><i></i>วันนี้</span>
+     <span class="p-tab"><i></i>ปฏิทิน</span>
+     <span class="p-tab p-tab--talk"><span class="p-kevin"${on ? ' data-on' : ''}>KEVIN</span></span>
+     <span class="p-tab"><i></i>คลัง</span>
+     <span class="p-tab"><i></i>ตั้งค่า</span>
+   </div>`
+
+const phone = (inner, navOn = true) => `<div class="phone">${inner}${nav(navOn)}</div>`
+
+/* ---------- สิบโครง ---------- */
+const L = [
+  {
+    n: 1, name: 'ของตอนนี้ — แท็บสองโหมด', flag: ['now', 'ของตอนนี้'],
+    why: 'หัวข้อ · แท็บ แชต/โทร · แล้วแต่ละโหมดกินพื้นที่ที่เหลือทั้งหมด · <b>ตรงไปตรงมาและอธิบายตัวเองได้</b> แต่สองโหมดเป็นคู่แข่งกัน — เลือกอันหนึ่งคืออีกอันหายไปทั้งจอ',
+    cost: 'ไม่ต้องแก้อะไร',
+    shots: [
+      ['แชต', phone(`<div class="p-body">${head()}${seg('chat')}<div class="p-scroll">${bubbles(3)}</div>${composer()}</div>`)],
+      ['โทร', phone(`<div class="p-body">${head()}${seg('voice')}<div class="p-stage"><div class="orb orb--l orb--flat">🎙</div><div class="p-state">พร้อมคุยแล้ว<small>ไมค์ยังปิดอยู่</small></div><span class="p-btn">เริ่มโทร</span></div></div>`)],
+    ],
+  },
+  {
+    n: 2, name: 'Orb นำ — โทรเป็นจอเต็ม', flag: ['small', 'แตะแค่การแสดงผล'],
+    why: 'แบบเดียวกับภาพตัวอย่างแรก · orb ใหญ่เป็นตัวละครกลางจอ คำพูดอยู่ใต้ orb และ<b>แถวปุ่มล่างสามปุ่ม</b> ซ้ายคือกลับไปแชต กลางคือไมค์ ขวาคือวางสาย · แชตยังเป็นอีกจอเหมือนเดิม',
+    cost: 'เพิ่ม orb ที่มีสี · ย้ายปุ่มลงล่าง · ไม่แตะตรรกะ',
+    shots: [
+      ['กำลังฟัง', phone(`<div class="p-body">${head('', false)}<div class="p-stage"><div class="orb orb--xl"></div><div class="p-cap"><b>KEVIN</b>พรุ่งนี้มีสองคาบครับ เริ่ม 09:00 ที่ E11-S601</div><div class="p-timer"><span class="p-dot"></span>กำลังฟัง…</div></div><div class="p-bar"><span class="p-round">💬</span><span class="p-round p-round--main">🎙</span><span class="p-round">✕</span></div></div>`)],
+    ],
+  },
+  {
+    n: 3, name: 'Orb ย่อได้ — แชตมี orb ประจำ', flag: ['small', 'แตะแค่การแสดงผล'],
+    why: 'แบบเดียวกับภาพตัวอย่างที่สอง · จอว่างมี orb กลางจอกับคำทัก พอเริ่มคุย <b>orb หดขึ้นไปเป็นหัวของหน้า</b> แล้วคืนพื้นที่ให้บทสนทนา · ชิปคำถามอยู่เหนือช่องพิมพ์ตลอด',
+    cost: 'เพิ่ม orb + สถานะว่าง/ไม่ว่าง · ตรรกะเดิมทั้งหมด',
+    shots: [
+      ['ยังไม่คุย', phone(`<div class="p-body">${head()}${seg('chat')}<div class="p-scroll" style="justify-content:center;align-items:center;gap:11px"><div class="orb orb--m"></div><div style="text-align:center;font-size:12px;font-weight:600;line-height:1.4">สวัสดี<br>วันนี้อยากรู้อะไร</div></div>${chips()}${composer()}</div>`)],
+      ['คุยแล้ว', phone(`<div class="p-body"><div class="p-head"><span style="display:flex;align-items:center;gap:6px"><span class="orb orb--s"></span><span class="p-title" style="font-size:13px">KeviN</span></span><span class="p-gear">⚙</span></div><div class="p-scroll">${bubbles(4)}</div>${chips()}${composer()}</div>`)],
+    ],
+  },
+  {
+    n: 4, name: 'สายเป็นแผ่นลอยขึ้นมา', flag: ['mid', 'ต้องรื้อโครงหน้า'],
+    why: 'แชตเป็นบ้านถาวร ไม่มีแท็บ · กดปุ่มไมค์ในช่องพิมพ์แล้ว<b>แผ่นสายเลื่อนขึ้นมาครึ่งจอ</b> เห็นบทสนทนาข้างหลังตลอด · ลากลงเพื่อวางสาย · ตอบข้อ “สองโหมดเขียนลงบทสนทนาเดียวกัน” ได้ตรงที่สุด เพราะตาเห็นมันเกิดจริง ๆ',
+    cost: 'ทำแผ่นลอย + ท่าลาก · ต้องกันไม่ให้สายตายตอนแผ่นปิด',
+    shots: [
+      ['แชตปกติ', phone(`<div class="p-body">${head()}<div class="p-scroll">${bubbles(3)}</div>${composer('<span class="p-round" style="width:26px;height:26px;font-size:11px">🎙</span>')}</div>`)],
+      ['สายเปิดอยู่', phone(`<div class="p-body">${head()}<div class="p-scroll">${bubbles(3)}</div>${composer('<span class="p-round" style="width:26px;height:26px;font-size:11px">🎙</span>')}</div><div class="p-dim"></div><div class="p-sheet"><span class="p-grab"></span><div class="p-timer"><span class="p-dot"></span>กำลังคุย 01:24</div>${wave()}<div class="p-cap"><b>KEVIN</b>พฤหัสว่างยาวห้าชั่วโมงครับ</div><div style="display:flex;gap:8px"><span class="p-btn p-btn--quiet">ปิดไมค์</span><span class="p-btn p-btn--end">วางสาย</span></div></div>`)],
+    ],
+  },
+  {
+    n: 5, name: 'แถบสายค้างบนหัว', flag: ['mid', 'ต้องรื้อโครงหน้า'],
+    why: 'โทรแล้ว<b>ยุบเหลือแถบบางบนหัวแชต</b> เหมือนแถบสายของโทรศัพท์ · พิมพ์ไปคุยไปได้พร้อมกัน และแถบนี้ตามไปทุกหน้าของแอปได้ด้วย ซึ่งตรงกับความจริงที่ว่าสายไม่ตายเมื่อออกจากหน้านี้',
+    cost: 'ย้ายตัวแสดงสายขึ้นไประดับ layout · เป็นงานที่ใหญ่ที่สุดในกลุ่มกลาง',
+    shots: [
+      ['คุยไป พิมพ์ไป', phone(`<div class="p-body">${head()}<div class="p-callbar"><span class="p-dot"></span><span style="font-size:10px">กำลังคุยกับ KeviN</span><small>01:24</small></div><div class="p-scroll">${bubbles(4)}</div>${composer()}</div>`)],
+      ['อยู่หน้าอื่น', phone(`<div class="p-body"><div class="p-head"><span class="p-title" style="font-size:14px">อังคาร 1 ก.ย.</span></div><div class="p-callbar"><span class="p-dot"></span><span style="font-size:10px">กำลังคุยกับ KeviN</span><small>02:03</small></div><div class="p-scroll"><div style="border:1px solid var(--line);border-radius:12px;padding:9px"><div style="font-family:var(--f-mono);font-size:8px;color:var(--brand)">คาบถัดไป · อีก 3 ชม.</div><div style="font-weight:600;font-size:12px;margin-top:4px">กระบวนการพัฒนาซอฟต์แวร์</div></div></div></div>`, false)],
+    ],
+  },
+  {
+    n: 6, name: 'ปุ่มเดียวสองท่า', flag: ['mid', 'ต้องรื้อโครงหน้า'],
+    why: 'ไม่มีแท็บ ไม่มีแผ่น · <b>แตะ = ส่งข้อความ · กดค้าง = พูด</b> ปล่อยแล้วส่ง · เร็วที่สุดสำหรับคำถามสั้น ๆ ซึ่งเป็นเกือบทุกคำถามจริง · ข้อควรระวังคือท่ากดค้างไม่มีอะไรบอกว่ามีอยู่ ต้องสอนครั้งแรก',
+    cost: 'ทำท่ากดค้าง + สอนครั้งแรก · โหมดโทรยาว ๆ ต้องมีทางเข้าอื่น',
+    shots: [
+      ['ปกติ', phone(`<div class="p-body">${head()}<div class="p-scroll">${bubbles(3)}</div>${chips()}${composer('<span class="p-round" style="width:26px;height:26px;font-size:11px">🎙</span>')}</div>`)],
+      ['กดค้างอยู่', phone(`<div class="p-body">${head()}<div class="p-scroll">${bubbles(3)}</div><div style="padding:9px 0 11px"><div class="p-hold">${wave()} ปล่อยเพื่อส่ง</div></div></div>`)],
+    ],
+  },
+  {
+    n: 7, name: 'ไทม์ไลน์เดียว ไม่มีโหมด', flag: ['big', 'แตะตรรกะการบันทึก'],
+    why: 'ลบคำว่า “โหมด” ทิ้งทั้งคำ · เสียงกับข้อความเรียงในสายเดียวกันตามเวลา มีหัวคั่นบอกว่าช่วงไหนคือสาย · <b>สะอาดที่สุดในไฟล์นี้</b> และตรงกับความจริงที่ว่าทั้งสองทางเขียนลงบทสนทนาเดียวกันอยู่แล้ว',
+    cost: 'ต้องบันทึกคำพูดเป็นข้อความทันที ไม่ใช่ตอนวางสาย · เปลี่ยนวิธีเก็บจริง',
+    shots: [
+      ['สายเดียว', phone(`<div class="p-body">${head()}<div class="p-scroll"><div class="p-time">— วันนี้ 09:12 · พิมพ์ —</div>${bubbles(2)}<div class="p-time">— 09:20 · เริ่มสาย —</div><div class="b b--me b--voice">คาบว่างยาวสุดสัปดาห์นี้<span class="b__via">จากสาย</span></div><div class="b b--ai b--voice">พฤหัส 10:00–15:00<span class="b__via">จากสาย</span></div><div class="p-time">— 09:23 · วางสาย —</div></div>${composer('<span class="p-round" style="width:26px;height:26px;font-size:11px">🎙</span>')}</div>`)],
+    ],
+  },
+  {
+    n: 8, name: 'จอโทรแบบเต็มตา', flag: ['small', 'แตะแค่การแสดงผล'],
+    why: 'โทรกลายเป็นจอเต็มไม่มีแถบล่าง · <b>คลื่นเสียงกินเต็มความกว้าง</b> คำบรรยายตัวใหญ่กลางจอ อ่านได้จากระยะแขน · เหมาะกับตอนวางโทรศัพท์ไว้แล้วคุยไปทำอย่างอื่นไป — ซึ่งเป็นท่าที่ใช้จริงบ่อย',
+    cost: 'ซ่อนแถบล่างระหว่างสาย · ต้องมีทางออกที่ชัดแทน',
+    shots: [
+      ['เต็มจอ', `<div class="phone"><div class="p-body" style="padding:14px"><div class="p-timer" style="justify-content:center"><span class="p-dot"></span>กำลังคุย 01:24</div><div class="p-stage" style="gap:18px">${wave(true)}<div style="font-size:14px;font-weight:600;line-height:1.45;max-width:92%">พฤหัสบดีว่างยาว<br>ห้าชั่วโมงครับ</div><div style="font-family:var(--f-mono);font-size:9px;color:var(--faint)">KEVIN กำลังพูด</div></div><div class="p-bar"><span class="p-round">🔇</span><span class="p-round p-round--main" style="background:var(--due);color:#2A1210">✕</span><span class="p-round">💬</span></div></div></div>`],
+    ],
+  },
+  {
+    n: 9, name: 'สองคอลัมน์', flag: ['mid', 'ต้องรื้อโครงหน้า'],
+    why: 'สายอยู่ซ้าย บทสนทนาอยู่ขวา <b>เห็นพร้อมกันโดยไม่ต้องสลับ</b> · บนมือถือคอลัมน์ซ้ายหดเหลือแถบบาง แตะเพื่อขยาย · เป็นแบบเดียวที่ได้ประโยชน์จริงบนเดสก์ท็อป ซึ่งตอนนี้แถบข้าง 200px ว่างอยู่',
+    cost: 'ต้องออกแบบสองความกว้างจริง ๆ ไม่ใช่แค่ย่อ',
+    shots: [
+      ['มือถือ', phone(`<div class="p-body">${head()}<div class="p-split"><div class="p-col" style="flex:none;width:44px;align-items:center;padding:7px 4px"><div class="orb orb--s"></div><div style="font-family:var(--f-mono);font-size:8px;color:var(--sched);writing-mode:vertical-rl;margin-top:6px">01:24</div></div><div class="p-col"><h4>บทสนทนา</h4>${bubbles(2)}</div></div>${composer()}</div>`)],
+      ['เดสก์ท็อป', `<div class="phone" style="width:340px;height:400px"><div class="p-body"><div class="p-split"><div class="p-col" style="align-items:center;justify-content:center;gap:10px"><div class="orb orb--m"></div><div class="p-timer"><span class="p-dot"></span>01:24</div>${wave()}<span class="p-btn p-btn--end">วางสาย</span></div><div class="p-col"><h4>บทสนทนา</h4>${bubbles(3)}<div style="margin-top:auto">${composer()}</div></div></div></div></div>`],
+    ],
+  },
+  {
+    n: 10, name: 'การ์ดซ้อนลากได้', flag: ['big', 'แตะตรรกะการบันทึก'],
+    why: 'ทุกอย่างเป็นการ์ดในกองเดียว · การ์ดสายอยู่บนสุดตอนกำลังคุย <b>ลากลงเพื่อย่อเป็นแถบ ลากขึ้นเพื่อกลับมาเต็ม</b> · ให้ความรู้สึกว่าสายเป็นของที่ “พักไว้” ได้ ไม่ใช่ของที่ต้องวางทิ้งอย่างเดียว',
+    cost: 'ต้องทำสถานะสามระดับของการ์ด + ท่าลาก · ซับซ้อนที่สุดในไฟล์นี้',
+    shots: [
+      ['สายเต็มการ์ด', phone(`<div class="p-body">${head()}<div class="p-stack"><div class="p-cardl" style="top:0;bottom:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px"><span class="p-grab"></span><div class="orb orb--m"></div><div class="p-timer"><span class="p-dot"></span>01:24</div><div class="p-cap" style="font-size:9px"><b>KEVIN</b>พฤหัสว่างยาวห้าชั่วโมง</div></div><div class="p-cardl" style="bottom:38px;height:30px;opacity:.75"></div><div class="p-cardl" style="bottom:0;height:30px;opacity:.5"></div></div>${composer()}</div>`)],
+      ['ย่อเป็นแถบ', phone(`<div class="p-body">${head()}<div class="p-scroll">${bubbles(3)}</div><div class="p-cardl" style="position:static;padding:7px 9px;display:flex;align-items:center;gap:7px;margin-bottom:2px"><span class="p-grab" style="width:20px"></span><span class="p-dot"></span><span style="font-size:9px">สายยังอยู่</span><small style="font-family:var(--f-mono);font-size:9px;color:var(--sched);margin-left:auto">01:24</small></div>${composer()}</div>`)],
+    ],
+  },
+]
+
+document.getElementById('list').innerHTML = L.map((v) => `
+  <article class="card">
+    <div class="card__top">
+      <span class="card__n">${String(v.n).padStart(2, '0')}</span>
+      <span class="card__name">${v.name}</span>
+      <span class="flag flag--${v.flag[0]}">${v.flag[1]}</span>
+    </div>
+    <div class="card__body">
+      <div class="card__why">
+        <p>${v.why}</p>
+        <p class="card__cost">ต้องแก้อะไร · ${v.cost}</p>
+      </div>
+      <div class="screens">
+        ${v.shots.map(([cap, html]) => `<div class="shot">${html}<span class="shot__cap">${cap}</span></div>`).join('')}
+      </div>
+    </div>
+  </article>`).join('')
+</script>

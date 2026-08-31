@@ -243,8 +243,18 @@ export default function TalkRoom({
               enterKeyHint="send"
               disabled={busy}
             />
-            <button className="btn" type="submit" disabled={busy || !draft.trim()}>
-              ส่ง
+            {/* ⚠️ ปุ่มเป็นลูกศรอย่างเดียว — `aria-label` คือชื่อเดียวที่มันมี */}
+            <button
+              className="composer__send"
+              type="submit"
+              disabled={busy || !draft.trim()}
+              aria-label="ส่ง"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" strokeWidth="2.1" strokeLinecap="round"
+                   strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
             </button>
           </form>
         </>
