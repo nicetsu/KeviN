@@ -16,12 +16,12 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (276 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (290 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
 `web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ตัวกรอง Area · ภาษา · เสียง)
 `web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/chat/markdown.ts` (แกะ markdown ของผู้ช่วย)
-`web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด) · `web/lib/eventOrder.ts` (ลำดับกิจกรรม) · `web/lib/voice/mic.ts` (เลือกไมค์)
+`web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด) · `web/lib/eventOrder.ts` (ลำดับกิจกรรม) · `web/lib/voice/mic.ts` (เลือกไมค์) · `web/lib/archive.ts` (ของที่รอถูกลบ)
 
 **ความลับเก็บที่ไหน**
 VAPID private key → Supabase secrets · VAPID public key → Vercel env (`NEXT_PUBLIC_`)
@@ -83,6 +83,19 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
   และ `proxy.ts` ยืนยันตัวตนให้แล้วทุก request (แต่ `proxy.ts` เองยังต้องใช้ `getUser()` ต่อไป)
 - **เขียนข้อมูลต้องมี `.select()` แล้วนับแถวเสมอ** — `update` ที่ไม่โดนสักแถวรายงานว่าสำเร็จ
   เคยทำให้ลากจัดลำดับดูเหมือนได้แต่ไม่ได้เขียนอะไรลง DB เลย (ดู `doc/TRAPS.md`)
+
+**หน้าจอ — สิ่งที่ต้องรู้ก่อนแตะ**
+
+- **`components/Reveal.tsx`** ครอบทุก `page.tsx` และ `loading.tsx` — โครงร่างกลายเป็นเนื้อจริง
+  ถ้าเพิ่มหน้าใหม่ ต้องครอบทั้งคู่ ไม่งั้นหน้านั้นจะกระพริบต่างจากที่อื่น
+- **`lib/useFlip.ts`** ทำให้แถวที่ย้ายตำแหน่งเดินทาง — `ItemList` ใช้อยู่แล้ว
+  แถวใหม่ต้องมี `data-flip` ที่เป็นตัวตนคงที่
+- **token จังหวะ** `--t-fast` 140ms · `--t-base` 220ms · `--t-slow` 320ms · `--ease`
+  **ห้ามตั้งค่าใหม่เอง** ใช้ค่าพวกนี้เสมอ (doc/DESIGN.md)
+- **ทุก `@keyframes` และ `transition` ใหม่ต้องมี `prefers-reduced-motion` คุม** —
+  ของเดิมทำครบทุกตัว อย่าให้ของใหม่เป็นตัวแรกที่ทำพัง
+- **`/library/archive`** คือหน้าที่มองเห็นของที่รอถูกลบ · `KEEP_DAYS` ใน `lib/archive.ts`
+  **ต้องตรงกับ `interval '7 days'` ใน `purge_archived()`** แก้ที่เดียวแล้วอีกที่จะนับผิดเงียบ ๆ
 
 **เก็บกวาดอัตโนมัติ — `housekeeping()` รันวันละครั้ง 20:00 UTC (ตีสามไทย)**
 

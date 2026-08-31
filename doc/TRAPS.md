@@ -349,3 +349,36 @@ prompt ต้องกำหนดชัดว่าการลบถามย�
 เขียนเป็น `useEffect` + `setState` ตอนแรกแล้ว lint จับ (`set-state-in-effect`)
 เพราะ `enumerateDevices()` เป็น async — setState ใน effect body ทำให้เกิด cascading render
 รูป `useSyncExternalStore` ตรงกับธรรมชาติของมันกว่า และได้ `devicechange` มาฟรี
+
+---
+
+## Redesign รอบสอง (1 ก.ย. 2026)
+
+### `next build` ทับ dev server — **เจอซ้ำรอบที่สอง**
+รันตรวจงานระหว่างพัฒนาแล้วทุกหน้าเรนเดอร์**ว่างเปล่าโดยไม่มี error สักบรรทัด**
+ทั้ง console ทั้ง log ของเซิร์ฟเวอร์เงียบสนิท · ต้อง `rm -rf .next` แล้วรีสตาร์ท
+
+ข้อนี้อยู่ในไฟล์นี้อยู่แล้วแต่ยังพลาดซ้ำ — **ห้ามรัน `next build` ตอน dev server ยังทำงาน**
+ถ้าต้องตรวจ ให้หยุด dev server ก่อน แล้วล้าง `.next` หลังเสร็จเสมอ
+
+### `Date.now()` ใน Server Component โดน lint
+กฎ `react-hooks` จับว่าเป็น impure function ใน render · `new Date().getTime()` ผ่าน
+ทั้งที่ให้ผลเหมือนกัน — เขียนให้ผ่านกฎดีกว่าปิดกฎ เพราะกฎถูกในหลักการ
+(Server Component รันครั้งเดียวต่อ request จึงไม่มีปัญหาจริง แต่ Client Component มี)
+
+### FLIP ต้องใช้ `useLayoutEffect` ไม่ใช่ `useEffect`
+ถ้าใช้ `useEffect` ผู้ใช้จะเห็นแถว**กระโดดไปที่ใหม่ก่อน** แล้ว animation
+ค่อยเริ่มจากตรงนั้น ซึ่งแย่กว่าไม่มี animation เลย
+
+และต้องให้ตัวตนกับ**ทุกแถว** รวมแถวที่ไม่ใช่ item (คาบเรียนไม่มี `id`)
+ไม่งั้นครึ่งรายการเดินทางอีกครึ่งกระโดด ซึ่งดูแย่กว่ากระโดดทั้งหมด
+
+### `useSyncExternalStore` กับรายการอุปกรณ์
+เขียนเป็น `useEffect` + `setState` แล้ว lint จับ (`set-state-in-effect`)
+เพราะ `enumerateDevices()` เป็น async · รูป external store ตรงกับธรรมชาติของมันกว่า
+และได้ `devicechange` มาฟรี — **ของที่เปลี่ยนเองได้จากนอก React ควรเป็น store ไม่ใช่ effect**
+
+### เปลี่ยนคีย์ที่เป็นทั้งชื่อเก่าและชื่อใหม่
+ตอนเปลี่ยน `areas.color` เป็น `comp`/`pers`/`gen` — `pers` เป็นทั้งชื่อเก่า (General เดิม)
+และชื่อใหม่ (Personal) **ต้องปลดตัวเก่าออกก่อนเสมอ** ไม่งั้นสองแถวจะเป็นค่าเดียวกัน
+ชั่วคราวแล้วโดน `update` รอบถัดไปเปลี่ยนพร้อมกันทั้งคู่
