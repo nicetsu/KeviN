@@ -6,16 +6,22 @@
 
 :root {
   /* ---- พื้น ---- */
-  --bg:        #0A0912;
-  --surface:   #14131F;
-  --raised:    #1C1B2B;
-  --line:      #26253A;
-  --line-soft: #1D1C2C;
+  /* พื้นอุ่นขึ้นหนึ่งระดับ (1 ก.ย. 2026) — ค่าเดิม #0A0912 · #14131F
+     ⚠️ คอนทราสต์ลดลงเล็กน้อย · `--faint` เหลือ 4.83 บน `--surface` ซึ่งเฉียดเกณฑ์ AA (4.5)
+        **ดันพื้นสว่างกว่านี้ต้องขยับ `--faint` ตามด้วย** (doc/DECISIONS.md) */
+  --bg:        #120E22;
+  --surface:   #1B1630;
+  --raised:    #241E3C;
+  --line:      #2E2748;
+  --line-soft: #251F3D;
 
   /* ---- ตัวอักษร · คอนทราสต์สูงโดยตั้งใจ เพื่อให้อ่านกลางแดดได้ ---- */
   --ink:   #F1F0F7;
   --muted: #A5A2B8;
-  --faint: #87849D;
+  /* ⚠️ ขยับตามพื้นที่สว่างขึ้น (1 ก.ย. 2026) — ค่าเดิม #87849D ตก AA บน `--raised` (4.39)
+     สีนี้เคยตก AA มาแล้วรอบหนึ่งตอนเป็น #6E6B83 · **คงเฉดเดิม แค่สว่างขึ้น** เหมือนรอบก่อน
+     ตอนนี้ต่ำสุด 4.81 บน `--raised` (doc/DECISIONS.md) */
+  --faint: #8E8BA4;
 
   /* ---- แบรนด์ · คงความจัดไว้เต็ม เพราะเป็นสิ่งเดียวที่กดได้ ---- */
   --brand:      #A594FF;
@@ -371,11 +377,28 @@ html, body { margin: 0; padding: 0; }
   background: var(--surface); border-top: 1px solid var(--line);
   padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
 }
+/*
+ * บนมือถือช่องหนึ่งช่องคือ **ไอคอนซ้อนบนคำ** เรียงตั้ง
+ *
+ * ⚠️ `align-items: center` จำเป็น ไม่ใช่แค่ความสวย — ถ้าไม่มี ตัว `a` จะยืดเต็มช่อง
+ *    แล้วแคปซูล KeviN (ที่มีพื้นหลัง) จะกว้างเท่าช่องแทนที่จะพอดีตัวอักษร
+ */
 .nav__item {
-  flex: 1; text-align: center; text-decoration: none;
+  flex: 1; text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.15rem;
   font-size: var(--s--1); color: var(--muted);
   padding: 0.3rem 0; border-radius: var(--r-pill);
 }
+/*
+ * ⚠️ ต้องกำหนดขนาดที่นี่ — SVG ในไฟล์ไม่มี width/height ให้มันเลย
+ *    ถ้าลบกฎนี้ทิ้ง เบราว์เซอร์จะกาง viewBox เป็นขนาดเริ่มต้น (เคยได้ 74px)
+ *    แล้วแถบล่างจะสูงกว่าสองเท่าโดยไม่มี error อะไรเตือน
+ */
+.nav__item svg { width: 1.3rem; height: 1.3rem; flex: none; }
+
+/* ช่อง KeviN ไม่มีไอคอน — กันไม่ให้แคปซูลเตี้ยกว่าช่องอื่นจนแถบเบี้ยว */
+.nav__item--talk { min-height: 2.55rem; padding-left: 0.9rem; padding-right: 0.9rem; }
 .nav__item--on { color: var(--brand); font-weight: 600; }
 .nav__item--off { color: var(--faint); opacity: 0.45; cursor: default; }
 
@@ -407,7 +430,12 @@ html, body { margin: 0; padding: 0; }
     border-top: none; border-right: 1px solid var(--line);
     padding: 1.5rem 0.75rem;
   }
-  .nav__item { flex: none; text-align: left; padding: 0.5rem 0.85rem; }
+  /* เดสก์ท็อปมีที่กว้าง — กลับไปเป็นไอคอนอยู่ข้างคำ ชิดซ้ายเป็นรายการ */
+  .nav__item {
+    flex: none; flex-direction: row; justify-content: flex-start;
+    gap: 0.6rem; padding: 0.5rem 0.85rem;
+  }
+  .nav__item--talk { min-height: 0; }
   .nav__item--on { background: var(--raised); }
   .wrap { margin-left: 200px; }
 }
@@ -731,7 +759,9 @@ button.cb { cursor: pointer; }
    ===================================================================== */
 .fab {
   position: fixed; z-index: 25; right: 1rem;
-  bottom: calc(4.4rem + env(safe-area-inset-bottom));
+  /* ⚠️ ค่านี้ผูกกับความสูงของแถบล่าง — แถบสูง ~71px หลังใส่ไอคอน (เดิม ~55px)
+     ถ้าแถบเปลี่ยนความสูงอีก ต้องขยับค่านี้ตาม ไม่งั้นปุ่มจะทับแถบ */
+  bottom: calc(5.4rem + env(safe-area-inset-bottom));
   width: 3.1rem; height: 3.1rem; border-radius: var(--r-pill);
   background: var(--brand); color: #12102A; border: none;
   font-size: 1.6rem; line-height: 1; cursor: pointer;
