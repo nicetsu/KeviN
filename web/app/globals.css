@@ -958,6 +958,20 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 .md em { font-style: italic; color: inherit; }
 
+/*
+ * ฟองข้อความไหลขึ้นตอนโผล่
+ *
+ * ⚠️ ใช้ `animation` ไม่ใช่ `transition` เพราะแถวใหม่ไม่มีสถานะ "ก่อน" ให้เปลี่ยนจาก
+ *    และตั้งสั้นกว่าที่อื่น (--t-base) เพราะข้อความตอบมาทีละก้อนต่อเนื่อง
+ *    ถ้ายาวกว่านี้ก้อนถัดไปจะมาทับก่อนก้อนก่อนหน้าจะนิ่ง
+ */
+.msg { animation: msg-in var(--t-base) var(--ease) both; }
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(6px) }
+  to   { opacity: 1; transform: none }
+}
+@media (prefers-reduced-motion: reduce) { .msg { animation: none; } }
+
 .msg__via {
   display: block; margin-top: 0.3rem;
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);

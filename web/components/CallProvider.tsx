@@ -18,6 +18,8 @@ type CallApi = {
   elapsed: number
   muted: boolean
   error: string | null
+  /** ความดังของเสียงที่พูดอยู่ 0–1 · ให้วงเสียงขยับตามของจริง */
+  level: number
   /** true = โควตาเสียงหมด · หน้าจอควรดันไปโหมดแชต */
   quotaOut: boolean
   /** turn ที่ปิดก้อนแล้วในสายปัจจุบัน · หน้า KeviN เอาไปแสดงสด */
@@ -59,6 +61,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   const [error, setError] = useState<string | null>(null)
   const [quotaOut, setQuotaOut] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  const [level, setLevel] = useState(0)
 
   const session = useRef<Session | null>(null)
   /*
@@ -141,6 +144,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
         setLive({ who: 'kevin', text: buffer.current.kevin })
       },
       onTurnEnd: flush,
+      onLevel: setLevel,
       onError: (m) => {
         setError(m)
         // โควตาเสียงหมด = คนละโควตากับแชต · หน้าจอจะดันไปโหมดแชตให้
@@ -153,6 +157,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
         setState('idle')
         setLive(null)
         setElapsed(0)
+        setLevel(0)
         setMuted(false)
         if (reason && reason !== 'วางสายแล้ว') setError(reason)
       },
@@ -203,10 +208,10 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   }, [running, hangUp])
 
   const api = useMemo<CallApi>(() => ({
-    state, live, elapsed, muted, error, quotaOut, turns,
+    state, live, elapsed, muted, error, quotaOut, turns, level,
     start, hangUp, toggleMute, switchMic,
     dismissError: () => setError(null),
-  }), [state, live, elapsed, muted, error, quotaOut, turns, start, hangUp, toggleMute, switchMic])
+  }), [state, live, elapsed, muted, error, quotaOut, turns, level, start, hangUp, toggleMute, switchMic])
 
   return (
     <Ctx.Provider value={api}>

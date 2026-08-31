@@ -2,6 +2,7 @@ import { hourOf, bangkokNow } from '@/lib/time'
 import { dayAbbr } from '@/lib/schedule'
 import { layoutDay } from '@/lib/layout'
 import { entryKey, spanLabel, type CalendarEntry } from '@/lib/calendar'
+import NowLine from './NowLine'
 
 const SLOT = 0.5 // คอลัมน์ละ 30 นาที — ตารางจริงมีคาบจบ 17:30 และ 19:30
 
@@ -123,13 +124,8 @@ export default function WeekGrid({
           )
         })}
 
-        {now.hour >= from && now.hour <= to && (
-          <div
-            className="wk__now"
-            style={{ gridRow: `2 / span 7`, gridColumn: colOf(now.hour) }}
-            aria-label="เวลาปัจจุบัน"
-          />
-        )}
+        {/* เส้นตอนนี้เลื่อนเองทุกครึ่งนาที — คำนวณฝั่งเบราว์เซอร์ (NowLine.tsx) */}
+        <NowLine from={from} to={to} slot={SLOT} rows={7} />
       </div>
     </div>
   )

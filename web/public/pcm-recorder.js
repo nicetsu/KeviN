@@ -19,6 +19,8 @@ class PcmRecorder extends AudioWorkletProcessor {
     this.target = 1600
     this.buffer = new Int16Array(this.target)
     this.filled = 0
+    // กำลังเสียงสะสมของก้อนปัจจุบัน · ใช้บอกความดังให้หน้าจอ
+    this.energy = 0
   }
 
   process(inputs) {
@@ -29,11 +31,17 @@ class PcmRecorder extends AudioWorkletProcessor {
       // หนีบก่อนคูณ ไม่งั้นค่าที่เกิน 1 จะวนกลับเป็นเสียงแตก
       const s = Math.max(-1, Math.min(1, channel[i]))
       this.buffer[this.filled++] = s < 0 ? s * 0x8000 : s * 0x7fff
+      this.energy += s * s
 
       if (this.filled === this.target) {
+        // ความดังแบบ RMS ของก้อนนี้ — ได้มาฟรีเพราะวนลูปอยู่แล้ว
+        // หน้าจอเอาไปขยับวงเสียงให้ตรงกับที่พูดจริง แทนจังหวะตายตัวที่เขียนไว้
+        const level = Math.sqrt(this.energy / this.target)
+        this.energy = 0
+
         // ส่งสำเนาออกไป แล้วโอนกรรมสิทธิ์ buffer เพื่อไม่ต้องคัดลอกซ้ำ
         const chunk = this.buffer.slice()
-        this.port.postMessage(chunk.buffer, [chunk.buffer])
+        this.port.postMessage({ pcm: chunk.buffer, level }, [chunk.buffer])
         this.filled = 0
       }
     }

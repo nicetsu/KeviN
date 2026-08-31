@@ -29,6 +29,13 @@ export type CallHooks = {
   /** จบหนึ่ง turn แล้ว — เอาไปปิดก้อนคำบรรยายและบันทึกลงประวัติ */
   onTurnEnd: () => void
   onError: (message: string) => void
+  /**
+   * ความดังของเสียงที่พูดเข้าไป · 0–1 โดยประมาณ (RMS)
+   *
+   * ได้มาฟรีจาก worklet ที่วนลูปแปลง PCM อยู่แล้ว — ต้นทุนเพิ่มแทบเป็นศูนย์
+   * ไม่บังคับ เพราะสายทดสอบเสียงในหน้าตั้งค่าไม่ได้ใช้
+   */
+  onLevel?: (level: number) => void
   onEnded: (reason: string) => void
 }
 
@@ -154,10 +161,14 @@ export class VoiceCall {
     await this.micCtx.audioWorklet.addModule('/pcm-recorder.js')
 
     this.node = new AudioWorkletNode(this.micCtx, 'pcm-recorder')
-    this.node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => {
+    this.node.port.onmessage = (e: MessageEvent<{ pcm: ArrayBuffer; level: number }>) => {
+      // ความดังส่งให้หน้าจอเสมอ แม้ตอนปิดไมค์ — ปิดไมค์แล้ววงต้องนิ่ง ซึ่งก็คือ
+      // ข้อมูลเหมือนกันว่าตอนนี้ไม่มีอะไรถูกส่งออกไป
+      this.hooks.onLevel?.(this.muted ? 0 : e.data.level)
+
       if (this.muted || this.ws?.readyState !== WebSocket.OPEN) return
       this.ws.send(JSON.stringify({
-        realtimeInput: { audio: { data: toBase64(e.data), mimeType: `audio/pcm;rate=${IN_RATE}` } },
+        realtimeInput: { audio: { data: toBase64(e.data.pcm), mimeType: `audio/pcm;rate=${IN_RATE}` } },
       }))
     }
     this.micSource = this.micCtx.createMediaStreamSource(this.stream)

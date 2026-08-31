@@ -4,6 +4,16 @@ import { useCall, mmss } from '@/components/CallProvider'
 import type { CallState } from '@/lib/voice/session'
 import MicPicker from './MicPicker'
 
+/** รูปคลื่น · แท่งกลางไวกว่าแท่งริม ทำให้ค่าเดียวดูเป็นคลื่นไม่ใช่แถบ */
+const WAVE = [
+  { idle: 12, gain: 16 },
+  { idle: 26, gain: 30 },
+  { idle: 40, gain: 40 },
+  { idle: 22, gain: 34 },
+  { idle: 34, gain: 26 },
+  { idle: 14, gain: 14 },
+]
+
 const LABEL: Record<CallState, { title: string; hint: string }> = {
   idle:         { title: 'พร้อมคุยแล้ว',     hint: 'ไมค์ยังปิดอยู่' },
   connecting:   { title: 'กำลังต่อสาย…',     hint: 'ขออนุญาตใช้ไมค์' },
@@ -62,10 +72,25 @@ export default function VoiceCall() {
         <span className="call__dot" /> กำลังคุย {mmss(call.elapsed)}
       </div>
 
+      {/*
+        วงเสียง — ตอนเราพูด แท่งขยับตาม **ความดังจริง** ที่ worklet วัดมาให้
+        ตอน KeviN ตอบ กลับไปใช้จังหวะที่เขียนไว้ เพราะเราไม่ได้วัดเสียงขาออก
+        (เสียงตอบมาเป็นก้อน base64 ที่เล่นผ่าน AudioContext คนละทาง)
+
+        `SHAPE` ทำให้แท่งกลางสูงกว่าแท่งริม — เสียงจริงมีค่าเดียว ถ้าให้ทุกแท่ง
+        สูงเท่ากันจะดูเหมือนแถบสี่เหลี่ยมขยับ ไม่เหมือนคลื่นเสียง
+      */}
       <div className={`orb${answering ? ' orb--think' : ' orb--live'}`} aria-hidden="true">
         <div className="wave">
-          {[12, 26, 40, 22, 34, 14].map((h, i) => (
-            <u key={i} style={{ height: h, background: answering ? 'var(--brand)' : 'var(--sched)' }} />
+          {WAVE.map((shape, i) => (
+            <u
+              key={i}
+              style={{
+                height: answering ? shape.idle : 6 + Math.min(1, call.level * 4) * shape.gain,
+                background: answering ? 'var(--brand)' : 'var(--sched)',
+                transition: answering ? undefined : 'height 90ms linear',
+              }}
+            />
           ))}
         </div>
       </div>
