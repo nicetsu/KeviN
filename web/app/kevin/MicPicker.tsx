@@ -6,11 +6,11 @@ import { useMic, useMicList, askMicPermission } from '@/lib/voice/micStore'
 import { resolveMic, MIC_AUTO } from '@/lib/voice/mic'
 
 /**
- * ตัวเลือกไมค์ · อยู่ในหน้าตั้งค่า (ย้ายมาจากหน้าโทร 1 ก.ย. 2026)
+ * ตัวเลือกไมค์ · อยู่ใน**แผงตั้งค่าการคุย** ถัดจากภาษา (เจ้าของเคาะ 1 ก.ย. 2026)
  *
- * ⚠️ **สลับได้แม้กำลังโทรอยู่** — สายอยู่ที่ `CallProvider` ระดับ layout
- *    `switchMic` เรียก `session.current?.switchMic` แบบ optional จึงทำงาน
- *    ทั้งตอนมีสายและไม่มีสาย · ไม่ต้องมีตัวเลือกซ้ำในหน้าโทรอีก
+ * ⚠️ **ไม่ถูกล็อกตอนกำลังคุย ต่างจากภาษากับเสียง** — สองอันนั้นผูกไปกับ token
+ *    ตั้งแต่เปิดสาย แต่ไมค์เป็นของฝั่งเบราว์เซอร์ล้วน เสียบหูฟังกลางสายแล้วสลับได้เลย
+ *    `switchMic` เรียก `session.current?.switchMic` แบบ optional จึงทำงานทั้งสองกรณี
  *
  * ⚠️ **ชื่ออุปกรณ์ถูกปิดไว้จนกว่าจะได้สิทธิ์ไมค์** เบราว์เซอร์คืน `label` ว่าง
  *    ถ้ายังไม่เคยอนุญาต — ก่อนโทรครั้งแรกจึงเห็นแค่ "ไมโครโฟน 1 / 2"
@@ -50,7 +50,7 @@ export default function MicPicker() {
   }
 
   return (
-    <div className="mic mic--settings">
+    <div className="mic mic--panel">
       <button
         type="button"
         className="mic__btn"

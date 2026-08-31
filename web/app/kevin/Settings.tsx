@@ -5,6 +5,7 @@ import { LANG_LABEL, type Lang } from '@/lib/ai/lang'
 import { VOICES } from '@/lib/ai/voices'
 import { setPrefs, type TalkPrefs } from '@/lib/talkPrefs'
 import { previewVoice } from '@/lib/voice/preview'
+import MicPicker from './MicPicker'
 
 /**
  * แผงตั้งค่าของหน้า KeviN
@@ -71,6 +72,15 @@ export default function Settings({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/*
+            ⚠️ ไม่มี `disabled={locked}` โดยตั้งใจ — ไมค์สลับกลางสายได้
+               ต่างจากภาษากับเสียงที่ล็อกไปกับ token ตั้งแต่เปิดสาย
+          */}
+          <div className="set__row">
+            <span className="set__label">ไมโครโฟน</span>
+            <MicPicker />
           </div>
 
           <div className="set__label set__label--block">เสียง</div>
