@@ -225,6 +225,7 @@ html, body { margin: 0; padding: 0; }
  */
 .cb { transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
 .cb:active { transform: scale(0.88); }
+@media (prefers-reduced-motion: reduce) { .cb { transition: none; } }
 .cb svg { display: block; }
 
 /* ---- ป้ายขวา · โผล่เฉพาะตอนผิดปกติ ---- */
@@ -769,17 +770,33 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
  * เบราว์เซอร์ที่ไม่รองรับ `animation-timeline` จะข้ามทั้งบล็อกไปเอง
  * การ์ดยังแสดง gradient นิ่ง ๆ ตามปกติ
  */
+/*
+ * ⚠️ **`animation-timeline: view()` ใช้กับ pseudo-element ไม่ได้**
+ *    ใส่บน `::before` ตรง ๆ แล้ว `currentTime` ค้างที่ 50% ตลอดไม่ว่าจะเลื่อนยังไง
+ *    (ตรวจแล้วบน Chrome — ตัว element จริงเดินถูก แต่ pseudo ไม่เดิน)
+ *
+ *    จึงให้ **การ์ดเป็นตัวเดินไทม์ไลน์** แล้วส่งค่าให้ `::before` ผ่าน custom property
+ *    ที่ register ด้วย `@property` — ถ้าไม่ register เบราว์เซอร์จะมองว่าเป็นสตริง
+ *    แล้ว interpolate ไม่ได้ ค่าจะกระโดดจากต้นไปปลายทันที
+ */
+@property --acard-drift {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .acard::before {
+    .acard {
       animation: acard-drift linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
     }
     @keyframes acard-drift {
-      from { transform: translateY(-3%) scale(1.06) }
-      to   { transform: translateY(3%) scale(1.06) }
+      from { --acard-drift: -3% }
+      to   { --acard-drift: 3% }
     }
+    .acard::before { transform: translateY(var(--acard-drift)) scale(1.06); }
   }
 }
 .acard--class::before { background: var(--g-class); }
