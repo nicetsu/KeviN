@@ -534,6 +534,9 @@ returning *;</code></pre>
   <tr><td>CHECK กับ <code>at time zone</code></td><td>เป็น STABLE ไม่ใช่ IMMUTABLE — ใส่ใน CHECK ไม่ได้ กฎอย่าง "ห้ามข้ามเที่ยงคืน" จึงบังคับที่ DB ไม่ได้</td></tr>
   <tr><td><code>"24:00:00"</code></td><td><code>new Date()</code> คืน Invalid Date เงียบ ๆ ไม่ throw</td></tr>
   <tr><td><code>week_offsets</code> ≠ "ไม่ไป"</td><td>เอาไปปนกันแล้วผลบนจอถูก แต่ข้อมูลเสียถาวรและกู้ไม่ได้</td></tr>
+  <tr><td><code>security definer</code> ที่ลบข้อมูล</td><td>ลืม revoke = ใครถือ anon key ก็ยิง <code>rpc/purge_archived</code> ลบข้อมูลทุกคนได้</td></tr>
+  <tr><td>ลบ project</td><td><code>cascade</code> พา items ทั้งกองไปด้วย รวมของที่ยังไม่ได้เก็บเข้าคลัง</td></tr>
+  <tr><td>ตัดกลุ่มว่างทิ้ง</td><td>component หายไปพร้อมแถบเลิกทำ ตอนเก็บของ<b>ชิ้นสุดท้าย</b>เข้าคลัง</td></tr>
   <tr><td>ตัวจับเวลาสาย</td><td>ต่อสายใหม่ทุก 15 นาทีแล้ว<b>อย่ารีเซ็ต</b> ไม่งั้นคุยยาวไม่รู้ตัวจนโควตาหมด</td></tr>
   <tr><td><code>thoughtSignature</code></td><td>ประกอบ turn ของโมเดลขึ้นใหม่เองแล้วรอบแรกผ่าน <b>รอบสองถึงพัง</b> — ต้องส่ง <code>parts</code> คืนทั้งก้อน</td></tr>
   <tr><td><code>voiceName</code></td><td>มีผลกับบางภาษาเท่านั้น ตั้งแล้วไทยเปลี่ยนแต่อังกฤษไม่เปลี่ยน</td></tr>
@@ -562,12 +565,13 @@ returning *;</code></pre>
   <tr><td><code>lib/ai/lang.ts</code> · <code>voices.ts</code> · <code>prompt.ts</code></td><td>ภาษา · เสียง · prompt ที่ต้องไม่มีชื่อวิชาโผล่</td><td>30 เคส</td></tr>
   <tr><td><code>lib/ai/visibility.ts</code></td><td>allowlist ของ Area — พลาดแล้วไม่มีอะไรฟ้อง</td><td>10 เคส</td></tr>
   <tr><td><code>lib/layout.ts</code></td><td>จัดบล็อกที่เวลาชนกันในปฏิทินสัปดาห์</td><td>10 เคส</td></tr>
+  <tr><td><code>lib/eventOrder.ts</code></td><td>กิจกรรมที่ผ่านแล้วร่วงไปท้าย · วัดที่เวลาจบ</td><td>8 เคส</td></tr>
   <tr><td><code>lib/chat/markdown.ts</code></td><td>แกะ markdown ที่ผู้ช่วยเขียนมา · ตัวอักษรต้องไม่หาย</td><td>19 เคส</td></tr>
   <tr><td><code>lib/chat/links.ts</code></td><td>ตัดลิงก์ที่โมเดลแต่งขึ้นเอง</td><td>9 เคส</td></tr>
   <tr><td><code>lib/voice/transcript.ts</code></td><td>แทนที่สิ่งที่ผู้ใช้พูดด้วย <code>- voice -</code></td><td>7 เคส</td></tr>
   <tr><td><b><code>test/guard.test.ts</code></b></td><td><b>อ่านซอร์สจริง</b> · พังถ้ามีทางเขียนข้อมูลโผล่ในประตูที่สาม</td><td>6 เคส</td></tr>
 </table>
-<p><b>รวม 255 เคส</b> · <code>npm test --prefix web</code></p>
+<p><b>รวม 263 เคส</b> · <code>npm test --prefix web</code></p>
 <p>ฝั่ง DB มีชุดทดสอบ constraint ที่รันกับฐานข้อมูลจริงอีก <b>18 เคส</b> —
   8 เคสของกิจกรรม และ 10 เคสของการตัดทอนเวลา</p>
 

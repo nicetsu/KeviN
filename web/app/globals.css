@@ -155,6 +155,12 @@ html, body { margin: 0; padding: 0; }
 .row--skip { opacity: 0.45; }
 .row--skip .row__title { text-decoration: line-through; }
 .row--done { opacity: 0.38; }
+/*
+ * กิจกรรมที่เลยเวลาไปแล้ว — จางแต่ไม่ขีดฆ่า
+ * ขีดฆ่าแปลว่า "จัดการแล้ว" ส่วนกิจกรรมที่ผ่านไปไม่ได้แปลว่าใครทำอะไรกับมัน
+ * จางเท่า .row--skip ซึ่งแปลว่า "ไม่ต้องสนใจแล้ว" ไม่ใช่ .row--done ที่แปลว่าเสร็จ
+ */
+.row--past { opacity: 0.45; }
 
 /* ---- ช่องติ๊ก · มีเฉพาะ task ---- */
 .cb {

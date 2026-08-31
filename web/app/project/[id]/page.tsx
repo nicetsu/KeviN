@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { describe, type Slot } from '@/lib/schedule'
 import { bangkokTime, thaiDateLabel } from '@/lib/time'
 import { ENTRY_COLOR } from '@/lib/calendar'
+import { orderEvents, isPastEvent } from '@/lib/eventOrder'
 import ItemList, { type Row } from '@/components/ItemList'
 import ProjectMenu from '@/components/ProjectMenu'
 
@@ -99,6 +100,11 @@ export default async function ProjectPage({
   const items = (itemRes.data ?? []) as Item[]
   const events = (eventRes.data ?? []) as EventRow[]
 
+  // ตรรกะการเรียงอยู่ใน lib/eventOrder.ts ที่มีเทสต์กำกับ
+  const now = new Date().toISOString()
+  const isPast = (e: EventRow) => isPastEvent(e, now)
+  const sortedEvents = orderEvents(events, now)
+
   // ป้ายบอกว่างานชิ้นนี้เป็นของกิจกรรมไหน · null = ไม่ได้ผูกกับกิจกรรมใด
   const eventName = new Map(events.map((e) => [e.id, e.title]))
   const chip = (i: Item): Row['tag'] =>
@@ -147,20 +153,24 @@ export default async function ProjectPage({
 
       {/*
         กิจกรรมมาก่อนงาน เพราะมันคือ "ต้องไปที่ไหนตอนไหน" ซึ่งเปลี่ยนไม่ได้
-        ส่วนงานเป็นสิ่งที่จัดเวลาเองได้ · เรียงตาม starts_at เสมอ ลากไม่ได้
+        ส่วนงานเป็นสิ่งที่จัดเวลาเองได้ · ลากจัดลำดับไม่ได้ เวลาเป็นตัวตัดสิน
+        ที่ยังไม่ผ่านอยู่บน ที่ผ่านแล้วจางลงและร่วงไปท้ายกลุ่ม
       */}
       <Group title="กิจกรรม" count={events.length || null}>
         <ItemList
-          rows={events.map(
+          rows={sortedEvents.map(
             (e): Row => ({
-              id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้ เก็บเข้าคลังจากหน้าของมันเอง
+              id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้และลากไม่ได้
               color: ENTRY_COLOR.event,
               title: e.title,
               meta: [eventStamp(e), e.location, e.label].filter(Boolean).join(' · '),
               done: false,
+              past: isPast(e),
               checkable: false,
               tag: null,
               href: `/project/${id}/event/${e.id}`,
+              // เก็บเข้าคลังได้จากแถวนี้เลย พร้อมแถบเลิกทำแบบเดียวกับงาน
+              event: { projectId: id, eventId: e.id },
             })
           )}
         />
@@ -255,14 +265,23 @@ function Group({
   count: string | number | null
   children: React.ReactNode
 }) {
-  const empty = !count
+  /*
+   * ⚠️ **ห้ามตัด children ทิ้งตอนกลุ่มว่าง**
+   *
+   * ของเดิมเขียน `{empty ? <p>ยังไม่มี</p> : children}` ซึ่งทำให้ ItemList
+   * ถูก unmount ทันทีที่เก็บของ**ชิ้นสุดท้าย**ในกลุ่มเข้าคลัง —
+   * แถบเลิกทำที่ควรค้าง 8 วินาทีจึงหายไปพร้อมกัน กดคืนไม่ได้เลย
+   * ซึ่งเป็นจังหวะที่คนอยากกดเลิกทำมากที่สุดพอดี (เจอ 1 ก.ย. 2026)
+   *
+   * ข้อความ "ยังไม่มี" ย้ายไปอยู่ใน ItemList แทน มันรู้จำนวนแถวจริงอยู่แล้ว
+   */
   return (
     <>
       <div className="sec">
         <span>{title}</span>
         {count && <span>{count}</span>}
       </div>
-      {empty ? <p className="none">ยังไม่มี</p> : children}
+      {children}
     </>
   )
 }

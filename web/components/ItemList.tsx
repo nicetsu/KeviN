@@ -4,6 +4,7 @@ import { useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toggleDone, archiveItem, restoreItem, reorderItems } from '@/app/actions/items'
+import { archiveEvent } from '@/app/actions/events'
 import { clearTimeOffset } from '@/app/actions/timeOffsets'
 import ItemPanel, { type PanelItem } from './ItemPanel'
 
@@ -26,6 +27,21 @@ export type Row = {
    */
   href?: string | null
   /**
+   * แถวนี้เป็น event ไม่ใช่ item — ปุ่มเก็บเข้าคลังจะเรียก `archiveEvent` แทน
+   *
+   * event ไม่มี `id` ในความหมายของ item (ติ๊กไม่ได้ ลากไม่ได้) แต่ก่อนหน้านี้
+   * การไม่มี `id` ทำให้ปุ่มเก็บเข้าคลังหายไปด้วย ต้องเข้าไปกดในหน้าแก้กิจกรรม
+   * ซึ่งลึกลงไปอีกสองชั้น (เจ้าของขอให้ลบได้จากตรงนี้ 1 ก.ย. 2026)
+   */
+  event?: { projectId: string; eventId: string } | null
+  /**
+   * ผ่านไปแล้ว — จางลงแต่ **ไม่ขีดฆ่า**
+   *
+   * ต่างจาก `done` ตรงที่ขีดฆ่าแปลว่า "จัดการแล้ว" ส่วนกิจกรรมที่ผ่านไป
+   * ไม่ได้แปลว่าใครทำอะไรกับมัน มันแค่เลยเวลาไปเฉย ๆ
+   */
+  past?: boolean
+  /**
    * ปุ่มคืนค่าการตัดทอนของวันนั้น · ใส่เฉพาะแถวที่ถูกตัดเวลาหรือตั้งใจไม่ไป
    *
    * เว็บ **ตั้ง** ค่าตัดทอนไม่ได้ (นั่นเป็นงานของ Claude เพราะต้องถามกลับ)
@@ -42,6 +58,14 @@ export type Row = {
 
 const UNDO_MS = 8000
 
+/**
+ * คีย์ของแถวสำหรับซ่อน/เลิกทำ — item ใช้ id ของตัวเอง · event ใช้ id ของ event
+ * ทั้งคู่เป็น uuid จากคนละตาราง จึงไม่มีทางชนกัน
+ */
+function keyOf(r: Row): string | null {
+  return r.id ?? r.event?.eventId ?? null
+}
+
 export default function ItemList({ rows }: { rows: Row[] }) {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -49,7 +73,11 @@ export default function ItemList({ rows }: { rows: Row[] }) {
   // ติ๊กแล้วต้องขยับทันที ไม่รอเซิร์ฟเวอร์
   const [optimistic, setOptimistic] = useState<Record<string, boolean>>({})
   const [hidden, setHidden] = useState<Set<string>>(new Set())
-  const [undo, setUndo] = useState<{ id: string; title: string } | null>(null)
+  // `restore` เก็บวิธีเลิกทำของแถวนั้นไว้เลย — item กับ event คืนค่าคนละทาง
+  // และตอนกดเลิกทำ แถวต้นทางอาจถูกวาดใหม่ไปแล้ว
+  const [undo, setUndo] = useState<
+    { key: string; title: string; restore: () => Promise<{ ok: boolean; error?: string }> } | null
+  >(null)
   const [error, setError] = useState<string | null>(null)
   const [panel, setPanel] = useState<PanelItem | null>(null)
 
@@ -77,15 +105,21 @@ export default function ItemList({ rows }: { rows: Row[] }) {
   }
 
   function onArchive(r: Row) {
-    if (!r.id) return
-    const id = r.id
-    setHidden((p) => new Set(p).add(id))
-    setUndo({ id, title: r.title })
+    const key = keyOf(r)
+    if (!key) return
+    const ev = r.event
+
+    // event กับ item เก็บเข้าคลังคนละ action แต่ผู้ใช้เห็นเป็นปุ่มเดียวกัน
+    const archive = () => (ev ? archiveEvent(ev.projectId, ev.eventId, true) : archiveItem(key))
+    const restore = () => (ev ? archiveEvent(ev.projectId, ev.eventId, false) : restoreItem(key))
+
+    setHidden((p) => new Set(p).add(key))
+    setUndo({ key, title: r.title, restore })
 
     startTransition(async () => {
-      const res = await archiveItem(id)
+      const res = await archive()
       if (!res.ok) {
-        setHidden((p) => { const n = new Set(p); n.delete(id); return n })
+        setHidden((p) => { const n = new Set(p); n.delete(key); return n })
         setUndo(null)
         setError(res.error)
       }
@@ -93,19 +127,19 @@ export default function ItemList({ rows }: { rows: Row[] }) {
 
     // แถบเลิกทำค้าง 8 วินาที ตาม PLAN.md เฟส 4
     window.setTimeout(() => {
-      setUndo((u) => (u?.id === id ? null : u))
+      setUndo((u) => (u?.key === key ? null : u))
       router.refresh()
     }, UNDO_MS)
   }
 
   function onUndo() {
     if (!undo) return
-    const id = undo.id
+    const { key, restore } = undo
     setUndo(null)
     startTransition(async () => {
-      const res = await restoreItem(id)
-      if (!res.ok) { setError(res.error); return }
-      setHidden((p) => { const n = new Set(p); n.delete(id); return n })
+      const res = await restore()
+      if (!res.ok) { setError(res.error ?? 'คืนค่าไม่สำเร็จ'); return }
+      setHidden((p) => { const n = new Set(p); n.delete(key); return n })
       router.refresh()
     })
   }
@@ -121,7 +155,7 @@ export default function ItemList({ rows }: { rows: Row[] }) {
     })
   }
 
-  const visible = rows.filter((r) => !(r.id && hidden.has(r.id)))
+  const visible = rows.filter((r) => { const k = keyOf(r); return !(k && hidden.has(k)) })
 
   // ---- ลากจัดลำดับ ----------------------------------------------------
   // แถวที่ลากได้อยู่ติดกันเป็นบล็อกเดียว จึงสลับกันเองได้โดยไม่กระทบแถวอื่น
@@ -214,14 +248,16 @@ export default function ItemList({ rows }: { rows: Row[] }) {
     <>
       {error && <p className="alert alert--gap" role="alert">{error}</p>}
 
+      {shown.length === 0 && <p className="none">ยังไม่มี</p>}
+
       <div data-list>
         {shown.map((r, i) => {
           const done = isDone(r)
           const movable = Boolean(canMove && r.movable && r.id)
           return (
             <div
-              className={`row${done ? ' row--done' : ''}${dragId && dragId === r.id ? ' row--drag' : ''}`}
-              key={r.id ?? `x${i}`}
+              className={`row${done ? ' row--done' : ''}${r.past ? ' row--past' : ''}${dragId && dragId === r.id ? ' row--drag' : ''}`}
+              key={keyOf(r) ?? `x${i}`}
               data-movable={movable ? 'true' : undefined}
               data-id={r.id ?? undefined}
             >
@@ -307,7 +343,7 @@ export default function ItemList({ rows }: { rows: Row[] }) {
                 </button>
               )}
 
-              {r.id && (
+              {keyOf(r) && (
                 <button
                   type="button"
                   className="rowbtn"

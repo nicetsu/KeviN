@@ -16,12 +16,12 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (255 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (263 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
 `web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ตัวกรอง Area · ภาษา · เสียง)
 `web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/chat/markdown.ts` (แกะ markdown ของผู้ช่วย)
-`web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด)
+`web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด) · `web/lib/eventOrder.ts` (ลำดับกิจกรรม)
 
 **ความลับเก็บที่ไหน**
 VAPID private key → Supabase secrets · VAPID public key → Vercel env (`NEXT_PUBLIC_`)
@@ -83,6 +83,14 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
   และ `proxy.ts` ยืนยันตัวตนให้แล้วทุก request (แต่ `proxy.ts` เองยังต้องใช้ `getUser()` ต่อไป)
 - **เขียนข้อมูลต้องมี `.select()` แล้วนับแถวเสมอ** — `update` ที่ไม่โดนสักแถวรายงานว่าสำเร็จ
   เคยทำให้ลากจัดลำดับดูเหมือนได้แต่ไม่ได้เขียนอะไรลง DB เลย (ดู `doc/TRAPS.md`)
+
+**เก็บกวาดอัตโนมัติ — `housekeeping()` รันวันละครั้ง 20:00 UTC (ตีสามไทย)**
+
+- reminder ข้ามวัน · task ที่ติ๊กเสร็จ**และ**เลยวันส่ง → `archived_at` อัตโนมัติ
+- ของในคลังครบ **7 วัน → `DELETE` จริง** ครอบคลุม `items` · `events` · **และ `projects`**
+- **ลบ project แล้ว items ข้างในหายตามทั้งกอง** (`on delete cascade`) — ตั้งใจ เจ้าของเคาะเอง
+- เพิ่มฟังก์ชัน `security definer` ใหม่เมื่อไหร่ **ต้อง revoke จาก public/anon/authenticated ทุกครั้ง**
+  ไม่งั้นใครถือ anon key ก็ยิง `rpc/purge_archived` ลบข้อมูลทิ้งได้
 
 **สามตารางเวลา แยกหน้าที่กันชัด ๆ ห้ามให้พร่า**
 
