@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useCall, mmss } from '@/components/CallProvider'
 import type { CallState } from '@/lib/voice/session'
 
@@ -34,15 +33,18 @@ export default function VoiceCall() {
   const running = call.state !== 'idle'
 
   /*
-   * ⚠️ `going` มีไว้ให้ปุ่มยุบหายก่อนฉากจะเปลี่ยน **ไม่ใช่ตัวบอกสถานะสาย**
-   *    สถานะจริงคือ `call.state` ที่มาจาก provider · ตัวนี้ตายไปพร้อมการ remount
-   *    ซึ่งถูกแล้ว เพราะพอสายติดฉากนี้ก็หายไปทั้งก้อน
+   * ⚠️ **ห้ามใส่ state "กำลังกดโทร" มาที่นี่อีก** — เคยใส่แล้วพัง (1 ก.ย. 2026)
+   *
+   *    `session.start()` เรียก `onState('connecting')` เป็นบรรทัดแรก **ก่อน**
+   *    ขอสิทธิ์ไมค์ด้วยซ้ำ · `running` จึงเป็น true ทันทีที่กด และฉากนี้หายไปเอง
+   *    ไม่มีช่วงเวลาที่ต้องเอา state มาช่วยปิดปุ่มเลย
+   *
+   *    ที่พังคือ state ตัวนั้นไม่ถูกล้างตอนวางสาย (คอมโพเนนต์ไม่ได้ remount
+   *    แค่ return JSX คนละก้อน) ปุ่มเริ่มโทรจึงหายถาวรจนกว่าจะรีเฟรช
    */
-  const [going, setGoing] = useState(false)
-
   if (!running) {
     return (
-      <div className={`stage${going ? ' stage--going' : ''}`}>
+      <div className="stage">
         {/* วงเปล่า ไม่มีไอคอนไมค์ — นี่คือตัว KeviN ไม่ใช่ปุ่ม (doc/DECISIONS.md) */}
         <div className="orb" aria-hidden="true" />
         <div className="stage__state">
@@ -56,10 +58,7 @@ export default function VoiceCall() {
             ต่างจากภาษากับเสียงที่ยังอยู่ในหน้านี้เพราะปรับระหว่างคุย */}
 
         {/* ขอสิทธิ์ไมค์ตอนกด ไม่ใช่ตอนเข้าหน้า — ป๊อปอัปที่เด้งโดยไม่ได้ขอมักโดนปฏิเสธ */}
-        <button
-          className="btn stage__go"
-          onClick={() => { setGoing(true); void call.start() }}
-        >
+        <button className="btn stage__go" onClick={call.start}>
           <MicIcon color="var(--brand)" size={17} />
           เริ่มโทร
         </button>

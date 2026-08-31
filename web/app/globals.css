@@ -1425,16 +1425,13 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   to   { transform: scaleY(1);    opacity: 1 }
 }
 
-/* ปุ่มเริ่มโทรยุบหายตอนกด — ทำงานผ่าน `.stage--going` ที่ติดตอนกดปุ่ม */
-.stage--going .stage__go { animation: go-out var(--t-fast) var(--ease) both; pointer-events: none; }
-@keyframes go-out {
-  to { opacity: 0; transform: scale(0.88) }
-}
+/* เคยมี `.stage--going` ให้ปุ่มยุบหายตอนกด — **ถอดออกแล้ว** เพราะฉากเปลี่ยน
+   ทันทีที่กดอยู่แล้ว (session ตั้ง connecting ก่อนขอไมค์) และ state ที่ใช้คุมมัน
+   ค้างจนปุ่มหายถาวรหลังวางสาย · รายละเอียดใน VoiceCall.tsx */
 
 @media (prefers-reduced-motion: reduce) {
   .stage > *, .orb--live, .orb--think,
-  .orb--live .wave, .orb--think .wave,
-  .stage--going .stage__go { animation: none; }
+  .orb--live .wave, .orb--think .wave { animation: none; }
   .orb--live::after, .orb--think::after { display: none; }
 }
 
