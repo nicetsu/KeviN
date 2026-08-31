@@ -1,0 +1,788 @@
+<title>KeviN กลางวัน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+
+<style>
+  /* หน้านี้เป็นเอกสาร อยู่บนพื้น Nightfall เดิม
+     ส่วนจอตัวอย่างข้างในใช้จานสีกลางวันที่คำนวณใหม่ (หัวข้อ 02) */
+  :root {
+    --bg: #0A0912; --surface: #14131F; --raised: #1C1B2B;
+    --line: #26253A; --line-soft: #1D1C2C;
+    --ink: #F1F0F7; --muted: #A5A2B8; --faint: #87849D;
+    --brand: #A594FF; --brand-deep: #8878F0; --brand-soft: #1E1B33;
+    --sched: #79C2D0; --event: #D5BB6D; --due: #E0897E; --task: #74C6A4; --note: #8E88A8;
+
+    /* ---- จานสีกลางวัน ---- */
+    --l-bg:      #F3EFFC;
+    --l-card:    #FFFFFF;
+    --l-sunk:    #F7F4FE;
+    --l-line:    #E7E0F6;
+    --l-ink:     #1A1527;
+    --l-muted:   #6B6580;
+    --l-faint:   #6F6982;
+    --l-brand:   #6B48D6;
+    --l-brand-d: #5F3DC4;
+    --l-brand-s: #EFE9FE;
+    --l-sched:   #26697A;  --l-sched-s: #E2F1F4;
+    --l-event:   #7A5F18;  --l-event-s: #F6EFDC;
+    --l-due:     #B03A30;  --l-due-s:   #FBE7E4;
+    --l-task:    #1E7A54;  --l-task-s:  #E2F3EB;
+    --l-note:    #5C5670;  --l-note-s:  #EFEDF4;
+
+    --f: "Inter", "Noto Sans Thai", system-ui, sans-serif;
+    --f-mono: "Geist Mono", Consolas, ui-monospace, monospace;
+    --s--2: 0.70rem; --s--1: 0.80rem; --s-0: 0.94rem; --s-1: 1.10rem;
+    --s-2: clamp(1.25rem, 1rem + 0.85vw, 1.65rem);
+    --s-3: clamp(1.85rem, 1.35rem + 2.1vw, 2.85rem);
+    --r-card: 14px; --r-pill: 999px;
+    --measure: 66ch; --gutter: clamp(1.1rem, 4vw, 2.5rem);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--f); font-size: var(--s-0); line-height: 1.75;
+    letter-spacing: -0.005em; -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 72rem; margin: 0 auto; padding: clamp(2.5rem,7vw,5rem) var(--gutter) 6rem; display: flex; flex-direction: column; gap: 3rem; }
+  .prose { max-width: var(--measure); }
+
+  header { display: flex; flex-direction: column; gap: 0.9rem; }
+  .eyebrow { font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  h1 { margin: 0; font-size: var(--s-3); font-weight: 600; line-height: 1.12; letter-spacing: -0.025em; text-wrap: balance; }
+  .lede { margin: 0; max-width: var(--measure); font-size: var(--s-1); color: var(--muted); }
+  .thesis { border-left: 2px solid var(--brand); padding: 0.2rem 0 0.2rem 1.1rem; max-width: var(--measure); font-size: var(--s-1); }
+  .thesis b { color: var(--brand); font-weight: 600; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag { font-family: var(--f-mono); font-size: var(--s--2); padding: 0.18rem 0.6rem; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); color: var(--faint); }
+
+  section { display: flex; flex-direction: column; gap: 1rem; }
+  h2 { margin: 0; font-size: var(--s-2); font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; text-wrap: balance; display: flex; align-items: baseline; gap: 0.7rem; }
+  h2 .n { font-family: var(--f-mono); font-size: var(--s--1); font-weight: 500; color: var(--brand); flex: none; }
+  h3 { margin: 0.6rem 0 0; font-size: var(--s-1); font-weight: 600; }
+  p { margin: 0; max-width: var(--measure); }
+  .sub { color: var(--muted); font-size: var(--s--1); max-width: var(--measure); }
+  strong { font-weight: 600; color: var(--ink); }
+  em { font-style: normal; color: var(--sched); }
+  code { font-family: var(--f-mono); font-size: 0.86em; background: var(--raised); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.08em 0.36em; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--s--1); min-width: 30rem; }
+  th, td { text-align: left; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; line-height: 1.55; }
+  thead th { font-size: var(--s--2); font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); background: var(--raised); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .note { border: 1px solid var(--line); border-left: 2px solid var(--sched); background: var(--surface); border-radius: 0 12px 12px 0; padding: 0.85rem 1.05rem; max-width: var(--measure); font-size: var(--s--1); color: var(--muted); line-height: 1.7; }
+  .note strong { color: var(--sched); }
+  .note--warn { border-left-color: var(--due); } .note--warn strong { color: var(--due); }
+  .note--brand { border-left-color: var(--brand); } .note--brand strong { color: var(--brand); }
+
+  ul { margin: 0; padding-left: 1.15rem; max-width: var(--measure); }
+  li { margin-bottom: 0.3rem; } li::marker { color: var(--faint); }
+
+  /* ================= จอกลางวัน ================= */
+  .screens { display: grid; gap: 1.1rem; grid-template-columns: 1fr; }
+  @media (min-width: 620px) { .screens { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 1000px) { .screens--3 { grid-template-columns: repeat(3,1fr); } }
+
+  .ph {
+    background: var(--l-bg); border-radius: 22px; overflow: hidden;
+    display: flex; flex-direction: column; min-height: 20rem;
+    color: var(--l-ink); border: 1px solid var(--line);
+  }
+  .ph__cap { font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.08em; text-transform: uppercase; color: var(--l-faint); padding: 0.55rem 0.85rem 0; display: flex; justify-content: space-between; }
+  .ph__cap b { color: var(--l-brand); font-weight: 500; }
+  .sc { padding: 0.4rem 0.85rem 0.7rem; display: flex; flex-direction: column; gap: 0.32rem; flex: 1; }
+  .sc h4 { margin: 0.25rem 0 0.05rem; font-size: var(--s-1); font-weight: 700; letter-spacing: -0.03em; color: var(--l-ink); }
+  .sc .back { font-size: var(--s--2); color: var(--l-brand); font-weight: 500; }
+  .sc .subl { font-size: var(--s--2); color: var(--l-faint); }
+
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 0.2rem 0 0.15rem; }
+  .who { display: flex; align-items: center; gap: 0.45rem; }
+  .av { width: 1.85rem; height: 1.85rem; border-radius: 50%; background: linear-gradient(135deg, var(--l-brand) 0%, #C9A6F0 100%); flex: none; }
+  .who div { line-height: 1.25; }
+  .who b { display: block; font-size: var(--s--1); font-weight: 600; }
+  .who small { font-size: 0.62rem; color: var(--l-faint); }
+  .tbtn { width: 1.85rem; height: 1.85rem; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: var(--l-card); color: var(--l-muted); border: 1px solid var(--l-line); }
+  .tbtn svg { width: 0.95rem; height: 0.95rem; }
+
+  .lead { font-size: 1.3rem; font-weight: 700; line-height: 1.24; letter-spacing: -0.04em; margin: 0.25rem 0 0.5rem; }
+  .lead i { font-style: normal; color: var(--l-brand); }
+
+  .lsec { font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.1em; text-transform: uppercase; color: var(--l-faint); display: flex; justify-content: space-between; margin: 0.5rem 0 0.1rem; }
+  .lsec b { color: var(--l-brand); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+  .lcard {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--l-card); border: 1px solid var(--l-line);
+    border-radius: 16px; padding: 0.6rem 0.68rem; margin-bottom: 0.4rem;
+    font-size: var(--s--1); box-shadow: 0 1px 2px rgba(60, 40, 110, 0.05);
+  }
+  .lcard--late { border-color: rgba(176,58,48,0.32); }
+  .lcard--done { opacity: 0.5; } .lcard--done .lc__t { text-decoration: line-through; }
+  .lcard--past { opacity: 0.55; }
+  .lc__ico { width: 2.05rem; height: 2.05rem; border-radius: 12px; flex: none; display: flex; align-items: center; justify-content: center; }
+  .lc__ico svg { width: 1rem; height: 1rem; }
+  .lc__b { flex: 1; min-width: 0; }
+  .lc__t { font-weight: 600; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc__m { font-family: var(--f-mono); font-size: var(--s--2); color: var(--l-faint); margin-top: 0.02rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc__go { color: var(--l-faint); flex: none; }
+  .lc__tag { font-family: var(--f-mono); font-size: var(--s--2); padding: 0.02rem 0.45rem; border-radius: var(--r-pill); white-space: nowrap; flex: none; }
+  .lt--late { color: var(--l-due); background: var(--l-due-s); }
+  .lt--gone { color: var(--l-faint); background: var(--l-note-s); }
+
+  .li--sched { background: var(--l-sched-s); color: var(--l-sched); }
+  .li--event { background: var(--l-event-s); color: var(--l-event); }
+  .li--due   { background: var(--l-due-s);   color: var(--l-due); }
+  .li--task  { background: var(--l-task-s);  color: var(--l-task); }
+  .li--note  { background: var(--l-note-s);  color: var(--l-note); }
+  .li--brand { background: var(--l-brand-s); color: var(--l-brand); }
+
+  /* การ์ดม่วงเต็มใบ */
+  .hero {
+    background: linear-gradient(135deg, var(--l-brand) 0%, #9A78EE 100%);
+    color: #fff; border-radius: 18px; padding: 0.8rem 0.85rem; margin: 0.1rem 0 0.35rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::after { content: ""; position: absolute; right: -1.5rem; top: -1.5rem; width: 5rem; height: 5rem; border-radius: 50%; background: rgba(255,255,255,0.12); }
+  .hero__k { font-family: var(--f-mono); font-size: var(--s--2); opacity: 0.9; letter-spacing: 0.04em; }
+  .hero__n { font-size: var(--s-1); font-weight: 700; letter-spacing: -0.03em; margin: 0.2rem 0 0.12rem; }
+  .hero__t { font-family: var(--f-mono); font-size: var(--s--1); opacity: 0.95; }
+  .hero__s { font-size: var(--s--2); opacity: 0.85; }
+  .hero__bar { height: 4px; background: rgba(255,255,255,0.28); border-radius: 3px; margin-top: 0.5rem; overflow: hidden; }
+  .hero__bar u { display: block; height: 100%; background: #fff; border-radius: 3px; }
+
+  /* ตัวเลขสามช่อง */
+  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.4rem; margin: 0.15rem 0 0.3rem; }
+  .stat { background: var(--l-card); border: 1px solid var(--l-line); border-radius: 14px; padding: 0.5rem 0.4rem; text-align: center; }
+  .stat u { display: block; font-family: var(--f-mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--l-faint); font-style: normal; text-decoration: none; }
+  .stat b { display: block; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 0.1rem; }
+
+  /* pill filter */
+  .pills { display: flex; gap: 0.3rem; margin: 0.35rem 0 0.15rem; flex-wrap: wrap; }
+  .pills span { font-size: var(--s--2); padding: 0.22rem 0.7rem; border-radius: var(--r-pill); background: var(--l-card); border: 1px solid var(--l-line); color: var(--l-muted); }
+  .pills span.on { background: var(--l-brand); border-color: var(--l-brand); color: #fff; font-weight: 500; }
+
+  /* วงกลมความคืบหน้า */
+  .ring { display: flex; align-items: center; gap: 0.7rem; background: var(--l-card); border: 1px solid var(--l-line); border-radius: 16px; padding: 0.65rem 0.7rem; margin-bottom: 0.4rem; }
+  .ring svg { width: 3.1rem; height: 3.1rem; flex: none; }
+  .ring__t { font-size: var(--s--1); font-weight: 600; }
+  .ring__m { font-family: var(--f-mono); font-size: var(--s--2); color: var(--l-faint); }
+
+  /* การ์ด Area */
+  .areas { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 0.15rem; }
+  .ac { position: relative; border-radius: 16px; padding: 0.6rem 0.65rem; min-height: 4rem; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; background: var(--l-card); border: 1px solid var(--l-line); }
+  .ac::before { content: ""; position: absolute; inset: 0; opacity: 0.13; }
+  .ac--class::before { background: linear-gradient(135deg,#26697A,#5F3DC4); }
+  .ac--comp::before  { background: linear-gradient(135deg,#B03A30,#6B48D6); }
+  .ac--pers::before  { background: linear-gradient(135deg,#1E7A54,#26697A); }
+  .ac--gen::before   { background: linear-gradient(135deg,#6B48D6,#B5619B); }
+  .ac span { position: relative; }
+  .ac b { font-size: var(--s--1); font-weight: 700; letter-spacing: -0.02em; }
+  .ac u { font-family: var(--f-mono); font-size: var(--s--2); color: var(--l-muted); font-style: normal; text-decoration: none; }
+  .ac s { position: absolute; top: 0.45rem; right: 0.5rem; font-family: var(--f-mono); font-size: var(--s--2); color: var(--l-due); background: var(--l-due-s); border-radius: var(--r-pill); padding: 0 0.4rem; text-decoration: none; }
+
+  /* ปฏิทิน */
+  .mo { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-top: 0.25rem; }
+  .mo i { font-style: normal; text-align: center; font-family: var(--f-mono); font-size: 0.6rem; color: var(--l-faint); }
+  .mo b { font-weight: 400; background: var(--l-card); border: 1px solid transparent; border-radius: 10px; min-height: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; font-family: var(--f-mono); font-size: 0.62rem; color: var(--l-muted); }
+  .mo b.out { opacity: 0.35; }
+  .mo b.now { background: var(--l-brand); border-color: var(--l-brand); color: #fff; font-weight: 600; }
+  .mo u { display: flex; gap: 2px; min-height: 4px; }
+  .mo u s { width: 4px; height: 4px; border-radius: 50%; display: block; }
+
+  .wk { display: grid; grid-template-columns: 1.7rem repeat(8,minmax(0,1fr)); gap: 1px; background: var(--l-line); border: 1px solid var(--l-line); border-radius: 13px; overflow: hidden; margin-top: 0.25rem; }
+  .wk > * { background: var(--l-bg); }
+  .wk .hh { font-family: var(--f-mono); font-size: 0.55rem; color: var(--l-faint); display: flex; align-items: center; justify-content: center; padding: 0.18rem 0; }
+  .wk .dd { background: var(--l-card); font-family: var(--f-mono); font-size: 0.58rem; color: var(--l-muted); display: flex; align-items: center; padding-left: 0.25rem; }
+  .wk .dd.now { color: var(--l-brand); font-weight: 600; }
+  .wk .blk { margin: 2px; border-radius: 7px; font-size: 0.55rem; padding: 0.08rem 0.22rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; background: var(--l-sched-s); color: var(--l-sched); border-left: 2px solid var(--l-sched); }
+  .wk .blk.ev { background: var(--l-event-s); color: var(--l-event); border-left-color: var(--l-event); }
+  .wk .nowline { background: var(--l-brand); width: 2px; justify-self: center; }
+
+  /* แชต */
+  .seg { display: flex; gap: 0.25rem; background: var(--l-card); border: 1px solid var(--l-line); border-radius: var(--r-pill); padding: 0.14rem; margin: 0.2rem 0 0.35rem; }
+  .seg span { flex: 1; text-align: center; font-size: var(--s--2); padding: 0.24rem; border-radius: var(--r-pill); color: var(--l-muted); }
+  .seg span.on { background: var(--l-brand); color: #fff; font-weight: 500; }
+  .bub { max-width: 84%; padding: 0.45rem 0.65rem; border-radius: 16px; font-size: var(--s--1); line-height: 1.5; margin-bottom: 0.3rem; }
+  .bub--me { align-self: flex-end; background: var(--l-brand); color: #fff; border-bottom-right-radius: 5px; }
+  .bub--ai { align-self: flex-start; background: var(--l-card); border: 1px solid var(--l-line); border-bottom-left-radius: 5px; }
+  .bub small { display: block; font-family: var(--f-mono); font-size: 0.6rem; opacity: 0.75; margin-top: 0.12rem; }
+  .ask { display: flex; align-items: center; gap: 0.45rem; margin-top: auto; background: var(--l-card); border: 1px solid var(--l-line); border-radius: var(--r-pill); padding: 0.32rem 0.36rem 0.32rem 0.85rem; }
+  .ask u { flex: 1; color: var(--l-faint); font-size: var(--s--1); font-style: normal; text-decoration: none; }
+  .ask s { width: 1.75rem; height: 1.75rem; border-radius: 50%; flex: none; background: var(--l-brand); display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; }
+  .ask s svg { width: 0.85rem; height: 0.85rem; }
+
+  .orb { width: 4rem; height: 4rem; border-radius: 50%; margin: 0.5rem auto 0.35rem; background: var(--l-sched-s); border: 1px solid rgba(38,105,122,0.32); display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .orb i { width: 3px; border-radius: 2px; background: var(--l-sched); display: block; font-style: normal; }
+  .cst { text-align: center; font-family: var(--f-mono); font-size: var(--s--2); color: var(--l-sched); }
+  .cbar { display: flex; gap: 0.4rem; justify-content: center; margin-top: 0.45rem; }
+  .lbtn { font-size: var(--s--2); border-radius: var(--r-pill); padding: 0.28rem 0.85rem; border: 1px solid var(--l-line); color: var(--l-muted); background: var(--l-card); }
+  .lbtn--end { color: var(--l-due); border-color: rgba(176,58,48,0.38); }
+
+  .agenda { display: grid; grid-template-columns: auto 1fr; gap: 0 0.55rem; font-size: var(--s--1); }
+  .agenda > div { padding: 0.3rem 0; border-bottom: 1px solid var(--l-line); }
+  .agenda .tm { font-family: var(--f-mono); color: var(--l-sched); white-space: nowrap; font-size: var(--s--2); }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.28rem; margin: 0.25rem 0; }
+  .chips span { font-family: var(--f-mono); font-size: var(--s--2); color: var(--l-muted); background: var(--l-card); border: 1px solid var(--l-line); border-radius: var(--r-pill); padding: 0.08rem 0.5rem; }
+  .chips span.tm { color: var(--l-sched); background: var(--l-sched-s); border-color: transparent; }
+
+  .lempty { border: 1px dashed var(--l-line); border-radius: 16px; padding: 0.8rem; text-align: center; font-size: var(--s--2); color: var(--l-muted); background: var(--l-card); }
+  .lnone { font-size: var(--s--2); color: var(--l-faint); padding: 0.25rem 0; }
+  .llink { font-size: var(--s--2); color: var(--l-brand); font-weight: 500; padding: 0.25rem 0; }
+
+  .lnav { display: flex; align-items: center; border-top: 1px solid var(--l-line); padding: 0.45rem 0.1rem 0.05rem; margin-top: auto; }
+  .lnav span { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; flex: 1; color: var(--l-faint); font-size: 0.6rem; }
+  .lnav span.on { color: var(--l-brand); font-weight: 600; }
+  .lnav svg { width: 1rem; height: 1rem; }
+  .lnav .mid { flex: 0 0 3.2rem; color: #fff; background: var(--l-brand); border-radius: var(--r-pill); padding: 0.24rem 0; font-weight: 600; }
+
+  .swatch { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .swatch div { display: flex; align-items: center; gap: 0.4rem; font-size: var(--s--2); font-family: var(--f-mono); color: var(--muted); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 0.16rem 0.7rem 0.16rem 0.25rem; }
+  .swatch u { width: 1.5rem; height: 1.5rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .swatch svg { width: 0.8rem; height: 0.8rem; }
+
+  .foot { font-size: var(--s--1); color: var(--faint); max-width: var(--measure); border-top: 1px solid var(--line-soft); padding-top: 1.3rem; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">KeviN · จานสีกลางวัน · ข้อเสนอ 1 ก.ย. 2026</div>
+    <h1>ธีมสว่างแก้ปัญหาที่ธีมมืดถูกเลือกมาแก้</h1>
+    <p class="lede">
+      โครงเดิมทุกหน้าเหมือนไฟล์ก่อน — เปลี่ยนแค่จานสี
+      แต่ข้อนี้ใหญ่กว่าการทาสี เพราะมันกลับมติที่เคาะไว้ตั้งแต่ต้น
+    </p>
+    <div class="thesis">
+      เหตุผลที่เลือกธีมมืดเขียนไว้ว่า <b>“ธีมมืดล้วนอ่านยากกลางแดด
+      ซึ่งคือตอนเดินไปเรียนแล้วเปิดดูตาราง”</b><br>
+      แล้วแก้ด้วยการ<b>ดันคอนทราสต์ให้สูงกว่าต้นแบบ</b> —
+      แต่ธีมสว่างแก้ปัญหานั้นได้ตรงกว่า
+    </div>
+    <div class="tags">
+      <span class="tag">10 จอ</span>
+      <span class="tag">โครงเดิม 100%</span>
+      <span class="tag">คำนวณสีใหม่ทั้งชุด</span>
+    </div>
+  </header>
+
+  <!-- ============ 01 ============ -->
+  <section>
+    <h2><span class="n">01</span> ข้อนี้ไม่ใช่แค่ทาสี</h2>
+    <p class="prose">
+      <code>doc/DECISIONS.md</code> บันทึกไว้ว่า <strong>ธีมมืดอย่างเดียว</strong>
+      พร้อมเหตุผลว่ากลัวอ่านกลางแดดไม่ออก จึงดันคอนทราสต์ขึ้นเป็นทางแก้ —
+      และ <code>globals.css</code> ประกาศ <code>color-scheme: dark</code> ไว้ตายตัว
+    </p>
+    <p class="prose">
+      การเปลี่ยนไปสว่างคือ<strong>การกลับมตินั้น</strong> ผมจึงเขียนทั้งข้อดีและข้อเสียไว้
+      ให้ตัดสินจากของจริง ไม่ใช่จากภาพที่สวย
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>เรื่อง</th><th>ธีมมืด (ตอนนี้)</th><th>ธีมสว่าง</th></tr></thead>
+        <tbody>
+          <tr><td><strong>กลางแดด</strong></td><td>อ่านยาก แม้ดันคอนทราสต์แล้ว</td><td><strong>อ่านง่ายกว่าชัดเจน</strong> — จอสว่างสู้แดดได้ด้วยตัวมันเอง</td></tr>
+          <tr><td><strong>กลางคืน</strong></td><td>สบายตา</td><td><strong>แสบตา</strong> — และคุณใช้แอปนี้ตอนดึกบ่อย (ทดสอบตอน 23:16 กับตีสองมาแล้ว)</td></tr>
+          <tr><td><strong>แบตเตอรี่</strong></td><td>ประหยัดบนจอ OLED — พิกเซลดำไม่กินไฟ</td><td>กินมากกว่า</td></tr>
+          <tr><td><strong>สีชนิดข้อมูล</strong></td><td>ใช้ได้เลย</td><td><strong>ต้องคำนวณใหม่ทั้งชุด</strong> — สีเดิมบนพื้นขาวคอนทราสต์ตกทุกสี</td></tr>
+          <tr><td><strong>ความรู้สึก</strong></td><td>เครื่องมือ · เงียบ</td><td>สดใส · เข้าถึงง่าย</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note note--brand">
+      <strong>ทางที่ไม่ต้องเลือกข้าง</strong> — ทำทั้งสองจานสีแล้วสลับตามระบบ
+      (<code>prefers-color-scheme</code>) หรือมีสวิตช์ในหน้าตั้งค่า ·
+      โครงสร้าง CSS ของโปรเจกต์เอื้ออยู่แล้วเพราะทุกสีเป็น token ไม่ได้ฝังค่าไว้ในคอมโพเนนต์
+      งานจริงคือคำนวณสีชุดที่สองให้ผ่านคอนทราสต์ ไม่ใช่รื้อโครง
+    </div>
+  </section>
+
+  <!-- ============ 02 ============ -->
+  <section>
+    <h2><span class="n">02</span> ทำไมยกสีเดิมมาใช้ตรง ๆ ไม่ได้</h2>
+    <p class="prose">
+      สีชนิดข้อมูลของ KeviN ถูก<strong>ลดความจัดลง ~45%</strong> ตั้งแต่แรก
+      เพื่อให้อ่านสบายบนพื้นดำ · พอเอาไปวางบนพื้นขาว มันจางเกินจนคอนทราสต์ตก AA ทุกสี
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ชนิด</th><th class="n">บนพื้นมืด</th><th class="n">บนพื้นสว่าง</th><th>ทำอะไร</th></tr></thead>
+        <tbody>
+          <tr><td>คาบเรียน</td><td class="n">#79C2D0</td><td class="n">#26697A</td><td>เข้มลง ~2 ระดับ คงเฉดฟ้าเดิม</td></tr>
+          <tr><td>กิจกรรม</td><td class="n">#D5BB6D</td><td class="n">#7A5F18</td><td>เหลืองบนขาวแย่ที่สุด ต้องเข้มมากที่สุด</td></tr>
+          <tr><td>เตือน/เลยกำหนด</td><td class="n">#E0897E</td><td class="n">#B03A30</td><td>อิ่มขึ้นเพื่อให้ยังอ่านว่า “ต้องรีบ”</td></tr>
+          <tr><td>งาน</td><td class="n">#74C6A4</td><td class="n">#1E7A54</td><td>เข้มลงมาก เขียวอ่อนบนขาวแทบมองไม่เห็น</td></tr>
+          <tr><td>ม่วงแบรนด์</td><td class="n">#A594FF</td><td class="n">#6B48D6</td><td>ยังเป็นสิ่งที่เด่นที่สุด — กฎม่วงยังอยู่</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="swatch">
+      <div><u class="li--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></u> คาบเรียน</div>
+      <div><u class="li--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></u> กิจกรรม</div>
+      <div><u class="li--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></u> เตือน</div>
+      <div><u class="li--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></u> งาน</div>
+      <div><u class="li--note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6"/></svg></u> โน้ต</div>
+    </div>
+  </section>
+
+  <!-- ============ 03 ============ -->
+  <section>
+    <h2><span class="n">03</span> หน้าวันนี้</h2>
+    <p class="sub">กลุ่มเดิม ลำดับเดิม — พลาดไปแล้ว · เลยกำหนด · วันนี้</p>
+
+    <div class="screens">
+      <div class="ph">
+        <div class="ph__cap"><span>วันนี้</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="top">
+            <div class="who">
+              <div class="av"></div>
+              <div><b>สวัสดี</b><small>อังคาร 1 ก.ย.</small></div>
+            </div>
+            <div class="tbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></div>
+          </div>
+
+          <div class="hero">
+            <div class="hero__k">คาบถัดไป · อีก 40 นาที</div>
+            <div class="hero__n">สถาปัตยกรรมเครือข่ายฯ</div>
+            <div class="hero__t">09:00 – 12:00</div>
+            <div class="hero__s">E11-S604 · บรรยาย</div>
+          </div>
+
+          <div class="lsec"><span>พลาดไปแล้ว</span><span>1</span></div>
+          <div class="lcard lcard--past">
+            <div class="lc__ico li--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="lc__b"><div class="lc__t">เตือนประชุมทีม</div><div class="lc__m">เมื่อวาน 14:00</div></div>
+            <span class="lc__tag lt--gone">เก็บคืนนี้</span>
+          </div>
+
+          <div class="lsec"><span>เลยกำหนด</span><span>1</span></div>
+          <div class="lcard lcard--late">
+            <div class="lc__ico li--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="lc__b"><div class="lc__t">ส่งใบสมัครชมรม</div><div class="lc__m">General · เลย 2 วัน</div></div>
+            <span class="lc__tag lt--late">เลยกำหนด</span>
+          </div>
+
+          <div class="lsec"><span>วันนี้</span><span>3</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="lc__b"><div class="lc__t">เกษตรศาสตร์ฯ</div><div class="lc__m">15:00–17:00 · ONLINE</div></div>
+          </div>
+          <div class="lcard">
+            <div class="lc__ico li--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="lc__b"><div class="lc__t">อ่านสรุปบทที่ 3</div><div class="lc__m">ดิสครีต</div></div>
+          </div>
+
+          <div class="lnav">
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>วันนี้ · กำลังเรียน</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="top">
+            <div class="who"><div class="av"></div><div><b>สวัสดี</b><small>อังคาร 1 ก.ย.</small></div></div>
+            <div class="tbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></div>
+          </div>
+
+          <div class="hero">
+            <div class="hero__k">กำลังเรียนอยู่ · เหลือ 48 นาที</div>
+            <div class="hero__n">สถาปัตยกรรมเครือข่ายฯ</div>
+            <div class="hero__t">09:00 – 12:00</div>
+            <div class="hero__s">E11-S604 · บรรยาย</div>
+            <div class="hero__bar"><u style="width:73%"></u></div>
+          </div>
+
+          <div class="lsec"><span>วันนี้</span><span>3</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="lc__b"><div class="lc__t">เกษตรศาสตร์ฯ</div><div class="lc__m">15:00–17:00 · ONLINE</div></div>
+          </div>
+          <div class="lcard lcard--done">
+            <div class="lc__ico li--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="lc__b"><div class="lc__t">อ่านสรุปบทที่ 3</div><div class="lc__m">เสร็จ 08:20</div></div>
+          </div>
+          <div class="lcard">
+            <div class="lc__ico li--note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 13h6"/></svg></div>
+            <div class="lc__b"><div class="lc__t">อ.ชอบออกจากสไลด์</div><div class="lc__m">ดิสครีต</div></div>
+          </div>
+
+          <div class="lnav">
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 ============ -->
+  <section>
+    <h2><span class="n">04</span> คลัง · หน้า Area · ของที่เก็บไว้</h2>
+    <div class="screens screens--3">
+      <div class="ph">
+        <div class="ph__cap"><span>คลัง</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <h4>คลัง</h4>
+          <div class="subl">แตะเพื่อเปิด Area</div>
+          <div class="areas">
+            <div class="ac ac--class"><span><b>Class</b></span><span><u>8 วิชา</u></span><s>2</s></div>
+            <div class="ac ac--comp"><span><b>Competition</b></span><span><u>ว่าง</u></span></div>
+            <div class="ac ac--pers"><span><b>Personal</b></span><span><u>ว่าง</u></span></div>
+            <div class="ac ac--gen"><span><b>General</b></span><span><u>3 โปรเจกต์</u></span></div>
+          </div>
+          <div class="lsec"><span>กิจกรรมที่จะถึง</span><span>1</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="lc__b"><div class="lc__t">KBTG Techtopia</div><div class="lc__m">16 ก.ย. 08:30 · QSNCC</div></div>
+            <span class="lc__go">›</span>
+          </div>
+          <div class="lcard" style="margin-top:.5rem">
+            <div class="lc__b"><div class="lc__t" style="font-weight:500;color:var(--l-muted)">ของที่เก็บไว้</div></div>
+            <span class="lc__m">9</span><span class="lc__go">›</span>
+          </div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>หน้า Area</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="back">‹ คลัง</div>
+          <div class="ac ac--class" style="min-height:3.2rem;margin:.3rem 0 .5rem">
+            <span><b>Class</b></span><span><u>8 วิชา</u></span><s>2</s>
+          </div>
+          <div class="lcard">
+            <span class="lc__go">›</span>
+            <div class="lc__b"><div class="lc__t">ดิสครีต</div><div class="lc__m">อ. 13:00 · พฤ. 09:00</div></div>
+            <span class="lc__tag lt--late">2</span>
+          </div>
+          <div class="lcard">
+            <span class="lc__go">›</span>
+            <div class="lc__b"><div class="lc__t">ซอฟต์แวร์</div><div class="lc__m">จ. 13:00 · อ. 09:00</div></div>
+          </div>
+          <div class="lcard">
+            <span class="lc__go">›</span>
+            <div class="lc__b"><div class="lc__t">สถาปัตยกรรมเครือข่ายฯ</div><div class="lc__m">พ. 09:00</div></div>
+          </div>
+          <div class="llink">+ วิชาใหม่</div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>ของที่เก็บไว้</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="back">‹ คลัง</div>
+          <h4>ของที่เก็บไว้</h4>
+          <div class="subl">ลบถาวรเมื่อครบ 7 วัน</div>
+          <div class="lsec"><span>เหลืออีกไม่ถึงวัน</span><span>2</span></div>
+          <div class="lcard lcard--late">
+            <div class="lc__ico li--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="lc__b"><div class="lc__t">เตือนส่งใบสมัคร</div><div class="lc__m">ระบบเก็บให้</div></div>
+            <span class="lc__tag lt--late">อีก 4 ชม.</span>
+          </div>
+          <div class="lcard lcard--late">
+            <div class="lc__ico li--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="lc__b"><div class="lc__t">แบบฝึกหัดบทที่ 3</div><div class="lc__m">คุณกดเก็บเอง</div></div>
+            <span class="lc__tag lt--late">อีก 9 ชม.</span>
+          </div>
+          <div class="lsec"><span>ยังมีเวลา</span><span>7</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="lc__b"><div class="lc__t">Workshop: Equity</div><div class="lc__m">คุณกดเก็บเอง</div></div>
+            <span class="lc__tag lt--gone">อีก 5 วัน</span>
+          </div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 ============ -->
+  <section>
+    <h2><span class="n">05</span> ปฏิทิน · หน้าวิชา · หน้ากิจกรรม</h2>
+    <div class="screens screens--3">
+      <div class="ph">
+        <div class="ph__cap"><span>ปฏิทิน · เดือน</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <h4>กันยายน 2569</h4>
+          <div class="seg"><span class="on">เดือน</span><span>สัปดาห์</span></div>
+          <div class="mo">
+            <i>จ</i><i>อ</i><i>พ</i><i>พฤ</i><i>ศ</i><i>ส</i><i>อา</i>
+            <b class="out">31<u></u></b>
+            <b class="now">1<u><s style="background:#fff"></s></u></b>
+            <b>2<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>3<u><s style="background:var(--l-sched)"></s><s style="background:var(--l-due)"></s></u></b>
+            <b>4<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>5<u></u></b><b>6<u></u></b>
+            <b>7<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>8<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>9<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>10<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>11<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>12<u></u></b><b>13<u></u></b>
+            <b>14<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>15<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>16<u><s style="background:var(--l-event)"></s></u></b>
+            <b>17<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>18<u><s style="background:var(--l-sched)"></s></u></b>
+            <b>19<u></u></b><b>20<u></u></b>
+          </div>
+          <div class="lsec"><span>อังคาร 1 ก.ย.</span><span>2</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="lc__b"><div class="lc__t">สถาปัตยกรรมเครือข่ายฯ</div><div class="lc__m">09:00–12:00</div></div>
+          </div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>ปฏิทิน · สัปดาห์</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <h4>1 – 7 ก.ย.</h4>
+          <div class="seg"><span>เดือน</span><span class="on">สัปดาห์</span></div>
+          <div class="wk">
+            <div class="hh"></div><div class="hh">09</div><div class="hh">10</div><div class="hh">11</div><div class="hh">12</div><div class="hh">13</div><div class="hh">14</div><div class="hh">15</div><div class="hh">16</div>
+            <div class="dd now">จ</div><div class="blk" style="grid-column:2/5">สถาปัตย์ฯ</div><div></div><div></div><div></div><div class="blk" style="grid-column:8/10">เกษตรฯ</div>
+            <div class="dd">อ</div><div></div><div></div><div></div><div></div><div class="blk" style="grid-column:6/8">ดิสครีต</div><div></div><div></div>
+            <div class="dd">พ</div><div class="blk" style="grid-column:2/4">ซอฟต์แวร์</div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div class="dd">พฤ</div><div class="blk" style="grid-column:2/4">ดิสครีต</div><div></div><div></div><div></div><div></div><div></div><div></div>
+            <div class="dd">ศ</div><div></div><div></div><div class="blk ev" style="grid-column:4/7">Workshop</div><div></div><div></div><div></div>
+          </div>
+          <p class="lnone" style="margin-top:.4rem">ปฏิทินไว้ดู · แก้ที่หน้าคลัง</p>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>หน้าวิชา</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="back">‹ Class</div>
+          <h4>ดิสครีต</h4>
+          <div class="subl">อ. 13:00–15:00 · พฤ. 09:00–11:00</div>
+          <div class="llink">แก้ช่วงเวลาประจำ ›</div>
+          <div class="lsec"><span>กิจกรรม</span><span>1</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="lc__b"><div class="lc__t">สอบกลางภาค</div><div class="lc__m">12 ต.ค. 09:00</div></div>
+            <span class="lc__go">›</span>
+          </div>
+          <div class="lsec"><span>ที่ผ่านแล้ว</span><span>1</span></div>
+          <div class="lcard lcard--past">
+            <div class="lc__ico li--event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+            <div class="lc__b"><div class="lc__t">ติวก่อนสอบย่อย</div><div class="lc__m">28 ส.ค. 18:00</div></div>
+          </div>
+          <div class="lsec"><span>งาน</span><span>1 / 3</span></div>
+          <div class="lcard lcard--late">
+            <div class="lc__ico li--due"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+            <div class="lc__b"><div class="lc__t">แบบฝึกหัดบทที่ 4</div><div class="lc__m">22 ส.ค. 23:59</div></div>
+            <span class="lc__tag lt--late">เลยกำหนด</span>
+          </div>
+          <div class="lcard lcard--done">
+            <div class="lc__ico li--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></div>
+            <div class="lc__b"><div class="lc__t">ทำสรุปบทที่ 3</div><div class="lc__m">เสร็จ 28 ส.ค.</div></div>
+          </div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 ============ -->
+  <section>
+    <h2><span class="n">06</span> แท็บ KeviN · หน้ากิจกรรม · ตั้งค่า</h2>
+    <div class="screens screens--3">
+      <div class="ph">
+        <div class="ph__cap"><span>KeviN · แชต</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="top">
+            <div style="font-weight:700;letter-spacing:-.02em">KeviN</div>
+            <div class="tbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></div>
+          </div>
+          <div class="seg"><span class="on">แชต</span><span>โทร</span></div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bub bub--me">- voice -<small>จากสาย</small></div>
+            <div class="bub bub--ai">พรุ่งนี้มีคาบเดียวนะ ดิสครีตบ่ายโมง<small>จากสาย</small></div>
+            <div class="bub bub--me">แก้ข้อมูลได้ไหม</div>
+            <div class="bub bub--ai">ผมแก้ให้ไม่ได้ครับ จัดการได้ที่ <span style="color:var(--l-brand);font-weight:500">/library</span></div>
+          </div>
+          <div class="ask"><u>พิมพ์ข้อความ</u><s><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></s></div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>KeviN · โทร</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <div class="top">
+            <div style="font-weight:700;letter-spacing:-.02em">KeviN</div>
+            <div class="tbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2"/></svg></div>
+          </div>
+          <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+            <div class="cst">● กำลังคุย 02:14</div>
+            <div class="orb"><i style="height:13px"></i><i style="height:24px"></i><i style="height:34px"></i><i style="height:20px"></i><i style="height:11px"></i></div>
+            <div class="cst">กำลังฟัง</div>
+            <div class="lcard" style="margin-top:.5rem">
+              <div class="lc__ico li--brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
+              <div class="lc__b"><div class="lc__t" style="font-weight:400">พรุ่งนี้มีสื่อสารสนเทศ 10:00</div></div>
+            </div>
+            <div style="text-align:center;margin-top:.45rem"><span class="lbtn">ไมค์ · อัตโนมัติ</span></div>
+            <div class="cbar"><span class="lbtn">ปิดไมค์</span><span class="lbtn lbtn--end">วางสาย</span></div>
+          </div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph">
+        <div class="ph__cap"><span>ตั้งค่า</span><b>กลางวัน</b></div>
+        <div class="sc">
+          <h4>ตั้งค่า</h4>
+          <div class="lsec"><span>การแจ้งเตือน</span><span>1 เครื่อง</span></div>
+          <div class="lcard">
+            <div class="lc__ico li--task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9a6 6 0 1112 0v5l2 3H4l2-3z"/><path d="M10 20h4"/></svg></div>
+            <div class="lc__b"><div class="lc__t">Android · Chrome</div><div class="lc__m">เปิดอยู่</div></div>
+          </div>
+          <div class="lsec"><span>คุยกับ KeviN</span><span></span></div>
+          <div class="lcard"><div class="lc__b"><div class="lc__t" style="font-weight:500">ภาษา</div><div class="lc__m">ไทย</div></div><span class="lc__go">›</span></div>
+          <div class="lcard"><div class="lc__b"><div class="lc__t" style="font-weight:500">เสียง</div><div class="lc__m">ค่าตั้งต้น · Charon</div></div><span class="lc__go">›</span></div>
+          <div class="lcard"><div class="lc__b"><div class="lc__t" style="font-weight:500">ไมโครโฟน</div><div class="lc__m">อัตโนมัติ</div></div><span class="lc__go">›</span></div>
+          <div class="lsec"><span>การเก็บกวาด</span><span></span></div>
+          <div class="lcard"><div class="lc__b"><div class="lc__t" style="font-weight:500">เก็บของที่ผ่านไปแล้ว</div><div class="lc__m">ทุกคืน 03:00</div></div></div>
+          <div class="lcard"><div class="lc__b"><div class="lc__t" style="font-weight:500">ลบถาวรหลัง 7 วัน</div><div class="lc__m">กู้คืนไม่ได้</div></div></div>
+          <div class="lnav">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>วันนี้</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16"/></svg>ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>คลัง</span>
+            <span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 07 ============ -->
+  <section>
+    <h2><span class="n">07</span> สิ่งที่ในภาพมี แต่แอปนี้ใส่ไม่ได้</h2>
+    <p class="prose">
+      ภาพอ้างอิงเป็นแอปออกกำลังกาย ซึ่งทุกอย่าง<strong>วัดเป็นตัวเลขได้</strong> —
+      ก้าว แคลอรี กิโลเมตร ชีพจร · จึงมีวงกลมความคืบหน้า กราฟแท่ง และตัวเลขใหญ่เต็มจอ
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ในภาพ</th><th>ที่นี่ใส่ไม่ได้เพราะ</th></tr></thead>
+        <tbody>
+          <tr><td>หน้า Stats · กราฟแท่งรายสัปดาห์</td><td><strong>ไม่มีข้อมูลรองรับ</strong> — DB ไม่ได้เก็บสถิติว่าทำงานเสร็จวันละกี่ชิ้น เก็บแค่ว่าเสร็จเมื่อไหร่ · จะทำต้องเพิ่มตารางใหม่และเก็บย้อนหลังไม่ได้</td></tr>
+          <tr><td>วงกลม 8,432 / 10,000</td><td>ตารางเรียนไม่มี “เป้าหมาย” ให้เทียบ · คาบเรียนไม่ใช่สิ่งที่ทำได้มากขึ้นหรือน้อยลง</td></tr>
+          <tr><td>แถบ Weight Loss 64% · Runner Level 42%</td><td>เหมือนกัน — ไม่มีเป้าที่ตั้งไว้ให้วัดความคืบหน้า</td></tr>
+          <tr><td>ชีพจร 78 bpm</td><td>ไม่มีเซนเซอร์ ไม่มีข้อมูล</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note note--warn">
+      <strong>ตัวเลขที่ไม่มีความหมายแย่กว่าไม่มีตัวเลข</strong> — ใส่วงกลม “ทำงานไปแล้ว 3/5”
+      ทั้งที่ 5 เป็นเลขที่ไม่มีใครตั้ง จะทำให้คนเชื่อว่ามีเป้าที่ต้องไล่ให้ทัน
+      ทั้งที่มันคือจำนวนงานที่บังเอิญมีวันนั้น
+    </div>
+    <p class="prose">
+      <strong>สิ่งเดียวที่มีข้อมูลรองรับจริง</strong>คือแถบความคืบหน้าของคาบที่กำลังเรียนอยู่ —
+      ซึ่ง<em>ทำไปแล้ว</em>ในหน้าวันนี้ และเห็นได้ในจอที่สองของหัวข้อ 03
+    </p>
+  </section>
+
+  <!-- ============ 08 ============ -->
+  <section>
+    <h2><span class="n">08</span> ถ้าจะทำ</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ขั้น</th><th>ทำอะไร</th><th>ยากตรงไหน</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>คำนวณสีชุดกลางวันให้ผ่าน WCAG AA ทุกคู่</td><td><strong>งานจริงอยู่ตรงนี้</strong> — 5 สีชนิดข้อมูล × พื้น 3 ระดับ ต้องตรวจทีละคู่</td></tr>
+          <tr><td>2</td><td>ย้าย token ใน <code>globals.css</code> เข้า <code>@media (prefers-color-scheme: light)</code></td><td>ง่าย เพราะทุกสีเป็น token อยู่แล้ว ไม่ได้ฝังในคอมโพเนนต์</td></tr>
+          <tr><td>3</td><td>สวิตช์ในหน้าตั้งค่า · จำใน <code>localStorage</code></td><td>มี <code>useSyncExternalStore</code> ที่ใช้กับภาษาและเสียงอยู่แล้ว ยกมาใช้ได้เลย</td></tr>
+          <tr><td>4</td><td>ตรวจทุกหน้าในทั้งสองธีม</td><td>เสียเวลาที่สุด · เงา ขอบ และ gradient ต้องดูใหม่หมด</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <strong>ถ้าไม่อยากทำสองธีม</strong> — เลือกอันเดียวก็ได้ แต่ควรเลือกจากว่า
+      <em>ใช้แอปนี้ตอนไหนบ่อยกว่า</em> ระหว่างเดินไปเรียนกลางแดด กับตอนนอนดึกวางแผนวันพรุ่งนี้
+      ไม่ใช่เลือกจากภาพที่สวยกว่า
+    </div>
+  </section>
+
+  <p class="foot">
+    ข้อเสนอ · ยังไม่ได้แตะโค้ดแอป · คู่กับ <code>UXUI.html</code> (ปัจจุบัน)
+    และ <code>UXUI-BOLD.html</code> (ทาสีใหม่ในธีมมืด)<br>
+    <strong>ตรวจคอนทราสต์แล้วทุกคู่</strong> — 7 สี × พื้น 2 ระดับ ผ่าน WCAG AA ทั้ง 14 คู่
+    (ต่ำสุด 4.62 · สูงสุด 17.79) · ค่าชุดแรกที่ร่างไว้ตกสี่ตัวบนพื้นหน้า จึงเข้มขึ้นอีกระดับ
+  </p>
+
+</div>
