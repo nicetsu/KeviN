@@ -61,7 +61,14 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   const [elapsed, setElapsed] = useState(0)
 
   const session = useRef<Session | null>(null)
-  const buffer = useRef({ user: '', kevin: '' })
+  /*
+   * ⚠️ ฝั่งผู้ใช้เก็บแค่**ธงว่าพูดหรือยัง** ไม่เก็บข้อความ
+   *
+   * เจ้าของสั่ง 1 ก.ย. 2026 ว่าคำบรรยายสดฝั่งตัวเองไม่ต้องขึ้นจอ · พอไม่ต้องแสดง
+   * ก็ไม่มีเหตุผลจะถือข้อความนั้นไว้ในหน่วยความจำเลย เหลือแค่ต้องรู้ว่ารอบนี้
+   * ผู้ใช้พูดไหม เพื่อจะได้ลงแถว `- voice -` ในประวัติให้ครบจังหวะ
+   */
+  const buffer = useRef({ spoke: false, kevin: '' })
   const collected = useRef<VoiceTurn[]>([])
 
   const running = state !== 'idle'
@@ -82,13 +89,13 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   }, [running])
 
   const flush = useCallback(() => {
-    const { user, kevin } = buffer.current
+    const { spoke, kevin } = buffer.current
     const next: VoiceTurn[] = []
-    // สิ่งที่พูดออกไปไม่ถูกเก็บ — ลงเป็นคำว่า voice แทน (lib/voice/transcript.ts)
-    // คำบรรยายสด ๆ ระหว่างสายยังโชว์ข้อความจริงอยู่ แค่ไม่ถูกบันทึก
-    if (user.trim()) next.push({ role: 'user', content: user.trim() })
+    // ยังส่งผ่าน redactVoiceTurns เหมือนเดิม — ชั้นบังคับฝั่งเบราว์เซอร์ต้องอยู่
+    // แม้ตอนนี้จะไม่มีข้อความจริงให้แทนที่แล้วก็ตาม (lib/voice/transcript.ts)
+    if (spoke) next.push({ role: 'user', content: '' })
     if (kevin.trim()) next.push({ role: 'assistant', content: kevin.trim() })
-    buffer.current = { user: '', kevin: '' }
+    buffer.current = { spoke: false, kevin: '' }
     if (next.length) {
       collected.current = [...collected.current, ...redactVoiceTurns(next)]
       setTurns(collected.current)
@@ -119,15 +126,19 @@ export default function CallProvider({ children }: { children: React.ReactNode }
     setError(null)
     setQuotaOut(false)
     collected.current = []
-    buffer.current = { user: '', kevin: '' }
+    buffer.current = { spoke: false, kevin: '' }
     setTurns([])
 
     const s = new Session(prefs, {
       onState: setState,
       onCaption: (c) => {
-        const slot = c.who === 'user' ? 'user' : 'kevin'
-        buffer.current[slot] += c.text
-        setLive({ who: c.who, text: buffer.current[slot] })
+        // ฝั่งผู้ใช้: จำแค่ว่าพูดแล้ว · ไม่เก็บข้อความ และไม่ขึ้นจอ
+        if (c.who === 'user') {
+          buffer.current.spoke = true
+          return
+        }
+        buffer.current.kevin += c.text
+        setLive({ who: 'kevin', text: buffer.current.kevin })
       },
       onTurnEnd: flush,
       onError: (m) => {
