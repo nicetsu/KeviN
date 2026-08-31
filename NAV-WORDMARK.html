@@ -1,0 +1,263 @@
+<title>เวิร์ดมาร์ก KeviN ยี่สิบแบบ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Unbounded:wght@500;700&family=Syne:wght@600;800&display=swap">
+
+<style>
+/* ค่าทั้งหมดคัดจาก web/app/globals.css ของจริง (1 ก.ย. 2026)
+   ไฟล์นี้คือ "โลโก้ที่เป็นคำว่า KeviN" — ไม่มีรูปสัญลักษณ์เลยสักอัน
+   ทุกแบบอยู่ในกล่องเรืองแสง (ทรง 09) เหมือนกันหมด เพื่อเทียบเฉพาะตัวหนังสือ
+
+   ⚠️ 17–20 ใช้ฟอนต์นอกชุดของแอป (แอปมีแค่ Inter + Noto Sans Thai + Geist Mono)
+      ถ้าเลือกแบบพวกนั้น ต้องโหลดฟอนต์เพิ่มจริง = PWA หนักขึ้นและมีจังหวะที่ตัวอักษรกระโดด
+      ตอนฟอนต์มาถึง · ติดป้ายไว้ทุกใบแล้ว */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1180px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:44rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.bar-tools{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:2rem 0 1.3rem;padding:.7rem 0;background:linear-gradient(var(--bg) 72%,transparent)}
+.btn{font:inherit;font-size:var(--s--1);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:.42rem .95rem;cursor:pointer;transition:color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.btn:hover{color:var(--ink);border-color:var(--capline)}
+.btn[aria-pressed="true"]{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tools-note{font-size:var(--s--2);color:var(--faint);margin-left:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color var(--t-base) var(--ease)}
+.card:hover{border-color:var(--capline)}
+.card__top{display:flex;align-items:baseline;gap:.6rem;padding:.85rem 1rem .55rem}
+.card__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);font-variant-numeric:tabular-nums}
+.card__name{font-weight:600;letter-spacing:-.01em}
+.flag{margin-left:auto;font-size:var(--s--2);font-weight:500;padding:.1rem .5rem;border-radius:var(--r-pill);white-space:nowrap}
+.flag--ok{color:#74C6A4;background:rgba(116,198,164,.1)}
+.flag--ask{color:#D5BB6D;background:rgba(213,187,109,.1)}
+.flag--now{color:var(--brand);background:var(--brand-soft)}
+.card__why{padding:0 1rem .9rem;font-size:var(--s--1);color:var(--muted);margin:0}
+.card__why b{color:var(--ink);font-weight:500}
+
+/* ---------- แถวเทียบขนาด ---------- */
+.sizes{display:flex;align-items:center;gap:.9rem;padding:.9rem 1rem;background:var(--bg);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.big{
+  min-height:3.4rem;padding:0 1.1rem;flex:none;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;background:var(--raised);color:var(--brand);
+  font-size:1.35rem;
+}
+.tiny{display:flex;align-items:center;gap:.7rem}
+
+/* กล่องเรืองแสง — ค่าเดียวกับทรง 09 ใน NAV-SHAPE.html เป๊ะ ๆ
+   แก้ที่นี่ต้องไปแก้อีกไฟล์ด้วย ไม่งั้นสองไฟล์จะโชว์คนละอย่าง */
+.box{
+  min-height:2.55rem;padding:0 .95rem;border-radius:var(--r-pill);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:var(--s--1);color:var(--faint);background:var(--raised);
+}
+.box--on{color:var(--on-brand);background:var(--brand);box-shadow:0 0 22px -2px rgba(165,148,255,.55)}
+.sizes__note{margin-left:auto;text-align:right;font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);line-height:1.4}
+
+/* ---------- แถบจริง ---------- */
+.stage{background:var(--bg);margin-top:auto}
+.stage__label{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);padding:.5rem 1rem .1rem;letter-spacing:.06em}
+.nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:.5rem 0}
+.nav__item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;padding:.3rem 0;font-size:var(--s--1);color:var(--muted)}
+.nav__item svg{width:1.3rem;height:1.3rem;flex:none}
+.nav .box{flex:none}
+
+/* =====================================================================
+   เวิร์ดมาร์ก 20 แบบ · ทุกอันสืบขนาดจากกล่องที่มันอยู่
+   จึงย่อ/ขยายตามบริบทได้เองโดยไม่ต้องมีค่าซ้ำสองชุด
+   ===================================================================== */
+.wm{white-space:nowrap;line-height:1}
+
+.w1{font-weight:600}
+.w2{font-weight:500;letter-spacing:.1em;text-transform:lowercase}
+.w3{font-weight:600;letter-spacing:.18em;text-transform:uppercase;font-size:.9em}
+.w4{font-weight:500}
+.w5{font-weight:500}
+.w5 b{font-weight:700}
+.w6{font-weight:600}
+.w6 i{font-style:normal;color:var(--brand)}
+.box--on .w6 i,.big .w6 i{color:inherit}
+.w7{font-weight:500;letter-spacing:.04em}
+.w7 i{font-style:normal;opacity:.55;padding:0 .06em}
+.w8{font-family:var(--f-mono);font-weight:500;letter-spacing:.06em;font-size:.95em}
+.w9{font-family:var(--f-mono);font-weight:500}
+.w9 i{font-style:normal;animation:blink 1.1s steps(1,end) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.w10{font-weight:500;letter-spacing:.02em}
+.w10 i{font-style:normal;opacity:.45;font-weight:400}
+.w11{font-family:var(--f-mono);font-weight:500}
+.w11 i{font-style:normal;opacity:.5}
+.w12{font-weight:600}
+.w12 .i{position:relative}
+.w12 .i::before{
+  content:"";position:absolute;left:50%;top:-.34em;
+  width:.17em;height:.17em;border-radius:50%;
+  transform:translateX(-50%);background:var(--brand);
+}
+.box--on .w12 .i::before{background:currentColor}
+.w13{font-weight:600;color:var(--faint)}
+.w13 i{font-style:normal;color:var(--brand)}
+.box--on .w13{color:var(--on-brand);opacity:.62}
+.box--on .w13 i{color:var(--on-brand);opacity:1}
+.w14{font-weight:600;box-shadow:inset 0 -.32em 0 rgba(165,148,255,.28)}
+.box--on .w14{box-shadow:inset 0 -.32em 0 rgba(20,18,31,.16)}
+.w15{font-weight:500;font-style:italic;letter-spacing:.01em}
+.w16{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.82em;transform:scaleY(1.35);display:inline-block}
+.w17{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:1.22em;letter-spacing:.01em}
+.w18{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.02em}
+.w19{font-family:"Unbounded","Inter",sans-serif;font-weight:500;font-size:.8em;letter-spacing:.02em;text-transform:uppercase}
+.w20{font-family:"Syne","Inter",sans-serif;font-weight:800;font-size:1.02em;letter-spacing:-.01em}
+
+.after{margin-top:3rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+.after code{font-family:var(--f-mono);font-size:.82em;color:var(--brand);background:var(--brand-soft);padding:.08rem .35rem;border-radius:5px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">แถบล่าง · เวิร์ดมาร์ก</p>
+    <h1>คำว่า KeviN 20 แบบ</h1>
+    <p>ไม่มีรูปสัญลักษณ์เลยสักอัน — <strong>ตัวหนังสือคือโลโก้</strong>
+       ทุกแบบอยู่ในกล่องเรืองแสง (ทรง 09) เหมือนกันหมด เพื่อเทียบเฉพาะการจัดตัวอักษร</p>
+    <p>แต่ละใบโชว์ขนาดใหญ่ให้เห็นรายละเอียด กับ <strong>ขนาดจริงบนแถบ 12.6px</strong>
+       ซึ่งเป็นขนาดเดียวที่นับ — ลูกเล่นหลายอย่างหายไปเลยตอนย่อ</p>
+    <p><strong>ข้อดีที่เวิร์ดมาร์กมีแต่รูปไม่มี</strong>: ไม่ต้องเรียนรู้ว่ามันคืออะไร
+       และช่องนี้ยังมีตัวหนังสือเหมือนอีกสี่ช่อง แถบจึงไม่เสียจังหวะ</p>
+  </div>
+
+  <div class="bar-tools">
+    <button class="btn" id="only-on" aria-pressed="false">ดูเฉพาะตอนเลือกอยู่</button>
+    <button class="btn" id="wide" aria-pressed="false">คอลัมน์เดียว</button>
+    <span class="tools-note">01–16 ใช้ฟอนต์ที่แอปมีอยู่แล้ว · 17–20 ต้องโหลดฟอนต์เพิ่ม</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="after">
+    <h2>สามอย่างที่ผมดูตอนคัด</h2>
+    <p><b>ย่อแล้วเหลืออะไร</b> — ลูกเล่นที่วัดเป็นสัดส่วนของตัวอักษร (จุดบน i · ขีดใต้ · เคอร์เซอร์) จะเล็กลงตามจนเกือบหายที่ 12.6px ดูช่องขวาก่อนตัดสินเสมอ</p>
+    <p><b>มันยังเป็นชื่อคนอยู่ไหม</b> — ตัวใหญ่ล้วน (03 · 16 · 19) อ่านเป็นชื่อระบบมากกว่าชื่อผู้ช่วย ซึ่งสวนทางกับเหตุผลเดิมที่ตั้งชื่อช่องนี้ว่า KeviN แทนคำว่า “คุย”</p>
+    <p><b>ต้องจ่ายอะไรเพิ่ม</b> — 17–20 ต้องโหลดฟอนต์เพิ่มจริงในแอป ทำให้ PWA หนักขึ้นและมีจังหวะตัวอักษรกระโดดตอนฟอนต์มาถึง · ถ้าชอบแบบพวกนี้ ผมจะทำเฉพาะคำนี้เป็น SVG แทนการโหลดทั้งฟอนต์ก็ได้</p>
+    <p>บอกเลขมาได้เลย · จับคู่กับทรงจากไฟล์ <code>NAV-SHAPE.html</code> ก็ได้ เช่น “ทรง 2 + คำแบบ 08”</p>
+  </div>
+</div>
+
+<script>
+const ICON = {
+  home:'<path d="M4 11l8-6 8 6v8H4z" stroke-linejoin="round"/>',
+  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4" stroke-linecap="round"/>',
+  box:'<path d="M4 7l8-3 8 3v10l-8 3-8-3z" stroke-linejoin="round"/><path d="M4 7l8 3 8-3M12 10v10" stroke-linejoin="round"/>',
+  gear:'<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6.2 6.2l1.4 1.4M16.4 16.4l1.4 1.4M17.8 6.2l-1.4 1.4M7.6 16.4l-1.4 1.4" stroke-linecap="round"/>'
+}
+const svg = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">' + d + '</svg>'
+
+const W = [
+  { n:1, name:'KeviN', flag:['now','ของตอนนี้'], m:'KeviN',
+    why:'ตัวเทียบ · Inter 600 · <b>N ตัวใหญ่ท้ายคำคือของเดิมที่ใช้อยู่ทั้งโปรเจกต์</b> ไม่ใช่การพิมพ์ผิด' },
+  { n:2, name:'ตัวเล็กล้วน', flag:['ok','อ่านง่าย'], m:'kevin', cls:'w2',
+    why:'ตัวเล็กหมด ระยะห่างอักษรกว้าง · <b>เงียบและเป็นกันเองที่สุด</b> เหมือนชื่อเล่นมากกว่าชื่อระบบ' },
+  { n:3, name:'ตัวใหญ่ล้วน', flag:['ask','เป็นชื่อระบบ'], m:'KEVIN', cls:'w3',
+    why:'ตัวใหญ่ทั้งคำ เล็กลงหน่อยแล้วถ่างออก · <b>ดูเป็นทางการและมั่นคง</b> แต่ก็อ่านเป็นชื่อระบบมากกว่าชื่อใครสักคน' },
+  { n:4, name:'Kevin', flag:['ask','เสียตัวตน'], m:'Kevin', cls:'w4',
+    why:'สะกดแบบชื่อคนปกติ · <b>เป็นธรรมชาติที่สุดในสายตาคนอ่าน</b> แต่ทิ้งลายเซ็นตัว N ที่ใช้มาทั้งโปรเจกต์' },
+  { n:5, name:'เน้นตัว K กับ N', flag:['ok','อ่านง่าย'], m:'<b>K</b>evi<b>N</b>', cls:'w5',
+    why:'หัวกับท้ายหนา กลางบาง · <b>ทำให้ตัวย่อ KN โผล่ขึ้นมาในคำโดยไม่ต้องเขียนแยก</b> เผื่อวันหลังอยากได้ไอคอนสั้น ๆ' },
+  { n:6, name:'N สีแบรนด์', flag:['ok','อ่านง่าย'], m:'Kevi<i>N</i>', cls:'w6',
+    why:'ตัว N เป็นสีม่วงตัวเดียว · <b>ให้คำมีจุดเน้นโดยไม่ต้องเปลี่ยนรูปอะไรเลย</b> — ตอนถูกเลือกสีจะกลืนเป็นสีเดียวกันเอง' },
+  { n:7, name:'ke·vin', flag:['ask','อ่านสะดุด'], m:'ke<i>·</i>vin', cls:'w7',
+    why:'จุดกลางคั่นพยางค์แบบพจนานุกรม · <b>ดูตั้งใจและมีรสนิยม</b> แต่ทำให้คนอ่านสะดุดเสี้ยววินาทีทุกครั้ง' },
+  { n:8, name:'ฟอนต์โมโน', flag:['ok','อ่านง่าย'], m:'kevin', cls:'w8',
+    why:'ฟอนต์เดียวกับที่แอปใช้กับเวลาและตัวเลขอยู่แล้ว · <b>ไม่ต้องโหลดอะไรเพิ่มเลยและเข้ากับของเดิมทันที</b>' },
+  { n:9, name:'มีเคอร์เซอร์', flag:['ask','ขยับตลอดเวลา'], m:'kevin<i>▌</i>', cls:'w9',
+    why:'เคอร์เซอร์กระพริบท้ายคำ · <b>บอกว่าพร้อมรับคำสั่ง</b> — แต่ของที่ขยับตลอดเวลาบนแถบล่างจะแย่งสายตาไปจากเนื้อหาจริง' },
+  { n:10, name:'ในวงเล็บ', flag:['ask','คิดก่อน'], m:'<i>[</i>kevin<i>]</i>', cls:'w10',
+    why:'วงเล็บเหลี่ยมจาง ๆ ขนาบ · <b>ทำให้คำดูเป็นปุ่มโดยไม่ต้องมีกรอบจริง</b> — แต่ในกล่องอยู่แล้วอาจกลายเป็นกรอบซ้อนกรอบ' },
+  { n:11, name:'มีสแลชนำ', flag:['ask','เป็นชื่อระบบ'], m:'<i>/</i>kevin', cls:'w11',
+    why:'สแลชนำหน้าแบบเส้นทางหรือคำสั่ง · <b>ตรงกับความจริงที่หน้านี้คือ /kevin</b> และเข้ากับคนที่ใช้เทอร์มินัล — แต่คนทั่วไปอ่านไม่ออกว่าแปลว่าอะไร' },
+  { n:12, name:'จุดบน i เป็นม่วง', flag:['ask','หายตอนย่อ'], m:'kev<span class="i">ı</span>n', cls:'w12',
+    why:'เปลี่ยนจุดบนตัว i เป็นจุดสีแบรนด์ · <b>รายละเอียดเล็กที่สุดที่ยังนับเป็นโลโก้ได้</b> — แต่ที่ 12.6px จุดจะเหลือราว 2px ดูช่องขวาก่อน' },
+  { n:13, name:'สองน้ำหนักสี', flag:['ok','อ่านง่าย'], m:'kevi<i>n</i>', cls:'w13',
+    why:'ตัวหน้าจาง ตัวท้ายเข้ม · <b>ทำให้คำมีทิศทาง อ่านแล้วรู้สึกว่ามันชี้ไปข้างหน้า</b>' },
+  { n:14, name:'ขีดใต้หนา', flag:['ok','อ่านง่าย'], m:'kevin', cls:'w14',
+    why:'แถบสีจาง ๆ ทับครึ่งล่างของคำแบบปากกาไฮไลต์ · <b>เด่นโดยไม่ต้องเปลี่ยนตัวอักษรเลย</b>' },
+  { n:15, name:'ตัวเอียง', flag:['ask','คิดก่อน'], m:'kevin', cls:'w15',
+    why:'เอียงเล็กน้อย · <b>ให้ความรู้สึกเป็นชื่อเฉพาะ ไม่ใช่คำทั่วไป</b> — แต่ Inter ตัวเอียงคือการเอียงด้วยเครื่อง ไม่ใช่ตัวเอียงที่ออกแบบมาจริง' },
+  { n:16, name:'ยืดสูง', flag:['ask','เป็นชื่อระบบ'], m:'KEVIN', cls:'w16',
+    why:'ตัวใหญ่ที่ยืดสูงขึ้น · <b>ดูเป็นแบรนด์แฟชั่นหรือกีฬา</b> โดดที่สุดในไฟล์นี้ แต่ห่างจากบุคลิกผู้ช่วยส่วนตัวไปไกล' },
+  { n:17, name:'เซริฟคม', flag:['ask','ต้องโหลดฟอนต์'], m:'Kevin', cls:'w17',
+    why:'Instrument Serif · <b>ทำให้ KeviN ดูเป็นคนที่มีรสนิยม ไม่ใช่ซอฟต์แวร์</b> — ตัดกับฟอนต์ที่เหลือทั้งแอปชัดมาก ซึ่งเป็นได้ทั้งข้อดีและข้อเสีย' },
+  { n:18, name:'เซริฟนุ่ม', flag:['ask','ต้องโหลดฟอนต์'], m:'Kevin', cls:'w18',
+    why:'Fraunces · <b>อบอุ่นกว่าแบบ 17 และยังอ่านง่ายตอนเล็ก</b> เพราะปลายตัวอักษรไม่คมเท่า' },
+  { n:19, name:'เรขาคณิตหนา', flag:['ask','ต้องโหลดฟอนต์'], m:'KEVIN', cls:'w19',
+    why:'Unbounded · <b>ทันสมัยและมีน้ำหนักมาก</b> แต่ตัวกว้าง กินที่ในแถบเยอะกว่าทุกแบบ' },
+  { n:20, name:'ดิสเพลย์', flag:['ask','ต้องโหลดฟอนต์'], m:'kevin', cls:'w20',
+    why:'Syne · <b>มีบุคลิกที่สุดในไฟล์นี้</b> สัดส่วนตัวอักษรไม่เหมือนใคร — แลกมาด้วยการที่มันจะไม่กลมกลืนกับข้อความไทยที่อยู่รอบ ๆ เลย' },
+]
+
+function wm(v){ return '<span class="wm ' + (v.cls || 'w1') + '">' + v.m + '</span>' }
+function boxHTML(v,on){ return '<span class="box' + (on?' box--on':'') + '">' + wm(v) + '</span>' }
+
+function navHTML(v){
+  const item = (icon,label) => '<span class="nav__item">' + svg(ICON[icon]) + '<span>' + label + '</span></span>'
+  return '<div class="nav">' + item('home','วันนี้') + item('cal','ปฏิทิน') +
+    '<span class="nav__item">' + boxHTML(v,true) + '</span>' +
+    item('box','คลัง') + item('gear','ตั้งค่า') + '</div>'
+}
+
+document.getElementById('grid').innerHTML = W.map(function(v){
+  return '<article class="card">' +
+    '<div class="card__top"><span class="card__n">' + String(v.n).padStart(2,'0') + '</span>' +
+      '<span class="card__name">' + v.name + '</span>' +
+      '<span class="flag flag--' + v.flag[0] + '">' + v.flag[1] + '</span></div>' +
+    '<p class="card__why">' + v.why + '</p>' +
+    '<div class="sizes">' +
+      '<span class="big">' + wm(v) + '</span>' +
+      '<span class="tiny state-off">' + boxHTML(v,false) + '</span>' +
+      '<span class="tiny">' + boxHTML(v,true) + '</span>' +
+      '<span class="sizes__note">21px<br>12.6px · ขนาดจริง</span>' +
+    '</div>' +
+    '<div class="stage"><div class="stage__label">อยู่หน้า KeviN</div>' + navHTML(v) + '</div>' +
+  '</article>'
+}).join('')
+
+/* ห่อ try/catch เพราะโหมดส่วนตัวของบางเบราว์เซอร์โยน error ตอนแตะ localStorage */
+const store = {
+  get:function(k){try{return localStorage.getItem(k)==='1'}catch(e){return false}},
+  set:function(k,v){try{localStorage.setItem(k,v?'1':'0')}catch(e){}}
+}
+function wire(id,cls,key){
+  const b=document.getElementById(id)
+  function apply(on){b.setAttribute('aria-pressed',String(on));document.body.classList.toggle(cls,on)}
+  apply(store.get(key))
+  b.addEventListener('click',function(){const on=b.getAttribute('aria-pressed')!=='true';apply(on);store.set(key,on)})
+}
+wire('only-on','hide-off','kevin-wm-only-on')
+wire('wide','wide','kevin-wm-wide')
+const st=document.createElement('style')
+st.textContent='body.hide-off .state-off{display:none}body.wide .grid{grid-template-columns:1fr}'
+document.head.appendChild(st)
+</script>

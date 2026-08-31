@@ -397,8 +397,8 @@ html, body { margin: 0; padding: 0; }
  */
 .nav__item svg { width: 1.3rem; height: 1.3rem; flex: none; }
 
-/* ช่อง KeviN ไม่มีไอคอน — กันไม่ให้แคปซูลเตี้ยกว่าช่องอื่นจนแถบเบี้ยว */
-.nav__item--talk { min-height: 2.55rem; padding-left: 0.9rem; padding-right: 0.9rem; }
+/* ช่องนี้ไม่มีไอคอน — ตั้งความสูงขั้นต่ำไว้กันแถบเบี้ยว */
+.nav__item--talk { min-height: 2.55rem; }
 .nav__item--on { color: var(--brand); font-weight: 600; }
 .nav__item--off { color: var(--faint); opacity: 0.45; cursor: default; }
 
@@ -410,18 +410,36 @@ html, body { margin: 0; padding: 0; }
  * แคปซูลเด่นพอให้ตาไปเจอโดยไม่แข่ง · และเป็นช่องเดียวที่ **เปลี่ยนรูป** ตอนถูกเลือก
  * ไม่ใช่แค่เปลี่ยนสีอักษร เพราะมันเป็นปลายทางคนละชนิดกับอีกสี่ช่อง
  */
-.nav__item--talk {
-  color: var(--brand);
-  background: var(--brand-soft);
-  border: 1px solid #362F5C;
-  font-weight: 500;
+/*
+ * ⚠️ พื้นกล่องอยู่ที่ `.nav__box` ชั้นใน **ไม่ใช่ที่ตัวช่อง**
+ *    ตัวช่องเป็น `flex: 1` เท่ากับอีกสี่ช่อง ถ้าเอาพื้นมาไว้ตรงนี้
+ *    กล่องจะยืดเต็มช่อง (92px บนจอ 360px) แทนที่จะกว้างพอดีคำ
+ */
+.nav__box {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 2.55rem; padding: 0 0.68rem;
+  border-radius: var(--r-pill);
+  color: var(--faint); background: var(--raised);
 }
-.nav__item--talkOn {
+/*
+ * ตอนอยู่หน้านี้ = พื้นม่วงทึบ + แสงฟุ้งรอบ (เจ้าของเคาะจากไฟล์เทียบ 1 ก.ย. 2026)
+ * แสงฟุ้งคือสิ่งที่ทำให้ช่องนี้เปลี่ยน**รูป** ไม่ใช่แค่เปลี่ยนสี ซึ่งเป็นเงื่อนไข
+ * ที่ตั้งไว้แต่แรกว่าช่องนี้ต้องมี เพราะมันเป็นปลายทางคนละชนิดกับอีกสี่ช่อง
+ */
+.nav__item--talkOn .nav__box {
   color: #14121F;
   background: var(--brand);
-  border-color: var(--brand);
-  font-weight: 600;
+  box-shadow: 0 0 22px -2px rgba(165, 148, 255, 0.55);
 }
+
+/*
+ * ⚠️ ความสูงคือ**ตัวอักษรล้วน** — viewBox ตัดพอดี cap height ไม่มีขอบเผื่อ
+ *    0.58rem จึงดูสมดุลกับคำว่า "วันนี้" ข้าง ๆ ที่ตัวอักษรสูงราวเท่ากัน
+ *
+ * ตัวเลขนี้ผูกกับความกว้างช่อง: บนจอ 360px ช่องกว้าง 72px และกล่องนี้กิน 68px
+ * **ขยับขึ้นอีกนิดเดียวก็ล้น** ถ้าจะเพิ่ม ต้องลด padding ของ `--talk` ลงพร้อมกัน
+ */
+.nav__item .nav__wordmark { height: 0.55rem; width: auto; flex: none; }
 
 @media (min-width: 768px) {
   .nav {
@@ -435,7 +453,9 @@ html, body { margin: 0; padding: 0; }
     flex: none; flex-direction: row; justify-content: flex-start;
     gap: 0.6rem; padding: 0.5rem 0.85rem;
   }
+  /* แถบข้างเป็นรายการแนวตั้ง กล่องที่สูงกว่าเพื่อนจะทำให้ระยะห่างไม่เท่ากัน */
   .nav__item--talk { min-height: 0; }
+  .nav__box { min-height: 1.95rem; padding: 0 0.6rem; }
   .nav__item--on { background: var(--raised); }
   .wrap { margin-left: 200px; }
 }

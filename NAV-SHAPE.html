@@ -1,0 +1,288 @@
+<title>ทรงปุ่ม KeviN ยี่สิบแบบ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ค่าทั้งหมดคัดจาก web/app/globals.css ของจริง (1 ก.ย. 2026)
+   ไฟล์นี้ดูแต่ "ทรง" — เนื้อในเป็นคำว่า KeviN เหมือนกันทุกแบบโดยตั้งใจ
+   ถ้าอยากดูโลโก้ ให้ไปดูอีกไฟล์ (NAV-LOGO.html) แล้วค่อยจับคู่กัน */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด ถ้าทำให้สว่างได้ด้วยก็ไม่ใช่ของจริงแล้ว */
+
+.page{max-width:1180px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:44rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+.pair{display:inline-block;font-size:var(--s--1);color:var(--brand);border-bottom:1px solid var(--capline);text-decoration:none}
+
+.bar-tools{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:2rem 0 1.3rem;padding:.7rem 0;background:linear-gradient(var(--bg) 72%,transparent)}
+.btn{font:inherit;font-size:var(--s--1);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:.42rem .95rem;cursor:pointer;transition:color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.btn:hover{color:var(--ink);border-color:var(--capline)}
+.btn[aria-pressed="true"]{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tools-note{font-size:var(--s--2);color:var(--faint);margin-left:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color var(--t-base) var(--ease)}
+.card:hover{border-color:var(--capline)}
+.card__top{display:flex;align-items:baseline;gap:.6rem;padding:.85rem 1rem .55rem}
+.card__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);font-variant-numeric:tabular-nums}
+.card__name{font-weight:600;letter-spacing:-.01em}
+.flag{margin-left:auto;font-size:var(--s--2);font-weight:500;padding:.1rem .5rem;border-radius:var(--r-pill);white-space:nowrap}
+.flag--ok{color:#74C6A4;background:rgba(116,198,164,.1)}
+.flag--ask{color:#D5BB6D;background:rgba(213,187,109,.1)}
+.flag--now{color:var(--brand);background:var(--brand-soft)}
+.card__why{padding:0 1rem .9rem;font-size:var(--s--1);color:var(--muted);margin:0}
+.card__why b{color:var(--ink);font-weight:500}
+
+.stage{background:var(--bg);border-top:1px solid var(--line-soft);margin-top:auto}
+.stage__label{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);padding:.5rem 1rem .1rem;letter-spacing:.06em}
+
+.nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:.5rem 0;position:relative}
+.nav__item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;padding:.3rem 0;border-radius:var(--r-pill);font-size:var(--s--1);color:var(--muted);position:relative}
+.nav__item svg{width:1.3rem;height:1.3rem;flex:none}
+.nav__item--on{color:var(--brand);font-weight:600}
+.mid{position:relative}
+/* ทุกทรงใช้ความสูงฐานเดียวกัน เพื่อให้เทียบกันได้จริง */
+.cap{min-height:2.55rem;padding:0 .9rem;display:flex;align-items:center;justify-content:center}
+
+/* 01 แคปซูลทึบ · ของตอนนี้ */
+.s1 .mid{border-radius:var(--r-pill);color:var(--brand);background:var(--brand-soft);border:1px solid var(--capline);font-weight:500}
+.s1.on .mid{color:var(--on-brand);background:var(--brand);border-color:var(--brand);font-weight:600}
+
+/* 02 เส้นขอบอย่างเดียว */
+.s2 .mid{border-radius:var(--r-pill);color:var(--faint);border:1px solid var(--line)}
+.s2.on .mid{color:var(--brand);border-color:var(--brand);box-shadow:0 0 0 3px rgba(165,148,255,.12)}
+
+/* 03 ไล่เฉด */
+.s3 .mid{border-radius:var(--r-pill);color:var(--brand);background:var(--brand-soft);border:1px solid var(--capline)}
+.s3.on .mid{color:var(--on-brand);border-color:transparent;background:linear-gradient(135deg,#C3B6FF,#8878F0);font-weight:600}
+
+/* 04 แคปซูลเตี้ย */
+.s4 .mid{min-height:1.7rem;padding:0 .78rem;border-radius:var(--r-pill);color:var(--faint);background:var(--raised)}
+.s4.on .mid{color:var(--on-brand);background:var(--brand);font-weight:600}
+
+/* 05 มุมมนน้อย */
+.s5 .mid{border-radius:10px;color:var(--faint);background:var(--raised);border:1px solid var(--line)}
+.s5.on .mid{color:var(--on-brand);background:var(--brand);border-color:var(--brand);font-weight:600}
+
+/* 06 มุมตัด */
+.s6 .mid{clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px);color:var(--faint);background:var(--raised)}
+.s6.on .mid{color:var(--on-brand);background:var(--brand);font-weight:600}
+
+/* 07 ทรงไข่ */
+.s7 .mid{border-radius:46%/50%;padding:0 1.05rem;color:var(--faint);background:var(--raised);border:1px solid var(--line)}
+.s7.on .mid{color:var(--on-brand);background:var(--brand);border-color:var(--brand);font-weight:600}
+
+/* 08 ขอบสองชั้น */
+.s8 .mid{border-radius:var(--r-pill);color:var(--faint);border:1px solid var(--line)}
+.s8.on .mid{color:var(--brand);border-color:var(--brand);outline:1px solid var(--capline);outline-offset:3px}
+
+/* 09 เรืองแสง */
+.s9 .mid{border-radius:var(--r-pill);color:var(--faint);background:var(--raised)}
+.s9.on .mid{color:var(--on-brand);background:var(--brand);font-weight:600;box-shadow:0 0 22px -2px rgba(165,148,255,.55)}
+
+/* 10 พื้นโปร่ง */
+.s10 .mid{border-radius:var(--r-pill);color:var(--muted);background:rgba(165,148,255,.07)}
+.s10.on .mid{color:var(--brand);background:rgba(165,148,255,.22);font-weight:600}
+
+/* 11 ขีดใต้ */
+.s11 .mid{border-radius:0;color:var(--faint);border-bottom:2px solid transparent}
+.s11.on .mid{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+
+/* 12 ขีดบนสุดของแถบ */
+.s12 .nav{overflow:hidden}
+.s12 .mid{color:var(--faint)}
+.s12 .mid::before{content:"";position:absolute;top:-.5rem;left:18%;right:18%;height:2px;border-radius:2px;background:transparent}
+.s12.on .mid{color:var(--brand);font-weight:600}
+.s12.on .mid::before{background:var(--brand)}
+
+/* 13 จุดใต้คำ */
+.s13 .mid{color:var(--faint);flex-direction:column;gap:.3rem}
+.s13 .mid::after{content:"";width:.3rem;height:.3rem;border-radius:50%;background:transparent}
+.s13.on .mid{color:var(--brand);font-weight:600}
+.s13.on .mid::after{background:var(--brand)}
+
+/* 14 แท็บโค้งบน */
+.s14 .mid{align-self:stretch;border-radius:13px 13px 0 0;margin-bottom:-.5rem;padding-bottom:.5rem;color:var(--faint);background:transparent}
+.s14.on .mid{color:var(--brand);background:var(--raised);font-weight:600}
+
+/* 15 ลอยขึ้นเล็กน้อย */
+.s15 .nav{overflow:visible}
+.s15 .mid{min-height:2.35rem;border-radius:var(--r-pill);transform:translateY(-.5rem);color:var(--muted);background:var(--raised);border:1px solid var(--line)}
+.s15.on .mid{color:var(--on-brand);background:var(--brand);border-color:var(--brand);font-weight:600;box-shadow:0 6px 20px -8px rgba(165,148,255,.6)}
+
+/* 16 ร่องเว้า */
+.s16 .nav{overflow:visible}
+.s16 .mid{border-radius:var(--r-pill);margin-top:-1.15rem;color:var(--faint);background:var(--bg);border:1px solid var(--line);box-shadow:0 -3px 0 0 var(--surface)}
+.s16.on .mid{color:var(--brand);border-color:var(--capline);background:var(--brand-soft)}
+
+/* 17 วงกลม */
+.s17 .mid{width:2.55rem;height:2.55rem;min-height:0;flex:none;padding:0;border-radius:50%;font-weight:700;color:var(--faint);background:var(--raised)}
+.s17.on .mid{color:var(--on-brand);background:var(--brand)}
+
+/* 18 หกเหลี่ยม */
+.s18 .mid{clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,12px 100%,0 50%);padding:0 1.15rem;color:var(--faint);background:var(--raised)}
+.s18.on .mid{color:var(--on-brand);background:var(--brand);font-weight:600}
+
+/* 19 ขอบไล่เฉด */
+.s19 .mid{border-radius:var(--r-pill);color:var(--faint);border:1px solid var(--line)}
+.s19.on .mid{
+  color:var(--brand);border-color:transparent;
+  background:linear-gradient(var(--surface),var(--surface)) padding-box,
+             linear-gradient(115deg,#C3B6FF,#5F52B8) border-box;
+  border:1px solid transparent;font-weight:600;
+}
+
+/* 20 แคปซูลมีหาง */
+.s20 .nav{overflow:visible}
+.s20 .mid{border-radius:var(--r-pill) var(--r-pill) var(--r-pill) 6px;color:var(--faint);background:var(--raised)}
+.s20.on .mid{color:var(--on-brand);background:var(--brand);font-weight:600}
+
+.after{margin-top:3rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+.after code{font-family:var(--f-mono);font-size:.82em;color:var(--brand);background:var(--brand-soft);padding:.08rem .35rem;border-radius:5px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">แถบล่าง · ไฟล์ที่ 1 จาก 2</p>
+    <h1>ทรงปุ่ม 20 แบบ</h1>
+    <p>ทุกแบบใส่คำว่า <strong>KeviN</strong> เหมือนกันหมดโดยตั้งใจ — เพื่อให้เทียบ<strong>ทรงล้วน ๆ</strong>
+       ไม่มีโลโก้มาช่วยหรือมาแย่งความสนใจ</p>
+    <p>แต่ละแบบแสดงสองสถานะ: อยู่หน้าอื่น กับอยู่หน้า KeviN
+       ทุกทรงใช้ความสูงฐานเดียวกัน (2.55rem) ยกเว้นแบบที่ตั้งใจให้ต่าง</p>
+    <p><a class="pair" href="#">โลโก้อยู่อีกไฟล์ — เลือกทรงกับโลโก้แยกกัน แล้วบอกมาเป็นคู่ได้เลย</a></p>
+  </div>
+
+  <div class="bar-tools">
+    <button class="btn" id="only-on" aria-pressed="false">ดูเฉพาะตอนเลือกอยู่</button>
+    <button class="btn" id="wide" aria-pressed="false">คอลัมน์เดียว</button>
+    <span class="tools-note">01–10 อยู่ในกรอบมติเดิม · 11–20 เริ่มแตะโครงแถบ</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="after">
+    <h2>ข้อควรรู้ก่อนเลือก</h2>
+    <p>ทรงที่<b>ล้นออกนอกแถบ</b> (15 · 16 · 20) ต้องปลด <code>overflow</code> ของแถบ และต้องวัดใหม่ว่าปุ่มเพิ่มเร็วไม่ชน — เคยพลาดมาแล้ว (doc/TRAPS.md)</p>
+    <p>ทรงที่<b>ไม่มีพื้น</b> (11 · 12 · 13) สงบที่สุด แต่ทำให้ช่องนี้ไม่ต่างจากอีกสี่ช่องเลยตอนไม่ได้เลือก — ซึ่งขัดกับเหตุผลเดิมที่ให้ช่องนี้เปลี่ยนรูป</p>
+    <p>บอกเลขมาได้เลย · ผสมกับโลโก้จากอีกไฟล์ก็ได้ เช่น “ทรง 2 + โลโก้ 7”</p>
+  </div>
+</div>
+
+<script>
+const ICON = {
+  home:'<path d="M4 11l8-6 8 6v8H4z" stroke-linejoin="round"/>',
+  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4" stroke-linecap="round"/>',
+  box:'<path d="M4 7l8-3 8 3v10l-8 3-8-3z" stroke-linejoin="round"/><path d="M4 7l8 3 8-3M12 10v10" stroke-linejoin="round"/>',
+  gear:'<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6.2 6.2l1.4 1.4M16.4 16.4l1.4 1.4M17.8 6.2l-1.4 1.4M7.6 16.4l-1.4 1.4" stroke-linecap="round"/>'
+}
+const svg = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">' + d + '</svg>'
+
+const S = [
+  { n:1,  name:'แคปซูลทึบ',      flag:['now','ของตอนนี้'], label:'KeviN',
+    why:'ตัวเทียบ · <b>หนักไปทางป้ายมากกว่าปุ่ม</b> เพราะพื้นทึบเต็มช่องตอนถูกเลือก ทำให้กลางแถบดูหนักกว่าสองข้าง' },
+  { n:2,  name:'เส้นขอบอย่างเดียว', flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'ถอดพื้นทึบออก เหลือแค่เส้น · <b>เบาที่สุดในกลุ่มที่ยังมีกรอบ</b> และยังเปลี่ยนรูปครบเพราะขอบกับวงเรืองเปลี่ยนพร้อมกัน' },
+  { n:3,  name:'ไล่เฉด',          flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'โครงเดิมทุกอย่าง เปลี่ยนแค่พื้นตอนถูกเลือก · <b>เพิ่มมิติโดยไม่เพิ่มขนาด</b> เป็นการแก้ที่เล็กที่สุดในไฟล์นี้' },
+  { n:4,  name:'แคปซูลเตี้ย',      flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'ลดความสูงให้เท่าบรรทัดคำของช่องอื่น · แถบเป็นเส้นเดียวกันมากขึ้น <b>แต่ความเด่นหายไปเยอะ</b>' },
+  { n:5,  name:'มุมมนน้อย',        flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'มน 10px แทนแคปซูลเต็ม · <b>เข้ากับการ์ดในแอปที่มนเท่ากัน</b> — ทั้งจอจะดูเป็นชุดเดียวกันขึ้น' },
+  { n:6,  name:'มุมตัด',           flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'ตัดมุมทแยงสองมุมตรงข้าม · <b>รูปเดียวในแถบที่ไม่มีเส้นโค้งเลย</b> ให้ความรู้สึกเป็นเครื่องมือมากกว่าแอปแชต' },
+  { n:7,  name:'ทรงไข่',           flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'มนแบบวงรีจริง ไม่ใช่แคปซูลปลายตรง · <b>นุ่มกว่าทุกแบบ</b> เหมาะถ้าอยากให้ KeviN รู้สึกเป็นคนมากกว่าเป็นปุ่ม' },
+  { n:8,  name:'ขอบสองชั้น',       flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'ตอนถูกเลือกมีวงนอกเพิ่มอีกชั้น · <b>บอกสถานะโดยไม่ต้องเติมสีทึบ</b> — แถบยังโปร่งเท่าเดิม' },
+  { n:9,  name:'เรืองแสง',         flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'พื้นทึบเหมือนเดิมแต่มีแสงฟุ้งรอบ ๆ · <b>เด่นที่สุดโดยไม่ต้องใหญ่ขึ้นเลย</b> ข้อควรระวังคือจอ OLED กลางคืนจะฟุ้งกว่าที่เห็นตรงนี้' },
+  { n:10, name:'พื้นโปร่ง',        flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'พื้นเป็นสีแบรนด์จาง ๆ ไม่ทึบ · <b>ครึ่งทางระหว่างข้อ 1 กับข้อ 2</b> — มีน้ำหนักแต่ไม่ตัน' },
+  { n:11, name:'ขีดใต้',           flag:['ask','คิดก่อน'], label:'KeviN',
+    why:'ไม่มีกรอบเลย ใช้ขีดใต้บอกว่าเลือกอยู่ · <b>สงบมาก แต่ตอนไม่ได้เลือกจะกลืนกับอีกสี่ช่องสนิท</b>' },
+  { n:12, name:'ขีดบนแถบ',        flag:['ask','คิดก่อน'], label:'KeviN',
+    why:'ขีดไปอยู่ที่ขอบบนของแถบ · <b>เป็นภาษาของแท็บบนเดสก์ท็อป</b> ซึ่งบนมือถืออาจอ่านไม่ออกว่าหมายถึงช่องไหน' },
+  { n:13, name:'จุดใต้คำ',         flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'จุดเล็กใต้คำ · <b>เบาที่สุดในไฟล์นี้</b> และเป็นภาษาเดียวกับ iOS ที่คนคุ้นอยู่แล้ว' },
+  { n:14, name:'แท็บโค้งบน',      flag:['ask','คิดก่อน'], label:'KeviN',
+    why:'พื้นยกขึ้นเป็นแท็บเชื่อมกับขอบแถบ · <b>บอกว่า “หน้านี้กำลังเปิดอยู่” ได้ตรงที่สุด</b> แต่ทำให้แถบดูเป็นแท็บเบราว์เซอร์' },
+  { n:15, name:'ลอยขึ้นนิดเดียว',  flag:['ask','คิดก่อน'], label:'KeviN',
+    why:'ยก 8px พอให้รู้ว่าไม่ใช่ช่องธรรมดา · <b>ยังเป็นแคปซูล ไม่ใช่วงกลม</b> จึงยังไม่ปะทะปุ่มเพิ่มเร็วตรง ๆ แต่เข้าใกล้เส้นแล้ว' },
+  { n:16, name:'ร่องเว้า',         flag:['ask','คิดก่อน'], label:'KeviN',
+    why:'แคปซูลจมลงไปในแถบ พื้นเป็นสีเดียวกับพื้นหลังแอป · <b>เด่นโดยไม่ต้องลอยขึ้นมาแข่งกับปุ่มเพิ่มเร็ว</b>' },
+  { n:17, name:'วงกลม',           flag:['ask','ขัดมติเดิม'], label:'K',
+    why:'ทรงกลมล้วน ใส่ได้แค่ตัวเดียว · <b>เอกสารเคาะไว้ว่าไม่เอาวงกลม</b>เพราะจะแย่งกับปุ่มเพิ่มเร็ว — แบบนี้ไม่ยกลอย จึงเบากว่าเดิมแต่ยังชนมติอยู่' },
+  { n:18, name:'หกเหลี่ยม',        flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'ปลายแหลมสองข้าง · <b>ชี้ออกทั้งซ้ายขวาเหมือนของที่แทรกอยู่กลางแถว</b> ซึ่งตรงกับตำแหน่งจริงของมันพอดี' },
+  { n:19, name:'ขอบไล่เฉด',        flag:['ok','ปลอดภัย'], label:'KeviN',
+    why:'เส้นขอบเป็นไล่เฉด พื้นในยังโปร่ง · <b>ได้ความพิเศษของไล่เฉดโดยไม่ต้องถมสีทั้งก้อน</b>' },
+  { n:20, name:'แคปซูลมีหาง',      flag:['ask','คิดก่อน'], label:'KeviN',
+    why:'มุมล่างซ้ายเหลี่ยมเดียว ทำให้เหมือนกล่องคำพูด · <b>บอกว่ามันพูดได้โดยไม่ต้องมีไอคอน</b> — ต้องระวังว่าหางชี้ไปทางช่องปฏิทินพอดี' },
+]
+
+function navHTML(v, on){
+  const item = (icon,label,isOn) =>
+    '<span class="nav__item' + (isOn?' nav__item--on':'') + '">' + svg(ICON[icon]) + '<span>' + label + '</span></span>'
+  return '<div class="nav">' +
+    item('home','วันนี้', !on) + item('cal','ปฏิทิน', false) +
+    '<span class="nav__item mid cap"><span>' + v.label + '</span></span>' +
+    item('box','คลัง', false) + item('gear','ตั้งค่า', false) +
+  '</div>'
+}
+
+document.getElementById('grid').innerHTML = S.map(function(v){
+  const cls = 's' + v.n
+  return '<article class="card">' +
+    '<div class="card__top"><span class="card__n">' + String(v.n).padStart(2,'0') + '</span>' +
+      '<span class="card__name">' + v.name + '</span>' +
+      '<span class="flag flag--' + v.flag[0] + '">' + v.flag[1] + '</span></div>' +
+    '<p class="card__why">' + v.why + '</p>' +
+    '<div class="stage">' +
+      '<div class="stage__label state-off">อยู่หน้าอื่น</div>' +
+      '<div class="' + cls + ' state-off">' + navHTML(v,false) + '</div>' +
+      '<div class="stage__label">อยู่หน้า KeviN</div>' +
+      '<div class="' + cls + ' on">' + navHTML(v,true) + '</div>' +
+    '</div></article>'
+}).join('')
+
+/* ห่อ try/catch เพราะโหมดส่วนตัวของบางเบราว์เซอร์โยน error ตอนแตะ localStorage */
+const store = {
+  get:function(k){try{return localStorage.getItem(k)==='1'}catch(e){return false}},
+  set:function(k,v){try{localStorage.setItem(k,v?'1':'0')}catch(e){}}
+}
+function wire(id,cls,key){
+  const b=document.getElementById(id)
+  function apply(on){b.setAttribute('aria-pressed',String(on));document.body.classList.toggle(cls,on)}
+  apply(store.get(key))
+  b.addEventListener('click',function(){const on=b.getAttribute('aria-pressed')!=='true';apply(on);store.set(key,on)})
+}
+wire('only-on','hide-off','kevin-shape-only-on')
+wire('wide','wide','kevin-shape-wide')
+const st=document.createElement('style')
+st.textContent='body.hide-off .state-off{display:none}body.wide .grid{grid-template-columns:1fr}'
+document.head.appendChild(st)
+</script>

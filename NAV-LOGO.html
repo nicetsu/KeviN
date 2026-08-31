@@ -1,0 +1,274 @@
+<title>โลโก้ KeviN ยี่สิบแบบ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ค่าทั้งหมดคัดจาก web/app/globals.css ของจริง (1 ก.ย. 2026)
+   ไฟล์นี้ดูแต่ "โลโก้" — วางใน**กล่องเรืองแสง (ทรง 09)** เหมือนกันทุกแบบ
+   เพราะเจ้าของเลือกทรงนี้เป็นฉากตั้งต้น · ทรงอื่นอยู่อีกไฟล์ NAV-SHAPE.html
+   ในกล่องมี**โลโก้อย่างเดียว ไม่มีคำกำกับ** — กดปุ่มด้านบนเพื่อเทียบกับแบบมีคำได้ */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1180px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:44rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.bar-tools{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:2rem 0 1.3rem;padding:.7rem 0;background:linear-gradient(var(--bg) 72%,transparent)}
+.btn{font:inherit;font-size:var(--s--1);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:.42rem .95rem;cursor:pointer;transition:color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+.btn:hover{color:var(--ink);border-color:var(--capline)}
+.btn[aria-pressed="true"]{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tools-note{font-size:var(--s--2);color:var(--faint);margin-left:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1.1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color var(--t-base) var(--ease)}
+.card:hover{border-color:var(--capline)}
+.card__top{display:flex;align-items:baseline;gap:.6rem;padding:.85rem 1rem .55rem}
+.card__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);font-variant-numeric:tabular-nums}
+.card__name{font-weight:600;letter-spacing:-.01em}
+.flag{margin-left:auto;font-size:var(--s--2);font-weight:500;padding:.1rem .5rem;border-radius:var(--r-pill);white-space:nowrap}
+.flag--ok{color:#74C6A4;background:rgba(116,198,164,.1)}
+.flag--ask{color:#D5BB6D;background:rgba(213,187,109,.1)}
+.card__why{padding:0 1rem .9rem;font-size:var(--s--1);color:var(--muted);margin:0}
+.card__why b{color:var(--ink);font-weight:500}
+
+/* ---------- แถวเทียบขนาด ---------- */
+.sizes{
+  display:flex; align-items:center; gap:1rem;
+  padding:.9rem 1rem; background:var(--bg);
+  border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft);
+}
+.big{
+  width:3.4rem;height:3.4rem;flex:none;border-radius:14px;
+  display:grid;place-items:center;background:var(--raised);color:var(--brand);
+}
+.big svg{width:2.1rem;height:2.1rem}
+.tiny{display:flex;align-items:center;gap:.7rem}
+/* ⚠️ SVG ในไฟล์นี้ไม่มี width/height ในแท็ก — ขนาดมาจากกฎนี้ที่เดียว
+   ลบทิ้งเมื่อไหร่โลโก้จะหายจากกล่องทันทีโดยไม่มี error (เจอมาแล้วทั้งที่นี่และในแอปจริง) */
+.box svg{width:1.3rem;height:1.3rem;flex:none}
+
+/* กล่องเรืองแสง — ค่าเดียวกับทรง 09 ในไฟล์ NAV-SHAPE.html เป๊ะ ๆ
+   แก้ที่นี่แล้วต้องไปแก้อีกไฟล์ด้วย ไม่งั้นสองไฟล์จะโชว์คนละอย่าง */
+.box{
+  min-height:2.55rem; padding:0 1.05rem; border-radius:var(--r-pill);
+  display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:.12rem;
+  font-size:var(--s--1); color:var(--faint); background:var(--raised);
+}
+.box--on{
+  color:var(--on-brand); background:var(--brand); font-weight:600;
+  box-shadow:0 0 22px -2px rgba(165,148,255,.55);
+}
+.box__word{display:none}
+body.with-word .box__word{display:block}
+/* มีคำแล้วกล่องจะแคบไป — ขยายให้พอดีเหมือนตอนอยู่ในแถบจริง */
+body.with-word .box{padding:0 .9rem}
+.sizes__note{
+  margin-left:auto;text-align:right;
+  font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);line-height:1.4;
+}
+
+/* ---------- แถบจริง ---------- */
+.stage{background:var(--bg);margin-top:auto}
+.stage__label{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);padding:.5rem 1rem .1rem;letter-spacing:.06em}
+.nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:.5rem 0}
+.nav__item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;padding:.3rem 0;font-size:var(--s--1);color:var(--muted)}
+.nav__item svg{width:1.3rem;height:1.3rem;flex:none}
+.nav__item--on{color:var(--brand);font-weight:600}
+.nav .box{flex:none}
+.box__solo{font-weight:600;letter-spacing:.01em}
+.big__word{font-weight:700;font-size:.92rem;letter-spacing:-.01em}
+.card--ref{border-color:var(--capline)}
+
+.after{margin-top:3rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">แถบล่าง · ไฟล์ที่ 2 จาก 2</p>
+    <h1>โลโก้ 20 แบบ</h1>
+    <p>ทุกแบบอยู่ใน<strong>กล่องเรืองแสง (ทรง 09)</strong> เหมือนกันหมด และในกล่องมี
+       <strong>โลโก้อย่างเดียว ไม่มีคำกำกับ</strong> — ตัวเทียบคำว่า KeviN เดี่ยว ๆ อยู่ใบแรกสุด</p>
+    <p>แต่ละการ์ดโชว์<strong>สองขนาด</strong>: ขนาดใหญ่ให้เห็นรูปทรงจริง กับ
+       <strong>ขนาดจริงบนแถบ 21px</strong> ซึ่งเป็นขนาดเดียวที่นับ — โลโก้หลายอันสวยตอนใหญ่แล้วตันตอนย่อ</p>
+    <p>เส้นทุกอันหนา 1.9 เท่าไอคอนอีกสี่ช่องเป๊ะ ๆ ไม่งั้นมันจะดูเป็นของคนละชุดทันทีที่วางเรียงกัน</p>
+    <p><strong>ข้อแลกของการไม่มีคำ</strong>: ช่องนี้จะเป็นช่องเดียวในแถบที่ไม่มีตัวหนังสือ
+       เด่นขึ้นก็จริง แต่ต้องจำเอาว่ารูปนี้คือ KeviN — กดปุ่ม “ใส่คำใต้โลโก้” เพื่อเทียบสองทางได้</p>
+  </div>
+
+  <div class="bar-tools">
+    <button class="btn" id="with-word" aria-pressed="false">ใส่คำใต้โลโก้</button>
+    <button class="btn" id="hide-bar" aria-pressed="false">ซ่อนแถบตัวอย่าง</button>
+    <button class="btn" id="wide" aria-pressed="false">คอลัมน์เดียว</button>
+    <span class="tools-note">01–08 เสียง/AI · 09–12 รูปทรง · 13–15 ตัวอักษร · 16–20 อื่น ๆ</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="after">
+    <h2>สิ่งที่ผมดูตอนคัด</h2>
+    <p><b>อ่านออกที่ 21px ไหม</b> — อันที่มีรายละเอียดในตัว (17 คลื่นวิทยุ · 19 เข็มทิศ) จะเริ่มตันเมื่อย่อ ดูช่องขวาในแถวเทียบขนาดก่อนตัดสิน</p>
+    <p><b>มันบอกอะไรผิดหรือเปล่า</b> — โลโก้แชต (09 · 10) ทำให้โหมดโทรกลายเป็นของแถม ทั้งที่เป็นของหลักพอกัน</p>
+    <p><b>โตต่อได้ไหม</b> — 03 · 04 · 20 หมุนหรือขยับได้ ใช้เป็นตัวบอก “กำลังคิดอยู่” ได้ด้วยตัวเดียวกัน ไม่ต้องมีสองรูป</p>
+  </div>
+</div>
+
+<script>
+const ICON = {
+  home:'<path d="M4 11l8-6 8 6v8H4z" stroke-linejoin="round"/>',
+  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4" stroke-linecap="round"/>',
+  box:'<path d="M4 7l8-3 8 3v10l-8 3-8-3z" stroke-linejoin="round"/><path d="M4 7l8 3 8-3M12 10v10" stroke-linejoin="round"/>',
+  gear:'<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6.2 6.2l1.4 1.4M16.4 16.4l1.4 1.4M17.8 6.2l-1.4 1.4M7.6 16.4l-1.4 1.4" stroke-linecap="round"/>'
+}
+const svg = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">' + d + '</svg>'
+const solid = 'fill="currentColor" stroke="none"'
+
+const L = [
+  { n:1, name:'คลื่นเสียง', flag:['ok','อ่านออกดี'],
+    d:'<path d="M3 10v4M8 5.5v13M13 8v8M18 4v16M21 10.5v3" stroke-linecap="round"/>',
+    why:'ห้าขีดสูงต่ำ · <b>บอกว่าช่องนี้พูดได้</b> ซึ่งเป็นสิ่งที่ทำให้มันต่างจากอีกสี่ช่องจริง ๆ · ถ้าวันหลังให้ขีดขยับตามเสียง มันจะกลายเป็นตัวบอกสถานะไปในตัว' },
+  { n:2, name:'คลื่นไซน์', flag:['ok','อ่านออกดี'],
+    d:'<path d="M2.5 12c2-6 4.5-6 6.5 0s4.5 6 6.5 0 4-4.4 6-1.2" stroke-linecap="round"/>',
+    why:'เส้นเดียวลื่นไหล · <b>นุ่มกว่าแบบขีด</b> และเป็นรูปเดียวในแถบที่ไม่มีมุมเลย — แต่ตอนย่อจะบางจนเกือบหาย' },
+  { n:3, name:'วงซ้อน', flag:['ok','อ่านออกดี'],
+    d:'<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.4"/>',
+    why:'วงกลมสองชั้น · <b>เป็นกลางที่สุด</b> ไม่ผูกกับเสียงหรือแชต จึงไม่มีวันผิดไม่ว่า KeviN จะโตไปทางไหน' },
+  { n:4, name:'วงแหวนเปิด', flag:['ok','อ่านออกดี'],
+    d:'<path d="M19.5 14.5a8 8 0 10-3.6 4.2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.6"/>',
+    why:'วงที่ยังปิดไม่สนิท มีแกนกลาง · <b>หมุนได้</b> อยากได้ตัวบอกว่ากำลังคิดอยู่ก็หมุนตัวเดิม ไม่ต้องมีสองรูป' },
+  { n:5, name:'วงโคจร', flag:['ask','ตันตอนย่อ'],
+    d:'<circle cx="12" cy="12" r="4.6"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(-28 12 12)"/><circle cx="20.6" cy="7.6" r="1.8" ' + solid + '/>',
+    why:'มีดาวเล็กโคจรรอบแกน · <b>สวยที่สุดตอนใหญ่</b> แต่ที่ 21px เส้นวงรีจะเบียดกับวงใน — ดูช่องขวาก่อน' },
+  { n:6, name:'ดวงตา', flag:['ask','คิดก่อน'],
+    d:'<path d="M2.5 12s3.8-6 9.5-6 9.5 6 9.5 6-3.8 6-9.5 6-9.5-6-9.5-6z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.8"/>',
+    why:'สื่อว่า “มองเห็นข้อมูลของคุณ” ซึ่งจริง — ผู้ช่วยในแอปอ่านได้อย่างเดียว เขียนไม่ได้ · <b>แต่ดวงตาบนแอปส่วนตัวอ่านเป็นการถูกจับตามองได้ง่ายพอกัน</b>' },
+  { n:7, name:'ประกายสี่แฉก', flag:['ask','คลิเช่ AI'],
+    d:'<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6L4.5 11l5.6-1.9z" stroke-linejoin="round"/>',
+    why:'อ่านออกว่า AI ทันทีเพราะทุกแอปใช้อันนี้ · <b>ข้อเสียคือ KeviN จะดูเหมือนฟีเจอร์ที่แปะเพิ่ม</b> ไม่ใช่ผู้ช่วยของคุณเอง' },
+  { n:8, name:'ประกายเว้า', flag:['ok','อ่านออกดี'],
+    d:'<path d="M12 3c.6 4.7 4.3 8.4 9 9-4.7.6-8.4 4.3-9 9-.6-4.7-4.3-8.4-9-9 4.7-.6 8.4-4.3 9-9z" stroke-linejoin="round"/>',
+    why:'ประกายที่ด้านเว้าเข้า ไม่ใช่แฉกตรง · <b>ยังอ่านว่า AI ได้แต่ไม่เหมือนของใคร</b> — ทางออกกลางระหว่างข้อ 7 กับการไม่ใช้ประกายเลย' },
+  { n:9, name:'กรอบพูดสามจุด', flag:['ask','บอกครึ่งเดียว'],
+    d:'<path d="M20 12.5c0 3.9-3.6 7-8 7-1 0-2-.2-2.9-.5L4 20.5l1.3-3.4A6.8 6.8 0 014 12.5c0-3.9 3.6-7 8-7s8 3.1 8 7z" stroke-linejoin="round"/><path d="M9 12.5h.01M12 12.5h.01M15 12.5h.01" stroke-linecap="round" stroke-width="2.4"/>',
+    why:'ชัดว่าเป็นที่คุย · <b>แต่บอกแค่ครึ่งเดียว</b> — ช่องนี้พูดได้ด้วย และกรอบแชตทำให้โหมดโทรกลายเป็นของแถม' },
+  { n:10, name:'กรอบพูดมีคลื่น', flag:['ok','ครบทั้งสองโหมด'],
+    d:'<path d="M20 12.5c0 3.9-3.6 7-8 7-1 0-2-.2-2.9-.5L4 20.5l1.3-3.4A6.8 6.8 0 014 12.5c0-3.9 3.6-7 8-7s8 3.1 8 7z" stroke-linejoin="round"/><path d="M9 11v3M12 9.6v6M15 11v3" stroke-linecap="round"/>',
+    why:'กรอบพูดที่ข้างในเป็นคลื่นเสียง · <b>อันเดียวในไฟล์นี้ที่บอกครบทั้งพิมพ์และพูด</b> — ตรงกับสิ่งที่ช่องนี้เป็นจริงที่สุด' },
+  { n:11, name:'เพชร', flag:['ok','อ่านออกดี'],
+    d:'<path d="M12 3.6l8.4 8.4-8.4 8.4L3.6 12z" stroke-linejoin="round"/><path d="M12 8.2L15.8 12 12 15.8 8.2 12z" stroke-linejoin="round"/>',
+    why:'สี่เหลี่ยมหมุน 45° ซ้อนสองชั้น · <b>ไม่มีมุมฉากเลยเมื่อมองเร็ว ๆ</b> จึงแยกตัวจากอีกสี่ช่องโดยไม่ต้องใหญ่กว่า' },
+  { n:12, name:'หกเหลี่ยมมีแกน', flag:['ok','อ่านออกดี'],
+    d:'<path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6"/>',
+    why:'ทรงแข็งแรงมีแกนกลาง · <b>ให้ความรู้สึกเป็นเครื่องมือ ไม่ใช่ของเล่น</b> เหมาะถ้าอยากให้ KeviN ดูน่าเชื่อถือมากกว่าน่ารัก' },
+  { n:13, name:'ตัว K', flag:['ok','อ่านออกดี'],
+    d:'<path d="M7.5 4.5v15M16.8 5L9 12l7.8 7" stroke-linecap="round"/>',
+    why:'ตัวเดียวจบ · <b>อ่านออกทันทีแม้เล็กมาก</b> ซึ่งเป็นข้อได้เปรียบที่รูปวาดไม่มีบนจอ 360px — และไม่มีวันสื่อผิด' },
+  { n:14, name:'K ในวงกลม', flag:['ok','อ่านออกดี'],
+    d:'<circle cx="12" cy="12" r="8.8"/><path d="M9.9 7.9v8.2M14.9 8.3L10.7 12l4.2 3.7" stroke-linecap="round"/>',
+    why:'ตัวอักษรในกรอบกลม · <b>ทำงานเหมือนรูปโปรไฟล์ของใครสักคน</b> ตรงกับเหตุผลเดิมที่ช่องนี้เป็น*ใคร* ไม่ใช่*ที่ไหน*' },
+  { n:15, name:'ตัว N', flag:['ask','สื่อไม่ตรง'],
+    d:'<path d="M6.5 19.5V4.5l11 15V4.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    why:'ตัวใหญ่ตัวท้ายของ KeviN · <b>รูปสวยกว่า K เพราะสมมาตร</b> แต่คนจะไม่เดาว่าย่อมาจากอะไร' },
+  { n:16, name:'ไมโครโฟน', flag:['ask','บอกครึ่งเดียว'],
+    d:'<rect x="9.2" y="3" width="5.6" height="10.6" rx="2.8"/><path d="M5.6 11.4a6.4 6.4 0 0012.8 0M12 17.8v3.2" stroke-linecap="round"/>',
+    why:'ตรงไปตรงมาที่สุด · <b>แต่กลับด้านกับข้อ 9</b> คือทำให้แชตกลายเป็นของแถม · และไมค์มักหมายถึง “กดแล้วพูดเลย” ซึ่งช่องนี้ไม่ใช่' },
+  { n:17, name:'คลื่นวิทยุ', flag:['ask','ตันตอนย่อ'],
+    d:'<circle cx="12" cy="12" r="1.7" ' + solid + '/><path d="M8.2 8.2a5.4 5.4 0 000 7.6M15.8 15.8a5.4 5.4 0 000-7.6M5.2 5.2a9.6 9.6 0 000 13.6M18.8 18.8a9.6 9.6 0 000-13.6" stroke-linecap="round"/>',
+    why:'สื่อการติดต่อสองทาง · <b>ส่วนโค้งสี่เส้นเบียดกันตอนย่อ</b> ดูช่องขวาแล้วตัดสิน — ถ้าจะใช้ ควรตัดเหลือสองส่วนโค้ง' },
+  { n:18, name:'ส่งข้อความ', flag:['ask','สื่อไม่ตรง'],
+    d:'<path d="M4 12l16-7-7 16-2.4-6.6z" stroke-linejoin="round"/>',
+    why:'กระดาษพับ · <b>สื่อว่า “กดแล้วส่ง” ซึ่งเป็นการกระทำ ไม่ใช่สถานที่</b> — ช่องในแถบล่างควรเป็นที่ที่ไปถึง ไม่ใช่ปุ่มสั่งงาน' },
+  { n:19, name:'เข็มทิศ', flag:['ask','ตันตอนย่อ'],
+    d:'<circle cx="12" cy="12" r="8.6"/><path d="M15.4 8.6l-1.9 4.9-4.9 1.9 1.9-4.9z" stroke-linejoin="round"/>',
+    why:'สื่อว่าพาไปถูกทาง · <b>ตรงกับหน้าที่ของผู้ช่วยดี</b> แต่เข็มข้างในเล็กมากตอนย่อ และมักถูกอ่านว่าเป็นแผนที่' },
+  { n:20, name:'สามจุดโค้ง', flag:['ok','อ่านออกดี'],
+    d:'<path d="M5 14.8a9 9 0 0014 0" stroke-linecap="round"/><circle cx="8" cy="9.4" r="1.25" ' + solid + '/><circle cx="12" cy="9.4" r="1.25" ' + solid + '/><circle cx="16" cy="9.4" r="1.25" ' + solid + '/>',
+    why:'สามจุดวางอยู่ในอ้อมของส่วนโค้ง · <b>สามจุดคือ “กำลังพิมพ์” ที่ทุกคนรู้จัก</b> และโค้งทำให้มันเป็นของเรา ไม่ใช่ของแอปแชตทั่วไป · จุดกระพริบไล่กันได้ตอนกำลังคิด · <b>ข้อควรรู้: ตอนใหญ่มันอ่านเป็นหน้ายิ้มได้</b> ซึ่งจะเป็นข้อดีหรือข้อเสียก็แล้วแต่ว่าอยากให้ KeviN ดูเป็นเพื่อนแค่ไหน' },
+]
+
+/* กล่องเรืองแสงหนึ่งใบ · on = อยู่หน้า KeviN
+   เนื้อในเป็นโลโก้อย่างเดียว ส่วนคำซ่อนไว้ด้วย CSS ให้ปุ่มด้านบนเปิดได้ */
+function boxHTML(mark, on){
+  return '<span class="box' + (on ? ' box--on' : '') + '">' +
+    (mark ? svg(mark) : '<span class="box__solo">KeviN</span>') +
+    (mark ? '<span class="box__word">KeviN</span>' : '') + '</span>'
+}
+
+function navHTML(mark){
+  const item = (icon,label) => '<span class="nav__item">' + svg(ICON[icon]) + '<span>' + label + '</span></span>'
+  return '<div class="nav">' + item('home','วันนี้') + item('cal','ปฏิทิน') +
+    '<span class="nav__item">' + boxHTML(mark, true) + '</span>' +
+    item('box','คลัง') + item('gear','ตั้งค่า') + '</div>'
+}
+
+/* ใบอ้างอิง — กล่องเดียวกันแต่ข้างในเป็นคำ ไม่ใช่โลโก้
+   วางไว้ใบแรกเพราะทุกใบที่เหลือคือ "ถ้าเอารูปมาแทนคำนี้" */
+const REF = '<article class="card card--ref">' +
+  '<div class="card__top"><span class="card__n">—</span>' +
+    '<span class="card__name">คำว่า KeviN เดี่ยว ๆ</span>' +
+    '<span class="flag flag--ok">ตัวเทียบ</span></div>' +
+  '<p class="card__why">กล่องเดียวกันแต่ข้างในเป็นคำ · <b>อ่านออกโดยไม่ต้องเรียนรู้อะไรเลย</b> — ทุกใบที่เหลือคือคำถามว่ารูปคุ้มพอจะแทนคำนี้ไหม</p>' +
+  '<div class="sizes"><span class="big"><span class="big__word">KeviN</span></span>' +
+    '<span class="tiny">' + boxHTML(null,false) + boxHTML(null,true) + '</span>' +
+    '<span class="sizes__note">ไม่มีรูป<br>คำล้วน</span></div>' +
+  '<div class="stage bar"><div class="stage__label">อยู่หน้า KeviN</div>' + navHTML(null) + '</div>' +
+'</article>'
+
+document.getElementById('grid').innerHTML = REF + L.map(function(v){
+  return '<article class="card">' +
+    '<div class="card__top"><span class="card__n">' + String(v.n).padStart(2,'0') + '</span>' +
+      '<span class="card__name">' + v.name + '</span>' +
+      '<span class="flag flag--' + v.flag[0] + '">' + v.flag[1] + '</span></div>' +
+    '<p class="card__why">' + v.why + '</p>' +
+    '<div class="sizes">' +
+      '<span class="big">' + svg(v.d) + '</span>' +
+      '<span class="tiny">' + boxHTML(v.d, false) + boxHTML(v.d, true) + '</span>' +
+      '<span class="sizes__note">34px<br>21px · ขนาดจริง</span>' +
+    '</div>' +
+    '<div class="stage bar">' +
+      '<div class="stage__label">อยู่หน้า KeviN</div>' + navHTML(v.d) +
+    '</div></article>'
+}).join('')
+
+/* ห่อ try/catch เพราะโหมดส่วนตัวของบางเบราว์เซอร์โยน error ตอนแตะ localStorage */
+const store = {
+  get:function(k){try{return localStorage.getItem(k)==='1'}catch(e){return false}},
+  set:function(k,v){try{localStorage.setItem(k,v?'1':'0')}catch(e){}}
+}
+function wire(id,cls,key){
+  const b=document.getElementById(id)
+  function apply(on){b.setAttribute('aria-pressed',String(on));document.body.classList.toggle(cls,on)}
+  apply(store.get(key))
+  b.addEventListener('click',function(){const on=b.getAttribute('aria-pressed')!=='true';apply(on);store.set(key,on)})
+}
+wire('with-word','with-word','kevin-logo-with-word')
+wire('hide-bar','no-bar','kevin-logo-no-bar')
+wire('wide','wide','kevin-logo-wide')
+const st=document.createElement('style')
+st.textContent='body.no-bar .bar{display:none}body.wide .grid{grid-template-columns:1fr}'
+document.head.appendChild(st)
+</script>
