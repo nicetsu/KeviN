@@ -84,16 +84,44 @@
 @keyframes reveal-fade { from { opacity: 0 } to { opacity: 1 } }
 @keyframes reveal-rise { from { transform: translateY(6px) } to { transform: none } }
 
-/*
- * ชื่อวิชาที่เดินทางจากคลังไปเป็นหัวของหน้าวิชา
- *
- * ไม่ต้องเขียน keyframes เอง — เบราว์เซอร์คำนวณระยะและขนาดให้จาก
- * ตำแหน่งจริงสองฝั่ง เราบอกแค่ว่าใช้เวลาเท่าไหร่และโค้งแบบไหน
- */
 ::view-transition-group(*) {
   animation-duration: var(--t-slow);
   animation-timing-function: var(--ease);
 }
+
+/*
+ * ทิศทางของการเปลี่ยนหน้า — เข้าไปข้างในเลื่อนซ้าย ถอยกลับเลื่อนขวา
+ *
+ * ⚠️ **นี่คือ animation เดียวที่ทำงานได้จริงเมื่อข้ามหน้าในแอปนี้**
+ *    shared element (morph) จับคู่ไม่ได้เลย เพราะ Next.js ทำ view transition
+ *    **สองรอบ** ต่อการเปลี่ยนหน้าหนึ่งครั้งบน route ที่เป็น `force-dynamic` —
+ *    รอบแรกตอนเริ่มโหลด รอบสองตอนเนื้อมาถึง ของฝั่งเก่าจึงหายไปก่อนของฝั่งใหม่
+ *    จะมาเสมอ ไม่มีจังหวะที่ทั้งสองอยู่บนจอพร้อมกัน (doc/TRAPS.md)
+ *
+ *    แต่ `root` เข้าร่วมทุกรอบ — ทั้งจอจึงเลื่อนได้ ซึ่งเห็นชัดกว่า morph ด้วยซ้ำ
+ *    บนจอมือถือที่ของชิ้นเดียวเดินทางแล้วสังเกตยาก
+ */
+html:active-view-transition-type(nav-forward) {
+  &::view-transition-old(root) {
+    animation: var(--t-slow) var(--ease) both nav-out-left;
+  }
+  &::view-transition-new(root) {
+    animation: var(--t-slow) var(--ease) both nav-in-right;
+  }
+}
+html:active-view-transition-type(nav-back) {
+  &::view-transition-old(root) {
+    animation: var(--t-slow) var(--ease) both nav-out-right;
+  }
+  &::view-transition-new(root) {
+    animation: var(--t-slow) var(--ease) both nav-in-left;
+  }
+}
+
+@keyframes nav-out-left  { to   { transform: translateX(-22%); opacity: 0 } }
+@keyframes nav-in-right  { from { transform: translateX(22%);  opacity: 0 } }
+@keyframes nav-out-right { to   { transform: translateX(22%);  opacity: 0 } }
+@keyframes nav-in-left   { from { transform: translateX(-22%); opacity: 0 } }
 
 /*
  * ผู้ที่ตั้งค่าลดการเคลื่อนไหว — ตัด transition ของเบราว์เซอร์ทิ้งทั้งชุด

@@ -1,4 +1,3 @@
-import { ViewTransition } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
@@ -7,7 +6,6 @@ import { LIBRARY_OPEN_COOKIE, decodeOpen } from '@/lib/libraryOpen'
 import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
 import { summarize, type Slot } from '@/lib/schedule'
 import { AREA_CLASS } from '@/lib/areaColor'
-import { Content } from '@/components/Reveal'
 import ProjectTree, { type TreeProject, type TreeItem } from './ProjectTree'
 
 export const dynamic = 'force-dynamic'
@@ -131,33 +129,26 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
   const attention = tree.reduce((n, p) => n + p.attention, 0)
 
   return (
-    <Content>
-      <main className="wrap">
-        <div className="page-head">
-          <Link href="/library" className="back">‹ คลัง</Link>
-        </div>
+    <main className="wrap">
+      <div className="page-head">
+        <Link href="/library" className="back" transitionTypes={['nav-back']}>‹ คลัง</Link>
+      </div>
 
-        {/*
-          ปลายทางของการเดินทางจากกล่องในหน้าคลัง — ชื่อต้องตรงกับฝั่งโน้นเป๊ะ
-          กล่องเดิมขยายเต็มความกว้างแล้วกลายเป็นหัวของหน้านี้
-        */}
-        <ViewTransition name={`area-${area.id}`}>
-          <div className={`acard acard--head ${AREA_CLASS[area.color ?? ''] ?? ''}`}>
-            <span className="acard__nm">{area.name}</span>
-            <span className="acard__ct">
-              {openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
-            </span>
-            {attention > 0 && <span className="acard__badge">{attention}</span>}
-          </div>
-        </ViewTransition>
+      {/* หัวของหน้า — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง */}
+      <div className={`acard acard--head ${AREA_CLASS[area.color ?? ''] ?? ''}`}>
+        <span className="acard__nm">{area.name}</span>
+        <span className="acard__ct">
+          {openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
+        </span>
+        {attention > 0 && <span className="acard__badge">{attention}</span>}
+      </div>
 
-        <ProjectTree
-          areaId={area.id}
-          label={label}
-          projects={tree}
-          initialOpen={initialOpen}
-        />
-      </main>
-    </Content>
+      <ProjectTree
+        areaId={area.id}
+        label={label}
+        projects={tree}
+        initialOpen={initialOpen}
+      />
+    </main>
   )
 }

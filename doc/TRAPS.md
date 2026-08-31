@@ -372,7 +372,36 @@ prompt ต้องกำหนดชัดว่าการลบถามย�
 และโครงร่างไม่มี element ชื่อเดียวกัน จึง**ไม่มีคู่ให้ morph** · ต่อให้ปิด `loading.tsx`
 ก็ยังชนเพดานเวลาของเบราว์เซอร์ เพราะทุกหน้าเป็น `force-dynamic` ต้องรอเซิร์ฟเวอร์เสมอ
 
-**เงื่อนไขที่ทำให้มันติดได้ (1 ก.ย. 2026)** — พอเจ้าของขอให้กล่อง Area เป็นทางเข้าจริง
+**สรุปสุดท้าย (1 ก.ย. 2026 · หลังทดสอบบน production build 6 รอบ): ทำไม่ได้ในสถาปัตยกรรมนี้**
+
+Next.js ทำ view transition **สองรอบต่อการเปลี่ยนหน้าหนึ่งครั้ง** บน route ที่เป็น
+`force-dynamic` — รอบแรกตอนเริ่มโหลด รอบสองตอนเนื้อมาถึง เห็นจากการดัก
+`document.getAnimations()` ทุกครั้งที่ทดสอบ:
+
+```
+รอบ 1: old(root) · old(area-A) · old(area-B) …        ← ของเก่าหายไป
+รอบ 2: old(_t_1_) · new(area-A)                        ← ของใหม่มา แต่คู่ไม่อยู่แล้ว
+```
+
+**ไม่มี `::view-transition-group(area-*)` สักครั้ง** ซึ่งเป็น pseudo-element ที่ทำ morph จริง
+มีแต่ `group(root)` · `_t_1_` คือโครงร่างจาก `loading.tsx` (ยืนยันได้เพราะมันเล่น `reveal-fade`)
+
+ลองแล้วไม่ช่วย: ลบ `loading.tsx` ของทุก segment ในเส้นทาง · ลบ `<Content>` wrapper ·
+ใช้ `<ViewTransition name>` ของ React · ใช้ `view-transition-name` ของ CSS ตรง ๆ
+
+⚠️ **React ไม่ยอมใส่ `viewTransitionName` ผ่าน style object** (`getComputedStyle` คืน `none`)
+ต้องส่งผ่าน custom property แล้วให้ CSS ตั้งชื่อ — แต่ถึงตั้งได้ก็ยังไม่จับคู่อยู่ดี
+
+⚠️ **`loading.tsx` ใน segment ครอบ route ลูกทุกตัวที่ไม่มีของตัวเอง**
+`app/library/loading.tsx` จึงเป็นโครงร่างของ `/library/[areaId]` ด้วย
+
+**ทางที่ใช้ได้จริงคือ `root`** ซึ่งเข้าร่วมทุกรอบ — เลื่อนทั้งจอด้วย
+`:active-view-transition-type()` + `transitionTypes` บน `<Link>` ซึ่งบนมือถือ
+เห็นชัดกว่า morph ของชิ้นเดียวด้วยซ้ำ
+
+---
+
+**บันทึกความพยายามเดิม (ก่อนสรุปข้างบน)** — พอเจ้าของขอให้กล่อง Area เป็นทางเข้าจริง
 หน้า Area ใหม่ก็ **ไม่ใส่ `loading.tsx`** เพราะ query เล็ก (ดึง Area เดียว)
 morph จึงติดทันที ยืนยันด้วยการดัก `view-transition-name` แล้วเจอชื่อที่ React สร้างให้
 **ข้อสรุปคือ morph ข้ามหน้าใช้ได้เฉพาะกับหน้าที่ไม่มีโครงร่างคั่น**
