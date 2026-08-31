@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import AreaCard from './AreaCard'
 import { Content } from '@/components/Reveal'
 import { createClient } from '@/lib/supabase/server'
 import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
@@ -119,21 +120,18 @@ export default async function LibraryPage() {
         <div className="areas">
           {cards.map((a) => (
             /*
-              `nav-forward` = กำลังเข้าไปข้างใน · ทั้งจอเลื่อนไปทางซ้าย
-              (morph ของกล่องเองทำไม่ได้ เหตุผลอยู่ใน globals.css และ doc/TRAPS.md)
+              การ์ดจดตำแหน่งตัวเองตอนถูกกด แล้วหัวของหน้าถัดไปบินออกมาจากตรงนั้น
+              (lib/cardFlight.ts) — ทำเองแทน View Transition เพราะ Next.js
+              ทำ transition สองรอบ ฝั่งเก่าหายก่อนฝั่งใหม่มาเสมอ จับคู่ไม่ได้
             */
-            <Link
+            <AreaCard
               key={a.id}
-              href={`/library/${a.id}`}
-              className={`acard ${a.colorClass}`}
-              transitionTypes={['nav-forward']}
-            >
-              <span className="acard__nm">{a.name}</span>
-              <span className="acard__ct">
-                {a.openCount > 0 ? `${a.openCount} ${a.label}` : 'ว่าง'}
-              </span>
-              {a.attention > 0 && <span className="acard__badge">{a.attention}</span>}
-            </Link>
+              id={a.id}
+              name={a.name}
+              colorClass={a.colorClass}
+              count={a.openCount > 0 ? `${a.openCount} ${a.label}` : 'ว่าง'}
+              attention={a.attention}
+            />
           ))}
         </div>
 

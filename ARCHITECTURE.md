@@ -237,7 +237,7 @@ S7 แผงรายละเอียด และ S8 เพิ่มเร็
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 290 เคส · ใช้เวลาไม่ถึงวินาที
+npm test --prefix web        # 301 เคส · ใช้เวลาไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เทสต์ | เคส |
@@ -485,7 +485,7 @@ Safari บน iPhone ไม่ให้เว็บทั่วไปส่ง p
 # รันเว็บในเครื่อง (พอร์ต 3001)
 npm run dev --prefix web
 
-# รันเทสต์ตรรกะแกน (290 เคส)
+# รันเทสต์ตรรกะแกน (301 เคส)
 npm test --prefix web
 
 # deploy  (--scope ขาดไม่ได้ ไม่งั้นตอบ Not authorized เพราะ project อยู่ใต้ team
@@ -535,7 +535,7 @@ KeviN/
 └── web/                     Next.js app
     ├── vercel.json          ตรึง region ไว้ที่โตเกียว ห้ามลบ
     ├── tsconfig.test.json   คอนฟิกคอมไพล์เทสต์เป็น CommonJS ลง .test-build/
-    ├── test/                เทสต์ตรรกะแกน 290 เคส · `npm test`
+    ├── test/                เทสต์ตรรกะแกน 301 เคส · `npm test`
     ├── lib/ai/              tool อ่านอย่างเดียว · ตัวกรอง Area · prompt · ภาษา · เสียง
     │   ├── tools.ts           ทะเบียน tool + runTool() ประตูเดียวที่ข้อมูลออกไป
     │   ├── db.ts              interface ที่ไม่มีเมธอดเขียน (ชั้นกันเขียนที่ 2)

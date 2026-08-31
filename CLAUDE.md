@@ -16,7 +16,7 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (290 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (301 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
 `web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ตัวกรอง Area · ภาษา · เสียง)
@@ -90,6 +90,8 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
   ถ้าเพิ่มหน้าใหม่ ต้องครอบทั้งคู่ ไม่งั้นหน้านั้นจะกระพริบต่างจากที่อื่น
 - **`lib/useFlip.ts`** ทำให้แถวที่ย้ายตำแหน่งเดินทาง — `ItemList` ใช้อยู่แล้ว
   แถวใหม่ต้องมี `data-flip` ที่เป็นตัวตนคงที่
+- **`lib/cardFlight.ts`** การ์ดที่กดบินไปเป็นหัวของหน้าถัดไป — **ไม่ใช่ View Transition**
+  เพราะ Next.js ทำ transition สองรอบจนจับคู่ไม่ได้ · ต้องลบค่าที่จดทันทีที่อ่าน
 - **`lib/haptic.ts`** สั่นตอนติ๊กเสร็จ (`tap`) และตอนของหายจากจอ (`away`)
   **การสั่นห้ามพาการกระทำหลักล้มตาม** — iOS ไม่รองรับเลย
 - **`components/Odometer.tsx`** ตัวเลขไหลทีละหลัก · แถบ 0-9 อยู่ใน DOM เสมอ

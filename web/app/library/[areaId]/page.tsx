@@ -7,6 +7,7 @@ import { LIBRARY_OPEN_COOKIE, decodeOpen } from '@/lib/libraryOpen'
 import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
 import { summarize, type Slot } from '@/lib/schedule'
 import { AREA_CLASS } from '@/lib/areaColor'
+import AreaHead from './AreaHead'
 import ProjectTree, { type TreeProject, type TreeItem } from './ProjectTree'
 
 export const dynamic = 'force-dynamic'
@@ -136,14 +137,17 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
           <Link href="/library" className="back" transitionTypes={['nav-back']}>‹ คลัง</Link>
         </div>
 
-        {/* หัวของหน้า — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง */}
-        <div className={`acard acard--head ${AREA_CLASS[area.color ?? ''] ?? ''}`}>
-          <span className="acard__nm">{area.name}</span>
-          <span className="acard__ct">
-            {openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
-          </span>
-          {attention > 0 && <span className="acard__badge">{attention}</span>}
-        </div>
+        {/*
+          หัวของหน้า — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง
+          บินออกมาจากตำแหน่งการ์ดที่ถูกกด ถ้ามีค่าที่จดไว้และยังไม่หมดอายุ
+        */}
+        <AreaHead
+          areaId={area.id}
+          colorClass={AREA_CLASS[area.color ?? ''] ?? ''}
+          name={area.name}
+          count={openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
+          attention={attention}
+        />
 
         <ProjectTree
           areaId={area.id}
