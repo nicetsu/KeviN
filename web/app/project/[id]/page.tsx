@@ -105,6 +105,23 @@ export default async function ProjectPage({
   const now = new Date().toISOString()
   const isPast = (e: EventRow) => isPastEvent(e, now)
   const sortedEvents = orderEvents(events, now)
+  const upcoming = sortedEvents.filter((e) => !isPast(e))
+  const passed = sortedEvents.filter(isPast)
+
+  /** แถวกิจกรรมหนึ่งแถว — รูปเดียวกันทั้งที่ยังไม่ผ่านและที่ผ่านแล้ว */
+  const eventRow = (e: EventRow): Row => ({
+    id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้และลากไม่ได้
+    color: ENTRY_COLOR.event,
+    title: e.title,
+    meta: [eventStamp(e), e.location, e.label].filter(Boolean).join(' · '),
+    done: false,
+    past: isPast(e),
+    checkable: false,
+    tag: null,
+    href: `/project/${id}/event/${e.id}`,
+    // เก็บเข้าคลังได้จากแถวนี้เลย พร้อมแถบเลิกทำแบบเดียวกับงาน
+    event: { projectId: id, eventId: e.id },
+  })
 
   // ป้ายบอกว่างานชิ้นนี้เป็นของกิจกรรมไหน · null = ไม่ได้ผูกกับกิจกรรมใด
   const eventName = new Map(events.map((e) => [e.id, e.title]))
@@ -158,25 +175,22 @@ export default async function ProjectPage({
           ส่วนงานเป็นสิ่งที่จัดเวลาเองได้ · ลากจัดลำดับไม่ได้ เวลาเป็นตัวตัดสิน
           ที่ยังไม่ผ่านอยู่บน ที่ผ่านแล้วจางลงและร่วงไปท้ายกลุ่ม
         */}
-        <Group title="กิจกรรม" count={events.length || null}>
-          <ItemList
-            rows={sortedEvents.map(
-              (e): Row => ({
-                id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้และลากไม่ได้
-                color: ENTRY_COLOR.event,
-                title: e.title,
-                meta: [eventStamp(e), e.location, e.label].filter(Boolean).join(' · '),
-                done: false,
-                past: isPast(e),
-                checkable: false,
-                tag: null,
-                href: `/project/${id}/event/${e.id}`,
-                // เก็บเข้าคลังได้จากแถวนี้เลย พร้อมแถบเลิกทำแบบเดียวกับงาน
-                event: { projectId: id, eventId: e.id },
-              })
-            )}
-          />
+        <Group title="กิจกรรม" count={upcoming.length || null}>
+          <ItemList rows={upcoming.map(eventRow)} />
         </Group>
+
+        {/*
+          หัวข้อคั่นแทนที่จะจางเฉย ๆ — ความจางบอกได้ว่า "ไม่ต้องสนใจแล้ว"
+          แต่บอกไม่ได้ว่า **ตรงไหนคือเส้นแบ่ง** พอมีกิจกรรมหลายอันปนกัน
+          ตาจะต้องไล่อ่านวันที่ทีละบรรทัดเพื่อหาว่าอันไหนยังไม่เกิด
+        */}
+        {passed.length > 0 && (
+          <div className="sec">
+            <span>ที่ผ่านแล้ว</span>
+            <span>{passed.length}</span>
+          </div>
+        )}
+        {passed.length > 0 && <ItemList rows={passed.map(eventRow)} />}
         <Link href={`/project/${id}/event/new`} className="btn btn--ghost add-slot">
           + กิจกรรมใหม่
         </Link>
