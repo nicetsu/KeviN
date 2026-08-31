@@ -833,6 +833,31 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   align-self: flex-start; background: var(--raised);
   border: 1px solid var(--line-soft); border-bottom-left-radius: 5px;
 }
+/*
+ * markdown ในฟองแชต
+ *
+ * ผู้ช่วยเขียน `**ตัวหนา**` กับ `- รายการ` มาเองโดยไม่ต้องสั่ง (doc/CHAT.md)
+ * เจ้าของเลือกให้เรนเดอร์แทนที่จะห้ามใน prompt
+ *
+ * ⚠️ ระยะห่างทั้งหมดคุมด้วย `gap` ของตัว `.md` ไม่ใช่ margin ของลูก —
+ *    margin ของ p/ul ที่เบราว์เซอร์ตั้งมาให้จะยุบรวมกันเองจนช่องไฟไม่เท่ากัน
+ *    และทำให้ฟองแชตมีขอบบนล่างหนากว่าที่ตั้งไว้
+ */
+.md { display: flex; flex-direction: column; gap: 0.5rem; }
+.md > :first-child { margin-top: 0; }
+.md__p { margin: 0; }
+.md__h { margin: 0; font-size: var(--s-0); font-weight: 600; letter-spacing: -0.01em; }
+.md__list { margin: 0; padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.md__list li::marker { color: var(--faint); }
+/* ตัวเลขในรายการต้องตรงหลักกัน ตอนผู้ช่วยไล่ลำดับงาน */
+.md__list { font-variant-numeric: tabular-nums; }
+.md__code {
+  font-family: var(--f-mono); font-size: 0.86em;
+  background: var(--surface); border: 1px solid var(--line-soft);
+  border-radius: 5px; padding: 0.05em 0.32em;
+}
+.md em { font-style: italic; color: inherit; }
+
 .msg__via {
   display: block; margin-top: 0.3rem;
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);

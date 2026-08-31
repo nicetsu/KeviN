@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { StoredMessage } from '@/lib/chat/store'
 import Autolink from '@/lib/autolink'
+import MessageText from '@/lib/chat/MessageText'
 import VoiceCall from './VoiceCall'
 import { useCall } from '@/components/CallProvider'
 import { useTalkPrefs } from '@/lib/talkPrefs'
@@ -258,7 +259,12 @@ function Bubble({ line }: { line: Line }) {
   const mine = line.role === 'user'
   return (
     <div className={`msg${mine ? ' msg--me' : ' msg--ai'}`}>
-      <Autolink text={line.content} />
+      {/*
+        ฝั่งผู้ช่วยแกะ markdown · ฝั่งผู้ใช้ไม่แกะ
+        สิ่งที่ผู้ใช้พิมพ์ไม่ใช่ markdown และค่าที่โหมดโทรบันทึกคือ `- voice -`
+        ซึ่งถ้าเอาไปแกะจะกลายเป็นรายการหัวข้อย่อยที่เขียนว่า "voice -"
+      */}
+      {mine ? <Autolink text={line.content} /> : <MessageText text={line.content} />}
       {line.via === 'voice' && <span className="msg__via">จากสาย</span>}
     </div>
   )

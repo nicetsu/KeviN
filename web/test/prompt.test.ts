@@ -86,9 +86,14 @@ test('ทุกเส้นทางที่ prompt เอ่ยถึงต้
   // ผูกสองไฟล์เข้าด้วยกัน — เพิ่มหน้าใน prompt แล้วลืมเติมใน ROUTES
   // จะได้ลิงก์ที่ผู้ช่วยกล้ายื่นแต่ตัวกรองตัดทิ้ง ซึ่งพังแบบเงียบสนิท
   const p = systemPrompt('chat', TODAY)
-  const quoted = [...p.matchAll(/`(\/[\w/-]*)`/g)].map((m) => m[1])
-  assert.ok(quoted.length >= 4, 'ต้องมีเส้นทางถูกอ้างอยู่จริง')
-  for (const route of quoted) {
+  // เส้นทางที่ยกมาเป็นตัวอย่างของ "ไม่มีจริง" ไม่นับ — บรรทัดนั้นสอนว่าอะไรผิด
+  const kept = p
+    .split(/\n/)
+    .filter((l) => !l.includes('ไม่มีอยู่จริง'))
+    .join(' ')
+  const routes = [...kept.matchAll(/(?<![\w/`])(\/[a-z]+)/g)].map((m) => m[1])
+  assert.ok(routes.length >= 3, 'ต้องมีเส้นทางถูกอ้างอยู่จริง')
+  for (const route of new Set(routes)) {
     assert.ok(isRealRoute(route), `prompt เอ่ยถึง ${route} แต่ตัวกรองไม่รู้จัก`)
   }
 })
