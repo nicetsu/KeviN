@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, ViewTransition } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createProject } from '@/app/actions/items'
@@ -153,16 +153,9 @@ export default function LibraryTree({
                         >
                           ›
                         </button>
-                        {/*
-                          ชื่อวิชาที่กด **คือชิ้นเดียวกับ** หัวของหน้าวิชา
-                          ครอบทั้งสองฝั่งด้วยชื่อเดียวกัน เบราว์เซอร์จะพามันเดินทางเอง
-                          แทนที่จะให้หน้าใหม่กระพริบมาแทน (app/project/[id]/page.tsx)
-                        */}
-                        <ViewTransition name={`project-${p.id}`}>
-                          <Link href={`/project/${p.id}`} className="pnode__name">
-                            {p.name}
-                          </Link>
-                        </ViewTransition>
+                        <Link href={`/project/${p.id}`} className="pnode__name">
+                          {p.name}
+                        </Link>
                         <span className="pnode__when">
                           {p.archived ? 'เก็บเข้าคลังแล้ว' : p.when}
                         </span>
