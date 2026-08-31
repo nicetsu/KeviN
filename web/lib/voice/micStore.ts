@@ -104,3 +104,24 @@ function subscribeList(onChange: () => void) {
 export function useMicList(): MicOption[] {
   return useSyncExternalStore(subscribeList, readList, () => EMPTY)
 }
+
+/**
+ * ขอสิทธิ์ไมค์เพื่อให้ได้**ชื่อ**อุปกรณ์ แล้วดึงรายการใหม่
+ *
+ * ⚠️ เบราว์เซอร์คืน `label` เป็นสตริงว่างจนกว่าจะเคยได้สิทธิ์ — ก่อนหน้านั้น
+ *    `enumerateDevices()` บอกได้แค่ว่ามีกี่ตัว ไม่บอกว่าตัวไหนคืออะไร
+ *    เดิมสิทธิ์นี้ได้มาจากการโทรครั้งแรก แต่พอตัวเลือกไมค์ย้ายมาอยู่หน้าตั้งค่า
+ *    ก็ต้องขอเองได้ ไม่งั้นคนที่ยังไม่เคยโทรจะไม่มีอะไรให้เลือกเลย
+ *
+ * ⚠️ **ปิด track ทันทีที่ได้มา** — ไม่งั้นไฟไมค์บนเครื่องจะค้างติดทั้งที่ไม่ได้คุยกับใคร
+ */
+export async function askMicPermission(): Promise<boolean> {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    for (const track of stream.getTracks()) track.stop()
+    await pull()
+    return true
+  } catch {
+    return false
+  }
+}

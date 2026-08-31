@@ -6,13 +6,17 @@ import { VOICES } from '@/lib/ai/voices'
 import { useTalkPrefs } from '@/lib/talkPrefs'
 import { useMic, useMicList } from '@/lib/voice/micStore'
 import { resolveMic } from '@/lib/voice/mic'
+import MicPicker from './MicPicker'
 
 /**
  * สรุปค่าที่ตั้งไว้สำหรับการคุยกับ KeviN · แสดงในหน้าตั้งค่า
  *
- * ⚠️ **ไม่ได้ย้ายตัวตั้งค่ามาที่นี่** — ปุ่มฟันเฟืองในหน้า KeviN ยังอยู่เหมือนเดิม
- *    เพราะภาษากับเสียงเป็นของที่อยากปรับ *ระหว่าง* คุย ซึ่งเป็นเหตุผลเดิม
- *    ที่เอาไปไว้ตรงนั้น (doc/DECISIONS.md)
+ * ⚠️ **ภาษากับเสียงยังปรับที่หน้า KeviN** ปุ่มฟันเฟืองตรงนั้นยังอยู่เหมือนเดิม
+ *    เพราะเป็นของที่อยากปรับ *ระหว่าง* คุย ซึ่งเป็นเหตุผลเดิมที่เอาไปไว้ตรงนั้น
+ *
+ * ⚠️ **แต่ไมโครโฟนย้ายมาที่นี่ที่เดียวแล้ว** (เจ้าของเคาะ 1 ก.ย. 2026)
+ *    เป็นของที่ตั้งครั้งเดียวแล้วจบ ไม่ใช่ของที่ต้องเลือกใหม่ทุกครั้งก่อนโทร
+ *    — หน้าโทรจึงเหลือแค่ปุ่มเริ่มโทร (doc/DECISIONS.md)
  *
  *    ที่นี่เป็น**ที่ที่สอง**ที่หาเจอ — หน้าที่ชื่อ "ตั้งค่า" ควรบอกได้ว่า
  *    ตอนนี้ตั้งอะไรไว้บ้าง แม้จะไม่ใช่ที่ที่ใช้ปรับบ่อยที่สุด
@@ -30,7 +34,6 @@ export default function TalkSummary() {
   const rows = [
     { label: 'ภาษา', value: LANG_LABEL[prefs.lang] },
     { label: 'เสียง', value: voice ? `${voice.label}${voice.desc ? ` · ${voice.desc}` : ''}` : '—' },
-    { label: 'ไมโครโฟน', value: mic?.label ?? 'อัตโนมัติ' },
   ]
 
   return (
@@ -44,8 +47,19 @@ export default function TalkSummary() {
           </div>
         </div>
       ))}
+
+      {/* แถวนี้ปรับได้จริงที่นี่ ต่างจากสองแถวบนที่เป็นแค่กระจกสะท้อนค่า */}
+      <div className="row">
+        <span className="row__stripe" style={{ background: 'var(--brand)' }} />
+        <div className="row__body">
+          <div className="row__title">ไมโครโฟน</div>
+          <div className="row__meta">{mic?.label ?? 'อัตโนมัติ'}</div>
+        </div>
+        <MicPicker />
+      </div>
+
       <Link href="/kevin" className="back" style={{ marginTop: '0.5rem' }}>
-        ปรับที่หน้า KeviN ›
+        ปรับภาษาและเสียงที่หน้า KeviN ›
       </Link>
     </>
   )

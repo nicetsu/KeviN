@@ -2,7 +2,6 @@
 
 import { useCall, mmss } from '@/components/CallProvider'
 import type { CallState } from '@/lib/voice/session'
-import MicPicker from './MicPicker'
 
 /** รูปคลื่น · แท่งกลางไวกว่าแท่งริม ทำให้ค่าเดียวดูเป็นคลื่นไม่ใช่แถบ */
 const WAVE = [
@@ -43,16 +42,11 @@ export default function VoiceCall() {
           {LABEL.idle.title}
           <small>{LABEL.idle.hint}</small>
         </div>
-        <p className="muted stage__note">
-          ถามเรื่องตาราง งาน และกิจกรรมได้
-          <br />
-          <span className="mono-hint">ยังแก้ข้อมูลไม่ได้จากที่นี่</span>
-        </p>
-
         {call.error && <p className="alert alert--gap" role="alert">{call.error}</p>}
 
-        {/* ชื่ออุปกรณ์ยังโผล่ไม่ครบจนกว่าจะอนุญาตไมค์ครั้งแรก — MicPicker บอกไว้แล้ว */}
-        <MicPicker />
+        {/* ⚠️ ตัวเลือกไมค์ย้ายไปหน้าตั้งค่าแล้ว (เจ้าของเคาะ 1 ก.ย. 2026)
+            เป็นของที่ตั้งครั้งเดียวแล้วจบ ไม่ใช่ของที่ปรับทุกครั้งก่อนโทร
+            ต่างจากภาษากับเสียงที่ยังอยู่ในหน้านี้เพราะปรับระหว่างคุย */}
 
         {/* ขอสิทธิ์ไมค์ตอนกด ไม่ใช่ตอนเข้าหน้า — ป๊อปอัปที่เด้งโดยไม่ได้ขอมักโดนปฏิเสธ */}
         <button className="btn stage__go" onClick={call.start}>
@@ -115,9 +109,6 @@ export default function VoiceCall() {
       )}
 
       {call.error && <p className="alert alert--gap" role="alert">{call.error}</p>}
-
-      {/* สลับได้กลางสาย ไม่ต้องวางแล้วโทรใหม่ — ไมค์ไม่ได้ผูกกับ token */}
-      <MicPicker />
 
       <div className="call__bar">
         <button className="btn btn--quiet" onClick={call.toggleMute}>

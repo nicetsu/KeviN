@@ -208,8 +208,15 @@ html, body { margin: 0; padding: 0; }
 .mono { font-family: var(--f-mono); }
 
 /* ---- หัวหน้าจอ ---- */
+/*
+ * `--s-2` เป็นขนาดหัวข้อของทุกหน้า · หน้าวันนี้ขอใหญ่กว่านั้นหนึ่งขั้น
+ * (เจ้าของเคาะ 1 ก.ย. 2026) เพราะวันที่คือสิ่งแรกที่ตาไปเกาะตอนเปิดแอป
+ * **เปลี่ยนเฉพาะหน้านี้** ไม่แตะ `--s-2` ที่หน้าอื่นใช้ร่วมกันอยู่
+ */
 .page-head { margin: 0 0 1.5rem; }
 .page-head h1 { font-size: var(--s-2); font-weight: 600; letter-spacing: -0.025em; margin: 0; }
+/* ⚠️ ต้องอยู่**หลัง** `.page-head h1` — specificity เท่ากัน (0,1,1) ผู้ชนะจึงเป็นตัวที่มาทีหลัง */
+.page-head--today h1 { font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.35rem); }
 .page-head .sub {
   font-family: var(--f-mono); font-size: var(--s--1); color: var(--faint);
   letter-spacing: 0.04em; margin-top: 0.15rem;
@@ -416,8 +423,9 @@ html, body { margin: 0; padding: 0; }
  *    กล่องจะยืดเต็มช่อง (92px บนจอ 360px) แทนที่จะกว้างพอดีคำ
  */
 .nav__box {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: 2.55rem; padding: 0 0.68rem;
+  display: flex; align-items: center; justify-content: center;
+  align-self: stretch; width: 100%;
+  min-height: 2.55rem; padding: 0 0.5rem;
   border-radius: var(--r-pill);
   color: var(--faint); background: var(--raised);
 }
@@ -428,7 +436,7 @@ html, body { margin: 0; padding: 0; }
  */
 .nav__item--talkOn .nav__box {
   color: #14121F;
-  background: var(--brand);
+  background: linear-gradient(135deg, #C3B6FF 0%, #8878F0 100%);
   box-shadow: 0 0 22px -2px rgba(165, 148, 255, 0.55);
 }
 
@@ -439,7 +447,7 @@ html, body { margin: 0; padding: 0; }
  * ตัวเลขนี้ผูกกับความกว้างช่อง: บนจอ 360px ช่องกว้าง 72px และกล่องนี้กิน 68px
  * **ขยับขึ้นอีกนิดเดียวก็ล้น** ถ้าจะเพิ่ม ต้องลด padding ของ `--talk` ลงพร้อมกัน
  */
-.nav__item .nav__wordmark { height: 0.55rem; width: auto; flex: none; }
+.nav__item .nav__wordmark { height: 0.68rem; width: auto; flex: none; max-width: 100%; }
 
 @media (min-width: 768px) {
   .nav {
@@ -455,7 +463,7 @@ html, body { margin: 0; padding: 0; }
   }
   /* แถบข้างเป็นรายการแนวตั้ง กล่องที่สูงกว่าเพื่อนจะทำให้ระยะห่างไม่เท่ากัน */
   .nav__item--talk { min-height: 0; }
-  .nav__box { min-height: 1.95rem; padding: 0 0.6rem; }
+  .nav__box { width: auto; align-self: flex-start; min-height: 1.95rem; padding: 0 0.7rem; }
   .nav__item--on { background: var(--raised); }
   .wrap { margin-left: 200px; }
 }
@@ -915,10 +923,24 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
    hero · คาบถัดไป (ui-kit.html)
    ตอบหลักการ UX ข้อ 1 — เปิดมาต้องรู้ทันทีว่าตอนนี้ต้องทำอะไร
    ===================================================================== */
+/*
+ * ⚠️ ไล่เฉดใช้ตัวเดียวกับการ์ด General ในคลัง (`--g-gen`) ที่ความทึบ 11%
+ *    เท่ากับ `.acard::before` เป๊ะ ๆ — สองที่นี้ต้องเท่ากันเสมอ ไม่งั้นจะรู้สึก
+ *    เหมือนคนละระบบทั้งที่เป็นการ์ดใหญ่เหมือนกัน (doc/DESIGN.md)
+ *
+ * ⚠️ ลูกในต้องมี `position: relative` ไม่งั้น `::before` จะทับข้อความ
+ *    เพราะ pseudo วางทีหลังใน stacking order
+ */
 .hero {
+  position: relative; overflow: hidden;
   border: 1px solid var(--line); background: var(--surface);
   border-radius: var(--r-card); padding: 1.05rem 1.1rem; margin-bottom: 1.1rem;
 }
+.hero::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--g-gen); opacity: 0.11; pointer-events: none;
+}
+.hero > * { position: relative; }
 .hero__kick {
   font-family: var(--f-mono); font-size: var(--s--2);
   letter-spacing: 0.08em; color: var(--brand);
@@ -1165,6 +1187,13 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 .mic__btn:hover { color: var(--ink); border-color: var(--brand); }
 .mic__note { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin: 0; }
+
+/*
+ * ในหน้าตั้งค่าปุ่มอยู่ในแถว ไม่ได้อยู่ล่างจอ — กางลงล่างจึงเป็นธรรมชาติกว่า
+ * และชิดขวาเพราะปุ่มอยู่ท้ายแถว ถ้าชิดซ้ายรายการจะยื่นออกนอกจอ
+ */
+.mic--settings { margin-left: auto; align-self: center; }
+.mic--settings .mic__list { top: calc(100% + 0.4rem); bottom: auto; right: 0; }
 
 /* เปิดขึ้นบนเพราะปุ่มอยู่ค่อนไปทางล่างจอ ถ้ากางลงจะโดนแถบปุ่มบัง */
 .mic__list {
