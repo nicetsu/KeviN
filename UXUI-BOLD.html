@@ -1,0 +1,547 @@
+<title>KeviN กล้าขึ้น</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+
+<style>
+  /* Nightfall เดิม + โทนที่รับมาจากภาพอ้างอิง
+     ธีมมืดอย่างเดียวโดยตั้งใจ (doc/DECISIONS.md) ทุกสีทาไว้ชัด */
+  :root {
+    --bg:        #0A0912;
+    --surface:   #14131F;
+    --raised:    #1C1B2B;
+    --line:      #26253A;
+    --line-soft: #1D1C2C;
+
+    --ink:   #F1F0F7;
+    --muted: #A5A2B8;
+    --faint: #87849D;
+
+    --brand:      #A594FF;
+    --brand-deep: #8878F0;
+    --brand-soft: #1E1B33;
+
+    --sched:      #79C2D0;  --sched-soft: #16292E;
+    --event:      #D5BB6D;  --event-soft: #2D2716;
+    --due:        #E0897E;  --due-soft:   #2E1E1D;
+    --task:       #74C6A4;  --task-soft:  #172A24;
+    --note:       #8E88A8;  --note-soft:  #1B1A28;
+
+    /* พื้นที่อุ่นขึ้นตามภาพอ้างอิง — ใช้เฉพาะในตัวอย่าง "แบบใหม่" */
+    --bg-warm:      #120E22;
+    --surface-warm: #1B1630;
+
+    --f: "Inter", "Noto Sans Thai", system-ui, sans-serif;
+    --f-mono: "Geist Mono", Consolas, ui-monospace, monospace;
+
+    --s--2: 0.70rem;
+    --s--1: 0.80rem;
+    --s-0:  0.94rem;
+    --s-1:  1.10rem;
+    --s-2:  clamp(1.25rem, 1rem + 0.85vw, 1.65rem);
+    --s-3:  clamp(1.85rem, 1.35rem + 2.1vw, 2.85rem);
+
+    --r-card: 14px;
+    --r-tile: 10px;
+    --r-pill: 999px;
+
+    --measure: 66ch;
+    --gutter: clamp(1.1rem, 4vw, 2.5rem);
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--f); font-size: var(--s-0); line-height: 1.75;
+    letter-spacing: -0.005em; -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 66rem; margin: 0 auto;
+    padding: clamp(2.5rem, 7vw, 5rem) var(--gutter) 6rem;
+    display: flex; flex-direction: column; gap: 3.25rem;
+  }
+  .prose { max-width: var(--measure); }
+
+  header { display: flex; flex-direction: column; gap: 0.9rem; }
+  .eyebrow {
+    font-family: var(--f-mono); font-size: var(--s--2);
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint);
+  }
+  h1 { margin: 0; font-size: var(--s-3); font-weight: 600; line-height: 1.12; letter-spacing: -0.025em; text-wrap: balance; }
+  .lede { margin: 0; max-width: var(--measure); font-size: var(--s-1); color: var(--muted); }
+  .thesis { border-left: 2px solid var(--brand); padding: 0.2rem 0 0.2rem 1.1rem; max-width: var(--measure); font-size: var(--s-1); }
+  .thesis b { color: var(--brand); font-weight: 600; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+  .tag {
+    font-family: var(--f-mono); font-size: var(--s--2); padding: 0.18rem 0.6rem;
+    border-radius: var(--r-pill); border: 1px solid var(--line);
+    background: var(--surface); color: var(--faint);
+  }
+
+  section { display: flex; flex-direction: column; gap: 1.1rem; }
+  h2 {
+    margin: 0; font-size: var(--s-2); font-weight: 600; line-height: 1.25;
+    letter-spacing: -0.02em; text-wrap: balance;
+    display: flex; align-items: baseline; gap: 0.7rem;
+  }
+  h2 .n { font-family: var(--f-mono); font-size: var(--s--1); font-weight: 500; color: var(--brand); flex: none; }
+  h3 { margin: 0.7rem 0 0; font-size: var(--s-1); font-weight: 600; letter-spacing: -0.01em; }
+
+  p { margin: 0; max-width: var(--measure); }
+  p + p { margin-top: 0.7rem; }
+  .sub { color: var(--muted); font-size: var(--s--1); max-width: var(--measure); }
+  strong { font-weight: 600; color: var(--ink); }
+  em { font-style: normal; color: var(--sched); }
+
+  code {
+    font-family: var(--f-mono); font-size: 0.86em; background: var(--raised);
+    border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.08em 0.36em; color: var(--ink);
+  }
+  a { color: var(--brand); text-underline-offset: 3px; }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--s--1); min-width: 30rem; }
+  th, td { text-align: left; padding: 0.58rem 0.9rem; border-bottom: 1px solid var(--line-soft); vertical-align: top; line-height: 1.55; }
+  thead th {
+    font-size: var(--s--2); font-weight: 500; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--faint); background: var(--raised); white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .pill { display: inline-block; font-family: var(--f-mono); font-size: var(--s--2); padding: 0.06rem 0.5rem; border-radius: var(--r-pill); white-space: nowrap; }
+  .pill--yes { color: var(--task); background: var(--task-soft); border: 1px solid #23453A; }
+  .pill--bend { color: var(--event); background: var(--event-soft); border: 1px solid #4A4023; }
+  .pill--no { color: var(--due); background: var(--due-soft); border: 1px solid #4A2E2B; }
+
+  .note {
+    border: 1px solid var(--line); border-left: 2px solid var(--sched);
+    background: var(--surface); border-radius: 0 12px 12px 0;
+    padding: 0.9rem 1.1rem; max-width: var(--measure);
+    font-size: var(--s--1); color: var(--muted); line-height: 1.7;
+  }
+  .note strong { color: var(--sched); }
+  .note--warn { border-left-color: var(--due); } .note--warn strong { color: var(--due); }
+  .note--brand { border-left-color: var(--brand); } .note--brand strong { color: var(--brand); }
+
+  ul { margin: 0; padding-left: 1.15rem; max-width: var(--measure); }
+  li { margin-bottom: 0.32rem; }
+  li::marker { color: var(--faint); }
+
+  /* ---------- โทรศัพท์ ---------- */
+  .phones { display: grid; gap: 1.1rem; grid-template-columns: 1fr; margin-top: 0.3rem; }
+  @media (min-width: 620px) { .phones { grid-template-columns: 1fr 1fr; } }
+
+  .phone { border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; background: var(--bg); }
+  .phone--new { background: var(--bg-warm); }
+  .phone__cap {
+    font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--faint);
+    padding: 0.6rem 0.85rem 0.1rem; display: flex; justify-content: space-between; gap: 0.5rem;
+  }
+  .phone__cap b { color: var(--brand); font-weight: 500; }
+  .scr { padding: 0.4rem 0.85rem 0.8rem; display: flex; flex-direction: column; gap: 0.35rem; flex: 1; }
+
+  .greet { font-size: var(--s--2); color: var(--brand); font-weight: 500; margin-top: 0.3rem; }
+  .big {
+    font-size: 1.42rem; font-weight: 700; line-height: 1.22; letter-spacing: -0.035em;
+    margin: 0.15rem 0 0.7rem;
+  }
+  .big i { font-style: normal; background: linear-gradient(92deg, var(--brand) 0%, #D98BB4 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .sec {
+    font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--faint);
+    display: flex; justify-content: space-between; margin-top: 0.6rem;
+  }
+  .sec b { color: var(--brand); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+  /* แถวแบบเดิม — เส้นคั่น + แถบสีบาง */
+  .row { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.42rem 0; border-top: 1px solid var(--line-soft); font-size: var(--s--1); }
+  .row:first-child { border-top: 0; }
+  .row__stripe { width: 2px; align-self: stretch; border-radius: 2px; flex: none; }
+  .row__body { flex: 1; min-width: 0; }
+  .row__meta { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: 0.05rem; }
+  .cb { width: 0.9rem; height: 0.9rem; margin-top: 0.2rem; flex: none; border: 1.5px solid var(--line); border-radius: 5px; }
+
+  /* แถวแบบใหม่ — การ์ดยกพื้น + ไอคอนสี่เหลี่ยมมน */
+  .card {
+    display: flex; align-items: center; gap: 0.7rem;
+    background: var(--surface-warm); border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 15px; padding: 0.7rem 0.75rem; margin-bottom: 0.5rem;
+    font-size: var(--s--1);
+  }
+  .card__ico {
+    width: 2.15rem; height: 2.15rem; border-radius: 11px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card__ico svg { width: 1.05rem; height: 1.05rem; }
+  .card__body { flex: 1; min-width: 0; }
+  .card__t { font-weight: 600; letter-spacing: -0.01em; }
+  .card__m { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); margin-top: 0.05rem; }
+  .card__go { color: var(--faint); flex: none; font-size: 0.95rem; }
+  .card--talk { background: rgba(255,255,255,0.035); }
+
+  .ico--task  { background: var(--task-soft);  color: var(--task);  }
+  .ico--sched { background: var(--sched-soft); color: var(--sched); }
+  .ico--due   { background: var(--due-soft);   color: var(--due);   }
+  .ico--event { background: var(--event-soft); color: var(--event); }
+  .ico--note  { background: var(--note-soft);  color: var(--note);  }
+  .ico--flat  { background: rgba(165,148,255,0.14); color: var(--brand); }
+
+  /* หัวจอ */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0 0.2rem; }
+  .top__btn {
+    width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.06); color: var(--muted);
+  }
+  .top__ai { background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%); color: #14131F; }
+
+  /* ช่องถาม */
+  .ask {
+    display: flex; align-items: center; gap: 0.5rem; margin-top: auto;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--r-pill); padding: 0.4rem 0.45rem 0.4rem 0.9rem;
+  }
+  .ask__f { flex: 1; color: var(--faint); font-size: var(--s--1); }
+  .ask__s {
+    width: 1.9rem; height: 1.9rem; border-radius: 50%; flex: none;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%);
+    display: flex; align-items: center; justify-content: center; color: #14131F;
+  }
+
+  /* แถบล่าง */
+  .nav { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--line-soft); padding: 0.5rem 0.2rem 0.1rem; margin-top: 0.6rem; }
+  .nav i { font-style: normal; font-size: var(--s--2); color: var(--faint); flex: 1; text-align: center; }
+  .nav i.on { color: var(--brand); }
+  .nav i.mid { flex: 0 0 4rem; color: var(--brand); background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.42); border-radius: var(--r-pill); padding: 0.2rem 0; }
+  .nav--ico { align-items: center; }
+  .nav--ico span { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; flex: 1; color: var(--faint); font-size: var(--s--2); }
+  .nav--ico span.on { color: var(--brand); }
+  .nav--ico svg { width: 1.05rem; height: 1.05rem; }
+  .nav--ico .mid {
+    flex: 0 0 3.6rem; color: var(--brand);
+    background: var(--brand-soft); border: 1px solid rgba(165,148,255,0.42);
+    border-radius: var(--r-pill); padding: 0.25rem 0;
+  }
+
+  .swatch { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.2rem; }
+  .swatch div {
+    display: flex; align-items: center; gap: 0.45rem; font-size: var(--s--2);
+    font-family: var(--f-mono); color: var(--muted);
+    border: 1px solid var(--line); border-radius: var(--r-pill); padding: 0.2rem 0.7rem 0.2rem 0.3rem;
+  }
+  .swatch u { width: 1.15rem; height: 1.15rem; border-radius: 6px; display: block; }
+
+  .foot { font-size: var(--s--1); color: var(--faint); max-width: var(--measure); border-top: 1px solid var(--line-soft); padding-top: 1.4rem; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">KeviN · ภาษาภาพรุ่นกล้า · 1 ก.ย. 2026</div>
+    <h1>รับความสดมาโดยไม่ทิ้งความหมาย</h1>
+    <p class="lede">
+      อ่านภาพอ้างอิงที่เจ้าของส่งมาแล้วแยกออกเป็นสี่อย่าง —
+      สามอย่างรับมาได้ทันที หนึ่งอย่างต้องดัดก่อน ไม่งั้นจะทำลายกฎที่แอปนี้ยืนอยู่
+    </p>
+    <div class="thesis">
+      ภาพนั้นสวยเพราะ<b>ทุกการ์ดสำคัญเท่ากัน</b><br>
+      แต่แอปนี้มีของที่<b>เลยกำหนดแล้ว</b>ปนกับของที่<b>ยังไม่ถึงเวลา</b> — ความเท่ากันจึงเป็นการโกหก
+    </div>
+    <div class="tags">
+      <span class="tag">ไม่เพิ่มสีใหม่สักสี</span>
+      <span class="tag">กฎม่วง = กดได้ ยังอยู่</span>
+      <span class="tag">เทียบของจริงทุกจอ</span>
+    </div>
+  </header>
+
+  <!-- ============ 01 ============ -->
+  <section>
+    <h2><span class="n">01</span> แยกสี่อย่างออกจากกัน</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>สิ่งที่เห็นในภาพ</th><th>รับได้ไหม</th><th>เพราะ</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>การ์ดยกพื้น มีขอบมน แทนแถวคั่นเส้น</strong></td>
+            <td><span class="pill pill--yes">รับเลย</span></td>
+            <td>ไม่ขัดกฎอะไร และทำให้แตะง่ายขึ้นบนมือถือ — พื้นที่แตะใหญ่ขึ้นราวเท่าตัว</td>
+          </tr>
+          <tr>
+            <td><strong>ไอคอนสี่เหลี่ยมมนสีสดหน้าแถว</strong></td>
+            <td><span class="pill pill--bend">ต้องดัด</span></td>
+            <td><strong>ในภาพสีไอคอนไม่มีความหมาย</strong> เป็นแค่การไล่สีให้สวย · ที่นี่ทุกสีมีความหมายผูกไว้แล้ว ต้องให้สีไอคอน<em>ตรงกับชนิดของข้อมูล</em> ไม่ใช่ไล่ตามลำดับ</td>
+          </tr>
+          <tr>
+            <td><strong>หัวข้อใหญ่ตัวหนา มีคำเน้นไล่สี</strong></td>
+            <td><span class="pill pill--yes">รับเลย</span></td>
+            <td>ตอนนี้หัวหน้าวันนี้เป็นแค่วันที่ตัวเล็ก · การมีประโยคที่บอกว่า “วันนี้ต้องสนใจอะไร” ทำงานแทน hero ได้เลย</td>
+          </tr>
+          <tr>
+            <td><strong>แถบล่างมีไอคอน</strong></td>
+            <td><span class="pill pill--yes">รับเลย</span></td>
+            <td>ตอนนี้เป็นข้อความล้วนห้าช่อง ซึ่งบนจอ 360px ตัวอักษรเล็กจนอ่านยาก · ไอคอนช่วยให้จำตำแหน่งได้โดยไม่ต้องอ่าน</td>
+          </tr>
+          <tr>
+            <td><strong>ช่องถามลอยอยู่ล่างทุกหน้า</strong></td>
+            <td><span class="pill pill--no">ไม่รับ</span></td>
+            <td>แท็บ KeviN มีอยู่แล้วและอยู่กลางแถบล่าง · ใส่ช่องถามซ้ำอีกจะมีสองทางไปที่เดียวกัน และกินที่ถาวรจากเนื้อหา</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 02 ============ -->
+  <section>
+    <h2><span class="n">02</span> หน้าวันนี้ — เทียบของจริง</h2>
+    <p class="sub">ข้อมูลชุดเดียวกันทั้งสองจอ ต่างกันแค่วิธีวาง</p>
+
+    <div class="phones">
+      <div class="phone">
+        <div class="phone__cap"><span>ตอนนี้</span><span>375px</span></div>
+        <div class="scr">
+          <div style="font-size:var(--s-1);font-weight:600;margin:.4rem 0 .5rem">อังคาร 1 ก.ย.</div>
+
+          <div style="border:1px solid var(--line);background:var(--surface);border-radius:var(--r-card);padding:.65rem .75rem">
+            <div style="font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand)">คาบถัดไป · อีก 40 นาที</div>
+            <div style="font-size:var(--s-1);font-weight:600;margin:.2rem 0 .1rem">สถาปัตยกรรมเครือข่ายฯ</div>
+            <div style="font-family:var(--f-mono);font-size:var(--s--1)">09:00 – 12:00</div>
+          </div>
+
+          <div class="sec"><span>เลยกำหนด</span><span>1</span></div>
+          <div class="row">
+            <span class="row__stripe" style="background:var(--due)"></span><span class="cb"></span>
+            <div class="row__body"><div>ส่งใบสมัครชมรม</div><div class="row__meta">General · เลย 2 วัน</div></div>
+          </div>
+          <div class="sec"><span>วันนี้</span><span>3</span></div>
+          <div class="row">
+            <span class="row__stripe" style="background:var(--sched)"></span>
+            <div class="row__body"><div>เกษตรศาสตร์ฯ</div><div class="row__meta">15:00–17:00 · ONLINE</div></div>
+          </div>
+          <div class="row">
+            <span class="row__stripe" style="background:var(--task)"></span><span class="cb"></span>
+            <div class="row__body"><div>อ่านสรุปบทที่ 3</div><div class="row__meta">ดิสครีต</div></div>
+          </div>
+          <div class="nav"><i class="on">วันนี้</i><i>ปฏิทิน</i><i class="mid">KeviN</i><i>คลัง</i><i>ตั้งค่า</i></div>
+        </div>
+      </div>
+
+      <div class="phone phone--new">
+        <div class="phone__cap"><span>แบบใหม่</span><b>เทียบภาพอ้างอิง</b></div>
+        <div class="scr">
+          <div class="top">
+            <div class="top__btn" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <path d="M4 7h16M4 12h16M4 17h10"/></svg>
+            </div>
+            <div class="top__btn top__ai" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.6 4.9L18.5 9.5l-4.9 1.6L12 16l-1.6-4.9L5.5 9.5l4.9-1.6z"/></svg>
+            </div>
+          </div>
+
+          <div class="greet">อังคาร 1 ก.ย. · สวัสดีตอนเช้า</div>
+          <div class="big">วันนี้ต้องสนใจ<br><i>สามอย่าง</i></div>
+
+          <div class="card">
+            <div class="card__ico ico--due" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 8v5M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <div class="card__body">
+              <div class="card__t">ส่งใบสมัครชมรม</div>
+              <div class="card__m">เลย 2 วัน · General</div>
+            </div>
+            <span class="card__go">›</span>
+          </div>
+
+          <div class="card">
+            <div class="card__ico ico--sched" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </div>
+            <div class="card__body">
+              <div class="card__t">สถาปัตยกรรมเครือข่ายฯ</div>
+              <div class="card__m">อีก 40 นาที · E11-S604</div>
+            </div>
+            <span class="card__go">›</span>
+          </div>
+
+          <div class="card">
+            <div class="card__ico ico--task" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 12.5l5 5 10-11"/></svg>
+            </div>
+            <div class="card__body">
+              <div class="card__t">อ่านสรุปบทที่ 3</div>
+              <div class="card__m">ดิสครีต</div>
+            </div>
+            <span class="card__go">›</span>
+          </div>
+
+          <div class="sec"><span>คุยล่าสุด</span><b>ดูทั้งหมด</b></div>
+          <div class="card card--talk">
+            <div class="card__ico ico--flat" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 5h16v11H9l-5 4z"/></svg>
+            </div>
+            <div class="card__body">
+              <div class="card__t">พรุ่งนี้มีอะไรบ้าง</div>
+              <div class="card__m">เมื่อวาน 21:40</div>
+            </div>
+            <span class="card__go">›</span>
+          </div>
+
+          <div class="nav nav--ico">
+            <span class="on">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/></svg>
+              วันนี้</span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+              ปฏิทิน</span>
+            <span class="mid">KeviN</span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 7l8-3 8 3v10l-8 3-8-3z"/></svg>
+              คลัง</span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5L18 18M18 6l-1.5 1.5M7.5 16.5L6 18"/></svg>
+              ตั้งค่า</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note note--brand">
+      <strong>ประโยคหัวจอทำงานแทน hero ได้</strong> — “วันนี้ต้องสนใจสามอย่าง” บอกได้ทั้ง
+      <em>มีอะไรรออยู่</em> และ <em>เท่าไหร่</em> ในบรรทัดเดียว · ตัวเลขมาจากของที่ต้องสนใจจริง
+      (เลยกำหนด + ครบวันนี้ + คาบที่ยังไม่เริ่ม) ไม่ใช่จำนวนแถวทั้งหมด
+    </div>
+  </section>
+
+  <!-- ============ 03 ============ -->
+  <section>
+    <h2><span class="n">03</span> ไอคอนสี — จุดเดียวที่ต้องดัด</h2>
+    <p class="prose">
+      ในภาพอ้างอิง ไอคอนสามใบเป็นม่วง ฟ้า ชมพู ไล่ลงมาสวยงาม
+      <strong>แต่สีนั้นไม่ได้บอกอะไรเลย</strong> — สลับที่กันก็ยังสวยเหมือนเดิม
+    </p>
+    <p class="prose">
+      ที่นี่ทำแบบนั้นไม่ได้ เพราะกฎข้อเดียวของแอปคือ <em>ม่วงคือสิ่งที่กดได้ สีที่เหลือคือข้อมูล</em>
+      ถ้าไอคอนไล่สีสวย ๆ กฎนั้นตายทันที · ทางออกคือ<strong>ให้สีไอคอนมาจากชนิดของข้อมูล
+      ที่กำหนดไว้อยู่แล้ว</strong> — ได้ความสดมาโดยไม่เสียความหมาย
+    </p>
+
+    <div class="swatch">
+      <div><u style="background:var(--sched-soft);border:1px solid var(--sched)"></u> คาบเรียน · ฟ้า</div>
+      <div><u style="background:var(--event-soft);border:1px solid var(--event)"></u> กิจกรรม · เหลือง</div>
+      <div><u style="background:var(--due-soft);border:1px solid var(--due)"></u> เลยกำหนด · ส้ม</div>
+      <div><u style="background:var(--task-soft);border:1px solid var(--task)"></u> งาน · เขียว</div>
+      <div><u style="background:var(--note-soft);border:1px solid var(--note)"></u> โน้ต · เทา</div>
+    </div>
+
+    <div class="note">
+      <strong>ผลพลอยได้ที่ไม่ได้ตั้งใจ</strong> — พอไอคอนมีสีตามชนิด
+      <em>แถบสีบางด้านซ้ายก็ไม่ต้องมีแล้ว</em> เพราะมันบอกเรื่องเดียวกัน
+      แถวจึงสะอาดขึ้นทั้งที่ข้อมูลเท่าเดิม
+    </div>
+    <div class="note note--warn">
+      <strong>สิ่งที่ต้องระวัง</strong> — ไอคอนต้องต่างกันด้วย<strong>รูป</strong> ไม่ใช่แค่สี
+      คนตาบอดสีจะเห็นสี่เหลี่ยมเทาเหมือนกันหมด · นาฬิกา = คาบ · เครื่องหมายถูก = งาน ·
+      วงกลมอัศเจรีย์ = เลยกำหนด
+    </div>
+  </section>
+
+  <!-- ============ 04 ============ -->
+  <section>
+    <h2><span class="n">04</span> “คุยล่าสุด” — ของที่มีอยู่แล้วแต่ไม่เคยได้ใช้</h2>
+    <p class="prose">
+      ส่วนที่น่าสนใจที่สุดในภาพอ้างอิงคือ <em>Recent conversations</em> —
+      เพราะตอนนี้ใน DB มีบทสนทนา <strong>17 รายการ</strong> เก็บไว้ครบทั้งข้อความและ tool ที่เรียก
+      แต่<strong>ไม่มีหน้าไหนเปิดดูได้เลย</strong>
+    </p>
+    <p class="prose">
+      ตารางถูกสร้างตอนทำประตูที่สาม พร้อม index <code>conversations_recent</code>
+      ที่เรียงตามเวลาให้แล้ว — ของพร้อมใช้ ขาดแค่ที่แสดง
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ทำอะไร</th><th>ต้นทุน</th><th>ได้อะไร</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>โชว์ 2 บทสนทนาล่าสุดในหน้าวันนี้</td>
+            <td>query เดียว · ใช้ index ที่มีอยู่</td>
+            <td>กลับไปคุยต่อจากที่ค้างไว้ได้โดยไม่ต้องเข้าแท็บ KeviN แล้วเลื่อนหา</td>
+          </tr>
+          <tr>
+            <td>หน้า <code>/kevin/history</code></td>
+            <td>หน้าใหม่หนึ่งหน้า</td>
+            <td>ย้อนดูว่าเคยถามอะไรไปแล้ว · ตอนนี้ประวัติหายไปกับตาทุกครั้งที่ปิดแอป</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 05 ============ -->
+  <section>
+    <h2><span class="n">05</span> สิ่งที่ตั้งใจไม่รับมา</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ในภาพ</th><th>ทำไมไม่รับ</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>ช่องถามลอยล่างทุกหน้า</td>
+            <td>แท็บ KeviN อยู่กลางแถบล่างอยู่แล้ว · มีสองทางไปที่เดียวกันทำให้ต้องคิดว่าจะใช้ทางไหน ทั้งที่ผลเหมือนกัน</td>
+          </tr>
+          <tr>
+            <td>ทุกการ์ดหน้าตาเท่ากัน</td>
+            <td><strong>ข้อสำคัญที่สุด</strong> — ของที่เลยกำหนดกับของที่ยังไม่ถึงเวลาต้องดูไม่เท่ากัน ไม่งั้นการจัดลำดับความสำคัญที่ทำมาทั้งหมดหายไปกับความสวย</td>
+          </tr>
+          <tr>
+            <td>ทักทาย “สวัสดีตอนเช้า, ชื่อ”</td>
+            <td>เก็บไว้แต่<strong>ย่อลงเป็นบรรทัดเล็ก</strong>คู่กับวันที่ · ผู้ใช้คนเดียวที่รู้ชื่อตัวเองอยู่แล้ว การทักทายเต็มบรรทัดกินที่ของข้อมูลจริง</td>
+          </tr>
+          <tr>
+            <td>พื้นหลังม่วงอิ่มกว่าเดิม</td>
+            <td>รับมา<strong>เล็กน้อย</strong> (<code>#0A0912</code> → <code>#120E22</code>) พอให้อุ่นขึ้นแต่ยังอ่านกลางแดดได้ · อิ่มกว่านี้คอนทราสต์จะตกจนตัวอักษรสีจางอ่านไม่ออกนอกห้อง</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 06 ============ -->
+  <section>
+    <h2><span class="n">06</span> ลำดับการทำ</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>ขั้น</th><th>ทำอะไร</th><th>กระทบกี่หน้า</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>แถบล่างใส่ไอคอน</td><td>ทุกหน้า · แต่แก้ไฟล์เดียว (<code>Nav.tsx</code>)</td></tr>
+          <tr><td>2</td><td>แถวกลายเป็นการ์ด + ไอคอนสีตามชนิด</td><td><code>ItemList.tsx</code> ไฟล์เดียว ทุกหน้าที่ใช้มันได้ตาม</td></tr>
+          <tr><td>3</td><td>หัวจอหน้าวันนี้เป็นประโยค + ปุ่มบน</td><td>หน้าวันนี้</td></tr>
+          <tr><td>4</td><td>“คุยล่าสุด” ในหน้าวันนี้</td><td>หน้าวันนี้ + query เดียว</td></tr>
+          <tr><td>5</td><td>พื้นหลังอุ่นขึ้นนิดเดียว</td><td>token เดียวใน <code>globals.css</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <strong>ขั้น 2 คือขั้นที่คุ้มที่สุด</strong> — <code>ItemList</code> ถูกใช้ในหน้าวันนี้ หน้าวิชา
+      หน้ากิจกรรม และหน้าคลังของเก่า · แก้ที่เดียวเปลี่ยนทั้งแอป
+      และ FLIP กับแถบเลิกทำที่ทำไว้แล้วยังทำงานเหมือนเดิมเพราะไม่ได้แตะตรรกะ
+    </div>
+  </section>
+
+  <p class="foot">
+    ไฟล์นี้เป็น<strong>ข้อเสนอ ยังไม่ได้ลงมือ</strong> · คู่กับ <code>UXUI.html</code> ที่เป็นภาษาภาพปัจจุบัน<br>
+    ทุกสีในหน้านี้มาจาก token ที่มีอยู่แล้วใน <code>doc/DESIGN.md</code> — ไม่มีสีใหม่เข้าระบบสักสี
+  </p>
+
+</div>
