@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Content } from '@/components/Reveal'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
@@ -129,26 +130,28 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
   const attention = tree.reduce((n, p) => n + p.attention, 0)
 
   return (
-    <main className="wrap">
-      <div className="page-head">
-        <Link href="/library" className="back" transitionTypes={['nav-back']}>‹ คลัง</Link>
-      </div>
+    <Content>
+      <main className="wrap">
+        <div className="page-head">
+          <Link href="/library" className="back" transitionTypes={['nav-back']}>‹ คลัง</Link>
+        </div>
 
-      {/* หัวของหน้า — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง */}
-      <div className={`acard acard--head ${AREA_CLASS[area.color ?? ''] ?? ''}`}>
-        <span className="acard__nm">{area.name}</span>
-        <span className="acard__ct">
-          {openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
-        </span>
-        {attention > 0 && <span className="acard__badge">{attention}</span>}
-      </div>
+        {/* หัวของหน้า — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง */}
+        <div className={`acard acard--head ${AREA_CLASS[area.color ?? ''] ?? ''}`}>
+          <span className="acard__nm">{area.name}</span>
+          <span className="acard__ct">
+            {openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
+          </span>
+          {attention > 0 && <span className="acard__badge">{attention}</span>}
+        </div>
 
-      <ProjectTree
-        areaId={area.id}
-        label={label}
-        projects={tree}
-        initialOpen={initialOpen}
-      />
-    </main>
+        <ProjectTree
+          areaId={area.id}
+          label={label}
+          projects={tree}
+          initialOpen={initialOpen}
+        />
+      </main>
+    </Content>
   )
 }

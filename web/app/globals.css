@@ -82,7 +82,16 @@
     var(--t-slow) var(--ease) both reveal-rise;
 }
 @keyframes reveal-fade { from { opacity: 0 } to { opacity: 1 } }
-@keyframes reveal-rise { from { transform: translateY(6px) } to { transform: none } }
+/*
+ * ⚠️ **เลื่อนเข้าจาก "ขวา" ไม่ใช่จาก "ล่าง"** — เพราะเบราว์เซอร์ไม่สร้าง
+ *    `::view-transition-new(root)` ให้เลย (ยืนยันด้วยการดักทุก 30/120/260 ms
+ *    ทั้งสองรอบ ไม่เจอสักครั้ง) ของใหม่จึงไม่มีทางเลื่อนเข้าผ่าน root
+ *
+ *    ตัวที่เล่นได้จริงคือ `skel-in` ของเนื้อจริงในรอบที่สอง — ใช้มันเป็น
+ *    "ขาเข้า" แทน คู่กับ root ของหน้าเก่าที่เป็น "ขาออก" จึงครบวงจร
+ *    ระยะสั้นแค่ 18px เพราะมันเล่นทุกการเปลี่ยนหน้า รวมสลับแท็บล่างที่ควรนิ่ง
+ */
+@keyframes reveal-rise { from { transform: translateX(18px) } to { transform: none } }
 
 ::view-transition-group(*) {
   animation-duration: var(--t-slow);
@@ -118,10 +127,11 @@ html:active-view-transition-type(nav-back) {
   }
 }
 
-@keyframes nav-out-left  { to   { transform: translateX(-22%); opacity: 0 } }
-@keyframes nav-in-right  { from { transform: translateX(22%);  opacity: 0 } }
-@keyframes nav-out-right { to   { transform: translateX(22%);  opacity: 0 } }
-@keyframes nav-in-left   { from { transform: translateX(-22%); opacity: 0 } }
+/* ระยะ 35% — 22% ที่ลองก่อนหน้ายังอ่านเป็น fade มากกว่าเป็นการเลื่อน */
+@keyframes nav-out-left  { to   { transform: translateX(-35%); opacity: 0 } }
+@keyframes nav-in-right  { from { transform: translateX(35%);  opacity: 0 } }
+@keyframes nav-out-right { to   { transform: translateX(35%);  opacity: 0 } }
+@keyframes nav-in-left   { from { transform: translateX(-35%); opacity: 0 } }
 
 /*
  * ผู้ที่ตั้งค่าลดการเคลื่อนไหว — ตัด transition ของเบราว์เซอร์ทิ้งทั้งชุด

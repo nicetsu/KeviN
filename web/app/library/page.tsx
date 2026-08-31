@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Content } from '@/components/Reveal'
 import { createClient } from '@/lib/supabase/server'
 import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
 import { AREA_CLASS } from '@/lib/areaColor'
@@ -108,67 +109,69 @@ export default async function LibraryPage() {
   })
 
   return (
-    <main className="wrap">
-      <div className="page-head">
-        <h1>คลัง</h1>
-        <div className="sub">แตะเพื่อเปิด Area</div>
-      </div>
+    <Content>
+      <main className="wrap">
+        <div className="page-head">
+          <h1>คลัง</h1>
+          <div className="sub">แตะเพื่อเปิด Area</div>
+        </div>
 
-      <div className="areas">
-        {cards.map((a) => (
-          /*
-            `nav-forward` = กำลังเข้าไปข้างใน · ทั้งจอเลื่อนไปทางซ้าย
-            (morph ของกล่องเองทำไม่ได้ เหตุผลอยู่ใน globals.css และ doc/TRAPS.md)
-          */
-          <Link
-            key={a.id}
-            href={`/library/${a.id}`}
-            className={`acard ${a.colorClass}`}
-            transitionTypes={['nav-forward']}
-          >
-            <span className="acard__nm">{a.name}</span>
-            <span className="acard__ct">
-              {a.openCount > 0 ? `${a.openCount} ${a.label}` : 'ว่าง'}
-            </span>
-            {a.attention > 0 && <span className="acard__badge">{a.attention}</span>}
-          </Link>
-        ))}
-      </div>
-
-      {upcoming.length > 0 && (
-        <>
-          <div className="sec">
-            <span>กิจกรรมที่จะถึง</span>
-            <span>{upcoming.length}</span>
-          </div>
-          {upcoming.map((e) => (
-            <Link key={e.id} href={`/project/${e.project_id}/event/${e.id}`} className="row row--link">
-              <span className="row__stripe" style={{ background: 'var(--event)' }} />
-              <div className="row__body">
-                <div className="row__title">{e.title}</div>
-                <div className="row__meta">
-                  {stamp(e.starts_at)}
-                  {e.projects?.name ? ` · ${e.projects.name}` : ''}
-                  {e.location ? ` · ${e.location}` : ''}
-                </div>
-              </div>
-              <span className="row__go" aria-hidden="true">›</span>
+        <div className="areas">
+          {cards.map((a) => (
+            /*
+              `nav-forward` = กำลังเข้าไปข้างใน · ทั้งจอเลื่อนไปทางซ้าย
+              (morph ของกล่องเองทำไม่ได้ เหตุผลอยู่ใน globals.css และ doc/TRAPS.md)
+            */
+            <Link
+              key={a.id}
+              href={`/library/${a.id}`}
+              className={`acard ${a.colorClass}`}
+              transitionTypes={['nav-forward']}
+            >
+              <span className="acard__nm">{a.name}</span>
+              <span className="acard__ct">
+                {a.openCount > 0 ? `${a.openCount} ${a.label}` : 'ว่าง'}
+              </span>
+              {a.attention > 0 && <span className="acard__badge">{a.attention}</span>}
             </Link>
           ))}
-        </>
-      )}
+        </div>
 
-      {/*
-        ทางเข้าของที่เก็บไว้ อยู่ล่างสุดเพราะเป็นที่ที่แวะนาน ๆ ครั้ง
-        แต่ต้องมีอยู่ — ระบบเก็บของเองทุกคืนแล้วลบถาวรใน 7 วัน
-        ถ้าไม่มีทางเข้า ผู้ใช้จะไม่มีวันเห็นของที่กำลังจะหาย
-      */}
-      <Link href="/library/archive" className="archive-link">
-        <span>ของที่เก็บไว้</span>
-        <span className="archive-link__n">
-          {archivedCount > 0 ? `${archivedCount} ›` : '›'}
-        </span>
-      </Link>
-    </main>
+        {upcoming.length > 0 && (
+          <>
+            <div className="sec">
+              <span>กิจกรรมที่จะถึง</span>
+              <span>{upcoming.length}</span>
+            </div>
+            {upcoming.map((e) => (
+              <Link key={e.id} href={`/project/${e.project_id}/event/${e.id}`} className="row row--link">
+                <span className="row__stripe" style={{ background: 'var(--event)' }} />
+                <div className="row__body">
+                  <div className="row__title">{e.title}</div>
+                  <div className="row__meta">
+                    {stamp(e.starts_at)}
+                    {e.projects?.name ? ` · ${e.projects.name}` : ''}
+                    {e.location ? ` · ${e.location}` : ''}
+                  </div>
+                </div>
+                <span className="row__go" aria-hidden="true">›</span>
+              </Link>
+            ))}
+          </>
+        )}
+
+        {/*
+          ทางเข้าของที่เก็บไว้ อยู่ล่างสุดเพราะเป็นที่ที่แวะนาน ๆ ครั้ง
+          แต่ต้องมีอยู่ — ระบบเก็บของเองทุกคืนแล้วลบถาวรใน 7 วัน
+          ถ้าไม่มีทางเข้า ผู้ใช้จะไม่มีวันเห็นของที่กำลังจะหาย
+        */}
+        <Link href="/library/archive" className="archive-link">
+          <span>ของที่เก็บไว้</span>
+          <span className="archive-link__n">
+            {archivedCount > 0 ? `${archivedCount} ›` : '›'}
+          </span>
+        </Link>
+      </main>
+    </Content>
   )
 }
