@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
@@ -160,25 +161,27 @@ export default async function LibraryPage() {
   })
 
   return (
-    <main className="wrap">
-      <div className="page-head">
-        <h1>คลัง</h1>
-        <div className="sub">Area › โปรเจกต์ › งาน</div>
-      </div>
+    <Content>
+      <main className="wrap">
+        <div className="page-head">
+          <h1>คลัง</h1>
+          <div className="sub">Area › โปรเจกต์ › งาน</div>
+        </div>
 
-      <LibraryTree areas={tree} initialOpen={initialOpen} />
+        <LibraryTree areas={tree} initialOpen={initialOpen} />
 
-      {/*
-        ทางเข้าของที่เก็บไว้ อยู่ล่างสุดเพราะเป็นที่ที่แวะนาน ๆ ครั้ง
-        แต่ต้องมีอยู่ — ตั้งแต่ 1 ก.ย. 2026 ระบบเก็บของเองทุกคืนแล้วลบถาวรใน 7 วัน
-        ถ้าไม่มีทางเข้า ผู้ใช้จะไม่มีวันเห็นของที่กำลังจะหาย
-      */}
-      <Link href="/library/archive" className="archive-link">
-        <span>ของที่เก็บไว้</span>
-        <span className="archive-link__n">
-          {archivedCount > 0 ? `${archivedCount} ›` : '›'}
-        </span>
-      </Link>
-    </main>
+        {/*
+          ทางเข้าของที่เก็บไว้ อยู่ล่างสุดเพราะเป็นที่ที่แวะนาน ๆ ครั้ง
+          แต่ต้องมีอยู่ — ตั้งแต่ 1 ก.ย. 2026 ระบบเก็บของเองทุกคืนแล้วลบถาวรใน 7 วัน
+          ถ้าไม่มีทางเข้า ผู้ใช้จะไม่มีวันเห็นของที่กำลังจะหาย
+        */}
+        <Link href="/library/archive" className="archive-link">
+          <span>ของที่เก็บไว้</span>
+          <span className="archive-link__n">
+            {archivedCount > 0 ? `${archivedCount} ›` : '›'}
+          </span>
+        </Link>
+      </main>
+    </Content>
   )
 }

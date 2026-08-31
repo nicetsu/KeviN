@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import { connection } from 'next/server'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -28,24 +29,26 @@ export default async function NewEventPage({
   if (!data) notFound()
 
   return (
-    <main className="wrap">
-      <EventEditor
-        projectId={id}
-        projectName={data.name}
-        eventId={null}
-        archived={false}
-        initial={{
-          title: '',
-          body: '',
-          startDate: today,
-          startTime: '09:00',
-          endDate: today,
-          endTime: '12:00',
-          location: '',
-          label: '',
-        }}
-        initialLines={[newLine(0, '09:00')]}
-      />
-    </main>
+    <Content>
+      <main className="wrap">
+        <EventEditor
+          projectId={id}
+          projectName={data.name}
+          eventId={null}
+          archived={false}
+          initial={{
+            title: '',
+            body: '',
+            startDate: today,
+            startTime: '09:00',
+            endDate: today,
+            endTime: '12:00',
+            location: '',
+            label: '',
+          }}
+          initialLines={[newLine(0, '09:00')]}
+        />
+      </main>
+    </Content>
   )
 }

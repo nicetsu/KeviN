@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import {
@@ -109,33 +110,35 @@ export default async function CalendarPage({
   const q = (d: string) => `/calendar?mode=${mode}&d=${d}`
 
   return (
-    <main className="wrap wrap--wide">
-      <div className="cal-head">
-        <h1>
-          {mode === 'week' ? thaiRangeLabel(from, addDays(from, 6)) : thaiMonthLabel(monthStart)}
-        </h1>
-        <div className="seg">
-          <Link href={`/calendar?mode=month&d=${anchor}`} data-on={mode === 'month'}>เดือน</Link>
-          <Link href={`/calendar?mode=week&d=${anchor}`} data-on={mode === 'week'}>สัปดาห์</Link>
+    <Content>
+      <main className="wrap wrap--wide">
+        <div className="cal-head">
+          <h1>
+            {mode === 'week' ? thaiRangeLabel(from, addDays(from, 6)) : thaiMonthLabel(monthStart)}
+          </h1>
+          <div className="seg">
+            <Link href={`/calendar?mode=month&d=${anchor}`} data-on={mode === 'month'}>เดือน</Link>
+            <Link href={`/calendar?mode=week&d=${anchor}`} data-on={mode === 'week'}>สัปดาห์</Link>
+          </div>
         </div>
-      </div>
 
-      <div className="cal-nav">
-        <Link href={q(prev)} aria-label="ก่อนหน้า">‹</Link>
-        <Link href={q(today)} aria-label="วันนี้">วันนี้</Link>
-        <Link href={q(next)} aria-label="ถัดไป">›</Link>
-      </div>
+        <div className="cal-nav">
+          <Link href={q(prev)} aria-label="ก่อนหน้า">‹</Link>
+          <Link href={q(today)} aria-label="วันนี้">วันนี้</Link>
+          <Link href={q(next)} aria-label="ถัดไป">›</Link>
+        </div>
 
-      {error ? (
-        <p className="alert" role="alert">โหลดปฏิทินไม่สำเร็จ · {error.message}</p>
-      ) : mode === 'week' ? (
-        <>
-          <WeekGrid entries={entries} days={days} />
-          <p className="none" style={{ marginTop: '1rem' }}>ปฏิทินไว้ดู · แก้ที่หน้าคลัง</p>
-        </>
-      ) : (
-        <MonthGrid monthKey={monthStart} today={today} byDay={byDay} />
-      )}
-    </main>
+        {error ? (
+          <p className="alert" role="alert">โหลดปฏิทินไม่สำเร็จ · {error.message}</p>
+        ) : mode === 'week' ? (
+          <>
+            <WeekGrid entries={entries} days={days} />
+            <p className="none" style={{ marginTop: '1rem' }}>ปฏิทินไว้ดู · แก้ที่หน้าคลัง</p>
+          </>
+        ) : (
+          <MonthGrid monthKey={monthStart} today={today} byDay={byDay} />
+        )}
+      </main>
+    </Content>
   )
 }

@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { bangkokTime, thaiDateLabel } from '@/lib/time'
@@ -120,17 +121,19 @@ export default async function ArchivePage() {
   }))
 
   return (
-    <main className="wrap">
-      <Head />
-      {rows.length === 0 ? (
-        <div className="empty">
-          <strong>ไม่มีอะไรอยู่ในคลัง</strong>
-          ของที่เก็บไว้จะมารออยู่ที่นี่ {KEEP_DAYS} วันก่อนถูกลบถาวร
-        </div>
-      ) : (
-        <ArchiveList groups={groups} />
-      )}
-    </main>
+    <Content>
+      <main className="wrap">
+        <Head />
+        {rows.length === 0 ? (
+          <div className="empty">
+            <strong>ไม่มีอะไรอยู่ในคลัง</strong>
+            ของที่เก็บไว้จะมารออยู่ที่นี่ {KEEP_DAYS} วันก่อนถูกลบถาวร
+          </div>
+        ) : (
+          <ArchiveList groups={groups} />
+        )}
+      </main>
+    </Content>
   )
 }
 

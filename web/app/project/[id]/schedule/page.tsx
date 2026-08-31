@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
@@ -81,15 +82,17 @@ export default async function SchedulePage({
   const initialStart = rows[0]?.start_date ?? mondayOf(bangkokToday().dateKey)
 
   return (
-    <main className="wrap">
-      <Link href={`/project/${id}`} className="back">‹ กลับไปหน้าวิชา</Link>
-      <Editor
-        projectId={id}
-        projectName={projRes.data.name}
-        initialStart={initialStart}
-        initialSlots={initialSlots}
-        others={others}
-      />
-    </main>
+    <Content>
+      <main className="wrap">
+        <Link href={`/project/${id}`} className="back">‹ กลับไปหน้าวิชา</Link>
+        <Editor
+          projectId={id}
+          projectName={projRes.data.name}
+          initialStart={initialStart}
+          initialSlots={initialSlots}
+          others={others}
+        />
+      </main>
+    </Content>
   )
 }

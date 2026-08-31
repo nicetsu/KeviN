@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import EventEditor, { type Line } from '../../EventEditor'
@@ -73,24 +74,26 @@ export default async function EditEventPage({
   }))
 
   return (
-    <main className="wrap">
-      <EventEditor
-        projectId={id}
-        projectName={ev.projects?.name ?? 'วิชา'}
-        eventId={ev.id}
-        archived={ev.archived_at !== null}
-        initial={{
-          title: ev.title,
-          body: ev.body ?? '',
-          startDate: s.date,
-          startTime: s.time,
-          endDate: e.date,
-          endTime: e.time,
-          location: ev.location ?? '',
-          label: ev.label ?? '',
-        }}
-        initialLines={lines}
-      />
-    </main>
+    <Content>
+      <main className="wrap">
+        <EventEditor
+          projectId={id}
+          projectName={ev.projects?.name ?? 'วิชา'}
+          eventId={ev.id}
+          archived={ev.archived_at !== null}
+          initial={{
+            title: ev.title,
+            body: ev.body ?? '',
+            startDate: s.date,
+            startTime: s.time,
+            endDate: e.date,
+            endTime: e.time,
+            location: ev.location ?? '',
+            label: ev.label ?? '',
+          }}
+          initialLines={lines}
+        />
+      </main>
+    </Content>
   )
 }

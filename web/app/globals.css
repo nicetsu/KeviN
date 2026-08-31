@@ -66,6 +66,34 @@
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);   /* ออกตัวเร็ว จบช้า */
 }
 
+/*
+ * โครงร่าง → เนื้อจริง (components/Reveal.tsx)
+ *
+ * ⚠️ **จังหวะไม่สมมาตรโดยตั้งใจ** — ของเก่าออกเร็วเพื่อไม่ให้แย่งความสนใจ
+ *    ของใหม่เข้าช้ากว่าและ **รอให้ของเก่าออกไปก่อน** (delay เท่ากับเวลา exit)
+ *    ถ้าเข้าออกพร้อมกันจะเห็นสองชั้นทับกันแล้วดูรกกว่าไม่มี animation เลย
+ */
+::view-transition-old(.skel-out) {
+  animation: var(--t-fast) var(--ease) both reveal-fade reverse;
+}
+::view-transition-new(.skel-in) {
+  animation:
+    var(--t-base) var(--ease) var(--t-fast) both reveal-fade,
+    var(--t-slow) var(--ease) both reveal-rise;
+}
+@keyframes reveal-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes reveal-rise { from { transform: translateY(6px) } to { transform: none } }
+
+/*
+ * ผู้ที่ตั้งค่าลดการเคลื่อนไหว — ตัด transition ของเบราว์เซอร์ทิ้งทั้งชุด
+ * ไม่ใช่แค่ทำให้เร็วขึ้น เพราะการ crossfade เต็มจอก็ยังทำให้เวียนหัวได้
+ */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}
+
 html { color-scheme: dark; }
 
 body {

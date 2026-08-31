@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -132,127 +133,129 @@ export default async function ProjectPage({
     .sort((a, b) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time))
 
   return (
-    <main className="wrap">
-      <div className="page-head">
-        <Link href="/library" className="back">‹ {project.areas?.name ?? 'คลัง'}</Link>
-        <h1>{project.name}</h1>
-        {project.description && <div className="sub">{project.description}</div>}
-        {project.archived_at && <div className="sub">เก็บเข้าคลังแล้ว</div>}
-      </div>
-
-      <div className="sched-strip">
-        {sortedSlots.length > 0 ? (
-          sortedSlots.map((s, i) => <div key={i}>{describe(s)}</div>)
-        ) : (
-          <div>ยังไม่ได้ตั้งช่วงเวลาประจำ</div>
-        )}
-        <div style={{ marginTop: '0.5rem' }}>
-          <Link href={`/project/${id}/schedule`} className="back">แก้ช่วงเวลาประจำ ›</Link>
+    <Content>
+      <main className="wrap">
+        <div className="page-head">
+          <Link href="/library" className="back">‹ {project.areas?.name ?? 'คลัง'}</Link>
+          <h1>{project.name}</h1>
+          {project.description && <div className="sub">{project.description}</div>}
+          {project.archived_at && <div className="sub">เก็บเข้าคลังแล้ว</div>}
         </div>
-      </div>
 
-      {/*
-        กิจกรรมมาก่อนงาน เพราะมันคือ "ต้องไปที่ไหนตอนไหน" ซึ่งเปลี่ยนไม่ได้
-        ส่วนงานเป็นสิ่งที่จัดเวลาเองได้ · ลากจัดลำดับไม่ได้ เวลาเป็นตัวตัดสิน
-        ที่ยังไม่ผ่านอยู่บน ที่ผ่านแล้วจางลงและร่วงไปท้ายกลุ่ม
-      */}
-      <Group title="กิจกรรม" count={events.length || null}>
-        <ItemList
-          rows={sortedEvents.map(
-            (e): Row => ({
-              id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้และลากไม่ได้
-              color: ENTRY_COLOR.event,
-              title: e.title,
-              meta: [eventStamp(e), e.location, e.label].filter(Boolean).join(' · '),
-              done: false,
-              past: isPast(e),
-              checkable: false,
-              tag: null,
-              href: `/project/${id}/event/${e.id}`,
-              // เก็บเข้าคลังได้จากแถวนี้เลย พร้อมแถบเลิกทำแบบเดียวกับงาน
-              event: { projectId: id, eventId: e.id },
-            })
+        <div className="sched-strip">
+          {sortedSlots.length > 0 ? (
+            sortedSlots.map((s, i) => <div key={i}>{describe(s)}</div>)
+          ) : (
+            <div>ยังไม่ได้ตั้งช่วงเวลาประจำ</div>
           )}
-        />
-      </Group>
-      <Link href={`/project/${id}/event/new`} className="btn btn--ghost add-slot">
-        + กิจกรรมใหม่
-      </Link>
+          <div style={{ marginTop: '0.5rem' }}>
+            <Link href={`/project/${id}/schedule`} className="back">แก้ช่วงเวลาประจำ ›</Link>
+          </div>
+        </div>
 
-      <Group title="งาน" count={tasks.length ? `${doneCount} / ${tasks.length}` : null}>
-        <ItemList
-          rows={tasks.map(
-            (t): Row => ({
-              id: t.id,
-              color: t.due_at ? 'var(--due)' : 'var(--task)',
-              title: t.title,
-              meta: t.done_at
-                ? `เสร็จ ${stamp(t.done_at)}`
-                : t.due_at
-                  ? stamp(t.due_at)
-                  : 'ยังไม่กำหนดวัน',
-              done: t.done_at !== null,
-              checkable: true,
-              tag: chip(t),
-              // due_at มาก่อน sort_order ใน sink() งานที่มีวันกำหนดจึงลากไม่ได้
-              movable: t.done_at === null && t.due_at === null,
-              panel: {
-                id: t.id, projectId: id, type: 'task' as const, title: t.title,
-                body: t.body, at: t.due_at, done: t.done_at !== null,
-                projectName: project.name,
-              },
-            })
-          )}
-        />
-      </Group>
+        {/*
+          กิจกรรมมาก่อนงาน เพราะมันคือ "ต้องไปที่ไหนตอนไหน" ซึ่งเปลี่ยนไม่ได้
+          ส่วนงานเป็นสิ่งที่จัดเวลาเองได้ · ลากจัดลำดับไม่ได้ เวลาเป็นตัวตัดสิน
+          ที่ยังไม่ผ่านอยู่บน ที่ผ่านแล้วจางลงและร่วงไปท้ายกลุ่ม
+        */}
+        <Group title="กิจกรรม" count={events.length || null}>
+          <ItemList
+            rows={sortedEvents.map(
+              (e): Row => ({
+                id: null,               // event ไม่ใช่ item · ติ๊กไม่ได้และลากไม่ได้
+                color: ENTRY_COLOR.event,
+                title: e.title,
+                meta: [eventStamp(e), e.location, e.label].filter(Boolean).join(' · '),
+                done: false,
+                past: isPast(e),
+                checkable: false,
+                tag: null,
+                href: `/project/${id}/event/${e.id}`,
+                // เก็บเข้าคลังได้จากแถวนี้เลย พร้อมแถบเลิกทำแบบเดียวกับงาน
+                event: { projectId: id, eventId: e.id },
+              })
+            )}
+          />
+        </Group>
+        <Link href={`/project/${id}/event/new`} className="btn btn--ghost add-slot">
+          + กิจกรรมใหม่
+        </Link>
 
-      <Group title="เตือน" count={reminders.length || null}>
-        <ItemList
-          rows={reminders.map(
-            (r): Row => ({
-              id: r.id,
-              color: 'var(--due)',
-              title: r.title,
-              meta: r.remind_at ? stamp(r.remind_at) : '',
-              done: false,
-              checkable: false,
-              tag: chip(r),
-              panel: {
-                id: r.id, projectId: id, type: 'reminder' as const, title: r.title,
-                body: r.body, at: r.remind_at, done: false,
-                projectName: project.name,
-              },
-            })
-          )}
-        />
-      </Group>
+        <Group title="งาน" count={tasks.length ? `${doneCount} / ${tasks.length}` : null}>
+          <ItemList
+            rows={tasks.map(
+              (t): Row => ({
+                id: t.id,
+                color: t.due_at ? 'var(--due)' : 'var(--task)',
+                title: t.title,
+                meta: t.done_at
+                  ? `เสร็จ ${stamp(t.done_at)}`
+                  : t.due_at
+                    ? stamp(t.due_at)
+                    : 'ยังไม่กำหนดวัน',
+                done: t.done_at !== null,
+                checkable: true,
+                tag: chip(t),
+                // due_at มาก่อน sort_order ใน sink() งานที่มีวันกำหนดจึงลากไม่ได้
+                movable: t.done_at === null && t.due_at === null,
+                panel: {
+                  id: t.id, projectId: id, type: 'task' as const, title: t.title,
+                  body: t.body, at: t.due_at, done: t.done_at !== null,
+                  projectName: project.name,
+                },
+              })
+            )}
+          />
+        </Group>
 
-      <Group title="โน้ต" count={notes.length || null}>
-        <ItemList
-          rows={notes.map(
-            (n): Row => ({
-              id: n.id,
-              color: 'var(--note)',
-              title: n.title,
-              meta: n.body ?? '',
-              done: false,
-              checkable: false,
-              tag: chip(n),
-              movable: true,
-              panel: {
-                id: n.id, projectId: id, type: 'shortnote' as const, title: n.title,
-                body: n.body, at: null, done: false,
-                projectName: project.name,
-              },
-            })
-          )}
-        />
-      </Group>
+        <Group title="เตือน" count={reminders.length || null}>
+          <ItemList
+            rows={reminders.map(
+              (r): Row => ({
+                id: r.id,
+                color: 'var(--due)',
+                title: r.title,
+                meta: r.remind_at ? stamp(r.remind_at) : '',
+                done: false,
+                checkable: false,
+                tag: chip(r),
+                panel: {
+                  id: r.id, projectId: id, type: 'reminder' as const, title: r.title,
+                  body: r.body, at: r.remind_at, done: false,
+                  projectName: project.name,
+                },
+              })
+            )}
+          />
+        </Group>
 
-      <div className="actions actions--end">
-        <ProjectMenu projectId={id} archived={project.archived_at !== null} />
-      </div>
-    </main>
+        <Group title="โน้ต" count={notes.length || null}>
+          <ItemList
+            rows={notes.map(
+              (n): Row => ({
+                id: n.id,
+                color: 'var(--note)',
+                title: n.title,
+                meta: n.body ?? '',
+                done: false,
+                checkable: false,
+                tag: chip(n),
+                movable: true,
+                panel: {
+                  id: n.id, projectId: id, type: 'shortnote' as const, title: n.title,
+                  body: n.body, at: null, done: false,
+                  projectName: project.name,
+                },
+              })
+            )}
+          />
+        </Group>
+
+        <div className="actions actions--end">
+          <ProjectMenu projectId={id} archived={project.archived_at !== null} />
+        </div>
+      </main>
+    </Content>
   )
 }
 

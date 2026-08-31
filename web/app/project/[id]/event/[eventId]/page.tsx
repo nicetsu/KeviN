@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -114,98 +115,100 @@ export default async function EventPage({
     : `${stamp(ev.starts_at)} – ${stamp(ev.ends_at)}`
 
   return (
-    <main className="wrap">
-      <div className="page-head">
-        <Link href={`/project/${id}`} className="back">‹ {ev.projects?.name ?? 'วิชา'}</Link>
-        <h1>{ev.title}</h1>
-        {ev.archived_at && <div className="sub">เก็บเข้าคลังแล้ว</div>}
-      </div>
-
-      <div className="pills">
-        <span className="pill pill--time">{when}</span>
-        {ev.location && <span className="pill">{ev.location}</span>}
-        {ev.label && <span className="pill">{ev.label}</span>}
-      </div>
-
-      <div style={{ marginBottom: '0.9rem' }}>
-        <Link href={`/project/${id}/event/${eventId}/edit`} className="back">แก้กิจกรรม ›</Link>
-      </div>
-
-      {ev.body && (
-        <div className="prose">
-          <Autolink text={ev.body} />
+    <Content>
+      <main className="wrap">
+        <div className="page-head">
+          <Link href={`/project/${id}`} className="back">‹ {ev.projects?.name ?? 'วิชา'}</Link>
+          <h1>{ev.title}</h1>
+          {ev.archived_at && <div className="sub">เก็บเข้าคลังแล้ว</div>}
         </div>
-      )}
 
-      <div className="sec">
-        <span>กำหนดการ</span>
-        <span>{agenda.length || ''}</span>
-      </div>
+        <div className="pills">
+          <span className="pill pill--time">{when}</span>
+          {ev.location && <span className="pill">{ev.location}</span>}
+          {ev.label && <span className="pill">{ev.label}</span>}
+        </div>
 
-      {agenda.length === 0 ? (
-        <p className="none">ยังไม่มีกำหนดการ</p>
-      ) : (
-        dayKeys.map((offset) => (
-          <div key={offset}>
-            {!sameDay && (
-              <div className="agenda__day">{thaiDateLabel(agendaDayKey(startKey, offset))}</div>
-            )}
-            <div className="agenda">
-              {byDay.get(offset)!.map((line) => (
-                <div className="agenda__row" key={line.id}>
-                  <div className="agenda__time">{agendaClock(line)}</div>
-                  <div className="agenda__title">{line.title}</div>
-                </div>
-              ))}
-            </div>
+        <div style={{ marginBottom: '0.9rem' }}>
+          <Link href={`/project/${id}/event/${eventId}/edit`} className="back">แก้กิจกรรม ›</Link>
+        </div>
+
+        {ev.body && (
+          <div className="prose">
+            <Autolink text={ev.body} />
           </div>
-        ))
-      )}
+        )}
 
-      <div className="sec">
-        <span>ที่เกี่ยวข้อง</span>
-        <span>{items.length || ''}</span>
-      </div>
+        <div className="sec">
+          <span>กำหนดการ</span>
+          <span>{agenda.length || ''}</span>
+        </div>
 
-      {items.length === 0 ? (
-        <p className="none">ยังไม่มีงานหรือการเตือนที่ผูกกับกิจกรรมนี้</p>
-      ) : (
-        <ItemList
-          rows={items.map((it): Row => {
-            const at = it.type === 'reminder' ? it.remind_at : it.due_at
-            return {
-              id: it.id,
-              color:
-                it.type === 'shortnote'
-                  ? 'var(--note)'
-                  : it.type === 'reminder' || it.due_at
-                    ? 'var(--due)'
-                    : 'var(--task)',
-              title: it.title,
-              meta: it.done_at
-                ? `เสร็จ ${stamp(it.done_at)}`
-                : at
-                  ? stamp(at)
-                  : 'ไม่กำหนดวัน',
-              done: it.done_at !== null,
-              checkable: it.type === 'task',
-              tag: null,
-              panel: {
+        {agenda.length === 0 ? (
+          <p className="none">ยังไม่มีกำหนดการ</p>
+        ) : (
+          dayKeys.map((offset) => (
+            <div key={offset}>
+              {!sameDay && (
+                <div className="agenda__day">{thaiDateLabel(agendaDayKey(startKey, offset))}</div>
+              )}
+              <div className="agenda">
+                {byDay.get(offset)!.map((line) => (
+                  <div className="agenda__row" key={line.id}>
+                    <div className="agenda__time">{agendaClock(line)}</div>
+                    <div className="agenda__title">{line.title}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+
+        <div className="sec">
+          <span>ที่เกี่ยวข้อง</span>
+          <span>{items.length || ''}</span>
+        </div>
+
+        {items.length === 0 ? (
+          <p className="none">ยังไม่มีงานหรือการเตือนที่ผูกกับกิจกรรมนี้</p>
+        ) : (
+          <ItemList
+            rows={items.map((it): Row => {
+              const at = it.type === 'reminder' ? it.remind_at : it.due_at
+              return {
                 id: it.id,
-                projectId: id,
-                type: it.type,
+                color:
+                  it.type === 'shortnote'
+                    ? 'var(--note)'
+                    : it.type === 'reminder' || it.due_at
+                      ? 'var(--due)'
+                      : 'var(--task)',
                 title: it.title,
-                body: it.body,
-                at,
+                meta: it.done_at
+                  ? `เสร็จ ${stamp(it.done_at)}`
+                  : at
+                    ? stamp(at)
+                    : 'ไม่กำหนดวัน',
                 done: it.done_at !== null,
-                projectName: ev.projects?.name ?? '',
-              },
-            }
-          })}
-        />
-      )}
+                checkable: it.type === 'task',
+                tag: null,
+                panel: {
+                  id: it.id,
+                  projectId: id,
+                  type: it.type,
+                  title: it.title,
+                  body: it.body,
+                  at,
+                  done: it.done_at !== null,
+                  projectName: ev.projects?.name ?? '',
+                },
+              }
+            })}
+          />
+        )}
 
-      <EventItemAdd projectId={id} eventId={eventId} />
-    </main>
+        <EventItemAdd projectId={id} eventId={eventId} />
+      </main>
+    </Content>
   )
 }

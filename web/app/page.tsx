@@ -1,3 +1,4 @@
+import { Content } from '@/components/Reveal'
 import { connection } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import {
@@ -302,38 +303,40 @@ export default async function TodayPage() {
   const nothing = overdue.length === 0 && timeline.length === 0
 
   return (
-    <main className="wrap">
-      <Head dateKey={dateKey} />
+    <Content>
+      <main className="wrap">
+        <Head dateKey={dateKey} />
 
-      {hero && <Hero info={hero} />}
+        {hero && <Hero info={hero} />}
 
-      {nothing && (
-        <div className="empty">
-          <strong>วันนี้ว่าง</strong>
-          ไม่มีคาบเรียน กิจกรรม งาน หรือการเตือนในวันนี้
-        </div>
-      )}
-
-      {overdue.length > 0 && (
-        <>
-          <div className="sec">
-            <span>เลยกำหนด</span>
-            <span>{overdue.length}</span>
+        {nothing && (
+          <div className="empty">
+            <strong>วันนี้ว่าง</strong>
+            ไม่มีคาบเรียน กิจกรรม งาน หรือการเตือนในวันนี้
           </div>
-          <ItemList rows={overdue} />
-        </>
-      )}
+        )}
 
-      {timeline.length > 0 && (
-        <>
-          <div className="sec">
-            <span>วันนี้</span>
-            <span>{timeline.length}</span>
-          </div>
-          <ItemList rows={timeline} />
-        </>
-      )}
-    </main>
+        {overdue.length > 0 && (
+          <>
+            <div className="sec">
+              <span>เลยกำหนด</span>
+              <span>{overdue.length}</span>
+            </div>
+            <ItemList rows={overdue} />
+          </>
+        )}
+
+        {timeline.length > 0 && (
+          <>
+            <div className="sec">
+              <span>วันนี้</span>
+              <span>{timeline.length}</span>
+            </div>
+            <ItemList rows={timeline} />
+          </>
+        )}
+      </main>
+    </Content>
   )
 }
 
