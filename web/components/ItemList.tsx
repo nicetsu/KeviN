@@ -8,6 +8,7 @@ import { archiveEvent } from '@/app/actions/events'
 import { clearTimeOffset } from '@/app/actions/timeOffsets'
 import ItemPanel, { type PanelItem } from './ItemPanel'
 import { useFlip } from '@/lib/useFlip'
+import { tap, away } from '@/lib/haptic'
 
 export type Row = {
   /** id ของ item · คาบเรียนไม่ใช่ item จึงเป็น null และแก้ไม่ได้ที่นี่ */
@@ -104,6 +105,9 @@ export default function ItemList({ rows }: { rows: Row[] }) {
   function onToggle(r: Row) {
     if (!r.id) return
     const next = !isDone(r)
+    // สั่นเฉพาะตอนติ๊กว่าเสร็จ ไม่สั่นตอนเอาติ๊กออก — อย่างหลังคือการแก้ที่พลาด
+    // ไม่ใช่ความสำเร็จที่ต้องฉลอง
+    if (next) tap()
     setOptimistic((p) => ({ ...p, [r.id!]: next }))
     startTransition(async () => {
       const res = await toggleDone(r.id!, next)
@@ -125,6 +129,7 @@ export default function ItemList({ rows }: { rows: Row[] }) {
     const archive = () => (ev ? archiveEvent(ev.projectId, ev.eventId, true) : archiveItem(key))
     const restore = () => (ev ? archiveEvent(ev.projectId, ev.eventId, false) : restoreItem(key))
 
+    away()
     setHidden((p) => new Set(p).add(key))
     setUndo({ key, title: r.title, restore })
 

@@ -219,6 +219,12 @@ html, body { margin: 0; padding: 0; }
 }
 .cb:hover { border-color: var(--task); }
 .cb[data-on="true"] { background: var(--task); border-color: var(--task); }
+/*
+ * ยุบลงตอนนิ้วแตะ — บอกว่า "โดนแล้ว" ก่อนเซิร์ฟเวอร์จะตอบด้วยซ้ำ
+ * บนมือถือไม่มี hover ให้พึ่ง สถานะกดจึงเป็นสัญญาณเดียวที่มี
+ */
+.cb { transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
+.cb:active { transform: scale(0.88); }
 .cb svg { display: block; }
 
 /* ---- ป้ายขวา · โผล่เฉพาะตอนผิดปกติ ---- */
@@ -639,6 +645,34 @@ html, body { margin: 0; padding: 0; }
   font-size: var(--s--1); color: var(--muted);
   max-width: calc(100vw - 2rem);
 }
+/*
+ * เลื่อนขึ้นมาจากขอบล่าง — เดิมเด้งโผล่มาเฉย ๆ ทั้งที่เป็นของที่ต้องรีบเห็น
+ * ของที่ขึ้นมาจากขอบจอบอกว่ามัน "มาจากข้างนอก" และจะกลับไปเอง
+ * ต่างจากของที่โผล่กลางจอซึ่งอ่านว่าเป็นส่วนหนึ่งของหน้า
+ */
+/*
+ * ตัวเลขที่ไหลทีละหลัก (components/Odometer.tsx)
+ *
+ * แต่ละหลักเป็นหน้าต่างสูงหนึ่งบรรทัดที่มีแถบ 0-9 เลื่อนอยู่ข้างใน
+ * `1em` พอดีกับความสูงบรรทัดของ mono ที่ใช้ในการ์ด — ถ้าใช้ px จะเพี้ยน
+ * เวลาผู้ใช้ขยายขนาดตัวอักษรของระบบ
+ */
+.odo { display: inline-flex; vertical-align: baseline; }
+.odo__win { display: inline-block; height: 1em; overflow: hidden; line-height: 1; }
+.odo__col {
+  display: flex; flex-direction: column;
+  transition: transform var(--t-slow) var(--ease);
+}
+.odo__col > span { height: 1em; line-height: 1; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .odo__col { transition: none; } }
+
+.undo { animation: undo-in var(--t-base) var(--ease) both; }
+@keyframes undo-in {
+  from { opacity: 0; transform: translate(-50%, 130%) }
+  to   { opacity: 1; transform: translate(-50%, 0) }
+}
+@media (prefers-reduced-motion: reduce) { .undo { animation: none; } }
+
 .undo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .undo button {
   background: none; border: none; color: var(--brand); font: inherit;
@@ -721,6 +755,33 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
   text-decoration: none; color: inherit;
 }
 .acard::before { content: ""; position: absolute; inset: 0; opacity: 0.11; }
+
+/*
+ * gradient ขยับเบา ๆ ตามการเลื่อน — scroll-driven animation ที่ **ไม่ใช้ JS เลย**
+ * และไม่กิน main thread เพราะเบราว์เซอร์รันบนเธรดของ compositor
+ *
+ * ⚠️ ขยับแค่ 6% และเป็น `transform` ล้วน — ไม่แตะ `background-position`
+ *    ซึ่งจะบังคับให้วาด gradient ใหม่ทุกเฟรม · จุดประสงค์คือให้การ์ดรู้สึกมีมิติ
+ *    ตอนเลื่อนผ่าน ไม่ใช่ให้สังเกตเห็นว่ามันขยับ
+ *
+ * ⚠️ `scale` เผื่อไว้เพราะการเลื่อนขึ้นลงจะเปิดขอบว่างถ้าไม่ขยายไว้ก่อน
+ *
+ * เบราว์เซอร์ที่ไม่รองรับ `animation-timeline` จะข้ามทั้งบล็อกไปเอง
+ * การ์ดยังแสดง gradient นิ่ง ๆ ตามปกติ
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .acard::before {
+      animation: acard-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    @keyframes acard-drift {
+      from { transform: translateY(-3%) scale(1.06) }
+      to   { transform: translateY(3%) scale(1.06) }
+    }
+  }
+}
 .acard--class::before { background: var(--g-class); }
 .acard--comp::before  { background: var(--g-comp); }
 .acard--pers::before  { background: var(--g-pers); }

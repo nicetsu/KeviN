@@ -1,6 +1,7 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
+import Odometer from './Odometer'
 import Link from 'next/link'
 
 export type HeroEntry = {
@@ -76,7 +77,7 @@ export default function Hero({ info }: { info: HeroInfo }) {
   const NEXT = isEvent ? 'ถัดไป' : 'คาบถัดไป'
   const NOW = isEvent ? 'กำลังเกิดขึ้น' : 'กำลังเรียนอยู่'
 
-  let kicker = NEXT
+  let kicker: React.ReactNode = NEXT
   let live = false
 
   if (main.dayLabel) {
@@ -86,9 +87,13 @@ export default function Hero({ info }: { info: HeroInfo }) {
     if (now >= start && now < end) {
       live = true
       // งานข้ามวันที่เหลืออีกเป็นสิบชั่วโมง นับเป็นนาทีแล้วอ่านไม่รู้เรื่อง
-      kicker = main.untilText ? `${NOW} · ${main.untilText}` : `${NOW} · เหลืออีก ${gap(end - now)}`
+      kicker = main.untilText ? (
+        `${NOW} · ${main.untilText}`
+      ) : (
+        <>{NOW} · เหลืออีก <Gap ms={end - now} /></>
+      )
     } else if (now < start) {
-      kicker = `${NEXT} · อีก ${gap(start - now)}`
+      kicker = <>{NEXT} · อีก <Gap ms={start - now} /></>
     }
   }
 
@@ -151,8 +156,19 @@ function AfterLine({
 }
 
 /** "1 ชม. 53 นาที" · "40 นาที" */
-function gap(ms: number) {
+/**
+ * ช่วงเวลาที่เหลือ · ตัวเลขไหลทีละหลักแทนที่จะกระพริบ
+ *
+ * ตัวเลขนี้เปลี่ยนทุกนาทีขณะที่ผู้ใช้จ้องการ์ดอยู่ — เป็นตัวเลขเดียวในแอป
+ * ที่เปลี่ยนเองต่อหน้า จึงคุ้มที่จะให้มันเดินแทนที่จะกระตุก
+ */
+function Gap({ ms }: { ms: number }) {
   const mins = Math.round(ms / 60000)
-  if (mins < 60) return `${mins} นาที`
-  return `${Math.floor(mins / 60)} ชม. ${mins % 60} นาที`
+  if (mins < 60) return <><Odometer value={mins} label={`${mins} นาที`} /> นาที</>
+  return (
+    <>
+      <Odometer value={Math.floor(mins / 60)} label={`${Math.floor(mins / 60)} ชั่วโมง`} /> ชม.{' '}
+      <Odometer value={mins % 60} label={`${mins % 60} นาที`} /> นาที
+    </>
+  )
 }
