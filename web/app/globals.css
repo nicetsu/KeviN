@@ -1252,7 +1252,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
    *
    *    ค่านี้ผูกกับ `bottom` + ความสูงของ `.composer` — แก้ที่เดียวแล้วอีกที่จะพัง
    */
-  padding-bottom: 5rem;
+  padding-bottom: 4rem;
 }
 
 /*
@@ -1491,10 +1491,14 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   position: fixed; z-index: 19;
   left: 50%; transform: translateX(-50%);
   width: min(640px, 100% - 2rem);
-  bottom: calc(4.9rem + env(safe-area-inset-bottom));
+  bottom: calc(5.5rem + env(safe-area-inset-bottom));
   display: flex; align-items: center; gap: 0.5rem;
-  /* ระยะบนล่างของแถบพื้นรอบช่องพิมพ์ — หนาขึ้นให้ช่องพิมพ์ไม่ติดขอบ (1 ก.ย. 2026) */
-  padding: 1.15rem 0 0.95rem;
+  /*
+   * ⚠️ **ไม่มี padding แล้ว** — ค่าเดิม (1.15rem บน 0.95rem ล่าง) มีไว้ให้แถบพื้น
+   *    ที่เคยรองอยู่ข้างหลังหนาพอ · พอเอาแถบออกไป padding ก็เหลือเป็นที่ว่างเปล่า
+   *    ที่ดันช่องพิมพ์ให้ลอยสูงกว่าที่ควร โดยไม่มีอะไรมองเห็น (เจ้าของทัก 1 ก.ย. 2026)
+   */
+  padding: 0;
 }
 /*
  * ⚠️ **ช่องพิมพ์ไม่มีพื้นรองแล้ว ตั้งใจ** (เจ้าของเคาะ 1 ก.ย. 2026)
@@ -1525,9 +1529,8 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
    */
   .talk { height: calc(100dvh - 2.5rem); }
   .wrap:has(.talk) { padding-bottom: 1.25rem; }
-  /* เดสก์ท็อปไม่มีแถบล่าง ช่องพิมพ์จึงลอยต่ำกว่า — บังเอิญเผื่อเท่ามือถือพอดี
-     แต่คนละที่มาของค่า จึงเขียนแยกไว้ ไม่ใช่ค่าที่ผูกกัน */
-  .talk { padding-bottom: 5rem; }
+  /* เดสก์ท็อปไม่มีแถบล่าง ช่องพิมพ์จึงลอยต่ำกว่า ระยะเผื่อจึงคนละค่ากับมือถือ */
+  .talk { padding-bottom: 3.6rem; }
 }
 .composer__field {
   border-color: rgba(165, 148, 255, 0.26); background: #161228;
@@ -1775,27 +1778,25 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
    * ⚠️ `top` ต้องเป็น **ลบของ `padding-top` บวก safe-area** เสมอ
    *    ถ้าสองค่านี้ไม่คู่กัน แถบจะกระตุกตอนเริ่มลอยค้าง — แก้ padding แล้วต้องแก้ที่นี่ด้วย
    */
-  position: sticky; top: calc(-0.3rem + env(safe-area-inset-top)); z-index: 6;
+  position: sticky; top: env(safe-area-inset-top); z-index: 6;
   /*
    * ⚠️ ต้องตั้ง `gap` เอง — หัวข้อกับแท็บเคยได้ระยะจาก `gap` ของ `.talk`
    *    แต่พอย้ายมาห่อรวมกันในนี้ ทั้งคู่ก็หลุดจาก gap นั้น ระยะกลายเป็น 0
    *    แล้วดูอัดกัน โดยไม่มีอะไรฟ้อง (เจ้าของทัก 1 ก.ย. 2026)
    */
   /*
-   * ⚠️ **แถบหัวชิดขอบบนโดยตั้งใจ** (เจ้าของขอ 1 ก.ย. 2026) — `padding-top` จึงบางมาก
-   *    และหน้านี้ยังตัด `padding-top` ของ `.wrap` ลงด้วย (ดูกฎถัดไป)
-   *    ระยะที่ยังเหลือคือ `gap` กับ `padding-bottom` ซึ่งกันหัวข้อไม่ให้ติดแท็บ
+   * ⚠️ `padding-top: 0` โดยตั้งใจ — หัวข้อ `KeviN` ต้องอยู่ **ระดับเดียวกับหัวข้อหน้าอื่น**
+   *    (เจ้าของขอ 1 ก.ย. 2026) ระยะบนจึงมาจาก `padding` ของ `.wrap` ล้วน ๆ
+   *    ซึ่งเป็นค่าเดียวกับทุกหน้า สลับหน้าแล้วหัวข้อจะไม่ขยับ
+   *    **อย่าเติม `padding-top` ที่นี่** จะทำให้หน้านี้ต่ำกว่าหน้าอื่นทันที
+   *
+   *    ระยะ**ใต้**แท็บมาจาก `gap` ของ `.talk` (0.9rem) อยู่แล้ว — ตั้ง `padding-bottom`
+   *    ที่นี่จะบวกซ้ำเป็นสองเท่า `gap` ในนี้จึงตั้งให้เท่ากับของ `.talk`
+   *    เพื่อให้แท็บลอยอยู่กลางช่องของตัวเอง บนล่างเท่ากัน
    */
-  display: flex; flex-direction: column; gap: 1rem;
-  padding-top: 0.3rem; padding-bottom: 0.75rem;
+  display: flex; flex-direction: column; gap: 0.9rem;
+  padding-top: 0; padding-bottom: 0;
 }
-
-/*
- * ⚠️ **เฉพาะหน้าคุย** — `.wrap` ให้ทุกหน้าเว้นบน 1.25rem แต่หน้านี้เจ้าของขอให้
- *    หัวข้อชิดขอบบนจอ (1 ก.ย. 2026) จึงตัดเหลือแค่ระยะพ้น safe-area
- *    **อย่าไปแก้ `.wrap` ตัวหลัก** ทุกหน้าที่เหลือยังต้องเว้นเท่าเดิม
- */
-.wrap:has(.talk) { padding-top: calc(0.5rem + env(safe-area-inset-top)); }
 /*
  * ไล่เฉด**มีสี** ไม่ใช่แค่จางไปโปร่ง (เจ้าของเคาะ 1 ก.ย. 2026)
  * ม่วงจาง ๆ ที่ขอบบนต่อเนื่องกับแสงพื้นของหน้า แล้วไล่ลงไปหาสีพื้นก่อนจบที่โปร่ง
