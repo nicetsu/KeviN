@@ -1244,6 +1244,15 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   display: flex; flex-direction: column; gap: 0.9rem;
   height: calc(100vh - 6.25rem);
   height: calc(100dvh - 6.25rem);
+  /*
+   * ⚠️ ระยะเผื่อช่องพิมพ์ที่ลอยอยู่ต้องอยู่ **ที่นี่ ไม่ใช่ที่ `.thread`**
+   *    ถ้าไปใส่เป็น `padding-bottom` ของ `.thread` ตัวมันจะสูงลงไปถึงใต้แถบช่องพิมพ์
+   *    **แถบเลื่อนก็ยาวตามลงไปแล้วถูกแถบทึบบัง** ดูเหมือนแถบเลื่อนจมหาย
+   *    (เจ้าของเจอบนมือถือ 1 ก.ย. 2026)
+   *
+   *    ค่านี้ผูกกับ `bottom` + ความสูงของ `.composer` — แก้ที่เดียวแล้วอีกที่จะพัง
+   */
+  padding-bottom: 5rem;
 }
 
 /*
@@ -1286,12 +1295,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .thread {
   display: flex; flex-direction: column; gap: 0.55rem;
   flex: 1; min-height: 0; overflow-y: auto;
-  /*
-   * ⚠️ เผื่อที่ให้ช่องพิมพ์ที่ลอยอยู่ — ต้อง **ไม่น้อยกว่าความสูงช่องพิมพ์ (~4rem)
-   *    บวกระยะที่มันลอยพ้นขอบล่างของบทสนทนา** ไม่งั้นฟองสุดท้ายจะมุดใต้ช่องพิมพ์
-   *    ค่านี้ผูกกับ `bottom` ของ `.composer` — แก้ที่เดียวแล้วอีกที่จะพัง
-   */
-  padding-bottom: 4.6rem;
+
 }
 
 .msg {
@@ -1494,8 +1498,9 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
    */
   .talk { height: calc(100dvh - 2.5rem); }
   .wrap:has(.talk) { padding-bottom: 1.25rem; }
-  /* เดสก์ท็อปช่องพิมพ์ลอยต่ำกว่า (1.2rem จากขอบจอ) จึงต้องเผื่อมากกว่ามือถือ */
-  .thread { padding-bottom: 5.6rem; }
+  /* เดสก์ท็อปไม่มีแถบล่าง ช่องพิมพ์จึงลอยต่ำกว่า — บังเอิญเผื่อเท่ามือถือพอดี
+     แต่คนละที่มาของค่า จึงเขียนแยกไว้ ไม่ใช่ค่าที่ผูกกัน */
+  .talk { padding-bottom: 5rem; }
 }
 .composer__field {
   border-color: rgba(165, 148, 255, 0.26); background: #161228;
