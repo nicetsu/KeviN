@@ -1439,16 +1439,21 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  * ปุ่มเพิ่มเร็วไม่ต้องกังวล — `QuickAdd.tsx` ซ่อนตัวเองในหน้า `/kevin` อยู่แล้ว
  * ด้วยเหตุผลเดียวกันคือไม่ให้มีม่วงสองก้อนแย่งกันเป็นปุ่มหลัก
  */
+/*
+ * ⚠️ z-index **ต่ำกว่าแถบล่าง (20)** โดยตั้งใจ — ช่องพิมพ์อยู่เหนือแถบอยู่แล้ว
+ *    ในเชิงตำแหน่ง ไม่ต้องพึ่ง z-index · ถ้าตั้งสูงกว่า พื้นไล่เฉดจะวาดทับแถบล่าง
+ */
 .composer {
-  position: fixed; z-index: 22;
+  position: fixed; z-index: 19;
   left: 50%; transform: translateX(-50%);
   width: min(640px, 100% - 2rem);
   bottom: calc(4.9rem + env(safe-area-inset-bottom));
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.7rem 0 0.5rem;
 }
+/* ⚠️ ยื่นลงล่างแค่ 0.3rem — มากกว่านี้จะล้ำเข้าไปในแถบล่าง (สูง ~4.7rem) */
 .composer::before {
-  content: ""; position: absolute; inset: -0.6rem -1rem -1.2rem;
+  content: ""; position: absolute; inset: -0.9rem -1rem -0.3rem;
   background: linear-gradient(to top, var(--bg) 62%, transparent);
   pointer-events: none; z-index: -1;
 }
