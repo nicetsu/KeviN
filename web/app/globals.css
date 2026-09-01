@@ -1232,10 +1232,18 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  *    พอคีย์บอร์ดเด้งขึ้นมา ช่องพิมพ์จะถูกดันไปอยู่ใต้คีย์บอร์ด
  *    (`vh` ไว้เป็นค่าสำรองให้เบราว์เซอร์ที่ยังไม่รู้จัก `dvh`)
  */
+/*
+ * ⚠️ **`height` ไม่ใช่ `min-height`** — `min-height` ไม่จำกัดความสูงสูงสุด
+ *    บทสนทนายาวจะยืดกล่องนี้ออกไปเรื่อย ๆ แล้ว `.thread` ที่ `flex: 1` ก็ยืดตาม
+ *    จนไม่มีอะไรให้เลื่อนข้างใน — กลายเป็นทั้งหน้าเลื่อนแทน ข้อความจึงมุดใต้
+ *    ช่องพิมพ์ที่ลอยอยู่ (เจอบนเดสก์ท็อป 1 ก.ย. 2026)
+ *
+ *    6.25rem = padding บนล่างของ `.wrap` บนมือถือ (1.25 + 5)
+ */
 .talk {
   display: flex; flex-direction: column; gap: 0.9rem;
-  min-height: calc(100vh - 6.25rem);
-  min-height: calc(100dvh - 6.25rem);
+  height: calc(100vh - 6.25rem);
+  height: calc(100dvh - 6.25rem);
 }
 
 /*
@@ -1278,8 +1286,12 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .thread {
   display: flex; flex-direction: column; gap: 0.55rem;
   flex: 1; min-height: 0; overflow-y: auto;
-  /* ⚠️ เผื่อที่ให้ช่องพิมพ์ที่ลอยอยู่ — ผูกกับ `bottom` ของ `.composer` */
-  padding-bottom: 3.6rem;
+  /*
+   * ⚠️ เผื่อที่ให้ช่องพิมพ์ที่ลอยอยู่ — ต้อง **ไม่น้อยกว่าความสูงช่องพิมพ์ (~4rem)
+   *    บวกระยะที่มันลอยพ้นขอบล่างของบทสนทนา** ไม่งั้นฟองสุดท้ายจะมุดใต้ช่องพิมพ์
+   *    ค่านี้ผูกกับ `bottom` ของ `.composer` — แก้ที่เดียวแล้วอีกที่จะพัง
+   */
+  padding-bottom: 4.6rem;
 }
 
 .msg {
@@ -1473,6 +1485,15 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
     left: calc(200px + 1rem); transform: none; bottom: 1.2rem;
     width: min(608px, 100% - 200px - 2rem);
   }
+  /*
+   * ⚠️ เดสก์ท็อปไม่มีแถบล่าง — `padding-bottom: 5rem` ของ `.wrap` ที่เผื่อไว้ให้
+   *    แถบบนมือถือจึงกลายเป็นช่องว่างเปล่าท้ายหน้า · หน้านี้คุมความสูงเองด้วย
+   *    `100dvh` อยู่แล้ว จึงตัดออกได้
+   */
+  .talk { height: calc(100dvh - 2.5rem); }
+  .wrap:has(.talk) { padding-bottom: 1.25rem; }
+  /* เดสก์ท็อปช่องพิมพ์ลอยต่ำกว่า (1.2rem จากขอบจอ) จึงต้องเผื่อมากกว่ามือถือ */
+  .thread { padding-bottom: 5.6rem; }
 }
 .composer__field {
   border-color: rgba(165, 148, 255, 0.26); background: #161228;
@@ -1702,6 +1723,29 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .lang__label { font-size: var(--s--1); color: var(--muted); }
 .lang__note { margin: 0; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); line-height: 1.55; }
 .lang .seg button:disabled { opacity: 0.45; cursor: default; }
+
+/*
+ * หัวข้อกับแท็บลอยค้างบนสุดตอนเลื่อน (เจ้าของเคาะ 1 ก.ย. 2026)
+ *
+ * ⚠️ `sticky` ไม่ใช่ `fixed` — มันยังอยู่ในสายเนื้อหา จึงไม่ต้องเผื่อที่ให้เหมือน
+ *    ช่องพิมพ์ที่ลอยอยู่ · และเลื่อนตามคอลัมน์ได้เองบนเดสก์ท็อป
+ *
+ * ⚠️ **ต้องมีพื้นทึบไล่ลงล่าง** ไม่งั้นข้อความที่เลื่อนผ่านข้างหลังจะอ่านทับหัวข้อ
+ *    ระยะไล่ยาวกว่าของช่องพิมพ์เพราะข้างบนมีที่ว่างให้ไล่มากกว่า
+ *
+ * ⚠️ `top` ต้องเผื่อ `env(safe-area-inset-top)` เพราะหน้าใช้ `viewport-fit: cover`
+ *    ไม่งั้นบนมือถือหัวข้อจะไปค้างอยู่ใต้นาฬิกาของระบบ
+ */
+.talk__top {
+  position: sticky; top: calc(-0.4rem + env(safe-area-inset-top)); z-index: 6;
+  padding-top: 0.4rem;
+}
+.talk__top::before {
+  content: ""; position: absolute; inset: -1.3rem -1rem 0;
+  background: linear-gradient(to bottom, var(--bg) 68%, transparent);
+  pointer-events: none; z-index: -1;
+}
+.talk__top > * { position: relative; }
 
 /* ---- หัวหน้า KeviN + ปุ่มฟันเฟือง ---- */
 .talk__head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
