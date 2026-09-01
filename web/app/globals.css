@@ -371,11 +371,6 @@ html, body { margin: 0; padding: 0; }
 @keyframes pulse { 0%,100% { opacity: 0.55; } 50% { opacity: 0.28; } }
 @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
 
-/* ฟองโครงร่างของห้องคุย · ความมนต้องเท่า `.msg` ของจริง ไม่งั้นจะเห็นมุมกระโดด */
-.skel-bubble { border-radius: 18px; }
-.skel-bubble--me { align-self: flex-end; border-bottom-right-radius: 6px; }
-.skel-bubble--ai { align-self: flex-start; border-bottom-left-radius: 6px; }
-
 /* ---- แถบแจ้งข้อผิดพลาด ---- */
 .alert {
   border: 1px solid rgba(224,137,126,0.4); background: var(--due-soft);
