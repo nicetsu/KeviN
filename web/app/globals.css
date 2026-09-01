@@ -1459,8 +1459,20 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 .composer > * { position: relative; }
 @media (min-width: 768px) {
-  /* แถบข้าง 200px กินพื้นที่ซ้าย — ช่องพิมพ์ต้องเลื่อนตามไม่งั้นจะไม่อยู่กลางเนื้อหา */
-  .composer { left: calc(200px + 50%); bottom: 1.2rem; width: min(640px, 100% - 200px - 2rem); }
+  /*
+   * ⚠️ **เดสก์ท็อปเนื้อหาไม่ได้อยู่กลางจอ** — `.wrap` มี `margin-left: 200px`
+   *    แล้วชิดซ้ายหลังแถบข้าง ไม่ใช่กึ่งกลาง viewport
+   *
+   *    เคยใช้ `left: calc(200px + 50%)` กับ `translateX(-50%)` ซึ่งวางไว้กลาง*จอ*
+   *    ช่องพิมพ์เลยไปอยู่ขวาล่าง ห่างจากคอลัมน์ข้อความ (เจอบนเดสก์ท็อป 1 ก.ย. 2026)
+   *
+   *    ตอนนี้อ้างอิงขอบซ้ายของ `.wrap` ตรง ๆ — 200px ของแถบข้าง บวก padding 1rem
+   *    และกว้างเท่าเนื้อหาจริงคือ 640 ลบ padding สองข้าง
+   */
+  .composer {
+    left: calc(200px + 1rem); transform: none; bottom: 1.2rem;
+    width: min(608px, 100% - 200px - 2rem);
+  }
 }
 .composer__field {
   border-color: rgba(165, 148, 255, 0.26); background: #161228;
