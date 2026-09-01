@@ -542,6 +542,18 @@ html, body { margin: 0; padding: 0; }
  *       ซ้ำเมื่อไหร่เบราว์เซอร์ยกเลิก transition ทั้งชุดเงียบ ๆ
  */
 .nav { view-transition-name: nav; }
+/*
+ * ⚠️ **ต้องตั้ง `z-index` ให้ group ของแถบเอง** (เจ้าของทักซ้ำ 2 ก.ย. 2026)
+ *
+ *    `z-index: 20` ของ `.nav` ใช้ได้แค่ในสภาวะปกติ · ระหว่าง view transition
+ *    แถบถูกยกออกไปวาดเป็น pseudo layer และ **ลำดับของ layer เหล่านั้นไม่ได้
+ *    สืบทอด z-index เดิมมาเลย** ของที่อยู่ใน snapshot ของ root จึงวาดทับแถบได้
+ *    เห็นเป็นข้อความที่มุดอยู่ใต้แถบโผล่ทะลุออกมาระหว่างเปลี่ยนหน้า
+ *
+ *    `::view-transition-group` เป็น pseudo ที่รับ `z-index` ได้ตรง ๆ — ตั้งให้สูง
+ *    กว่า root ไว้ แถบจึงอยู่บนสุดตลอดทั้งช่วง transition เหมือนตอนปกติ
+ */
+::view-transition-group(nav) { z-index: 100; }
 ::view-transition-old(nav),
 ::view-transition-new(nav) { animation: none; mix-blend-mode: normal; }
 
