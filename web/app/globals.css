@@ -1295,7 +1295,34 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .thread {
   display: flex; flex-direction: column; gap: 0.55rem;
   flex: 1; min-height: 0; overflow-y: auto;
-
+  /*
+   * ข้อความค่อย ๆ จางหายที่ขอบบนและล่างแทนการโดนตัดชัด (เจ้าของขอ 1 ก.ย. 2026)
+   *
+   * ⚠️ **ต้องเป็น mask ไม่ใช่ไล่เฉดสีพื้นทับ** — หน้านี้มีแสงพื้นเรืองอยู่ข้างหลัง
+   *    การระบายสี `--bg` ทับจะกลบแสงตรงนั้นเป็นแถบด้าน ๆ ที่มองออก
+   *    mask ตัดค่าความทึบของตัวข้อความจริง จึงเห็นแสงพื้นทะลุมาแทน
+   *
+   * ⚠️ mask ทำให้กล่องนี้กลายเป็น **containing block ของลูกที่เป็น `position: fixed`**
+   *    (กติกาเดียวกับ `filter` — เคยพังมาแล้วกับ `animation-fill-mode: both`)
+   *    วันไหนจะเอาอะไรที่ `fixed` มาไว้ใน `.thread` ต้องรู้ตัวว่ามันจะไม่ fixed จริง
+   *
+   * ⚠️ ต้องมี `-webkit-` คู่เสมอ — Safari บน iOS ยังไม่รับตัวไม่มี prefix
+   *    ซึ่งเป็นเบราว์เซอร์หลักของเจ้าของบนมือถือ
+   */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 1.8rem,
+    #000 calc(100% - 2.5rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 1.8rem,
+    #000 calc(100% - 2.5rem),
+    transparent 100%
+  );
 }
 
 .msg {
@@ -1469,12 +1496,12 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   /* ระยะบนล่างของแถบพื้นรอบช่องพิมพ์ — หนาขึ้นให้ช่องพิมพ์ไม่ติดขอบ (1 ก.ย. 2026) */
   padding: 1.15rem 0 0.95rem;
 }
-/* ⚠️ ยื่นลงล่างแค่ 0.3rem — มากกว่านี้จะล้ำเข้าไปในแถบล่าง (สูง ~4.7rem) */
-.composer::before {
-  content: ""; position: absolute; inset: -0.5rem -1rem -0.3rem;
-  background: var(--bg);
-  pointer-events: none; z-index: -1;
-}
+/*
+ * ⚠️ **ช่องพิมพ์ไม่มีพื้นรองแล้ว ตั้งใจ** (เจ้าของเคาะ 1 ก.ย. 2026)
+ *    เคยมี `::before` ระบายสี `--bg` เป็นแถบทึบไว้กันข้อความที่เลื่อนผ่านข้างหลัง
+ *    ตอนนี้ `.thread` จางตัวเองด้วย mask แล้ว แถบนั้นจึงซ้ำซ้อน และมันกลบแสงพื้น
+ *    **ถ้าเห็นข้อความทะลุมาหลังช่องพิมพ์ ให้ขยับระยะจางของ mask ไม่ใช่เอาแถบกลับมา**
+ */
 .composer > * { position: relative; }
 @media (min-width: 768px) {
   /*
@@ -1745,7 +1772,13 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  */
 .talk__top {
   position: sticky; top: calc(-0.4rem + env(safe-area-inset-top)); z-index: 6;
-  padding-top: 0.4rem;
+  /*
+   * ⚠️ ต้องตั้ง `gap` เอง — หัวข้อกับแท็บเคยได้ระยะจาก `gap` ของ `.talk`
+   *    แต่พอย้ายมาห่อรวมกันในนี้ ทั้งคู่ก็หลุดจาก gap นั้น ระยะกลายเป็น 0
+   *    แล้วดูอัดกัน โดยไม่มีอะไรฟ้อง (เจ้าของทัก 1 ก.ย. 2026)
+   */
+  display: flex; flex-direction: column; gap: 0.85rem;
+  padding-top: 0.55rem; padding-bottom: 0.35rem;
 }
 /*
  * ไล่เฉด**มีสี** ไม่ใช่แค่จางไปโปร่ง (เจ้าของเคาะ 1 ก.ย. 2026)
@@ -1754,16 +1787,12 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  * ⚠️ จุดสุดท้ายต้องเป็น `transparent` เสมอ ไม่ใช่สีทึบ — ไม่งั้นจะเห็นเป็นเส้นตัด
  *    ตรงที่พื้นจบ ซึ่งเป็นสิ่งเดียวที่ทำให้รู้ว่ามันเป็นแผ่นทับอยู่
  */
-.talk__top::before {
-  content: ""; position: absolute; inset: -1.3rem -1rem 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(165, 148, 255, 0.14) 0%,
-    var(--bg) 62%,
-    transparent 100%
-  );
-  pointer-events: none; z-index: -1;
-}
+/*
+ * ⚠️ **แถบหัวไม่มีพื้นรองแล้ว ตั้งใจ** (เจ้าของเคาะ 1 ก.ย. 2026)
+ *    เคยเป็นไล่เฉดม่วงจาง ๆ ไว้กันข้อความที่เลื่อนลอดใต้หัวข้อ
+ *    ตอนนี้ mask ของ `.thread` จางข้อความให้ก่อนถึงหัวแล้ว
+ *    **ข้อความทะลุมาเมื่อไหร่ ให้ขยับระยะจางด้านบนของ mask ไม่ใช่เอาไล่เฉดกลับมา**
+ */
 .talk__top > * { position: relative; }
 
 /* ---- หัวหน้า KeviN + ปุ่มฟันเฟือง ---- */
