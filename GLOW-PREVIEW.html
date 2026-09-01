@@ -1,0 +1,304 @@
+<title>แสงพื้นทุกหน้า ก่อนและหลัง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ค่าสีคัดจาก web/app/globals.css ของจริง · จอจำลอง 268px = 71% ของ 375px
+   แสงในจอ "หลัง" คือค่าเดียวกับที่แก้ไว้บนเครื่องแล้วเป๊ะ ๆ */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --sched:#79C2D0; --event:#D5BB6D; --due:#E0897E; --task:#74C6A4;
+  --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+  --g-class:linear-gradient(135deg,#79C2D0 0%,#8878F0 100%);
+  --g-comp:linear-gradient(135deg,#E0897E 0%,#A594FF 100%);
+  --g-pers:linear-gradient(135deg,#74C6A4 0%,#79C2D0 100%);
+  --g-gen:linear-gradient(135deg,#A594FF 0%,#D98BB4 100%);
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1240px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:46rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.tools{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:2rem 0 1.3rem;padding:.7rem 0;background:linear-gradient(var(--bg) 72%,transparent)}
+.btn{font:inherit;font-size:var(--s--1);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:.42rem .95rem;cursor:pointer}
+.btn:hover{color:var(--ink);border-color:var(--capline)}
+.btn[aria-pressed="true"]{color:var(--brand);border-color:var(--brand);background:var(--brand-soft)}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tools__note{font-size:var(--s--2);color:var(--faint);margin-left:auto}
+
+.pair{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.6rem}
+.pair__h{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+.pair__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint)}
+.pair__t{font-weight:600;font-size:1.02rem}
+.pair__w{font-size:var(--s--1);color:var(--muted);margin:0;flex:1 1 100%}
+.pair__w b{color:var(--ink);font-weight:500}
+.pair__s{display:flex;gap:.85rem;flex-wrap:wrap}
+.shot{display:flex;flex-direction:column;gap:.35rem}
+.shot__cap{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);text-align:center}
+body.only-after .shot--before{display:none}
+
+/* =====================================================================
+   จอจำลอง
+   ===================================================================== */
+.phone{
+  width:268px;height:540px;flex:none;position:relative;overflow:hidden;
+  border:1px solid var(--line);border-radius:26px;background:var(--bg);
+  display:flex;flex-direction:column;font-size:11px;line-height:1.5;
+}
+.phone *{font-size:inherit}
+.glow{position:absolute;inset:0;pointer-events:none;z-index:0}
+.on .glow{
+  background:
+    radial-gradient(58% 22% at 22% 2%,rgba(165,148,255,var(--a1,.26)),transparent 70%),
+    radial-gradient(52% 20% at 84% 6%,rgba(121,194,208,var(--a2,.20)),transparent 72%),
+    radial-gradient(96% 34% at 50% 103%,rgba(136,120,240,var(--a3,.40)),transparent 74%);
+}
+body.soft .on .glow{--a1:.15;--a2:.11;--a3:.22}
+.p-body{flex:1;display:flex;flex-direction:column;min-height:0;padding:12px 12px 0;gap:9px;position:relative;z-index:1}
+.p-scroll{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:7px}
+.p-date{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.p-sub{font-family:var(--f-mono);font-size:9px;color:var(--faint);margin-top:2px}
+
+.hero{border:1px solid var(--line);border-radius:14px;padding:10px 11px;background:var(--surface)}
+.hero__kick{font-family:var(--f-mono);font-size:9px;letter-spacing:.06em;color:var(--brand)}
+.hero__name{font-size:14px;font-weight:600;line-height:1.2;letter-spacing:-.02em;margin:5px 0 4px}
+.hero__time{font-family:var(--f-mono);font-size:11px}
+.hero__sub{font-size:10px;color:var(--muted);margin-top:1px}
+.hero__after{margin-top:8px;padding-top:7px;border-top:1px solid var(--line-soft);font-size:9.5px;color:var(--muted)}
+.hero__after b{color:var(--ink);font-weight:500}
+
+.sec{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:9px;color:var(--faint);letter-spacing:.06em;padding-top:3px}
+.row{display:flex;gap:8px;align-items:flex-start;padding:5px 0}
+.row+.row{border-top:1px solid var(--line-soft)}
+.stripe{width:2px;align-self:stretch;border-radius:2px;flex:none;min-height:22px}
+.row__t{font-size:11px;line-height:1.35}
+.row__m{font-family:var(--f-mono);font-size:9px;color:var(--faint);margin-top:2px}
+.cb{width:13px;height:13px;border:1.4px solid var(--capline);border-radius:4px;flex:none;margin-top:2px}
+
+.p-nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:5px 0 7px;position:relative;z-index:1}
+.p-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:8px}
+.p-tab i{width:13px;height:13px;border:1.4px solid currentColor;border-radius:3px;display:block;font-style:normal}
+.p-tab--on{color:var(--brand)}
+.p-tab--talk{flex:1.6}
+.p-kevin{width:100%;min-height:30px;border-radius:var(--r-pill);background:var(--raised);color:var(--faint);display:grid;place-items:center;font-size:8.5px;font-weight:700;letter-spacing:.06em}
+.fab{position:absolute;right:11px;bottom:66px;width:34px;height:34px;border-radius:50%;background:var(--grad);color:var(--on-brand);display:grid;place-items:center;font-size:16px;font-weight:700;z-index:1;box-shadow:0 0 18px -4px rgba(165,148,255,.8)}
+
+/* หัวหน้าที่มีปุ่มสลับ */
+.chead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.seg{display:inline-flex;padding:2px;background:#161228;border:1px solid rgba(165,148,255,.2);border-radius:var(--r-pill)}
+.seg span{font-size:9px;color:var(--muted);padding:3px 9px;border-radius:var(--r-pill)}
+.seg span[data-on]{background:var(--grad);color:var(--on-brand);font-weight:600;box-shadow:0 0 12px -3px rgba(165,148,255,.9)}
+.cnav{display:flex;gap:4px}
+.cnav span{border:1px solid var(--line);border-radius:var(--r-pill);min-width:20px;height:20px;padding:0 7px;display:grid;place-items:center;font-size:9px;color:var(--muted)}
+
+/* ปฏิทินสัปดาห์ · วันเป็นแกนตั้ง เวลาเป็นแกนนอน (ห้ามกลับ) */
+.wk{display:flex;flex-direction:column;gap:3px;flex:1;min-height:0}
+.wk__scale{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:7.5px;color:var(--faint);padding-left:20px}
+.wk__r{display:flex;align-items:center;gap:4px;height:26px}
+.wk__d{width:16px;flex:none;font-family:var(--f-mono);font-size:8px;color:var(--faint)}
+.wk__t{flex:1;position:relative;height:100%;background:var(--surface);border-radius:5px;overflow:hidden}
+.wk__b{position:absolute;top:3px;bottom:3px;border-radius:3px}
+.wk__now{position:absolute;top:0;bottom:0;width:1.5px;background:var(--due)}
+
+/* คลัง */
+.areas{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.acard{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:9px;min-height:62px;display:flex;flex-direction:column;justify-content:space-between}
+.acard::before{content:"";position:absolute;inset:0;opacity:.11}
+.acard--class::before{background:var(--g-class)}
+.acard--comp::before{background:var(--g-comp)}
+.acard--pers::before{background:var(--g-pers)}
+.acard--gen::before{background:var(--g-gen)}
+.acard b{position:relative;font-size:12px}
+.acard small{position:relative;font-family:var(--f-mono);font-size:8.5px;color:var(--faint)}
+
+/* ตั้งค่า */
+.srow{display:flex;gap:8px;padding:6px 0}
+.srow+.srow{border-top:1px solid var(--line-soft)}
+.srow .stripe{background:var(--brand)}
+
+.after{margin-top:2rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">แสงพื้น · ทุกหน้า</p>
+    <h1>ถ้าเอาแสงห้องคุยไปทุกหน้า</h1>
+    <p>สี่หน้าเทียบกันตรง ๆ — <strong>ซ้ายคือของตอนนี้ ขวาคือใส่แสงแล้ว</strong>
+       ค่าแสงในจอขวาเหมือนที่แก้ไว้บนเครื่องแล้วเป๊ะ ๆ</p>
+    <p>กดปุ่มด้านบนเพื่อลองความแรง หรือซ่อนฝั่ง “ก่อน” ให้ดูเต็มจอทีละแบบ</p>
+  </div>
+
+  <div class="tools">
+    <button class="btn" id="only" aria-pressed="false">ดูเฉพาะแบบใส่แสง</button>
+    <button class="btn" id="soft" aria-pressed="false">ลดแสงลงครึ่งหนึ่ง</button>
+    <span class="tools__note">จอ 268px = 71% ของขนาดจริง</span>
+  </div>
+
+  <div id="pairs"></div>
+
+  <div class="after">
+    <h2>ที่ผมเห็นจากการลองจริงบนเครื่อง</h2>
+    <p><b>หน้าตั้งค่าได้ประโยชน์มากที่สุด</b> เพราะมีพื้นที่ว่างเยอะที่สุด · <b>หน้าวันนี้</b> แสงล่างทำให้ครึ่งล่างที่มักว่างไม่จบห้วน ๆ</p>
+    <p><b>หน้าคลังต้องดูให้ดี</b> — การ์ด Area มีไล่เฉดของตัวเองอยู่แล้วสี่ใบ แสงพื้นจึงไปซ้อนอีกชั้นตรงครึ่งบน · ถ้ารู้สึกแน่นไป ลองปุ่ม “ลดแสงลงครึ่งหนึ่ง”</p>
+    <p><b>หน้าปฏิทินสัปดาห์เสี่ยงที่สุด</b> เพราะมีบล็อกสีเต็มจออยู่แล้ว แสงพื้นอาจไปแข่งด้วย — นี่คือหน้าที่ผมยังไม่ได้เห็นของจริงตอนลอง เพราะโหลดไม่ทัน</p>
+  </div>
+</div>
+
+<script>
+const nav = (on) => `
+  <div class="p-nav">
+    <span class="p-tab${on === 'today' ? ' p-tab--on' : ''}"><i></i>วันนี้</span>
+    <span class="p-tab${on === 'cal' ? ' p-tab--on' : ''}"><i></i>ปฏิทิน</span>
+    <span class="p-tab p-tab--talk"><span class="p-kevin">KEVIN</span></span>
+    <span class="p-tab${on === 'lib' ? ' p-tab--on' : ''}"><i></i>คลัง</span>
+    <span class="p-tab${on === 'set' ? ' p-tab--on' : ''}"><i></i>ตั้งค่า</span>
+  </div>`
+
+const row = (k, t, m, check) => `
+  <div class="row"><span class="stripe" style="background:var(--${k})"></span>
+    ${check ? '<span class="cb"></span>' : ''}
+    <div><div class="row__t">${t}</div><div class="row__m">${m}</div></div>
+  </div>`
+
+/* ---------- เนื้อของสี่หน้า ---------- */
+const today = () => `
+  <div class="p-body">
+    <div class="p-date">อังคาร 1 ก.ย.</div>
+    <div class="hero">
+      <div class="hero__kick">คาบถัดไป · อีก 41 นาที</div>
+      <div class="hero__name">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div>
+      <div class="hero__time">09:00–12:00</div>
+      <div class="hero__sub">E11-S601 · ปฏิบัติ</div>
+      <div class="hero__after"><b>ถัดไป 13:00</b> · คณิตศาสตร์เต็มหน่วยและพีชคณิตเชิงเส้น</div>
+    </div>
+    <div class="p-scroll">
+      <div class="sec"><span>วันนี้</span><span>2</span></div>
+      ${row('sched','กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว','09:00–12:00 · E11-S601')}
+      ${row('sched','คณิตศาสตร์เต็มหน่วยและพีชคณิตเชิงเส้น','13:00–15:00 · E11-S603')}
+    </div>
+  </div>
+  <span class="fab">+</span>${nav('today')}`
+
+const week = () => {
+  const days = ['จ','อ','พ','พฤ','ศ','ส','อา']
+  const blocks = [
+    [[10,26,'sched'],[45,18,'sched']],
+    [[8,22,'sched'],[52,14,'event']],
+    [[16,30,'sched']],
+    [[10,18,'sched'],[40,26,'sched']],
+    [[22,20,'sched']],
+    [],
+    [[60,16,'event']],
+  ]
+  return `
+  <div class="p-body">
+    <div class="chead">
+      <div><div class="p-date" style="font-size:14px">1–7 ก.ย.</div></div>
+      <div class="seg"><span>เดือน</span><span data-on>สัปดาห์</span></div>
+    </div>
+    <div class="cnav"><span>‹</span><span>วันนี้</span><span>›</span></div>
+    <div class="wk">
+      <div class="wk__scale"><span>08</span><span>12</span><span>16</span><span>20</span></div>
+      ${days.map((d, i) => `
+        <div class="wk__r"><span class="wk__d">${d}</span>
+          <span class="wk__t">
+            ${blocks[i].map(([l, w, k]) => `<span class="wk__b" style="left:${l}%;width:${w}%;background:var(--${k})"></span>`).join('')}
+            ${i === 1 ? '<span class="wk__now" style="left:26%"></span>' : ''}
+          </span>
+        </div>`).join('')}
+    </div>
+  </div>
+  <span class="fab">+</span>${nav('cal')}`
+}
+
+const library = () => `
+  <div class="p-body">
+    <div><div class="p-date">คลัง</div><div class="p-sub">แตะเพื่อเปิด Area</div></div>
+    <div class="areas">
+      <span class="acard acard--class"><b>Class</b><small>8 วิชา</small></span>
+      <span class="acard acard--comp"><b>Competition</b><small>ว่าง</small></span>
+      <span class="acard acard--pers"><b>Personal</b><small>ว่าง</small></span>
+      <span class="acard acard--gen"><b>General</b><small>3 โปรเจกต์</small></span>
+    </div>
+    <div class="p-scroll">
+      <div class="sec"><span>กิจกรรมที่จะถึง</span><span>1</span></div>
+      ${row('event','KBTG Techtopia: Human of Tomorrow','16 ก.ย. 08:30 · Queen Sirikit')}
+    </div>
+  </div>
+  <span class="fab">+</span>${nav('lib')}`
+
+const settings = () => `
+  <div class="p-body">
+    <div class="p-date">ตั้งค่า</div>
+    <div class="p-scroll">
+      <div class="sec"><span>การแจ้งเตือน</span><span>1 เครื่อง</span></div>
+      <div class="srow"><span class="stripe"></span><div><div class="row__t">Android · Chrome</div><div class="row__m">เปิดอยู่</div></div></div>
+      <div class="sec"><span>คุยกับ KEVIN</span><span></span></div>
+      <div class="srow"><span class="stripe"></span><div><div class="row__t">ภาษา</div><div class="row__m">ไทย</div></div></div>
+      <div class="srow"><span class="stripe"></span><div><div class="row__t">เสียง</div><div class="row__m">ค่าตั้งต้น</div></div></div>
+      <div class="srow"><span class="stripe"></span><div><div class="row__t">ไมโครโฟน</div><div class="row__m">อัตโนมัติ</div></div></div>
+      <div class="sec"><span>การเก็บกวาด</span><span></span></div>
+      <div class="srow"><span class="stripe"></span><div><div class="row__t">เก็บของที่ผ่านไปแล้วอัตโนมัติ</div><div class="row__m">ทุกคืน 03:00</div></div></div>
+    </div>
+  </div>
+  <span class="fab">+</span>${nav('set')}`
+
+const PAGES = [
+  { n:1, t:'หน้าวันนี้', body:today,
+    w:'ครึ่งล่างของหน้านี้ว่างเกือบตลอด เพราะรายการมักสั้นกว่าจอ · <b>แสงก้อนล่างทำให้ตรงนั้นไม่จบห้วน ๆ</b> โดยไม่ต้องเติมเนื้อหาปลอมเข้าไป' },
+  { n:2, t:'ปฏิทิน · สัปดาห์', body:week,
+    w:'<b>หน้าที่เสี่ยงที่สุด</b> — มีบล็อกสีของคาบเรียนเต็มจออยู่แล้ว แสงพื้นจึงเข้ามาเป็นสีชั้นที่สอง · ดูว่าบล็อกฟ้ายังอ่านง่ายเท่าเดิมไหม โดยเฉพาะแถวล่างที่ทับกับแสงม่วง' },
+  { n:3, t:'คลัง', body:library,
+    w:'การ์ด Area มีไล่เฉดของตัวเองสี่ใบอยู่แล้วที่ความทึบ 11% · <b>แสงพื้นเลยไปซ้อนอีกชั้นตรงครึ่งบนพอดี</b> ถ้ารู้สึกแน่นไป ลองปุ่ม “ลดแสงลงครึ่งหนึ่ง” ด้านบน' },
+  { n:4, t:'ตั้งค่า', body:settings,
+    w:'<b>ได้ประโยชน์มากที่สุด</b> — เป็นหน้าที่มีพื้นที่ว่างเยอะที่สุดและไม่มีสีอะไรของตัวเองเลย แสงจึงเข้ามาเติมโดยไม่แย่งกับอะไร' },
+]
+
+document.getElementById('pairs').innerHTML = PAGES.map((p) => `
+  <section class="pair">
+    <div class="pair__h">
+      <span class="pair__n">${String(p.n).padStart(2,'0')}</span>
+      <span class="pair__t">${p.t}</span>
+      <p class="pair__w">${p.w}</p>
+    </div>
+    <div class="pair__s">
+      <div class="shot shot--before"><div class="phone"><span class="glow"></span>${p.body()}</div><span class="shot__cap">ตอนนี้</span></div>
+      <div class="shot"><div class="phone on"><span class="glow"></span>${p.body()}</div><span class="shot__cap">ใส่แสงแล้ว</span></div>
+    </div>
+  </section>`).join('')
+
+/* ห่อ try/catch เพราะโหมดส่วนตัวของบางเบราว์เซอร์โยน error ตอนแตะ localStorage */
+function wire(id, cls, key){
+  const b = document.getElementById(id)
+  const apply = (on) => { b.setAttribute('aria-pressed', String(on)); document.body.classList.toggle(cls, on)
+    try { localStorage.setItem(key, on ? '1' : '0') } catch (e) {} }
+  let saved = false
+  try { saved = localStorage.getItem(key) === '1' } catch (e) {}
+  apply(saved)
+  b.addEventListener('click', () => apply(b.getAttribute('aria-pressed') !== 'true'))
+}
+wire('only','only-after','glow-only')
+wire('soft','soft','glow-soft')
+</script>

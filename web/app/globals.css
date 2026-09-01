@@ -243,6 +243,28 @@ html, body { margin: 0; padding: 0; }
 
 .wrap { max-width: 640px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
 
+/* =====================================================================
+   แสงพื้น · ทุกหน้า
+   ===================================================================== */
+/*
+ * ก้อนใหญ่จากล่าง บวกสองจุดจางที่ขอบบน — ม่วงซ้าย ฟ้าขวา
+ * เดิมมีเฉพาะห้องคุย แล้วหน้าอื่นดูแบนกว่าจนเหมือนคนละแอป
+ *
+ * ⚠️ `fixed` เพื่อให้แสงอยู่กับที่ตอนเลื่อน ไม่ใช่เลื่อนตามเนื้อหา
+ * ⚠️ `isolation` + `z-index: -1` **ห้ามเปลี่ยนเป็น `.wrap > * { position: relative }`**
+ *    มันจะไปทับ `position: fixed` ของแผงที่เลื่อนขึ้นมา (doc/TRAPS.md)
+ * ⚠️ ถ้าวันไหนตัวแม่ของชั้นนี้มี transform ค้าง แสงจะถูกตัดเป็นกล่องทันที
+ *    — `.wrap` เองต้องไม่มี animation (ที่มีคือ `.wrap > *` ซึ่งเป็นลูก)
+ */
+.wrap { position: relative; isolation: isolate; }
+.wrap::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(58% 22% at 22% 2%,  rgba(165, 148, 255, 0.26), transparent 70%),
+    radial-gradient(52% 20% at 84% 6%,  rgba(121, 194, 208, 0.20), transparent 72%),
+    radial-gradient(96% 34% at 50% 103%, rgba(136, 120, 240, 0.40), transparent 74%);
+}
+
 .mono { font-family: var(--f-mono); }
 
 /* ---- หัวหน้าจอ ---- */
@@ -1160,14 +1182,8 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  *    โดยไม่ต้องแตะลูกสักตัว · และ `isolation` **ไม่สร้าง containing block**
  *    ให้ `position: fixed` ต่างจาก `transform`
  */
-.talk { position: relative; isolation: isolate; }
-.talk::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(58% 22% at 22% 2%,  rgba(165, 148, 255, 0.26), transparent 70%),
-    radial-gradient(52% 20% at 84% 6%,  rgba(121, 194, 208, 0.20), transparent 72%),
-    radial-gradient(96% 34% at 50% 103%, rgba(136, 120, 240, 0.40), transparent 74%);
-}
+.talk { position: relative; }
+/* แสงย้ายขึ้นไปอยู่ที่ `.wrap` แล้ว — ทุกหน้าใช้ร่วมกัน (ดูหัวข้อ "แสงพื้น") */
 
 
 /*
