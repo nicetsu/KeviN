@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/Reveal'
  */
 export default function Loading() {
   return (
-    <Skeleton>
+    <Skeleton name="talk">
       <main className="wrap">
         <div className="talk">
           <div className="talk__top">

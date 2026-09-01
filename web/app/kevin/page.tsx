@@ -27,7 +27,7 @@ export default async function KevinPage() {
   }
 
   return (
-    <Content>
+    <Content name="talk">
       <main className="wrap">
         {/*
           key เปลี่ยนเมื่อประวัติจากเซิร์ฟเวอร์เปลี่ยน — วางสายแล้ว provider เรียก

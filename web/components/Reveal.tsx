@@ -18,19 +18,29 @@ import { ViewTransition, type ReactNode } from 'react'
  *    ให้ของเก่าออกไปก่อน ถ้าเข้าออกพร้อมกันจะเห็นสองชั้นทับกันแล้วดูรก
  */
 
+/**
+ * ⚠️ `name` เปลี่ยนได้เพราะ **บางหน้าไม่ควรจางสลับ** —
+ *    หน้า `/kevin` มีโครงร่างที่หน้าตาเหมือนของจริงเกือบทุกจุด (วงกลมอยู่พิกัดเดียวกัน)
+ *    จังหวะที่ของเก่าออกไปก่อนของใหม่จะมาจึงอ่านเป็นการกระพริบ ไม่ใช่การเปลี่ยนผ่าน
+ *    หน้านั้นจึงใช้ `talk` ซึ่ง globals.css ปิด animation ทิ้งทั้งคู่ ให้สลับทันที
+ *
+ *    **ค่าตั้งต้นยังเป็น `skel` เหมือนเดิมสำหรับทุกหน้า** — อย่าเปลี่ยน
+ *    หน้าที่โครงร่างต่างจากเนื้อจริงยังต้องการการจางสลับที่ไม่สมมาตรแบบเดิม
+ */
+
 /** ครอบเนื้อหาใน `loading.tsx` */
-export function Skeleton({ children }: { children: ReactNode }) {
+export function Skeleton({ children, name = 'skel' }: { children: ReactNode; name?: string }) {
   return (
-    <ViewTransition exit="skel-out" default="none">
+    <ViewTransition exit={`${name}-out`} default="none">
       {children}
     </ViewTransition>
   )
 }
 
 /** ครอบเนื้อหาจริงใน `page.tsx` */
-export function Content({ children }: { children: ReactNode }) {
+export function Content({ children, name = 'skel' }: { children: ReactNode; name?: string }) {
   return (
-    <ViewTransition enter="skel-in" default="none">
+    <ViewTransition enter={`${name}-in`} default="none">
       {children}
     </ViewTransition>
   )
