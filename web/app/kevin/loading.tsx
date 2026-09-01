@@ -49,7 +49,8 @@ export default function Loading() {
           </div>
 
           <div className="stage" aria-hidden="true">
-            <div className="orb" />
+            {/* โปร่ง ๆ ไว้ก่อน · พื้นม่วงเติมเข้ามาพร้อมเนื้อจริง (ดู `.orb--fill`) */}
+            <div className="orb orb--wait" />
             {/* ล่องหนแต่ยังกินที่ — กันวงกลมเลื่อนลงไปอยู่กลางฉาก */}
             <div className="stage__state enter__ghost">
               พร้อมคุยแล้ว

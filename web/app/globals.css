@@ -1756,6 +1756,33 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 
 /* orb ตื่นขึ้นตอนสายติด — ยุบนิดหนึ่งแล้วคืนตัว ให้รู้สึกว่ามันรับสาย */
+/*
+ * วงกลมตอนรอเนื้อจริง — **โปร่ง ไม่ใช่ม่วงทึบ** (เจ้าของเคาะ 2 ก.ย. 2026)
+ *
+ * ใช้พื้นชุดเดียวกับตอนอยู่ในสาย (`.orb--think`) เพื่อไม่ให้มีสีที่สามในแอป
+ * แต่ **ไม่มีแท่งคลื่นตรงกลาง** — คลื่นคือสัญลักษณ์ของเสียง มันขึ้นเฉพาะตอน
+ * อยู่ในสายจริง · เอามาใช้ตอนโหลดจะอ่านว่าไมค์เริ่มทำงานแล้วทั้งที่ยังไม่ได้กด
+ */
+.orb--wait {
+  background: radial-gradient(circle at 50% 45%, #2A2450 0%, #1D1838 70%);
+  box-shadow: 0 0 34px -8px rgba(136, 120, 240, 0.35);
+}
+
+/*
+ * ⚠️ พื้นม่วงของวงกลม**เติมเข้ามา** ไม่ใช่โผล่ทันที
+ *    ถ้าปล่อยให้สลับจากโปร่งเป็นทึบในเฟรมเดียว จะเห็นเป็นสีกระโดด
+ *    ตัวนี้อยู่บน `::before` เพราะ `background` ที่เป็น gradient คนละชุด
+ *    ไม่ไล่ค่าให้กัน · ไล่ `opacity` ของชั้นที่ทับอยู่แทน
+ *
+ *    ค่าเริ่มต้นเป็นทึบเต็ม เพื่อให้คนที่ปิดการเคลื่อนไหวเห็นวงกลมปกติ
+ */
+.orb--fill::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: var(--grad-brand);
+  animation: orb-fill 0.5s var(--ease) 0.12s both;
+}
+@keyframes orb-fill { from { opacity: 0 } to { opacity: 1 } }
+
 .orb--live, .orb--think { animation: orb-wake var(--t-slow) var(--ease) both; }
 @keyframes orb-wake {
   0%   { transform: scale(0.9);  opacity: 0.6 }
@@ -1793,6 +1820,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   .stage > *, .orb--live, .orb--think,
   .orb--live .wave, .orb--think .wave { animation: none; }
   .orb--live::after, .orb--think::after { display: none; }
+  .orb--fill::before { animation: none; }
 }
 
 /* =====================================================================

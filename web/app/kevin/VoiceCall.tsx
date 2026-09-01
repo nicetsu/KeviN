@@ -69,7 +69,12 @@ export default function VoiceCall() {
     return (
       <div className="stage">
         {/* วงเปล่า ไม่มีไอคอนไมค์ — นี่คือตัว KeviN ไม่ใช่ปุ่ม (doc/DECISIONS.md) */}
-        <div className="orb" aria-hidden="true">
+        {/*
+          ⚠️ ตอนเพิ่งเข้าห้องยังใส่ `orb--wait` ไว้ด้วย — พื้นจึงยังโปร่งเท่าโครงร่าง
+             แล้ว `orb--fill` ค่อยไล่พื้นม่วงทับขึ้นมา · พอ `entering` หมด คลาสทั้งคู่
+             หายไปพร้อมกัน ซึ่งตอนนั้นพื้นม่วงทึบเต็มอยู่แล้ว จึงไม่มีอะไรกระพริบ
+        */}
+        <div className={`orb${entering ? ' orb--wait orb--fill' : ''}`} aria-hidden="true">
           {entering && (
             <>
               <span className="enter__heat" />
