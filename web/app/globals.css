@@ -196,7 +196,16 @@ html { color-scheme: dark; }
  * ⚠️ **ปิดแล้วต้องใส่การตอบสนองอื่นแทนเสมอ** — ไม่งั้นแตะแล้วเงียบสนิท
  *    ผู้ใช้จะกดซ้ำเพราะคิดว่าไม่ติด · ของที่กดได้ทุกชิ้นในไฟล์นี้จึงมี `:active`
  */
-html { -webkit-tap-highlight-color: transparent; }
+/*
+ * ⚠️ **`html` ต้องมี `background` ของตัวเอง** ไม่ใช่ปล่อยให้สืบทอดจาก `body`
+ *    พื้นที่นอกเนื้อหา — ใต้แถบนำทางของระบบ และตอนดึงเกินขอบ — วาดด้วยสีของ
+ *    canvas ซึ่งมาจากตรงนี้ · ถ้าไม่ตั้ง จะได้สีเริ่มต้นของเบราว์เซอร์
+ *    **เห็นเฉพาะตอนติดตั้งเป็นแอปแล้วเปิดจากหน้าโฮม** บนแท็บปกติไม่เห็นเลย
+ */
+html {
+  background: var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   background: var(--bg);
@@ -250,7 +259,12 @@ body {
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 
-.wrap { max-width: 640px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+/* ⚠️ `padding-top` เผื่อแถบสถานะ เพราะหน้าใช้ `viewport-fit: cover` แล้ว
+   ถ้าถอด `env()` ออก หัวข้อของทุกหน้าจะไปอยู่ใต้นาฬิกาของระบบ */
+.wrap {
+  max-width: 640px; margin: 0 auto;
+  padding: calc(1.25rem + env(safe-area-inset-top)) 1rem 5rem;
+}
 
 /* =====================================================================
    แสงพื้น · ทุกหน้า

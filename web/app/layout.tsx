@@ -42,6 +42,14 @@ export const viewport: Viewport = {
   themeColor: '#1B1630',
   width: 'device-width',
   initialScale: 1,
+  /*
+   * ⚠️ `cover` ทำให้แอปวาดไปถึงใต้แถบของระบบ — **นั่นคือสิ่งเดียวที่ทำให้
+   *    พื้นหลังของแถบนำทางเป็นสีของเรา** ไม่ใช่สีที่ระบบเลือกให้
+   *
+   *    แลกมาด้วยการที่ต้องเผื่อ `env(safe-area-inset-*)` เองทุกที่ —
+   *    `.wrap` เผื่อด้านบน · `.nav` กับ `.fab` เผื่อด้านล่างอยู่แล้ว
+   */
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
