@@ -157,6 +157,18 @@
 @media (prefers-reduced-motion: reduce) { .wrap > * { animation: none; } }
 
 /*
+ * ⚠️ **ห้องโทรไม่เล่น `rise-in`** (เจ้าของทักว่ายังไม่สมูท 2 ก.ย. 2026)
+ *
+ *    `rise-in` มีไว้ให้เนื้อหาโผล่ทีละก้อนจากบนลงล่าง ซึ่งหน้านี้ไม่ได้ประโยชน์
+ *    เพราะมีก้อนเดียว · ที่แย่กว่านั้นคือมัน **เล่นสองรอบต่อการเข้าหนึ่งครั้ง** —
+ *    รอบแรกตอนโครงร่างโผล่ รอบสองตอนเนื้อจริงมาแทน ทั้งฉากจึงเลื่อนขึ้นซ้ำ
+ *    ทับจังหวะของคลื่นที่กำลังเล่นอยู่ อ่านเป็นการสะดุดเล็ก ๆ หลังคลื่นจบ
+ *
+ *    จังหวะเข้าหน้านี้เป็นของคลื่นกับวงกลมอย่างเดียว
+ */
+.wrap:has(.talk) > * { animation: none; }
+
+/*
  * ทิศทางของการเปลี่ยนหน้า — เข้าไปข้างในเลื่อนซ้าย ถอยกลับเลื่อนขวา
  *
  * ⚠️ **นี่คือ animation เดียวที่ทำงานได้จริงเมื่อข้ามหน้าในแอปนี้**
@@ -1701,9 +1713,14 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  *    ไม่ได้ระบายสีทับ · เปลี่ยนเป็น background เมื่อไหร่จะได้วงทึบที่กลบแสง
  */
 .stage--enter { position: relative; }
+/*
+ * ⚠️ `inset: 0` เทียบกับ **วงกลม** ไม่ใช่ฉาก — ดูเหตุผลเต็มใน `loading.tsx`
+ * ⚠️ `z-index: -1` ให้คลื่นอยู่ **ใต้** วงกลม เห็นเฉพาะส่วนที่ยื่นพ้นออกมา
+ *    ถ้าอยู่ข้างบน `backdrop-filter` จะไปเบลอตัววงกลมเองจนขอบเละ
+ */
 .enter__heat {
-  position: absolute; top: 50%; left: 50%; width: 132px; height: 132px;
-  margin: -66px 0 0 -66px; border-radius: 50%; pointer-events: none;
+  position: absolute; inset: 0; z-index: -1;
+  border-radius: 50%; pointer-events: none;
   border: 1px solid rgba(195, 182, 255, 0.35);
   backdrop-filter: blur(9px) saturate(1.5);
   -webkit-backdrop-filter: blur(9px) saturate(1.5);

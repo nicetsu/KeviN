@@ -33,11 +33,18 @@ export default function Loading() {
             </div>
           </div>
 
-          {/* คลื่นสองระลอกบิดแสงพื้นข้างหลัง ไม่ได้ทาสีทับ — วงกลมก่อตัวตรงกลาง */}
           <div className="stage stage--enter" aria-hidden="true">
-            <span className="enter__heat" />
-            <span className="enter__heat" />
-            <div className="orb" />
+            {/*
+              ⚠️ **คลื่นต้องเป็นลูกของวงกลม ไม่ใช่ของฉาก** — วงกลมไม่ได้อยู่กึ่งกลาง
+                 `.stage` (มีข้อความกับปุ่มถ่วงอยู่ข้างใต้ มันจึงลอยสูงกว่ากลาง)
+                 คลื่นที่วางกลางฉากเลยต่ำกว่าวงกลมอย่างเห็นได้ชัด
+                 (เจ้าของทัก 2 ก.ย. 2026) · อยู่ข้างในแล้วจึงร่วมศูนย์กลางกันเสมอ
+                 ไม่ว่าฉากจะมีอะไรเพิ่มลดข้างใต้ก็ตาม
+            */}
+            <div className="orb">
+              <span className="enter__heat" />
+              <span className="enter__heat" />
+            </div>
 
             {/*
               ⚠️ **ที่ว่างขนาดเท่าข้อความกับปุ่มของจริง** — `visibility: hidden`
