@@ -1,0 +1,413 @@
+<title>สิบโครงหน้าวันนี้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* ค่าสีคัดจาก web/app/globals.css ของจริง (1 ก.ย. 2026)
+   จอจำลองกว้าง 268px = 71% ของ 375px จริง · ตัวเลขข้างในเป็น px ที่ย่อแล้ว
+   ข้อมูลในจอเป็นตารางจริงของเจ้าของ ไม่ใช่ข้อความสมมติ */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C;
+  --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --capline:#362F5C; --on-brand:#14121F;
+  --sched:#79C2D0; --event:#D5BB6D; --due:#E0897E; --task:#74C6A4; --note:#8E88A8;
+  --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+  --g-gen:linear-gradient(135deg,#A594FF 0%,#D98BB4 100%);
+  --s--2:0.7rem; --s--1:0.79rem; --s-0:0.92rem;
+  --r-pill:999px;
+  --t-fast:140ms; --t-base:220ms; --ease:cubic-bezier(.22,.61,.36,1);
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:var(--s-0);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* ธีมเดียว ตั้งใจ — ของที่ดูอยู่นี้จะไปอยู่บนแอปมืด */
+
+.page{max-width:1240px;margin:0 auto;padding:2.6rem 1.1rem 5rem}
+.kicker{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-size:clamp(1.7rem,4.6vw,2.5rem);line-height:1.15;margin:0 0 .9rem;text-wrap:balance;letter-spacing:-.02em}
+.lede{max-width:46rem}
+.lede p{color:var(--muted);margin:0 0 .7rem}
+.lede strong{color:var(--ink);font-weight:600}
+
+.facts{margin:1.8rem 0 0;padding:1.1rem 1.2rem;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.facts h2{font-size:var(--s-0);margin:0 0 .7rem;font-weight:600}
+.facts ol{margin:0;padding-left:1.15rem;color:var(--muted);font-size:var(--s--1)}
+.facts li{margin-bottom:.4rem}
+.facts li:last-child{margin-bottom:0}
+.facts b{color:var(--ink);font-weight:600}
+
+.list{display:flex;flex-direction:column;gap:1.1rem;margin-top:2rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:border-color var(--t-base) var(--ease)}
+.card:hover{border-color:var(--capline)}
+.card__top{display:flex;align-items:baseline;gap:.6rem;padding:1rem 1.15rem .5rem;flex-wrap:wrap}
+.card__n{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);font-variant-numeric:tabular-nums}
+.card__name{font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
+.flag{margin-left:auto;font-size:var(--s--2);font-weight:500;padding:.12rem .55rem;border-radius:var(--r-pill);white-space:nowrap}
+.flag--now{color:var(--brand);background:var(--brand-soft)}
+.flag--small{color:#74C6A4;background:rgba(116,198,164,.1)}
+.flag--mid{color:#D5BB6D;background:rgba(213,187,109,.1)}
+.flag--big{color:#E0897E;background:rgba(224,137,126,.1)}
+.card__body{display:flex;gap:1.3rem;padding:.3rem 1.15rem 1.2rem;flex-wrap:wrap}
+.card__why{flex:1 1 20rem;min-width:min(100%,18rem)}
+.card__why p{font-size:var(--s--1);color:var(--muted);margin:.35rem 0 .8rem}
+.card__why b{color:var(--ink);font-weight:500}
+.card__cost{font-size:var(--s--2);color:var(--faint);font-family:var(--f-mono);line-height:1.7;margin:0;padding-top:.6rem;border-top:1px solid var(--line-soft)}
+.screens{display:flex;gap:.85rem;flex-wrap:wrap}
+.shot{display:flex;flex-direction:column;gap:.35rem}
+.shot__cap{font-family:var(--f-mono);font-size:var(--s--2);color:var(--faint);text-align:center}
+
+/* =====================================================================
+   จอจำลอง
+   ===================================================================== */
+.phone{
+  width:268px;height:540px;flex:none;position:relative;overflow:hidden;
+  border:1px solid var(--line);border-radius:26px;background:var(--bg);
+  display:flex;flex-direction:column;font-size:11px;line-height:1.5;
+}
+.phone *{font-size:inherit}
+.p-body{flex:1;display:flex;flex-direction:column;min-height:0;padding:12px 12px 0;gap:9px}
+.p-scroll{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+
+.p-date{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.p-sub{font-family:var(--f-mono);font-size:9px;color:var(--faint);letter-spacing:.04em;margin-top:2px}
+
+/* การ์ดคาบถัดไป */
+.hero{border:1px solid var(--line);border-radius:14px;padding:10px 11px;background:var(--surface)}
+.hero__kick{font-family:var(--f-mono);font-size:9px;letter-spacing:.06em;color:var(--brand)}
+.hero__kick--live{color:var(--sched)}
+.hero__name{font-size:14px;font-weight:600;line-height:1.2;letter-spacing:-.02em;margin:5px 0 4px}
+.hero__time{font-family:var(--f-mono);font-size:11px}
+.hero__sub{font-size:10px;color:var(--muted);margin-top:1px}
+.hero__after{margin-top:8px;padding-top:7px;border-top:1px solid var(--line-soft);font-size:9.5px;color:var(--muted)}
+.hero__after b{color:var(--ink);font-weight:500}
+
+/* หัวกลุ่ม + แถว */
+.sec{display:flex;justify-content:space-between;align-items:center;font-family:var(--f-mono);font-size:9px;color:var(--faint);letter-spacing:.06em;padding-top:3px}
+.row{display:flex;gap:8px;align-items:flex-start;padding:5px 0}
+.row+.row{border-top:1px solid var(--line-soft)}
+.stripe{width:2px;align-self:stretch;border-radius:2px;flex:none;min-height:22px}
+.row__t{font-size:11px;line-height:1.35}
+.row__m{font-family:var(--f-mono);font-size:9px;color:var(--faint);margin-top:2px}
+.cb{width:13px;height:13px;border:1.4px solid var(--capline);border-radius:4px;flex:none;margin-top:2px}
+.cb[data-on]{background:var(--task);border-color:var(--task)}
+.dim{opacity:.5}
+
+/* แถบล่างของแอป */
+.p-nav{display:flex;justify-content:space-around;align-items:stretch;background:var(--surface);border-top:1px solid var(--line);padding:5px 0 7px}
+.p-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:8px}
+.p-tab i{width:13px;height:13px;border:1.4px solid currentColor;border-radius:3px;display:block;font-style:normal}
+.p-tab--on{color:var(--brand)}
+.p-tab--talk{flex:1.6}
+.p-kevin{width:100%;min-height:30px;border-radius:var(--r-pill);background:var(--raised);color:var(--faint);display:grid;place-items:center;font-size:8.5px;font-weight:700;letter-spacing:.06em}
+.fab{position:absolute;right:11px;bottom:64px;width:34px;height:34px;border-radius:50%;background:var(--grad);color:var(--on-brand);display:grid;place-items:center;font-size:16px;font-weight:700}
+
+/* ---------- ชิ้นส่วนเฉพาะแบบ ---------- */
+/* 02 ไทม์ไลน์ */
+.tl{position:relative;padding-left:34px}
+.tl::before{content:"";position:absolute;left:22px;top:4px;bottom:4px;width:1px;background:var(--line)}
+.tl__item{position:relative;padding:5px 0}
+.tl__dot{position:absolute;left:-16px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--sched);box-shadow:0 0 0 3px var(--bg)}
+.tl__h{position:absolute;left:-34px;top:6px;font-family:var(--f-mono);font-size:8.5px;color:var(--faint)}
+.tl__now{position:relative;padding:2px 0}
+.tl__now::before{content:"";position:absolute;left:-16px;right:-4px;top:50%;height:1px;background:var(--due)}
+.tl__now span{position:absolute;left:-34px;top:-4px;font-family:var(--f-mono);font-size:8px;color:var(--due)}
+
+/* 03 โฟกัสเดี่ยว */
+.focus{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;text-align:center}
+.focus__kick{font-family:var(--f-mono);font-size:9px;letter-spacing:.1em;color:var(--brand)}
+.focus__name{font-size:19px;font-weight:600;line-height:1.22;letter-spacing:-.02em}
+.focus__time{font-family:var(--f-mono);font-size:14px}
+.focus__where{font-size:10px;color:var(--muted)}
+.peek{border-top:1px solid var(--line);padding-top:7px;display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:9px;color:var(--faint)}
+
+/* 04 แถบวันแนวนอน */
+.band{border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--surface)}
+.band__scale{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:8px;color:var(--faint);margin-bottom:4px}
+.band__track{position:relative;height:22px;background:var(--raised);border-radius:6px;overflow:hidden}
+.band__blk{position:absolute;top:3px;bottom:3px;border-radius:4px}
+.band__now{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:var(--due)}
+
+/* 05 สองคอลัมน์ */
+.cols{display:flex;gap:7px;flex:1;min-height:0}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:8px}
+.col h4{margin:0;font-family:var(--f-mono);font-size:8px;color:var(--faint);letter-spacing:.08em}
+
+/* 06 วงแหวน */
+.dial{position:relative;width:150px;height:150px;margin:0 auto;flex:none}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial__mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px}
+.dial__k{font-family:var(--f-mono);font-size:8px;color:var(--brand);letter-spacing:.08em}
+.dial__n{font-size:11px;font-weight:600;line-height:1.25;max-width:82%}
+
+/* 08 แถบความคืบหน้า */
+.prog{border:1px solid var(--line);border-radius:12px;padding:10px 11px;background:var(--surface)}
+.prog__bar{height:5px;border-radius:3px;background:var(--raised);overflow:hidden;margin:7px 0 6px}
+.prog__fill{height:100%;background:var(--grad);border-radius:3px}
+.prog__row{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:8.5px;color:var(--faint)}
+
+/* 09 การ์ดปัด */
+.deck{position:relative;flex:1;min-height:0}
+.deck__c{position:absolute;left:0;right:0;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.deck__dots{display:flex;gap:4px;justify-content:center;padding-top:6px}
+.deck__dots u{width:5px;height:5px;border-radius:50%;background:var(--capline)}
+.deck__dots u:first-child{background:var(--brand)}
+
+/* 10 สรุปสามบรรทัด */
+.tri{display:flex;flex-direction:column;gap:8px}
+.tri__b{border:1px solid var(--line);border-radius:12px;padding:9px 11px;background:var(--surface)}
+.tri__k{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.08em;color:var(--faint)}
+.tri__t{font-size:12px;font-weight:600;margin-top:3px;line-height:1.3}
+.tri__m{font-family:var(--f-mono);font-size:9px;color:var(--muted);margin-top:2px}
+.tri--now{border-color:rgba(121,194,208,.4)}
+.tri--now .tri__k{color:var(--sched)}
+
+.after{margin-top:2.6rem;padding:1.3rem;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.after h2{font-size:1.05rem;margin:0 0 .8rem}
+.after p{color:var(--muted);font-size:var(--s--1);margin:0 0 .6rem}
+.after p:last-child{margin-bottom:0}
+.after b{color:var(--ink);font-weight:600}
+.after code{font-family:var(--f-mono);font-size:.82em;color:var(--brand);background:var(--brand-soft);padding:.08rem .35rem;border-radius:5px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none;animation:none}}
+</style>
+
+<div class="page">
+  <div class="lede">
+    <p class="kicker">หน้าแรก · /</p>
+    <h1>สิบโครงหน้าวันนี้</h1>
+    <p>สิบแบบนี้ต่างกันที่ <strong>วิธีตอบคำถามเดียว</strong> — “ตอนนี้ต้องทำอะไร”
+       ซึ่งเป็นเหตุผลที่หน้านี้มีอยู่</p>
+    <p>ทุกจอใช้สี สัดส่วน และ<strong>ตารางจริงของคุณ</strong> — วิศวกรรมซอฟต์แวร์ 09:00
+       คณิตศาสตร์ 13:00 และงานที่ค้างอยู่จริง ไม่ใช่ข้อมูลสมมติ</p>
+  </div>
+
+  <div class="facts">
+    <h2>ห้าอย่างที่หน้านี้ต้องทำได้ ไม่ว่าจะเปลี่ยนโครงเป็นแบบไหน</h2>
+    <ol>
+      <li><b>เปิดมาแล้วรู้ทันทีว่าต้องทำอะไร</b> โดยไม่ต้องกวาดตาหา — นี่คือหลักการข้อ 1 ของโปรเจกต์</li>
+      <li><b>แยก “เลยกำหนดแต่ยังทำได้” ออกจาก “พลาดไปแล้ว”</b> · งานที่เลยกำหนดยังติ๊กได้ ส่วนการเตือนที่ผ่านไปแล้วทำอะไรไม่ได้ — ปนกันเมื่อไหร่คนจะเลิกอ่านทั้งกลุ่ม</li>
+      <li><b>ติ๊กเสร็จได้จากหน้านี้เลย</b> ไม่ต้องเข้าไปข้างใน · และของที่ติ๊กแล้วต้องหายไปพร้อมทางเลิกทำ</li>
+      <li><b>สีบอกชนิด</b> — ฟ้า=คาบเรียน เหลือง=กิจกรรม ส้ม=เส้นตาย เขียว=งาน · ทุกแบบต้องคงความหมายนี้</li>
+      <li><b>ปุ่มเพิ่มเร็วต้องอยู่</b> และห้ามชนกับแถบล่าง</li>
+    </ol>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <div class="after">
+    <h2>เลือกยังไงดี</h2>
+    <p><b>ถ้าปัญหาคือ “ต้องเลื่อนหาบ่อย”</b> — 03 กับ 10 ตอบตรงที่สุด ทั้งคู่ยอมซ่อนของเพื่อให้สิ่งเดียวที่สำคัญตอนนี้ใหญ่ขึ้น</p>
+    <p><b>ถ้าปัญหาคือ “ไม่เห็นภาพรวมของวัน”</b> — 02 · 04 · 06 วาดเวลาให้ดู ต่างกันแค่รูปทรง (เส้นตั้ง · แถบนอน · วงแหวน)</p>
+    <p><b>ถ้าชอบของเดิมแต่อยากให้แน่นขึ้น</b> — 07 กับ 08 แตะน้อยที่สุด แค่จัดของที่มีอยู่ใหม่</p>
+    <p>บอกเลขมาได้เลย · ผสมก็ได้ เช่น “โครง 03 แต่ส่วนล่างเป็น 02”</p>
+  </div>
+</div>
+
+<script>
+/* ---------- ชิ้นส่วนที่ใช้ซ้ำ ---------- */
+const head = (sub) =>
+  `<div><div class="p-date">อังคาร 1 ก.ย.</div>${sub ? `<div class="p-sub">${sub}</div>` : ''}</div>`
+
+const hero = (live) => `
+  <div class="hero">
+    <div class="hero__kick${live ? ' hero__kick--live' : ''}">${live ? 'กำลังเรียนอยู่ · เหลืออีก 1 ชม. 12 นาที' : 'คาบถัดไป · อีก 3 ชม. 15 นาที'}</div>
+    <div class="hero__name">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div>
+    <div class="hero__time">09:00–12:00</div>
+    <div class="hero__sub">E11-S601 · ปฏิบัติ</div>
+    <div class="hero__after"><b>ถัดไป 13:00</b> · คณิตศาสตร์เต็มหน่วยและพีชคณิตเชิงเส้น</div>
+  </div>`
+
+const sec = (name, n) => `<div class="sec"><span>${name}</span><span>${n}</span></div>`
+
+const row = (color, title, meta, opt = {}) => `
+  <div class="row${opt.dim ? ' dim' : ''}">
+    <span class="stripe" style="background:var(--${color})"></span>
+    ${opt.check ? `<span class="cb"${opt.done ? ' data-on' : ''}></span>` : ''}
+    <div><div class="row__t">${title}</div><div class="row__m">${meta}</div></div>
+  </div>`
+
+const rowsToday = () =>
+  row('sched', 'กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว', '09:00–12:00 · E11-S601') +
+  row('sched', 'คณิตศาสตร์เต็มหน่วยและพีชคณิตเชิงเส้น', '13:00–15:00 · E11-S603')
+
+const rowsTasks = () =>
+  row('due', 'ส่งรายงาน Lab 3', 'วันนี้ 23:59', { check: true }) +
+  row('task', 'อ่านบทที่ 4 ก่อนสอบย่อย', 'ยังไม่กำหนดวัน', { check: true })
+
+const nav = () => `
+  <div class="p-nav">
+    <span class="p-tab p-tab--on"><i></i>วันนี้</span>
+    <span class="p-tab"><i></i>ปฏิทิน</span>
+    <span class="p-tab p-tab--talk"><span class="p-kevin">KEVIN</span></span>
+    <span class="p-tab"><i></i>คลัง</span>
+    <span class="p-tab"><i></i>ตั้งค่า</span>
+  </div>`
+
+const shell = (inner, fab = true) =>
+  `<div class="phone">${inner}${fab ? '<span class="fab">+</span>' : ''}${nav()}</div>`
+
+/* ---------- สิบโครง ---------- */
+const L = [
+  { n:1, name:'ของตอนนี้ — การ์ดนำ แล้วไล่เป็นกลุ่ม', flag:['now','ตัวเทียบ'],
+    why:'การ์ดคาบถัดไปอยู่บนสุด แล้วตามด้วยกลุ่ม พลาดไปแล้ว / เลยกำหนด / วันนี้ · <b>อ่านง่ายและอธิบายตัวเองได้</b> แต่พอมีของหลายกลุ่ม การ์ดใหญ่จะดันทุกอย่างลงไปจนต้องเลื่อนหา',
+    cost:'ไม่ต้องแก้อะไร',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}${hero()}<div class="p-scroll">${sec('วันนี้','2')}${rowsToday()}${sec('เลยกำหนด','1')}${rowsTasks()}</div></div>`)]] },
+
+  { n:2, name:'ไทม์ไลน์แนวตั้ง', flag:['mid','รื้อการจัดกลุ่ม'],
+    why:'ทุกอย่างเกาะเส้นเวลาเดียวกัน มี<b>เส้น “ตอนนี้” พาดขวางจริง ๆ</b> · เห็นทันทีว่าอะไรผ่านไปแล้วและอะไรรออยู่ข้างหน้า — งานที่ไม่มีเวลาไปกองท้ายเส้นในชื่อ “ยังไม่กำหนด”',
+    cost:'ต้องจัดของใหม่ตามเวลาแทนตามกลุ่ม',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head('อีก 3 ชม. 15 นาที ถึงคาบแรก')}
+      <div class="p-scroll tl">
+        <div class="tl__item"><span class="tl__h">09:00</span><span class="tl__dot"></span>
+          <div class="row__t">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div><div class="row__m">E11-S601 · ปฏิบัติ</div></div>
+        <div class="tl__now"><span>ตอนนี้</span></div>
+        <div class="tl__item"><span class="tl__h">13:00</span><span class="tl__dot"></span>
+          <div class="row__t">คณิตศาสตร์เต็มหน่วยและพีชคณิตเชิงเส้น</div><div class="row__m">E11-S603 · บรรยาย</div></div>
+        <div class="tl__item"><span class="tl__h">23:59</span><span class="tl__dot" style="background:var(--due)"></span>
+          <div class="row__t">ส่งรายงาน Lab 3</div><div class="row__m">เส้นตาย</div></div>
+        <div class="tl__item"><span class="tl__h">—</span><span class="tl__dot" style="background:var(--task)"></span>
+          <div class="row__t">อ่านบทที่ 4 ก่อนสอบย่อย</div><div class="row__m">ยังไม่กำหนดวัน</div></div>
+      </div></div>`)]] },
+
+  { n:3, name:'โฟกัสเดี่ยว', flag:['mid','รื้อการจัดกลุ่ม'],
+    why:'จอแรกมีสิ่งเดียว — สิ่งที่ต้องทำต่อไป ตัวใหญ่กลางจอ · ที่เหลือยุบเป็นบรรทัดเดียวข้างล่าง เลื่อนขึ้นถึงจะเห็น · <b>ตอบหลักการข้อ 1 ตรงที่สุดในไฟล์นี้</b> แต่ต้องเลื่อนเพื่อดูภาพรวม',
+    cost:'ต้องออกแบบสองชั้น จอแรกกับส่วนที่ซ่อน',
+    shots:[
+      ['จอแรก', shell(`<div class="p-body">${head()}
+        <div class="focus">
+          <div class="focus__kick">คาบถัดไป · อีก 3 ชม. 15 นาที</div>
+          <div class="focus__name">กระบวนการพัฒนา<br>ซอฟต์แวร์เชิงเดี่ยว</div>
+          <div class="focus__time">09:00–12:00</div>
+          <div class="focus__where">E11-S601 · ปฏิบัติ</div>
+        </div>
+        <div class="peek"><span>อีก 3 อย่างวันนี้</span><span>เลื่อนขึ้น ↑</span></div></div>`)],
+      ['เลื่อนขึ้น', shell(`<div class="p-body">${head()}
+        <div class="hero" style="padding:7px 9px"><div class="hero__kick">คาบถัดไป · อีก 3 ชม. 15 นาที</div><div class="row__t" style="margin-top:3px">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div></div>
+        <div class="p-scroll">${sec('วันนี้','2')}${rowsToday()}${sec('เลยกำหนด','1')}${rowsTasks()}</div></div>`)]] },
+
+  { n:4, name:'แถบวันแนวนอน', flag:['mid','รื้อการจัดกลุ่ม'],
+    why:'แถบเดียวบนสุดคือทั้งวัน — บล็อกสีคือเวลาที่ถูกจองไว้ เส้นแดงคือตอนนี้ · <b>เห็นช่องว่างของวันได้ในแวบเดียว</b> ซึ่งเป็นคำถามที่ถามผู้ช่วยบ่อยที่สุด (“คาบว่างยาวสุดคือช่วงไหน”)',
+    cost:'ต้องคำนวณตำแหน่งบล็อกจากเวลาจริง',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}
+      <div class="band">
+        <div class="band__scale"><span>08</span><span>12</span><span>16</span><span>20</span><span>24</span></div>
+        <div class="band__track">
+          <span class="band__blk" style="left:4%;width:19%;background:var(--sched)"></span>
+          <span class="band__blk" style="left:31%;width:13%;background:var(--sched)"></span>
+          <span class="band__blk" style="left:96%;width:3%;background:var(--due)"></span>
+          <span class="band__now" style="left:26%"></span>
+        </div>
+      </div>
+      <div class="p-scroll">${sec('ช่วงว่างยาวสุด','12:00–13:00')}${rowsToday()}${sec('ต้องทำ','2')}${rowsTasks()}</div></div>`)]] },
+
+  { n:5, name:'สองคอลัมน์ · เวลา / งาน', flag:['mid','รื้อการจัดกลุ่ม'],
+    why:'ซ้ายคือเวลาที่ถูกจองแล้ว ขวาคืองานที่ต้องหาเวลาทำเอง · <b>แยกสองสิ่งที่ต่างกันโดยธรรมชาติออกจากกัน</b> — อันหนึ่งเราเลือกไม่ได้ อีกอันเลือกได้',
+    cost:'บนจอ 360px คอลัมน์จะแคบมาก ต้องตัดคำให้ดี',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}
+      <div class="cols">
+        <div class="col"><h4>ติดแล้ว</h4>
+          <div><div class="row__t">09:00 วิศวกรรมซอฟต์แวร์</div><div class="row__m">E11-S601</div></div>
+          <div><div class="row__t">13:00 คณิตศาสตร์</div><div class="row__m">E11-S603</div></div>
+        </div>
+        <div class="col"><h4>ต้องทำ</h4>
+          <div style="display:flex;gap:6px"><span class="cb"></span><div><div class="row__t">ส่งรายงาน Lab 3</div><div class="row__m">23:59</div></div></div>
+          <div style="display:flex;gap:6px"><span class="cb"></span><div><div class="row__t">อ่านบทที่ 4</div><div class="row__m">ยังไม่กำหนด</div></div></div>
+        </div>
+      </div></div>`)]] },
+
+  { n:6, name:'วงแหวนยี่สิบสี่ชั่วโมง', flag:['big','งานหนักสุด'],
+    why:'ทั้งวันเป็นวงกลม ส่วนโค้งสีคือคาบที่ถูกจอง ตรงกลางบอกสิ่งถัดไป · <b>สวยและเข้าใจภาพรวมได้ไวมาก</b> แต่บอกรายละเอียดไม่ได้เลย ต้องมีรายการอยู่ข้างล่างเสมอ',
+    cost:'ต้องวาด SVG จากเวลาจริง + จัดการคาบที่ทับกัน',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}
+      <div class="dial">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#241E3C" stroke-width="7"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--sched)" stroke-width="7"
+                  stroke-dasharray="33 231" stroke-dashoffset="-59" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--sched)" stroke-width="7"
+                  stroke-dasharray="22 242" stroke-dashoffset="-115" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="var(--due)" stroke-width="7"
+                  stroke-dasharray="4 260" stroke-dashoffset="-250" stroke-linecap="round"/>
+        </svg>
+        <div class="dial__mid">
+          <div class="dial__k">อีก 3 ชม. 15 นาที</div>
+          <div class="dial__n">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div>
+          <div class="row__m">09:00 · E11-S601</div>
+        </div>
+      </div>
+      <div class="p-scroll">${sec('ต้องทำ','2')}${rowsTasks()}</div></div>`)]] },
+
+  { n:7, name:'รายการเดียว ไม่มีหัวกลุ่ม', flag:['small','แตะน้อยที่สุด'],
+    why:'เอาหัวกลุ่มออกทั้งหมด เรียงทุกอย่างตามเวลา · ของที่ผ่านไปแล้วจางลงและอยู่บน ของที่รออยู่สว่างและอยู่ล่าง · <b>ประหยัดพื้นที่ได้เยอะที่สุด</b> — แต่ต้องเชื่อว่าสีกับความจางบอกสถานะได้ครบโดยไม่ต้องมีคำ',
+    cost:'เอาหัวกลุ่มออก จัดเรียงใหม่ตามเวลา',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}${hero()}
+      <div class="p-scroll">
+        ${row('due','ตรวจอีเมลจากอาจารย์','เมื่อวาน 20:00',{dim:true})}
+        ${row('sched','กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว','09:00–12:00 · E11-S601')}
+        ${row('sched','คณิตศาสตร์เต็มหน่วยและพีชคณิตเชิงเส้น','13:00–15:00 · E11-S603')}
+        ${row('due','ส่งรายงาน Lab 3','23:59',{check:true})}
+        ${row('task','อ่านบทที่ 4 ก่อนสอบย่อย','ยังไม่กำหนดวัน',{check:true})}
+      </div></div>`)]] },
+
+  { n:8, name:'ความคืบหน้าของวัน', flag:['small','แตะน้อยที่สุด'],
+    why:'เพิ่มแถบเดียวบนสุด — วันผ่านไปกี่ % และเหลืออะไรอีกกี่อย่าง · <b>ให้ความรู้สึกว่าวันกำลังเดินหน้า</b> ไม่ใช่กองงานที่ไม่ลดลง · ที่เหลือเหมือนเดิมทุกอย่าง',
+    cost:'เพิ่มแถบเดียว ไม่แตะโครงเดิม',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}
+      <div class="prog">
+        <div class="prog__row"><span>วันนี้ผ่านไป 31%</span><span>เหลือ 4 อย่าง</span></div>
+        <div class="prog__bar"><span class="prog__fill" style="width:31%"></span></div>
+        <div class="prog__row"><span>ติ๊กแล้ว 1</span><span>ว่างยาวสุด 12:00–13:00</span></div>
+      </div>
+      ${hero()}
+      <div class="p-scroll">${sec('วันนี้','2')}${rowsToday()}</div></div>`)]] },
+
+  { n:9, name:'การ์ดปัดทีละใบ', flag:['big','งานหนักสุด'],
+    why:'ทีละอย่างเต็มการ์ด ปัดซ้ายเพื่อดูอันถัดไป ปัดขึ้นเพื่อติ๊กเสร็จ · <b>ทำให้การเคลียร์งานรู้สึกเหมือนเกม</b> — แต่การดูภาพรวมกลายเป็นเรื่องยาก และท่าปัดไม่มีอะไรบอกว่ามีอยู่',
+    cost:'ต้องทำท่าปัด + สอนครั้งแรก + ยังต้องมีมุมมองรายการสำรอง',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}
+      <div class="deck">
+        <div class="deck__c" style="top:0;bottom:30px;padding:14px;display:flex;flex-direction:column;justify-content:center;gap:8px;text-align:center">
+          <div class="hero__kick">คาบถัดไป · อีก 3 ชม. 15 นาที</div>
+          <div style="font-size:15px;font-weight:600;line-height:1.25">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div>
+          <div class="hero__time">09:00–12:00</div>
+          <div class="row__m">E11-S601 · ปฏิบัติ</div>
+        </div>
+        <div class="deck__c" style="bottom:14px;height:22px;opacity:.6"></div>
+        <div class="deck__c" style="bottom:2px;height:22px;opacity:.35"></div>
+      </div>
+      <div class="deck__dots"><u></u><u></u><u></u><u></u></div></div>`)]] },
+
+  { n:10, name:'สรุปสามบรรทัด', flag:['small','แตะน้อยที่สุด'],
+    why:'สามกล่องตอบสามคำถามที่ถามทุกวัน — <b>ตอนนี้ / ต่อไป / ค้างอยู่</b> · ที่เหลือเลื่อนลงไปดู · เป็นแบบที่กวาดตาครั้งเดียวจบเร็วที่สุด และไม่ต้องเรียนรู้อะไรใหม่เลย',
+    cost:'จัดของที่มีอยู่ใหม่เป็นสามกล่อง',
+    shots:[['หน้าปกติ', shell(`<div class="p-body">${head()}
+      <div class="tri">
+        <div class="tri__b tri--now"><div class="tri__k">ตอนนี้</div><div class="tri__t">ว่าง · ยังไม่มีคาบ</div><div class="tri__m">อีก 3 ชม. 15 นาที ถึงคาบแรก</div></div>
+        <div class="tri__b"><div class="tri__k">ต่อไป</div><div class="tri__t">กระบวนการพัฒนาซอฟต์แวร์เชิงเดี่ยว</div><div class="tri__m">09:00–12:00 · E11-S601</div></div>
+        <div class="tri__b"><div class="tri__k">ค้างอยู่ · 2</div><div class="tri__t">ส่งรายงาน Lab 3</div><div class="tri__m">23:59 · และอีก 1 อย่าง</div></div>
+      </div>
+      <div class="p-scroll">${sec('ทั้งวัน','4')}${rowsToday()}</div></div>`)]] },
+]
+
+document.getElementById('list').innerHTML = L.map((v) => `
+  <article class="card">
+    <div class="card__top">
+      <span class="card__n">${String(v.n).padStart(2,'0')}</span>
+      <span class="card__name">${v.name}</span>
+      <span class="flag flag--${v.flag[0]}">${v.flag[1]}</span>
+    </div>
+    <div class="card__body">
+      <div class="card__why">
+        <p>${v.why}</p>
+        <p class="card__cost">ต้องแก้อะไร · ${v.cost}</p>
+      </div>
+      <div class="screens">
+        ${v.shots.map(([cap, html]) => `<div class="shot">${html}<span class="shot__cap">${cap}</span></div>`).join('')}
+      </div>
+    </div>
+  </article>`).join('')
+</script>

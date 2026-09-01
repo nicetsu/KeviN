@@ -656,9 +656,23 @@ html, body { margin: 0; padding: 0; }
 .cal-head h1 { font-size: var(--s-2); font-weight: 600; letter-spacing: -0.025em; margin: 0; }
 
 /* ตัวสลับโหมด */
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-pill); overflow: hidden; }
-.seg a { text-decoration: none; color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem; }
-.seg a[data-on="true"] { background: var(--brand); color: #12102A; font-weight: 600; }
+/*
+ * ตัวสลับโหมด — ใช้ภาษาเดียวกับแท็บ แชต/โทร ของห้องคุย **ทั้งแอป**
+ * (เจ้าของเคาะ 1 ก.ย. 2026 · เดิมแต่งเฉพาะ `.seg--wide` แล้วสองที่ดูคนละชุด)
+ *
+ * ⚠️ **ห้ามใส่ `overflow: hidden` กลับมา** — มันตัดแสงเรืองของปุ่มที่เลือกอยู่ทิ้ง
+ *    ปุ่มข้างในมี `border-radius` ของตัวเองแล้ว ไม่ต้องพึ่งการตัดของกล่องนอก
+ */
+.seg {
+  display: inline-flex; padding: 3px;
+  background: #161228; border: 1px solid rgba(165, 148, 255, 0.2);
+  border-radius: var(--r-pill);
+}
+.seg a { text-decoration: none; color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem; border-radius: var(--r-pill); }
+.seg a[data-on="true"] {
+  background: var(--grad-brand); color: var(--on-brand); font-weight: 600;
+  box-shadow: 0 0 15px -3px rgba(165, 148, 255, 0.9);
+}
 
 .cal-nav { display: flex; gap: 0.35rem; margin-bottom: 0.9rem; }
 .cal-nav a {
@@ -712,8 +726,12 @@ html, body { margin: 0; padding: 0; }
 
 .seg--btn { margin-top: 0.6rem; }
 .seg button { background: none; border: none; font: inherit; cursor: pointer;
-              color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem; }
-.seg button[data-on="true"] { background: var(--brand); color: #12102A; font-weight: 600; }
+              color: var(--muted); font-size: var(--s--1); padding: 0.3rem 0.9rem;
+              border-radius: var(--r-pill); }
+.seg button[data-on="true"] {
+  background: var(--grad-brand); color: var(--on-brand); font-weight: 600;
+  box-shadow: 0 0 15px -3px rgba(165, 148, 255, 0.9);
+}
 
 .weeks { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
          gap: 0.3rem; margin-top: 0.6rem; }
@@ -830,11 +848,14 @@ button.cb { cursor: pointer; }
      ~82px หลังกล่อง KeviN สูงขึ้นเป็น 3.05rem (1 ก.ย. 2026) */
   bottom: calc(6rem + env(safe-area-inset-bottom));
   width: 3.1rem; height: 3.1rem; border-radius: var(--r-pill);
-  background: var(--brand); color: #12102A; border: none;
+  background: var(--grad-brand); color: var(--on-brand); border: none;
   font-size: 1.6rem; line-height: 1; cursor: pointer;
-  box-shadow: none; transition: box-shadow 0.18s ease, background 0.18s ease;
+  box-shadow: 0 0 22px -4px rgba(165, 148, 255, 0.8);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
-.fab:hover { background: var(--brand-deep); box-shadow: 0 6px 24px -8px rgba(165,148,255,.75); }
+.fab:hover { box-shadow: 0 0 30px -2px rgba(165, 148, 255, 0.95); }
+.fab:active { transform: scale(0.94); }
+@media (prefers-reduced-motion: reduce) { .fab:active { transform: none; } }
 @media (min-width: 768px) { .fab { bottom: 1.5rem; right: 1.5rem; } }
 
 .sheet {
@@ -1154,21 +1175,10 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  * ไม่ได้สร้างของใหม่ · รอบแรกเผลอตั้งชื่อคลาสซ้ำแล้วโดน `.seg button` ที่เฉพาะเจาะจง
  * กว่าทับจนปุ่มที่เลือกอยู่ไม่ขึ้นสี — ของเดิมทำงานได้อยู่แล้ว แค่ต้องการให้เต็มความกว้าง
  */
-/*
- * ⚠️ แต่งเฉพาะ `.seg--wide` ที่ห้องคุยใช้ **ห้ามแตะ `.seg` กลาง**
- *    เพราะปฏิทินกับหน้าตารางเวลาใช้ตัวเดียวกันอยู่ และไม่ควรเรืองแสงตาม
- */
-.seg--wide {
-  display: flex; width: 100%;
-  background: #161228; border-color: rgba(165, 148, 255, 0.2); padding: 3px;
-}
+/* หน้าตาทั้งหมดอยู่ที่ `.seg` แล้ว — ตัวนี้เหลือหน้าที่เดียวคือทำให้เต็มความกว้าง */
+.seg--wide { display: flex; width: 100%; }
 .seg--wide button {
   flex: 1; text-align: center; padding-top: 0.45rem; padding-bottom: 0.45rem;
-  border-radius: var(--r-pill);
-}
-.seg--wide button[data-on="true"] {
-  background: var(--grad-brand); color: var(--on-brand);
-  box-shadow: 0 0 15px -3px rgba(165, 148, 255, 0.9);
 }
 
 /* สายข้อความ */
