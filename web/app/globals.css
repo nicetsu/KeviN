@@ -1659,6 +1659,59 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .stage > *:nth-child(2) { animation-delay: 40ms; }
 .stage > *:nth-child(3) { animation-delay: 80ms; }
 .stage > *:nth-child(4) { animation-delay: 120ms; }
+/*
+ * จังหวะเข้าห้องโทร — คลื่นความร้อนสองระลอก แล้ววงกลมก่อตัว
+ * (เจ้าของเลือกแบบ 16 จาก KEVIN-ENTER.html · 2 ก.ย. 2026)
+ *
+ * ⚠️ **เล่นใน `loading.tsx` เท่านั้น ไม่ใช่ในหน้าจริง** — มันคือสิ่งที่มาแทน
+ *    โครงร่าง ระหว่างรอเซิร์ฟเวอร์ · พอเนื้อจริงมาถึง `Reveal` จะจางทับให้เอง
+ *    ถ้าเอาไปใส่ในหน้าจริงด้วยจะเห็นคลื่นสองรอบต่อการเข้าหนึ่งครั้ง
+ *
+ * ⚠️ **วงกลมต้องมาถึงเร็ว** (`.12s`) ส่วนคลื่นค่อยแผ่ต่อไปจนจบ
+ *    เพราะเซิร์ฟเวอร์อาจตอบใน 200ms แล้วตัดจังหวะนี้ทิ้งกลางคัน
+ *    ถ้าวงกลมมาช้ากว่านั้น การตัดจะกลายเป็นการกระโดดจากจอเปล่าเป็นวงเต็ม
+ *    **อย่าเลื่อน delay ของวงกลมออกไปเพื่อความสวย** — ความเนียนอยู่ตรงนี้
+ *
+ * ⚠️ `backdrop-filter` คือหัวใจ — คลื่นนี้**บิดแสงพื้นที่อยู่ข้างหลังจริง**
+ *    ไม่ได้ระบายสีทับ · เปลี่ยนเป็น background เมื่อไหร่จะได้วงทึบที่กลบแสง
+ */
+.stage--enter { position: relative; }
+.enter__heat {
+  position: absolute; top: 50%; left: 50%; width: 132px; height: 132px;
+  margin: -66px 0 0 -66px; border-radius: 50%; pointer-events: none;
+  border: 1px solid rgba(195, 182, 255, 0.35);
+  backdrop-filter: blur(9px) saturate(1.5);
+  -webkit-backdrop-filter: blur(9px) saturate(1.5);
+  animation: enter-heat 1.3s var(--ease) both;
+}
+.enter__heat:nth-of-type(2) { animation-delay: 0.2s; }
+.stage--enter .orb { animation: enter-core 0.5s var(--ease) 0.12s both; }
+@keyframes enter-heat {
+  0%   { transform: scale(0.35); opacity: 0 }
+  22%  { opacity: 1 }
+  100% { transform: scale(2.9);  opacity: 0 }
+}
+@keyframes enter-core {
+  from { transform: scale(0.3); opacity: 0 }
+  to   { transform: scale(1);   opacity: 1 }
+}
+
+/* กินที่เท่าของจริงแต่ไม่แสดง — กันวงกลมกระโดดตอนเนื้อมาถึง (ดู loading.tsx) */
+.enter__ghost { visibility: hidden; }
+.enter__ghosticon { display: block; width: 17px; height: 17px; }
+
+/* ฟันเฟืองตอนรอ — ที่ว่างขนาดเท่ากันเป๊ะ ไม่มีเส้น หัวข้อจะได้ไม่ขยับตอนของจริงมา */
+.gear--wait { border-color: transparent; }
+
+/*
+ * ⚠️ ผู้ที่ตั้งค่าลดการเคลื่อนไหว **ต้องไม่เห็นคลื่นเลย** ไม่ใช่แค่เห็นช้าลง
+ *    วงที่แผ่ออกเต็มจอเป็นสิ่งที่ทำให้เวียนหัวได้จริง
+ */
+@media (prefers-reduced-motion: reduce) {
+  .enter__heat { display: none; }
+  .stage--enter .orb { animation: none; }
+}
+
 @keyframes stage-in {
   from { opacity: 0; transform: translateY(8px) }
   to   { opacity: 1; transform: none }
