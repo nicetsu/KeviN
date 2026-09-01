@@ -189,6 +189,15 @@ html:active-view-transition-type(nav-back) {
 
 html { color-scheme: dark; }
 
+/*
+ * ⚠️ ปิดกรอบไฮไลต์ฟ้าตอนแตะของ Android Chrome (เจ้าของเจอบนเครื่องจริง 1 ก.ย. 2026)
+ *    มันเป็นสี่เหลี่ยมทึบที่ไม่เคารพความมนของอะไรเลย และเป็นสีที่ไม่ได้อยู่ในพาเลต
+ *
+ * ⚠️ **ปิดแล้วต้องใส่การตอบสนองอื่นแทนเสมอ** — ไม่งั้นแตะแล้วเงียบสนิท
+ *    ผู้ใช้จะกดซ้ำเพราะคิดว่าไม่ติด · ของที่กดได้ทุกชิ้นในไฟล์นี้จึงมี `:active`
+ */
+html { -webkit-tap-highlight-color: transparent; }
+
 body {
   background: var(--bg);
   color: var(--ink);
@@ -426,6 +435,22 @@ html, body { margin: 0; padding: 0; }
   padding: 0.62rem 0.75rem; font: inherit; font-size: var(--s-0);
 }
 .input:focus { border-color: var(--brand); outline: none; }
+
+/*
+ * การตอบสนองตอนแตะ — แทนกรอบฟ้าที่ปิดไป
+ * จางลงเร็ว ๆ แล้วคืนตัว · เบากว่าการขยับตำแหน่งซึ่งจะกวนตาบนรายการยาว
+ */
+.nav__item:active,
+.row:active,
+.acard:active,
+.archive-link:active,
+.talk__starter:active { opacity: 0.6; }
+.nav__item, .row, .acard, .archive-link, .talk__starter {
+  transition: opacity var(--t-fast) var(--ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav__item, .row, .acard, .archive-link, .talk__starter { transition: none; }
+}
 
 /* =====================================================================
    การนำทาง · มือถือ = แถบล่าง · เดสก์ท็อป = แถบข้างซ้าย
