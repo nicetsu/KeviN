@@ -450,6 +450,38 @@
   @keyframes fieldB{0%{transform:scale(3.2) rotate(0);opacity:0}22%{opacity:.9}100%{transform:scale(1) rotate(-190deg);opacity:0}}
   @keyframes fieldC{0%{transform:scale(2) rotate(0);opacity:0}25%{opacity:.85}100%{transform:scale(1) rotate(95deg);opacity:0}}
 
+
+  /* ===================== ชุดผสม ===================== */
+
+  /* 21 = 16 + 1 · คลื่นความร้อนแผ่ออก แล้วแสงบานเป็นวงตรงกลาง */
+  .a21 .heat{
+    position:absolute;width:42%;aspect-ratio:1;border-radius:50%;opacity:0;
+    backdrop-filter:blur(9px) saturate(1.5);
+    -webkit-backdrop-filter:blur(9px) saturate(1.5);
+    border:1px solid rgba(195,182,255,.35);
+  }
+  .a21.run .heat{animation:heatOut 1.3s var(--ease) both}
+  .a21.run .heat:nth-of-type(2){animation-delay:.2s}
+  .a21.run .orb{animation:bloom 1s var(--ease) .34s both}
+  .a21.run .cap{animation:fadeUp .45s var(--ease) 1.1s both}
+  .a21.run .go{animation:fadeUp .45s var(--ease) 1.22s both}
+
+  /* 22 = 9 + 1 · เส้นลากรอบวง พอบรรจบก็สว่างวาบเป็นวงทึบ */
+  .a22 svg{position:absolute;width:44%;overflow:visible}
+  .a22 circle{
+    fill:none;stroke:var(--brand-pale);stroke-width:2;
+    stroke-dasharray:302;stroke-dashoffset:302;
+  }
+  .a22.run svg circle{animation:draw .85s var(--ease) both, drawGlow .5s var(--ease) .8s both}
+  .a22.run .orb{animation:bloom .85s var(--ease) .8s both}
+  .a22.run .cap{animation:fadeUp .45s var(--ease) 1.25s both}
+  .a22.run .go{animation:fadeUp .45s var(--ease) 1.37s both}
+  @keyframes drawGlow{
+    0%{opacity:1;transform:scale(1)}
+    45%{opacity:1;transform:scale(1.14);filter:drop-shadow(0 0 8px rgba(195,182,255,.9))}
+    100%{opacity:0;transform:scale(1.3)}
+  }
+
   @media (prefers-reduced-motion: reduce){
     .phone *{animation:none !important}
     .phone .stage > *{opacity:1 !important}
@@ -846,6 +878,52 @@
     <p><strong style="color:var(--ink)">ต้องต่อเนื่องเป็นวงกลมจริง</strong> — ตัวที่ใช้เล่นกับตัวที่อยู่ในหน้าจริงควรเป็นชิ้นเดียวกัน ถ้าสลับชิ้นตอนจบจะเห็นเป็นการกระตุกเล็ก ๆ</p>
     <p><strong style="color:var(--ink)">ห้ามสื่อว่าไมค์เปิดแล้ว</strong> — แบบ 08 สวยแต่เสี่ยงตรงนี้ที่สุด เพราะคลื่นเสียงคือภาพที่ใช้ตอนอยู่ในสายจริง</p>
   </footer>
+
+  <div class="band" id="mix">
+    <p class="eyebrow">ชุดผสม</p>
+    <h2>สองคู่ที่ลองจับมาชนกัน</h2>
+    <p>ทั้งคู่ยืมท่าจบของแบบ <strong style="color:var(--ink)">01</strong> มาใช้ — วงกลมไม่ได้แค่โผล่ แต่<strong style="color:var(--ink)">สว่างจ้าเกินจริงแล้วหรี่ลงเข้าที่</strong> ซึ่งเป็นจังหวะที่ทำให้ทั้งสองอันจบแรงกว่าตัวตั้งต้นของมันเอง</p>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card__top"><span class="num">16+1</span><h2>คลื่นความร้อน แล้วแสงบาน</h2></div>
+      <div class="phone a21" tabindex="0">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="heat"></div><div class="heat"></div>
+          <div class="orb"></div>
+          <div class="cap"><b>พร้อมคุยแล้ว</b><small>ไมค์ยังปิดอยู่</small></div>
+          <div class="go">เริ่มโทร</div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">คลื่นสองระลอกบิดแสงพื้นแผ่ออกไปก่อน แล้วจุดสว่างจ้าบานขึ้นตรงกลางระหว่างที่คลื่นยังไม่จางหมด — ได้ทั้งความลึกของ 16 และปลายทางที่แน่นอนของ 01</p>
+      <div class="tags"><span class="tag">1.3s</span><span class="tag tag--good">มีมิติที่สุด</span><span class="tag tag--warn">backdrop-filter กินแรง</span></div>
+      <button class="replay">เล่นอีกครั้ง</button>
+    </div>
+
+    <div class="card">
+      <div class="card__top"><span class="num">9+1</span><h2>เส้นลากรอบ แล้วสว่างวาบ</h2></div>
+      <div class="phone a22" tabindex="0">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg>
+          <div class="orb"></div>
+          <div class="cap"><b>พร้อมคุยแล้ว</b><small>ไมค์ยังปิดอยู่</small></div>
+          <div class="go">เริ่มโทร</div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">เส้นลากรอบวงจนบรรจบ แล้วแทนที่จะค่อย ๆ เติมสี มันสว่างวาบพร้อมกับเส้นที่ขยายหลุดออกไป — จุดที่การรอจบกลายเป็นจังหวะที่เห็นชัด ไม่ใช่การเปลี่ยนผ่านเงียบ ๆ</p>
+      <div class="tags"><span class="tag">1.4s</span><span class="tag tag--good">บอกความคืบหน้า</span><span class="tag tag--good">จบแรง</span><span class="tag tag--warn">ยาวสุดในไฟล์</span></div>
+      <button class="replay">เล่นอีกครั้ง</button>
+    </div>
+
+  </div>
 </div>
 
 <script>
