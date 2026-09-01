@@ -26,6 +26,10 @@ export default async function KevinPage() {
     loadError = e instanceof Error ? e.message : 'โหลดบทสนทนาไม่สำเร็จ'
   }
 
+  /*
+   * ⚠️ ใช้ `name="talk"` ให้ตรงกับ `loading.tsx` — คู่นี้ **สลับทันทีไม่จาง**
+   *    เพราะโครงร่างเหมือนของจริงทุกพิกเซลอยู่แล้ว (เหตุผลเต็มอยู่ใน `loading.tsx`)
+   */
   return (
     <Content name="talk">
       <main className="wrap">
