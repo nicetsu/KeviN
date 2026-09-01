@@ -208,7 +208,8 @@ html {
 }
 
 body {
-  background: var(--bg);
+  /* ⚠️ **ไม่มี `background`** โดยตั้งใจ — พื้นอยู่ที่ `html` เพื่อให้ชั้นแสงของ `.wrap`
+     ที่ `z-index: -1` ยังอยู่หน้าพื้นได้โดยไม่ต้องพึ่ง `isolation` (ดูหัวข้อ "แสงพื้น") */
   color: var(--ink);
   font-family: var(--f);
   font-size: var(--s-0);
@@ -274,12 +275,17 @@ html, body { margin: 0; padding: 0; }
  * เดิมมีเฉพาะห้องคุย แล้วหน้าอื่นดูแบนกว่าจนเหมือนคนละแอป
  *
  * ⚠️ `fixed` เพื่อให้แสงอยู่กับที่ตอนเลื่อน ไม่ใช่เลื่อนตามเนื้อหา
- * ⚠️ `isolation` + `z-index: -1` **ห้ามเปลี่ยนเป็น `.wrap > * { position: relative }`**
- *    มันจะไปทับ `position: fixed` ของแผงที่เลื่อนขึ้นมา (doc/TRAPS.md)
+ * ⚠️ **`.wrap` ต้องไม่สร้าง stacking context** — ห้ามใส่ `isolation` หรือ `z-index`
+ *    เคยใส่ `isolation: isolate` แล้วพัง (1 ก.ย. 2026): แผงที่เลื่อนขึ้นมา (`.sheet`)
+ *    อยู่ข้างใน จึงถูกขังใน context นั้นและไปอยู่**ใต้แถบล่าง** ทั้งที่ z-index สูงกว่า
+ *
+ *    ที่ไม่ต้องใช้ `isolation` ได้เพราะ **`body` ไม่มีพื้นของตัวเอง** — พื้นอยู่ที่ `html`
+ *    ชั้นแสงที่ `z-index: -1` จึงยังอยู่หน้าพื้นเสมอ ไม่จมหายไป
+ *
  * ⚠️ ถ้าวันไหนตัวแม่ของชั้นนี้มี transform ค้าง แสงจะถูกตัดเป็นกล่องทันที
  *    — `.wrap` เองต้องไม่มี animation (ที่มีคือ `.wrap > *` ซึ่งเป็นลูก)
  */
-.wrap { position: relative; isolation: isolate; }
+.wrap { position: relative; }
 .wrap::before {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
@@ -919,11 +925,38 @@ button.cb { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .fab:active { transform: none; } }
 @media (min-width: 768px) { .fab { bottom: 1.5rem; right: 1.5rem; } }
 
+/* ทางเข้าแผงที่สอง · หน้าตาเหมือนค่าที่อ่านได้ ไม่ใช่ปุ่มเต็มยศ */
+.set__go {
+  font: inherit; font-size: var(--s--1); color: var(--brand);
+  background: none; border: 0; padding: 0.2rem 0; cursor: pointer;
+}
+.set__go:disabled { opacity: 0.45; cursor: default; }
+.set__go:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/*
+ * ปุ่มล้างประวัติ · สีเตือนตั้งแต่ยังไม่กด เพราะมันลบถาวร
+ * ตอนถามยืนยันเปลี่ยนเป็นพื้นทึบ ให้ต่างจากสถานะปกติชัดเจนโดยไม่ต้องอ่าน
+ */
+.set__wipe {
+  width: 100%; margin-top: 0.5rem;
+  color: var(--due); border-color: rgba(224, 137, 126, 0.4);
+}
+.set__wipe--armed { background: var(--due); color: #2A1210; border-color: var(--due); font-weight: 600; }
+
 .sheet {
   position: fixed; inset: 0; z-index: 40;
   background: rgba(10, 9, 18, 0.72);
   display: flex; align-items: flex-end; justify-content: center;
 }
+/*
+ * ⚠️ แผงซ้อนแผง — ต้องประกาศ**หลัง** `.sheet` เพราะ specificity เท่ากัน
+ *    เขียนไว้ก่อนแล้ว z-index 45 จะแพ้ 40 ของ `.sheet` เงียบ ๆ (กับดักเดิม doc/TRAPS.md)
+ *
+ *    ใช้ z-index สูงกว่าแทนการปิดแผงแรก เพราะปิดแล้วเปิดใหม่จะเห็นจอกระพริบ
+ *    และผู้ใช้จะเสียบริบทว่าตัวเองอยู่ในตั้งค่าอยู่
+ */
+.sheet--over { z-index: 45; }
+
 .sheet__panel {
   width: 100%; max-width: 520px;
   background: var(--surface); border: 1px solid var(--line);
@@ -1245,6 +1278,8 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .thread {
   display: flex; flex-direction: column; gap: 0.55rem;
   flex: 1; min-height: 0; overflow-y: auto;
+  /* ⚠️ เผื่อที่ให้ช่องพิมพ์ที่ลอยอยู่ — ผูกกับ `bottom` ของ `.composer` */
+  padding-bottom: 3.6rem;
 }
 
 .msg {
@@ -1391,9 +1426,36 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  * `sticky` เกาะได้เฉพาะตอนมีอะไรให้เลื่อน · ข้อความน้อย ๆ มันจึงลอยตามเนื้อหา
  * พอ `.thread` เลื่อนในตัวเองแล้ว ช่องพิมพ์เป็นแถวล่างสุดโดยธรรมชาติ
  */
+/*
+ * ช่องพิมพ์ลอยเหนือแถบล่าง แบบเดียวกับปุ่มเพิ่มเร็วของหน้าอื่น
+ * (เจ้าของเคาะ 1 ก.ย. 2026)
+ *
+ * ⚠️ **ต้องมีพื้นทึบไล่ขึ้นไป** ไม่ใช่โปร่ง — ข้อความที่เลื่อนผ่านข้างหลัง
+ *    จะอ่านทับกับช่องพิมพ์จนตาสับสน · ไล่เฉดทำให้ขอบบนไม่เป็นเส้นตัด
+ *
+ * ⚠️ **`.thread` ต้องเผื่อที่ด้านล่างเท่าความสูงตรงนี้** ไม่งั้นข้อความล่าสุด
+ *    จะถูกบังตลอด · ค่าผูกกันสองที่ แก้ที่เดียวแล้วอีกที่จะพัง
+ *
+ * ปุ่มเพิ่มเร็วไม่ต้องกังวล — `QuickAdd.tsx` ซ่อนตัวเองในหน้า `/kevin` อยู่แล้ว
+ * ด้วยเหตุผลเดียวกันคือไม่ให้มีม่วงสองก้อนแย่งกันเป็นปุ่มหลัก
+ */
 .composer {
+  position: fixed; z-index: 22;
+  left: 50%; transform: translateX(-50%);
+  width: min(640px, 100% - 2rem);
+  bottom: calc(4.9rem + env(safe-area-inset-bottom));
   display: flex; align-items: center; gap: 0.5rem;
-  flex: none; padding: 0.6rem 0 0.2rem;
+  padding: 0.7rem 0 0.5rem;
+}
+.composer::before {
+  content: ""; position: absolute; inset: -0.6rem -1rem -1.2rem;
+  background: linear-gradient(to top, var(--bg) 62%, transparent);
+  pointer-events: none; z-index: -1;
+}
+.composer > * { position: relative; }
+@media (min-width: 768px) {
+  /* แถบข้าง 200px กินพื้นที่ซ้าย — ช่องพิมพ์ต้องเลื่อนตามไม่งั้นจะไม่อยู่กลางเนื้อหา */
+  .composer { left: calc(200px + 50%); bottom: 1.2rem; width: min(640px, 100% - 200px - 2rem); }
 }
 .composer__field {
   border-color: rgba(165, 148, 255, 0.26); background: #161228;

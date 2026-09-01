@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { clearChatHistory } from '@/app/actions/chat'
 import { LANG_LABEL, type Lang } from '@/lib/ai/lang'
 import { VOICES } from '@/lib/ai/voices'
 import { setPrefs, type TalkPrefs } from '@/lib/talkPrefs'
@@ -29,6 +31,21 @@ export default function Settings({
   const [playing, setPlaying] = useState<Lang | null>(null)
   const [error, setError] = useState<string | null>(null)
   const cancel = useRef<(() => void) | null>(null)
+
+  /* แผงเสียงเป็นชั้นที่สอง — รายการเก้าเสียงกับปุ่มฟังยาวเกินกว่าจะอยู่ในแผงแรก */
+  const [voiceOpen, setVoiceOpen] = useState(false)
+
+  /*
+   * ⚠️ `armed` คือชั้นกันพลาดชั้นเดียวของการลบถาวร — แตะครั้งแรกแค่ถาม
+   *    แตะซ้ำถึงลบจริง · **ไม่มีทางกู้คืนหลังจากนั้น** จึงห้ามถอดออก
+   *    state ตายไปพร้อมการปิดแผง ซึ่งถูกแล้ว — เปิดใหม่ต้องเริ่มถามใหม่
+   */
+  const [armed, setArmed] = useState(false)
+  const [cleared, setCleared] = useState<number | null>(null)
+  const [pending, startClear] = useTransition()
+  const router = useRouter()
+
+  const voice = VOICES.find((v) => v.id === prefs.voice)
 
   // หยุดเสียงที่ค้างอยู่เมื่อปิดแผง — ไม่งั้นเสียงเล่นต่อทั้งที่ปิดไปแล้ว
   useEffect(() => () => cancel.current?.(), [])
@@ -83,47 +100,112 @@ export default function Settings({
             <MicPicker />
           </div>
 
-          <div className="set__label set__label--block">เสียง</div>
-          <div className="voices" role="radiogroup" aria-label="เสียง">
-            {VOICES.map((v) => (
-              <button
-                key={v.id}
-                role="radio"
-                aria-checked={prefs.voice === v.id}
-                className={`voice${prefs.voice === v.id ? ' voice--on' : ''}`}
-                disabled={locked}
-                onClick={() => setPrefs({ voice: v.id })}
-              >
-                <span className="voice__name">{v.label}</span>
-                {v.desc && <span className="voice__desc">{v.desc}</span>}
-              </button>
-            ))}
+          {/* เสียงย้ายไปแผงที่สอง — เหลือแค่ชื่อที่เลือกอยู่กับทางเข้า */}
+          <div className="set__row">
+            <span className="set__label">เสียง</span>
+            <button
+              className="set__go"
+              disabled={locked}
+              onClick={() => setVoiceOpen(true)}
+              aria-haspopup="dialog"
+            >
+              {voice ? voice.label : 'ค่าตั้งต้น'} ›
+            </button>
           </div>
 
+          <div className="set__label set__label--block">ประวัติการคุย</div>
           {/*
-            ฟังจากสาย Live API จริง ไม่ใช่ TTS — เพราะ Live ให้เสียงไม่เหมือน TTS
-            กดฟังหนึ่งครั้ง = เปิดสายจริงหนึ่งครั้ง กินโควตาเสียง
+            ⚠️ ลบถาวร ไม่ใช่เก็บเข้าคลัง · ชั้นกันพลาดคือการแตะสองครั้ง
+               ข้อความบนปุ่มจึงต้องบอกให้ชัดว่าครั้งที่สองคือจุดที่ย้อนไม่ได้แล้ว
           */}
-          <div className="set__try">
-            {(['th', 'en'] as const).map((l) => (
-              <button
-                key={l}
-                className="btn btn--quiet"
-                disabled={playing !== null}
-                onClick={() => listen(l)}
-              >
-                {playing === l ? 'กำลังเล่น…' : `ฟัง${LANG_LABEL[l]}`}
-              </button>
-            ))}
-          </div>
+          <button
+            className={`btn btn--quiet set__wipe${armed ? ' set__wipe--armed' : ''}`}
+            disabled={pending}
+            onClick={() => {
+              if (!armed) {
+                setArmed(true)
+                return
+              }
+              startClear(async () => {
+                const res = await clearChatHistory()
+                setArmed(false)
+                if (res.ok) {
+                  setCleared(res.removed)
+                  setError(null)
+                  router.refresh()
+                } else {
+                  setError(res.error)
+                }
+              })
+            }}
+          >
+            {pending ? 'กำลังลบ…' : armed ? 'แน่ใจนะ · แตะอีกครั้งเพื่อลบถาวร' : 'ล้างประวัติการคุย'}
+          </button>
+
+          {cleared !== null && (
+            <p className="set__note" role="status">
+              {cleared === 0 ? 'ไม่มีบทสนทนาให้ลบ' : `ลบแล้ว ${cleared} บทสนทนา`}
+            </p>
+          )}
 
           {error && <p className="alert alert--gap" role="alert">{error}</p>}
-
-          <p className="set__note">
-            การกดฟังเปิดสายจริงหนึ่งครั้ง ใช้โควตาเสียงเหมือนการโทร
-          </p>
         </div>
       </div>
+
+      {voiceOpen && (
+        /*
+         * แผงที่สอง ซ้อนบนแผงแรก
+         * z-index สูงกว่า `.sheet` ปกติ เพราะต้องอยู่เหนือแผงที่เปิดค้างอยู่
+         */
+        <div className="sheet sheet--over" role="dialog" aria-modal="true" aria-label="เลือกเสียง">
+          <div className="sheet__panel">
+            <div className="sheet__head">
+              <strong>เสียง</strong>
+              <button className="linkbtn" onClick={() => setVoiceOpen(false)}>เสร็จ</button>
+            </div>
+
+            <div className="voices" role="radiogroup" aria-label="เสียง">
+              {VOICES.map((v) => (
+                <button
+                  key={v.id}
+                  role="radio"
+                  aria-checked={prefs.voice === v.id}
+                  className={`voice${prefs.voice === v.id ? ' voice--on' : ''}`}
+                  disabled={locked}
+                  onClick={() => setPrefs({ voice: v.id })}
+                >
+                  <span className="voice__name">{v.label}</span>
+                  {v.desc && <span className="voice__desc">{v.desc}</span>}
+                </button>
+              ))}
+            </div>
+
+            {/*
+              ฟังจากสาย Live API จริง ไม่ใช่ TTS — เพราะ Live ให้เสียงไม่เหมือน TTS
+              กดฟังหนึ่งครั้ง = เปิดสายจริงหนึ่งครั้ง กินโควตาเสียง
+              ปุ่มอยู่ในแผงนี้เพราะคู่กับการเลือกเสียง ไม่ใช่ของที่ต้องเห็นตลอด
+            */}
+            <div className="set__try">
+              {(['th', 'en'] as const).map((l) => (
+                <button
+                  key={l}
+                  className="btn btn--quiet"
+                  disabled={playing !== null}
+                  onClick={() => listen(l)}
+                >
+                  {playing === l ? 'กำลังเล่น…' : `ฟัง${LANG_LABEL[l]}`}
+                </button>
+              ))}
+            </div>
+
+            {error && <p className="alert alert--gap" role="alert">{error}</p>}
+
+            <p className="set__note">
+              การกดฟังเปิดสายจริงหนึ่งครั้ง ใช้โควตาเสียงเหมือนการโทร
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
