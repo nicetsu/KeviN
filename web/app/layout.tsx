@@ -67,8 +67,15 @@ export default function RootLayout({
           ปฏิทินกลางสาย คอมโพเนนต์จะถูก unmount แล้วสายตายทันที
         */}
         <CallProvider>
-          <Nav />
           {children}
+          {/*
+            ⚠️ **แถบล่างต้องอยู่หลัง `children` ใน DOM** (เจ้าของทัก 2 ก.ย. 2026)
+               `z-index: 20` คุมได้ในสภาวะปกติ แต่ระหว่าง view transition แถบถูกยก
+               ไปเป็น layer ของตัวเอง (มันมี `view-transition-name`) แล้วลำดับการวาด
+               ใช้ tree order ไม่ใช่ z-index · อยู่ก่อน `children` เมื่อไหร่ เนื้อหาที่
+               กำลังเลื่อนเข้ามาจะวาดทับแถบ เห็นเป็นข้อความทะลุออกมาหน้าแถบ
+          */}
+          <Nav />
           <QuickAddMount />
         </CallProvider>
       </body>
