@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useCall, mmss } from '@/components/CallProvider'
 import type { CallState } from '@/lib/voice/session'
 
@@ -33,6 +34,28 @@ export default function VoiceCall() {
   const running = call.state !== 'idle'
 
   /*
+   * คลื่นตอนเข้าห้อง — **เล่นที่นี่ ไม่ใช่ใน `loading.tsx`** (แก้ 2 ก.ย. 2026)
+   *
+   * ⚠️ เคยอยู่ในโครงร่าง แล้วโดนตัดกลางคันทุกครั้ง เพราะเซิร์ฟเวอร์ตอบ
+   *    เร็วกว่าความยาวคลื่น (1.3s) มาก · โครงร่างหายไปพร้อมคลื่นที่ยังไม่จบ
+   *    เจ้าของเห็นเป็นอาการ "หยุดกลางคันแล้วเข้าหน้าหลัก"
+   *
+   *    อยู่บนหน้าจริงแล้วมันเล่นจนจบเสมอ ไม่ว่าเซิร์ฟเวอร์จะเร็วแค่ไหน
+   *    และ **ไม่หน่วงอะไรเลย** — ปุ่มเริ่มโทรกดได้ตั้งแต่วินาทีแรก
+   *
+   * ⚠️ ตัวจับเวลาเอา element ออกเมื่อจบ ไม่ใช่ปล่อยให้ค้าง — `backdrop-filter`
+   *    ที่ค้างอยู่จะกินแรงเครื่องตลอดเวลาที่เปิดหน้านี้ทิ้งไว้
+   *
+   * ⚠️ เล่นซ้ำเมื่อกลับมาที่ห้องหลังวางสาย เพราะ `TalkRoom` remount
+   *    (key ผูกกับจำนวนข้อความ) — ตั้งใจ อ่านเป็นการกลับเข้าห้อง
+   */
+  const [entering, setEntering] = useState(true)
+  useEffect(() => {
+    const t = setTimeout(() => setEntering(false), 1400)
+    return () => clearTimeout(t)
+  }, [])
+
+  /*
    * ⚠️ **ห้ามใส่ state "กำลังกดโทร" มาที่นี่อีก** — เคยใส่แล้วพัง (1 ก.ย. 2026)
    *
    *    `session.start()` เรียก `onState('connecting')` เป็นบรรทัดแรก **ก่อน**
@@ -46,7 +69,14 @@ export default function VoiceCall() {
     return (
       <div className="stage">
         {/* วงเปล่า ไม่มีไอคอนไมค์ — นี่คือตัว KeviN ไม่ใช่ปุ่ม (doc/DECISIONS.md) */}
-        <div className="orb" aria-hidden="true" />
+        <div className="orb" aria-hidden="true">
+          {entering && (
+            <>
+              <span className="enter__heat" />
+              <span className="enter__heat" />
+            </>
+          )}
+        </div>
         <div className="stage__state">
           {LABEL.idle.title}
           <small>{LABEL.idle.hint}</small>
