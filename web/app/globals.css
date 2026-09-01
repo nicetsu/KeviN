@@ -86,27 +86,48 @@
 ::view-transition-old(.skel-out) {
   animation: var(--t-fast) var(--ease) both reveal-fade reverse;
 }
+/*
+ * ⚠️ **มีแค่ fade ตรงนี้ ไม่มีการเลื่อนแล้ว** (เจ้าของเคาะ 1 ก.ย. 2026)
+ *    การเลื่อนย้ายไปอยู่ที่ `.wrap > *` ข้างล่าง ซึ่งทำเป็น**ทีละก้อนจากบนลงล่าง**ได้
+ *    ต่างจากตรงนี้ที่ขยับทั้งหน้าพร้อมกันก้อนเดียว
+ *
+ *    ถ้าใส่การเลื่อนกลับมาที่นี่ จะได้การเคลื่อนไหวสองชั้นซ้อนกัน —
+ *    ทั้งหน้าเลื่อนขึ้น *และ* ลูกแต่ละก้อนเลื่อนขึ้นอีกที ซึ่งอ่านเป็นอาการกระตุก
+ */
 ::view-transition-new(.skel-in) {
-  animation:
-    var(--t-base) var(--ease) var(--t-fast) both reveal-fade,
-    var(--t-slow) var(--ease) both reveal-rise;
+  animation: var(--t-base) var(--ease) var(--t-fast) both reveal-fade;
 }
 @keyframes reveal-fade { from { opacity: 0 } to { opacity: 1 } }
-/*
- * ⚠️ **เลื่อนเข้าจาก "ขวา" ไม่ใช่จาก "ล่าง"** — เพราะเบราว์เซอร์ไม่สร้าง
- *    `::view-transition-new(root)` ให้เลย (ยืนยันด้วยการดักทุก 30/120/260 ms
- *    ทั้งสองรอบ ไม่เจอสักครั้ง) ของใหม่จึงไม่มีทางเลื่อนเข้าผ่าน root
- *
- *    ตัวที่เล่นได้จริงคือ `skel-in` ของเนื้อจริงในรอบที่สอง — ใช้มันเป็น
- *    "ขาเข้า" แทน คู่กับ root ของหน้าเก่าที่เป็น "ขาออก" จึงครบวงจร
- *    ระยะสั้นแค่ 18px เพราะมันเล่นทุกการเปลี่ยนหน้า รวมสลับแท็บล่างที่ควรนิ่ง
- */
-@keyframes reveal-rise { from { transform: translateX(18px) } to { transform: none } }
 
 ::view-transition-group(*) {
   animation-duration: var(--t-slow);
   animation-timing-function: var(--ease);
 }
+
+/*
+ * เนื้อหาโผล่ทีละก้อนจากบนลงล่าง (เจ้าของเคาะ 1 ก.ย. 2026)
+ *
+ * ⚠️ ทำที่ **DOM จริง** ไม่ใช่ที่ `::view-transition-new` เพราะ pseudo ตัวนั้น
+ *    เป็นภาพของทั้งหน้าก้อนเดียว จะแยกเป็นทีละก้อนไม่ได้
+ *    (`::view-transition-new` เป็น live representation จึงเห็น animation นี้ผ่านมันได้)
+ *
+ * ⚠️ **หยุด stagger ที่ก้อนที่หก** — หน้ารายการยาว ๆ ถ้าไล่ต่อไปเรื่อย ๆ
+ *    ก้อนท้ายจะมาถึงช้าจนรู้สึกว่าแอปค้าง · ตั้งแต่ก้อนที่เจ็ดใช้ delay เท่ากันหมด
+ *
+ * ⚠️ ระยะ 14px และจบใน 220ms — สั้นกว่าการเปลี่ยนหน้า (320ms) เพราะมันเล่น
+ *    **ทุกครั้งที่โหลดหน้า** รวมสลับแท็บล่างที่ควรรู้สึกว่าทันที
+ */
+.wrap > * { animation: rise-in var(--t-base) var(--ease) both; }
+.wrap > *:nth-child(2) { animation-delay: 45ms; }
+.wrap > *:nth-child(3) { animation-delay: 90ms; }
+.wrap > *:nth-child(4) { animation-delay: 135ms; }
+.wrap > *:nth-child(5) { animation-delay: 180ms; }
+.wrap > *:nth-child(n+6) { animation-delay: 225ms; }
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px) }
+  to   { opacity: 1; transform: none }
+}
+@media (prefers-reduced-motion: reduce) { .wrap > * { animation: none; } }
 
 /*
  * ทิศทางของการเปลี่ยนหน้า — เข้าไปข้างในเลื่อนซ้าย ถอยกลับเลื่อนขวา
