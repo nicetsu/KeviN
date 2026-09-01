@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { StoredMessage } from '@/lib/chat/store'
 import Autolink from '@/lib/autolink'
 import MessageText from '@/lib/chat/MessageText'
@@ -11,46 +11,22 @@ import Settings from './Settings'
 
 type Mode = 'chat' | 'voice'
 
-const MODE_KEY = 'kevin.talk.mode'
-
 /**
- * โหมดล่าสุดที่เลือกไว้ — เก็บใน localStorage
+ * โหมดตั้งต้นเมื่อเปิดหน้านี้ — **โทรเสมอ** (เจ้าของเคาะ 1 ก.ย. 2026)
  *
- * ใช้ `useSyncExternalStore` ไม่ใช่ effect + setState เพราะ localStorage
- * เป็นแหล่งข้อมูลภายนอกที่ React ควรสมัครรับ · รูปแบบเดียวกับ `components/Hero.tsx`
- * และ `app/settings/NotificationSetup.tsx` ที่แก้ไปแล้วด้วยเหตุผลเดียวกัน
+ * เดิมจำโหมดล่าสุดไว้ใน `localStorage` แล้วกลับมาที่โหมดนั้น · เจ้าของขอให้
+ * กดปุ่ม KeviN แล้วมาถึงหน้าโทรทุกครั้ง ไม่ว่าครั้งก่อนจะปิดท้ายด้วยโหมดไหน
+ * เพราะการโทรเป็นสิ่งที่ตั้งใจมากดตรง ๆ ส่วนการพิมพ์คือสิ่งที่ค่อยเลือกทีหลัง
+ * แท็บแชตยังอยู่ที่เดิม กดสลับได้ตลอด และการสลับมีผลแค่ภายในครั้งนี้
  *
- * ⚠️ **จำโหมดได้ แต่ห้ามจำจนเริ่มโทรเอง** — โหมดโทรมีสถานะนิ่งเป็นค่าตั้งต้นเสมอ
- *    การกลับมาเจอโหมดโทรที่เลือกไว้ ไม่ได้แปลว่าไมค์เปิด (doc/CHAT.md §8)
+ * ⚠️ **มาถึงโหมดโทร ไม่ใช่เริ่มโทร** — หน้าโทรมีสถานะนิ่งเป็นค่าตั้งต้นเสมอ
+ *    ไมค์เปิดต่อเมื่อกดปุ่มเริ่มสายเท่านั้น การเปิดหน้าไม่ขอสิทธิ์อะไรทั้งนั้น
+ *    (doc/CHAT.md §8) — ถ้าวันไหนหน้านี้เริ่มขอไมค์ตอน mount ถือว่าพัง
+ *
+ * ⚠️ ค่านี้ต้องเหมือนกันทั้งฝั่งเซิร์ฟเวอร์และไคลเอนต์ ห้ามไปอ่านจาก storage
+ *    ตอน render ไม่งั้น hydrate แล้วแท็บจะกระโดดให้เห็น
  */
-const modeListeners = new Set<() => void>()
-
-function readMode(): Mode {
-  try {
-    return window.localStorage.getItem(MODE_KEY) === 'voice' ? 'voice' : 'chat'
-  } catch {
-    return 'chat' // โหมดส่วนตัวหรือปิด storage ไว้ — ไม่ใช่เรื่องคอขาดบาดตาย
-  }
-}
-
-function subscribeMode(onChange: () => void) {
-  modeListeners.add(onChange)
-  window.addEventListener('storage', onChange)
-  return () => {
-    modeListeners.delete(onChange)
-    window.removeEventListener('storage', onChange)
-  }
-}
-
-function writeMode(next: Mode) {
-  try { window.localStorage.setItem(MODE_KEY, next) } catch { /* ไม่จำก็ได้ */ }
-  for (const listener of modeListeners) listener()
-}
-
-/** ฝั่งเซิร์ฟเวอร์ไม่มี localStorage — เริ่มที่แชตซึ่งเป็นโหมดที่ไม่ขอสิทธิ์อะไรเลย */
-function useMode(): Mode {
-  return useSyncExternalStore(subscribeMode, readMode, () => 'chat')
-}
+const INITIAL_MODE: Mode = 'voice'
 
 /** ตัวอย่างคำถามที่ระบบตอบได้ดีจริง — สอนขอบเขตโดยไม่ต้องเขียนว่าทำอะไรไม่ได้ */
 const STARTERS = [
@@ -70,7 +46,7 @@ export default function TalkRoom({
   initialMessages: StoredMessage[]
   loadError: string | null
 }) {
-  const stored = useMode()
+  const [chosen, setChosen] = useState<Mode>(INITIAL_MODE)
   const call = useCall()
   const prefs = useTalkPrefs()
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -81,7 +57,7 @@ export default function TalkRoom({
    * สองช่องทางใช้คนละรุ่นจึงคนละโควตา · เสียงหมดแล้วแชตยังใช้ได้ปกติ
    * การปล่อยให้ค้างอยู่หน้าโทรที่กดไม่ได้ ไม่ช่วยอะไรเลย (doc/CHAT.md §8)
    */
-  const mode: Mode = call.quotaOut ? 'chat' : stored
+  const mode: Mode = call.quotaOut ? 'chat' : chosen
   const [conversationId, setConversationId] = useState(initialId)
   const [lines, setLines] = useState<Line[]>(
     initialMessages.map((m) => ({ role: m.role, content: m.content, via: m.via }))
@@ -175,7 +151,7 @@ export default function TalkRoom({
             role="tab"
             aria-selected={mode === m}
             data-on={mode === m}
-            onClick={() => writeMode(m)}
+            onClick={() => setChosen(m)}
           >
             {m === 'chat' ? 'แชต' : 'โทร'}
           </button>
