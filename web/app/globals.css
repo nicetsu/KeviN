@@ -117,7 +117,20 @@
  * ⚠️ ระยะ 14px และจบใน 220ms — สั้นกว่าการเปลี่ยนหน้า (320ms) เพราะมันเล่น
  *    **ทุกครั้งที่โหลดหน้า** รวมสลับแท็บล่างที่ควรรู้สึกว่าทันที
  */
-.wrap > * { animation: rise-in var(--t-base) var(--ease) both; }
+/*
+ * ⚠️ **`backwards` ไม่ใช่ `both`** — เจอบั๊กจริงบนมือถือ 1 ก.ย. 2026
+ *
+ *    `both` ทำให้ transform ค้างที่เฟรมสุดท้ายตลอดไป ซึ่งคือ `matrix(1,0,0,1,0,0)`
+ *    — identity ก็จริง แต่ **ยังนับว่า "มี transform"** ตัวมันจึงกลายเป็น
+ *    containing block ของลูกที่เป็น `position: fixed` อย่างถาวร
+ *
+ *    ผลคือแสงพื้นหลังของห้องคุย (`.talk::before`) ถูกตัดเป็นกล่องเท่า `.talk`
+ *    เห็นเป็นกรอบสี่เหลี่ยมกลางจอ · และแผงที่เลื่อนขึ้นมา (`.sheet`) ก็จะโดนด้วย
+ *
+ *    `backwards` ใช้เฟรมแรกระหว่างรอ delay เหมือนกัน แต่**ปล่อยค่ากลับเป็นปกติ
+ *    เมื่อจบ** — transform หายไปจริง containing block จึงไม่ค้าง
+ */
+.wrap > * { animation: rise-in var(--t-base) var(--ease) backwards; }
 .wrap > *:nth-child(2) { animation-delay: 45ms; }
 .wrap > *:nth-child(3) { animation-delay: 90ms; }
 .wrap > *:nth-child(4) { animation-delay: 135ms; }
@@ -1117,16 +1130,24 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  * ⚠️ `position: fixed` ไม่ใช่ `absolute` — แสงต้องกินเต็มจอ ไม่ใช่แค่ในกรอบ
  *    `.wrap` ที่มี padding อยู่ · z-index 0 จึงอยู่ใต้แถบล่าง (20) และปุ่มเพิ่มเร็ว (25)
  *
- * ⚠️ ลูกทุกตัวต้องมี `position: relative` ไม่งั้นจะจมอยู่ใต้ชั้นแสง
+ * ⚠️ **ห้ามใช้ `.talk > * { position: relative }` เพื่อยกลูกขึ้นเหนือแสง**
+ *    เคยทำแล้วพัง (1 ก.ย. 2026) — มันทับ `position: fixed` ของ `.sheet`
+ *    (แผงตั้งค่าการคุย) ซึ่ง specificity เท่ากันแต่กฎนี้อยู่ทีหลัง
+ *    แผงเลยหดมาอยู่ในกรอบ `.wrap` แทนที่จะคลุมเต็มจอ
+ *
+ *    ใช้ `isolation` + `z-index: -1` แทน · แสงไปอยู่ล่างสุดของกล่องนี้เอง
+ *    โดยไม่ต้องแตะลูกสักตัว · และ `isolation` **ไม่สร้าง containing block**
+ *    ให้ `position: fixed` ต่างจาก `transform`
  */
+.talk { position: relative; isolation: isolate; }
 .talk::before {
-  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(58% 22% at 22% 2%,  rgba(165, 148, 255, 0.26), transparent 70%),
     radial-gradient(52% 20% at 84% 6%,  rgba(121, 194, 208, 0.20), transparent 72%),
     radial-gradient(96% 34% at 50% 103%, rgba(136, 120, 240, 0.40), transparent 74%);
 }
-.talk > * { position: relative; z-index: 1; }
+
 
 /*
  * ตัวสลับโหมด — **ใช้ `.seg` ตัวเดิมของโปรเจกต์** ที่ปฏิทินและหน้าตารางเวลาใช้อยู่
