@@ -11,6 +11,8 @@
 import { keepVisible } from './visibility'
 import type { ReadOnlyDb } from './db'
 import { ToolFetchError } from './db'
+import { isProposeName, proposeDeclarations, runPropose } from './propose'
+import type { Draft } from '../drafts'
 
 export type ToolCtx = {
   db: ReadOnlyDb
@@ -254,6 +256,12 @@ const items: ToolDef<{ scope: 'overdue' | 'open' | 'done' | 'notes' }, ItemRow> 
   },
   areaOf: (row) => row.projects?.areas?.name,
   shape: (row) => ({
+    /*
+     * ⚠️ **ต้องมี `id`** — ชั้นเสนอ (`propose_*`) อ้างถึงรายการด้วย id เท่านั้น
+     *    ไม่ให้เดาจากชื่อ เพราะงานชื่อ "การบ้าน" มีได้หลายวิชาพร้อมกัน
+     *    ถ้าเอาออก ผู้ช่วยจะแก้ของที่มีอยู่ไม่ได้เลย เหลือแค่เพิ่มของใหม่
+     */
+    id: row.id,
     ชนิด: row.type === 'task' ? 'งาน' : row.type === 'reminder' ? 'เตือน' : 'โน้ต',
     ชื่อ: row.title,
     วิชา: row.projects?.name,
@@ -343,14 +351,38 @@ export function isToolName(name: string): name is ToolName {
   return (TOOL_NAMES as readonly string[]).includes(name)
 }
 
-/** รูปที่ส่งให้โมเดลตอนประกาศ tool · ใช้ได้ทั้ง Gemini และเจ้าอื่น */
+/**
+ * รูปที่ส่งให้โมเดลตอนประกาศ tool · ใช้ได้ทั้ง Gemini และเจ้าอื่น
+ *
+ * รวม `propose_*` เข้ามาด้วย — ตัวพวกนั้น**ยังไม่เขียนอะไร** มันคืนร่างกลับมา
+ * ให้เว็บวาดเป็นการ์ด แล้วผู้ใช้กดยืนยันถึงจะเขียนจริง (doc/WRITE.md)
+ */
 export function toolDeclarations() {
-  return TOOL_NAMES.map((name) => ({
-    name,
-    description: REGISTRY[name].description,
-    parameters: REGISTRY[name].parameters,
-  }))
+  return [
+    ...TOOL_NAMES.map((name) => ({
+      name,
+      description: REGISTRY[name].description,
+      parameters: REGISTRY[name].parameters,
+    })),
+    ...proposeDeclarations(),
+  ]
 }
+
+/** ชื่อที่ผู้ช่วยเรียกได้ทั้งหมด — ทั้งฝั่งอ่านและฝั่งเสนอ */
+export function isCallableTool(name: string): boolean {
+  return isToolName(name) || isProposeName(name)
+}
+
+/**
+ * ผลของการเรียก tool หนึ่งครั้ง
+ *
+ * `rows` มาจากฝั่งอ่าน · `draft` มาจากฝั่งเสนอ — ไม่มีทางมาพร้อมกัน
+ * ฝั่งที่เรียกต้องเช็ค `'draft' in result` ก่อนใช้ ไม่ใช่เดาจากชื่อ tool
+ */
+export type ToolResult =
+  | { ok: true; rows: unknown[]; hidden: number }
+  | { ok: true; draft: Draft }
+  | { ok: false; error: string }
 
 /**
  * เรียก tool หนึ่งตัว — **ประตูเดียวที่ข้อมูลออกไปหาโมเดล**
@@ -362,7 +394,17 @@ export async function runTool(
   name: string,
   rawInput: Record<string, unknown>,
   ctx: ToolCtx
-): Promise<{ ok: true; rows: unknown[]; hidden: number } | { ok: false; error: string }> {
+): Promise<ToolResult> {
+  /*
+   * ชั้นเสนอเข้ามาทางเดียวกัน — ผลที่ได้เป็น `draft` ไม่ใช่ `rows`
+   * ที่ให้ผ่านประตูเดียวกันเพราะทั้งสองโหมด (แชต/โทร) เรียกฟังก์ชันนี้อยู่แล้ว
+   * แยกประตูเมื่อไหร่ จะมีที่ให้ลืมตรวจเพิ่มอีกที่หนึ่งทันที
+   */
+  if (isProposeName(name)) {
+    const out = await runPropose(name, rawInput, { db: ctx.db, today: ctx.today })
+    return out.ok ? { ok: true, draft: out.draft } : out
+  }
+
   if (!isToolName(name)) return { ok: false, error: `ไม่มี tool ชื่อ ${name}` }
   const tool = REGISTRY[name]
 

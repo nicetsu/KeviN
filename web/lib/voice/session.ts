@@ -11,6 +11,7 @@
 
 import type { TalkPrefs } from '@/lib/talkPrefs'
 import { micConstraints, MIC_AUTO } from './mic'
+import type { Draft } from '@/lib/drafts'
 
 export type CallState =
   | 'idle'
@@ -29,6 +30,13 @@ export type CallHooks = {
   /** จบหนึ่ง turn แล้ว — เอาไปปิดก้อนคำบรรยายและบันทึกลงประวัติ */
   onTurnEnd: () => void
   onError: (message: string) => void
+  /**
+   * ผู้ช่วยเสนอร่างการกระทำระหว่างสาย
+   *
+   * ⚠️ **ร่างไม่ได้ถูกบันทึกอะไรเลยตรงนี้** — มันแค่เดินทางจาก tool ขึ้นไปให้จอ
+   *    วาดเป็นการ์ด · การเขียนจริงเกิดตอนผู้ใช้กดยืนยัน ซึ่งอยู่คนละชั้น
+   */
+  onDraft?: (draft: Draft) => void
   /**
    * ความดังของเสียงที่พูดเข้าไป · 0–1 โดยประมาณ (RMS)
    *
@@ -323,6 +331,23 @@ export class VoiceCall {
         // ต้องบอกโมเดลว่าดึงไม่ได้ **ห้ามคืนว่าง** ไม่งั้นมันจะสรุปว่า "ไม่มีอะไร"
         response = { ok: false, error: 'ต่อเซิร์ฟเวอร์ไม่ได้' }
       }
+      /*
+       * ร่างที่ผู้ช่วยเสนอ — ส่งขึ้นไปให้จอ **แล้วไม่ส่งตัวร่างกลับเข้าสาย**
+       *
+       * ที่ส่งกลับเข้าสายเป็นแค่คำบอกว่าร่างขึ้นจอแล้ว · ถ้าส่งทั้งก้อนกลับไป
+       * โมเดลจะเอารายละเอียดไปพูดซ้ำทั้งหมดทั้งที่ผู้ใช้อ่านจากการ์ดอยู่แล้ว
+       * และมันอาจหลงคิดว่าบันทึกเสร็จแล้วเพราะเห็นข้อมูลครบ
+       */
+      const r = response as { ok?: boolean; draft?: Draft } | null
+      if (r?.ok && r.draft) {
+        this.hooks.onDraft?.(r.draft)
+        response = {
+          ok: true,
+          note: 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+          title: r.draft.title,
+        }
+      }
+
       return { id: call.id, name: call.name, response }
     }))
 

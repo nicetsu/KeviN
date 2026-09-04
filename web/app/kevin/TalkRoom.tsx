@@ -8,6 +8,8 @@ import VoiceCall from './VoiceCall'
 import { useCall } from '@/components/CallProvider'
 import { useTalkPrefs } from '@/lib/talkPrefs'
 import Settings from './Settings'
+import DraftCard from '@/components/DraftCard'
+import type { Draft } from '@/lib/drafts'
 
 type Mode = 'chat' | 'voice'
 
@@ -35,7 +37,20 @@ const STARTERS = [
   'คาบว่างยาวสุดของสัปดาห์นี้',
 ]
 
-type Line = { role: 'user' | 'assistant'; content: string; via: 'chat' | 'voice'; pending?: boolean }
+/**
+ * หนึ่งฟองในสายข้อความ
+ *
+ * `drafts` คือร่างที่ผู้ช่วยเสนอมาพร้อมคำตอบนั้น — **ไม่ได้บันทึกลงประวัติ**
+ * มันมีอายุแค่หน้าจอนี้ · เลื่อนขึ้นไปดูบทสนทนาเก่าจะไม่เจอการ์ดที่กดยืนยันได้
+ * ซึ่งถูกแล้ว เพราะบริบทที่ทำให้เกิดร่างนั้นหมดอายุไปแล้ว (doc/WRITE.md §8)
+ */
+type Line = {
+  role: 'user' | 'assistant'
+  content: string
+  via: 'chat' | 'voice'
+  pending?: boolean
+  drafts?: Draft[]
+}
 
 export default function TalkRoom({
   conversationId: initialId,
@@ -67,6 +82,22 @@ export default function TalkRoom({
   const [error, setError] = useState<string | null>(null)
 
   const tail = useRef<HTMLDivElement>(null)
+
+  /**
+   * เอาการ์ดออกจากสายข้อความ — ใช้ทั้งตอนกดทิ้งและตอนยืนยันสำเร็จแล้วกดเลิกทำ
+   *
+   * ลบออกจาก `drafts` ของฟองนั้น ไม่ได้ลบทั้งฟอง — คำพูดของ KeviN ยังอยู่
+   * เพราะมันเป็นส่วนหนึ่งของบทสนทนา ต่างจากร่างที่เป็นของชั่วคราว
+   */
+  function dismissDraft(id: string) {
+    setLines((prev) =>
+      prev.map((l) =>
+        l.drafts?.some((d) => d.id === id)
+          ? { ...l, drafts: l.drafts.filter((d) => d.id !== id) }
+          : l
+      )
+    )
+  }
 
   useEffect(() => {
     tail.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -100,7 +131,8 @@ export default function TalkRoom({
         setError(data.error ?? 'ตอบไม่สำเร็จ')
       } else {
         setConversationId(data.conversationId)
-        setLines((prev) => [...prev, { role: 'assistant', content: data.reply, via: 'chat' }])
+        const drafts = Array.isArray(data.drafts) && data.drafts.length ? (data.drafts as Draft[]) : undefined
+        setLines((prev) => [...prev, { role: 'assistant', content: data.reply, via: 'chat', drafts }])
         if (data.warning) setError(data.warning)
       }
     } catch {
@@ -193,12 +225,20 @@ export default function TalkRoom({
             )}
 
             {lines.map((l, i) => (
-              <Bubble key={i} line={l} />
+              <Bubble key={i} line={l} onDismiss={dismissDraft} />
             ))}
 
             {/* ข้อความจากสายที่ยังคุยอยู่ · จะถูกบันทึกจริงตอนวางสาย */}
             {call.turns.map((t, i) => (
               <Bubble key={`v${i}`} line={{ ...t, via: 'voice' }} />
+            ))}
+
+            {/*
+              ร่างจากสายเสียงที่ยังค้างอยู่ — ขึ้นในโหมดแชตด้วย เพราะสลับโหมด
+              กลางสายแล้วร่างต้องไม่หายไป · มันเป็นของค้างของทั้งห้อง ไม่ใช่ของโหมดใดโหมดหนึ่ง
+            */}
+            {call.drafts.map((d) => (
+              <DraftCard key={d.id} draft={d} onSettled={call.dropDraft} />
             ))}
 
             {busy && (
@@ -248,9 +288,10 @@ export default function TalkRoom({
   )
 }
 
-function Bubble({ line }: { line: Line }) {
+function Bubble({ line, onDismiss }: { line: Line; onDismiss?: (id: string) => void }) {
   const mine = line.role === 'user'
   return (
+    <>
     <div className={`msg${mine ? ' msg--me' : ' msg--ai'}`}>
       {/*
         ฝั่งผู้ช่วยแกะ markdown · ฝั่งผู้ใช้ไม่แกะ
@@ -260,5 +301,14 @@ function Bubble({ line }: { line: Line }) {
       {mine ? <Autolink text={line.content} /> : <MessageText text={line.content} />}
       {line.via === 'voice' && <span className="msg__via">จากสาย</span>}
     </div>
+
+    {/*
+      การ์ดอยู่ **ใต้ฟองที่ทำให้เกิดมัน** ไม่ใช่ลอยแยก — นี่คือหัวใจของแบบ 07
+      ที่เจ้าของเลือก · อ่านแล้วรู้ทันทีว่าร่างนี้มาจากประโยคไหน
+    */}
+    {line.drafts?.map((d) => (
+      <DraftCard key={d.id} draft={d} onSettled={onDismiss} />
+    ))}
+    </>
   )
 }

@@ -9,7 +9,7 @@
 import type { NextRequest } from 'next/server'
 import { createClient, currentUserId } from '@/lib/supabase/server'
 import { readOnlyDb } from '@/lib/ai/supabaseDb'
-import { isToolName, runTool } from '@/lib/ai/tools'
+import { isCallableTool, runTool } from '@/lib/ai/tools'
 import { bangkokToday } from '@/lib/time'
 
 export const runtime = 'nodejs'
@@ -21,8 +21,14 @@ export async function POST(
 ) {
   const { tool } = await params
 
-  // ชั้นที่ 2 · รับเฉพาะชื่อที่อยู่ในทะเบียน
-  if (!isToolName(tool)) {
+  /*
+   * ชั้นที่ 2 · รับเฉพาะชื่อที่อยู่ในทะเบียน
+   *
+   * รวมชื่อฝั่งเสนอ (`propose_*`) ด้วย — พวกนั้นยังไม่เขียนอะไร มันคืนร่าง
+   * กลับไปให้เบราว์เซอร์วาดเป็นการ์ด · การเขียนจริงอยู่ที่ server action
+   * ซึ่งเป็นคนละทางกับ route นี้ทั้งหมด (doc/WRITE.md)
+   */
+  if (!isCallableTool(tool)) {
     return Response.json({ ok: false, error: `ไม่รู้จัก tool ชื่อ ${tool}` }, { status: 404 })
   }
 

@@ -8,6 +8,8 @@ import { VoiceCall as Session, type CallState, type Caption } from '@/lib/voice/
 import { useTalkPrefs } from '@/lib/talkPrefs'
 import { redactVoiceTurns } from '@/lib/voice/transcript'
 import { setMic, useMic } from '@/lib/voice/micStore'
+import type { Draft } from '@/lib/drafts'
+import DraftSheet from '@/components/DraftSheet'
 
 export type VoiceTurn = { role: 'user' | 'assistant'; content: string }
 
@@ -24,6 +26,16 @@ type CallApi = {
   quotaOut: boolean
   /** turn ที่ปิดก้อนแล้วในสายปัจจุบัน · หน้า KeviN เอาไปแสดงสด */
   turns: VoiceTurn[]
+  /**
+   * ร่างที่ผู้ช่วยเสนอระหว่างสายและยังไม่ได้ยืนยัน
+   *
+   * ⚠️ **อยู่ที่นี่ ไม่ใช่ในหน้า KeviN** ด้วยเหตุผลเดียวกับที่ session อยู่ที่นี่ —
+   *    สลับไปดูปฏิทินกลางสายแล้วร่างต้องไม่หาย · และต้องรอดข้ามการต่อสายใหม่
+   *    ตอน Live API ตัดที่ 15 นาที ซึ่งเกิดใต้ระดับนี้ทั้งหมด
+   */
+  drafts: Draft[]
+  /** เอาร่างออกจากจอ — ใช้ทั้งตอนกดทิ้งและตอนยืนยันสำเร็จ */
+  dropDraft: (id: string) => void
   start: () => Promise<void>
   /** สลับไมค์ระหว่างสาย · ไม่มีสายอยู่ก็เรียกได้ ค่าจะไปมีผลตอนโทรครั้งถัดไป */
   switchMic: (deviceId: string) => Promise<void>
@@ -54,6 +66,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   const prefs = useTalkPrefs()
   const mic = useMic()
 
+  const [drafts, setDrafts] = useState<Draft[]>([])
   const [state, setState] = useState<CallState | 'idle'>('idle')
   const [live, setLive] = useState<Caption | null>(null)
   const [turns, setTurns] = useState<VoiceTurn[]>([])
@@ -131,6 +144,13 @@ export default function CallProvider({ children }: { children: React.ReactNode }
     collected.current = []
     buffer.current = { spoke: false, kevin: '' }
     setTurns([])
+    /*
+     * ล้างร่างค้างตอน**เริ่มสายใหม่** ไม่ใช่ตอนวางสาย
+     *
+     * วางสายแล้วร่างต้องยังอยู่ให้กดยืนยันได้ — คนวางสายเพราะพูดจบ ไม่ใช่เพราะ
+     * เปลี่ยนใจ · แต่พอเริ่มสายใหม่แปลว่าเริ่มเรื่องใหม่ ของค้างจากรอบก่อนไม่ควรตามมา
+     */
+    setDrafts([])
 
     const s = new Session(prefs, {
       onState: setState,
@@ -145,6 +165,8 @@ export default function CallProvider({ children }: { children: React.ReactNode }
       },
       onTurnEnd: flush,
       onLevel: setLevel,
+      /* ใบใหม่ต่อท้าย ไม่ทับของเดิม — พูดรวดเดียวสามงานต้องได้สามใบ */
+      onDraft: (d) => setDrafts((prev) => [...prev, d]),
       onError: (m) => {
         setError(m)
         // โควตาเสียงหมด = คนละโควตากับแชต · หน้าจอจะดันไปโหมดแชตให้
@@ -207,16 +229,27 @@ export default function CallProvider({ children }: { children: React.ReactNode }
     return () => document.removeEventListener('visibilitychange', onHide)
   }, [running, hangUp])
 
+  const dropDraft = useCallback((id: string) => {
+    setDrafts((prev) => prev.filter((d) => d.id !== id))
+  }, [])
+
   const api = useMemo<CallApi>(() => ({
-    state, live, elapsed, muted, error, quotaOut, turns, level,
+    state, live, elapsed, muted, error, quotaOut, turns, level, drafts,
     start, hangUp, toggleMute, switchMic,
+    dropDraft,
     dismissError: () => setError(null),
-  }), [state, live, elapsed, muted, error, quotaOut, turns, level, start, hangUp, toggleMute, switchMic])
+  }), [state, live, elapsed, muted, error, quotaOut, turns, level, drafts, start, hangUp, toggleMute, switchMic, dropDraft])
 
   return (
     <Ctx.Provider value={api}>
       {children}
       {/* แถบตามไปทุกหน้า — ไมค์ที่เปิดค้างต้องมองเห็นตลอด (หลัก UX ข้อ 5) */}
+      {/*
+        ร่างค้างตามไปหน้าอื่นด้วย (แบบ 02) — เหตุผลเดียวกับแถบ "กำลังคุย"
+        คือของที่ยังไม่จบต้องมองเห็นตลอด ไม่ใช่รอให้กลับมาเจอเอง
+      */}
+      {!path.startsWith('/kevin') && <DraftSheet />}
+
       {running && !path.startsWith('/kevin') && (
         <button className="callbar" onClick={() => router.push('/kevin')}>
           <span className="call__dot" />

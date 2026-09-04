@@ -11,8 +11,28 @@ import { isRealRoute } from '../lib/chat/links'
 
 const TODAY = '2026-08-30'
 
-test('บอกชัดว่าอ่านอย่างเดียว', () => {
-  assert.match(systemPrompt('chat', TODAY), /อ่านอย่างเดียว/)
+test('บอกชัดว่าเสนอได้ แต่บันทึกเองไม่ได้', () => {
+  const p = systemPrompt('chat', TODAY)
+  // หัวใจของทั้งเรื่อง — ถ้าประโยคนี้หาย โมเดลจะพูดว่า "บันทึกให้แล้ว"
+  // ทั้งที่ยังไม่มีอะไรถูกเขียน ซึ่งเป็นคำโกหกที่ผู้ใช้เชื่อทันที
+  assert.match(p, /ห้ามพูดว่าบันทึกให้แล้ว/)
+  assert.match(p, /propose_/)
+})
+
+test('ห้ามกดยืนยันแทนผู้ใช้', () => {
+  // ปุ่มบนจอเป็นเส้นแบ่งเดียวระหว่างการเสนอกับการเขียนจริง
+  assert.match(systemPrompt('voice', TODAY), /ห้ามกดยืนยันแทนผู้ใช้/)
+})
+
+test('บอกว่าลบวิชาและแก้ตารางเรียนซ้ำทำไม่ได้', () => {
+  const p = systemPrompt('chat', TODAY)
+  assert.match(p, /ลบวิชา/)
+  assert.match(p, /ซ้ำทุกสัปดาห์/)
+})
+
+test('สั่งให้ส่งเวลาไทยเข้า propose ไม่ใช่ UTC', () => {
+  // แปลงเองเมื่อไหร่จะเหลื่อม 7 ชั่วโมงแบบเงียบ ๆ — เวลาที่ดูสมเหตุผลแต่ผิดวัน
+  assert.match(systemPrompt('chat', TODAY), /ห้ามแปลงเป็น UTC เอง/)
 })
 
 test('สั่งห้ามตอบว่าไม่มีอะไรเมื่อ tool ล่ม', () => {
@@ -29,7 +49,7 @@ test('โหมดเสียงกับโหมดแชตมีโทน�
   const voice = systemPrompt('voice', TODAY)
   assert.notEqual(chat, voice)
   assert.match(voice, /เหมือนคนคุยกันจริง|คนคุยกันจริง/)
-  for (const rule of ['อ่านอย่างเดียว', 'ห้ามตอบว่าไม่มีอะไร', 'calendar']) {
+  for (const rule of ['ห้ามพูดว่าบันทึกให้แล้ว', 'ห้ามตอบว่าไม่มีอะไร', 'calendar']) {
     assert.ok(chat.includes(rule) && voice.includes(rule), `กฎ "${rule}" ต้องมีทั้งสองโหมด`)
   }
 })

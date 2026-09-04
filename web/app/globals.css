@@ -1852,6 +1852,178 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 }
 
 /* =====================================================================
+   การ์ดยืนยัน · สิ่งที่ผู้ช่วยเสนอแต่ยังไม่ได้ทำ
+   ===================================================================== */
+/*
+ * รูปแบบ **07** จาก `CONFIRM-CARD.html` (เจ้าของเคาะ 2 ก.ย. 2026) —
+ * การ์ดอยู่ในกล่องเดียวกับคำพูดของ KeviN ทั้งในแชตและระหว่างสาย
+ *
+ * ⚠️ **ห้ามสูงจนดันปุ่มวางสายตกจอ** — ระหว่างสายมันซ้อนอยู่ในฉากเดียวกับ
+ *    วงเสียงและปุ่ม · `max-height` กับการเลื่อนในตัวเองคือสิ่งที่กันไว้
+ *    วัดบนจอ 360×640 ทุกครั้งที่แตะความสูงของการ์ด (doc/WRITE.md §6)
+ */
+.dcard {
+  border: 1px solid rgba(165, 148, 255, 0.42);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(46, 38, 80, 0.96), rgba(31, 25, 55, 0.96));
+  box-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.7);
+  padding: 0.6rem 0.7rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  /* ร่างยาว ๆ เลื่อนในตัวเอง ไม่ยืดฉากจนของอื่นตกจอ */
+  max-height: 40vh; overflow-y: auto;
+}
+
+.dcard__kind {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-family: var(--f-mono); font-size: var(--s--2);
+  letter-spacing: 0.08em; color: var(--brand);
+}
+.dcard__dot { width: 5px; height: 5px; border-radius: 50%; background: var(--task); flex: none; }
+.dcard__title { font-size: var(--s-0); font-weight: 700; line-height: 1.3; }
+
+.dcard__lines { margin: 0.1rem 0 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.dcard__line { display: flex; gap: 0.6rem; align-items: baseline; }
+.dcard__line dt {
+  flex: none; min-width: 4.2rem;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+}
+.dcard__v { margin: 0; font-size: var(--s--1); color: var(--ink); }
+.dcard__v--due { color: var(--due); font-weight: 600; }
+
+/* ค่าเดิมขีดฆ่าไว้ข้างหน้าค่าใหม่ — ทานได้ในบรรทัดเดียวว่าเปลี่ยนจากอะไร */
+.dcard__was {
+  color: var(--faint); font-weight: 400; margin-right: 0.4rem;
+  text-decoration-color: rgba(142, 139, 164, 0.7);
+}
+
+.dcard__err { margin: 0.15rem 0 0; font-size: var(--s--2); color: var(--due); }
+
+.dcard__acts { display: flex; gap: 0.35rem; margin-top: 0.15rem; }
+.dcard__go {
+  flex: 1; border: 0; border-radius: var(--r-pill); padding: 0.4rem 0;
+  background: var(--grad-brand); color: var(--on-brand);
+  font: inherit; font-size: var(--s--1); font-weight: 700; cursor: pointer;
+}
+.dcard__alt {
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  padding: 0.4rem 0.7rem; background: none; color: var(--muted);
+  font: inherit; font-size: var(--s--1); cursor: pointer;
+}
+.dcard__go:disabled, .dcard__alt:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- หลังยืนยันแล้ว — การ์ดกลายเป็นคำยืนยันผล พร้อมทางถอย ---- */
+.dcard--done {
+  flex-direction: row; align-items: center; justify-content: space-between;
+  gap: 0.6rem; border-color: rgba(116, 198, 164, 0.4);
+  background: rgba(28, 48, 42, 0.6); max-height: none;
+}
+.dcard__ok {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: var(--s--1); color: var(--task); font-weight: 600;
+}
+.dcard__undo {
+  flex: none; border: 1px solid rgba(116, 198, 164, 0.4); border-radius: var(--r-pill);
+  padding: 0.25rem 0.7rem; background: none; color: var(--task);
+  font: inherit; font-size: var(--s--2); cursor: pointer;
+}
+
+/* =====================================================================
+   ร่างค้างตอนอยู่หน้าอื่น (แบบ 02)
+   ===================================================================== */
+/*
+ * ⚠️ **ต่ำกว่าแถบล่าง (20)** โดยตั้งใจ — แผ่นนี้ลอยเหนือเนื้อหาแต่ไม่ทับทางเปลี่ยนหน้า
+ *    ผู้ใช้ที่แค่จะกดไปหน้าอื่นต้องกดได้ · และมีปุ่ม "ไว้ก่อน" ให้ยุบเองด้วย
+ */
+.dpop {
+  position: fixed; left: 0; right: 0; z-index: 19;
+  bottom: calc(4.9rem + env(safe-area-inset-bottom));
+  display: flex; justify-content: center; pointer-events: none;
+}
+.dpop__panel {
+  pointer-events: auto;
+  width: min(30rem, 100% - 1.6rem);
+  max-height: 60vh; overflow-y: auto;
+  background: linear-gradient(180deg, rgba(31, 25, 55, 0.98), rgba(24, 19, 45, 0.98));
+  border: 1px solid rgba(165, 148, 255, 0.35); border-radius: 18px;
+  box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.9);
+  padding: 0.7rem 0.8rem 0.8rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  animation: dpop-in var(--t-base) var(--ease) both;
+}
+@keyframes dpop-in { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+.dpop__later { align-self: center; }
+
+/* ยุบแล้วเหลือแถบบาง — ทรงเดียวกับแถบ "กำลังคุย" ที่ผู้ใช้รู้จักอยู่แล้ว */
+.dfold {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 19;
+  bottom: calc(4.9rem + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 0.45rem;
+  border: 1px solid rgba(165, 148, 255, 0.4); border-radius: var(--r-pill);
+  background: rgba(31, 25, 55, 0.97); color: var(--ink);
+  font: inherit; font-size: var(--s--1); padding: 0.35rem 0.9rem;
+  cursor: pointer; box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.9);
+  animation: dpop-in var(--t-fast) var(--ease) both;
+}
+.dfold__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); flex: none; }
+.dfold__hint { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
+@media (min-width: 768px) {
+  .dpop, .dfold { bottom: 1.2rem; }
+  .dpop { left: 200px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dpop__panel, .dfold { animation: none; }
+}
+
+/* =====================================================================
+   ชั้นสอง · ครึ่งจอล่างตอนกดแก้ (แบบ 10)
+   ===================================================================== */
+/*
+ * ⚠️ z-index สูงกว่า `.sheet` ปกติเพราะเปิดทับแผงอื่นได้ · แต่ยัง**ต่ำกว่าไม่ได้**
+ *    กว่าแถบล่าง เพราะตอนแก้ร่างผู้ใช้ไม่ควรเปลี่ยนหน้าไปไหน
+ */
+.dsheet {
+  position: fixed; inset: 0; z-index: 46;
+  background: rgba(8, 6, 18, 0.55);
+  display: flex; align-items: flex-end;
+}
+.dsheet__panel {
+  width: 100%; max-height: 72vh; overflow-y: auto;
+  background: linear-gradient(180deg, rgba(31, 25, 55, 0.99), rgba(24, 19, 45, 0.99));
+  border-top: 1px solid rgba(165, 148, 255, 0.35);
+  border-radius: 18px 18px 0 0;
+  padding: 0.8rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.dsheet__grab {
+  width: 34px; height: 3px; border-radius: 2px;
+  background: var(--line); margin: 0 auto 0.2rem;
+}
+.dsheet__field {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;
+  border-bottom: 1px solid var(--line); padding: 0.4rem 0;
+}
+.dsheet__field > span {
+  flex: none; font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+}
+.dsheet__field input {
+  flex: 1; min-width: 0; text-align: right;
+  background: none; border: 0; color: var(--ink); font: inherit; font-size: var(--s--1);
+}
+.dsheet__field input:focus { outline: none; color: var(--brand-pale); }
+.dsheet__field--ro b { font-weight: 600; font-size: var(--s--1); }
+.dsheet__acts { display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+.dsheet__acts .dcard__go { padding: 0.55rem 0; }
+
+@media (min-width: 768px) {
+  .dsheet { align-items: center; justify-content: center; }
+  .dsheet__panel {
+    max-width: 26rem; border-radius: 18px; border: 1px solid rgba(165, 148, 255, 0.35);
+    padding-bottom: 1rem;
+  }
+}
+
+/* =====================================================================
    ปุ่มระหว่างสาย · ไอคอนล้วน
    ===================================================================== */
 /*
@@ -1893,6 +2065,47 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   display: block; font-family: var(--f-mono); font-size: var(--s--2);
   font-weight: 400; color: var(--faint); letter-spacing: 0.04em; margin-bottom: 0.15rem;
 }
+
+/*
+ * กล่องคำบรรยายที่มีร่างอยู่ข้างใน (**แบบ 07**)
+ *
+ * ⚠️ **ต้องคุมความสูงทั้งกล่อง ไม่ใช่แค่การ์ด** — คำบรรยายยาว ๆ บวกร่างสองใบ
+ *    ดันปุ่มวางสายตกจอได้บนเครื่องเตี้ย · กล่องเลื่อนในตัวเอง ฉากจึงไม่ยืด
+ *    (เจ้าของเลือกแบบนี้ทั้งที่รู้ว่าสูงสุดในชุด ผมจึงต้องกันตรงนี้ให้แน่น)
+ */
+/*
+ * ⚠️ **หดเองเมื่อที่ไม่พอ ไม่ใช่ตั้ง `max-height` เป็น vh แล้วเดา**
+ *
+ *    เดาด้วย vh ผิดทันทีที่จำนวนร่างเปลี่ยน — วัดบนจอ 360×640 แล้วร่างสองใบ
+ *    ดันปุ่มวางสายไปแตะขอบจอพอดี ใบที่สามคือตกจอ (2 ก.ย. 2026)
+ *
+ *    ให้กล่องนี้เป็นชิ้นเดียวในฉากที่ยอมหด ส่วนวงเสียง ข้อความสถานะ และปุ่ม
+ *    เป็น `flex: none` ทั้งหมด · พื้นที่ไม่พอเมื่อไหร่ กล่องนี้เลื่อนในตัวเอง
+ *    **ปุ่มวางสายจึงไม่มีทางตกจอไม่ว่าจะมีร่างกี่ใบ**
+ */
+.caption--live { flex: 1 1 auto; min-height: 3.5rem; overflow-y: auto; }
+
+/*
+ * มีร่างรออยู่ = ความสนใจย้ายไปที่ร่าง วงกลมจึงถอยลงมาเป็นฉากหลัง
+ *
+ * ไม่ใช่แค่ความสวย — บนจอ 360×640 ที่มีร่างสามใบ กล่องเหลือความสูงแค่ 91px
+ * ซึ่งอ่านได้ทีละบรรทัด · ยกที่ว่างจากวงกลมมาให้กล่องแล้วอ่านได้ทั้งใบ
+ * และวงยังใหญ่พอให้เห็นว่าไมค์ทำงานอยู่ ซึ่งเป็นหน้าที่จริงของมัน
+ */
+.stage:has(.caption__draft) .orb {
+  width: 84px; height: 84px;
+  transition: width var(--t-base) var(--ease), height var(--t-base) var(--ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage:has(.caption__draft) .orb { transition: none; }
+}
+.stage > .call__timer,
+.stage > .orb,
+.stage > .stage__state,
+.stage > .callbtns { flex: none; }
+/* เส้นคั่นบาง ๆ ให้เห็นว่าร่างเป็นคนละก้อนกับคำพูด แต่ยังอยู่ในกล่องเดียวกัน */
+.caption__draft { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
+.caption__draft:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 
 .call__bar { display: flex; gap: 0.6rem; width: 100%; max-width: 22rem; margin-top: 0.3rem; }
 .call__bar > * { flex: 1; }

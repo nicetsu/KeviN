@@ -8,6 +8,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { isToolName, parseCalendar, runTool, toolDeclarations, TOOL_NAMES } from '../lib/ai/tools'
+import { PROPOSE_NAMES } from '../lib/ai/propose'
 import type { ReadOnlyDb } from '../lib/ai/db'
 
 const TODAY = '2026-08-30'
@@ -53,12 +54,27 @@ test('ทะเบียนไม่มี tool ที่เขียนข้�
   for (const name of TOOL_NAMES) assert.equal(writeish.test(name), false, `${name} ฟังดูเหมือนเขียนข้อมูล`)
 })
 
-test('toolDeclarations ครบทุกตัวและมี schema', () => {
+test('toolDeclarations ครบทั้งฝั่งอ่านและฝั่งเสนอ และมี schema', () => {
   const decls = toolDeclarations()
-  assert.equal(decls.length, TOOL_NAMES.length)
+  const names = decls.map((d) => d.name)
+
+  for (const n of TOOL_NAMES) assert.ok(names.includes(n), `หาย ${n}`)
+  // ฝั่งเสนอหายไปเมื่อไหร่ ผู้ช่วยจะแก้ข้อมูลไม่ได้เลยโดยไม่มี error ให้เห็น
+  for (const n of PROPOSE_NAMES) assert.ok(names.includes(n), `หาย ${n}`)
+  assert.equal(decls.length, TOOL_NAMES.length + PROPOSE_NAMES.length)
+
   for (const d of decls) {
     assert.ok(d.description.length > 10)
     assert.equal(d.parameters.type, 'object')
+  }
+})
+
+test('ทุก tool ฝั่งเสนอบอกในคำอธิบายว่ายังไม่บันทึก', () => {
+  // โมเดลอ่านคำอธิบายนี้เพื่อตัดสินใจว่าจะพูดกับผู้ใช้ยังไง — ถ้าไม่บอกว่ายังไม่บันทึก
+  // มันจะตอบว่า "บันทึกให้แล้วครับ" ทั้งที่ยังไม่มีอะไรถูกเขียนลงฐานข้อมูล
+  for (const d of toolDeclarations()) {
+    if (!d.name.startsWith('propose_')) continue
+    assert.ok(/ยังไม่บันทึก/.test(d.description), `${d.name} ไม่ได้บอกว่ายังไม่บันทึก`)
   }
 })
 
@@ -102,7 +118,7 @@ test('calendar · แถวของ Area ที่ไม่อนุญาต�
   ])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.deepEqual(r.rows.map((x) => (x as { ชื่อ: string }).ชื่อ), ['แคลคูลัส 1', 'UniHack'])
 })
 
@@ -114,7 +130,7 @@ test('items · กรองผ่าน projects.areas.name ที่ซ้อ�
   ])
   const r = await runTool('items', {}, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.deepEqual(r.rows.map((x) => (x as { ชื่อ: string }).ชื่อ), ['ส่งรายงาน'])
 })
 
@@ -127,7 +143,7 @@ test('event · กิจกรรมของ Area ที่ไม่อนุ�
   }])
   const r = await runTool('event', { event_id: '11111111-2222-3333-4444-555555555555' }, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.deepEqual(r.rows, [])
 })
 
@@ -157,7 +173,7 @@ test('calendar · ส่งสถานะไม่ไปและเวลา�
   const db = fakeDb([entry({ skipped: true }), entry({ source_id: 's2', trimmed: true })])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.equal((r.rows[0] as { ไม่ไป?: boolean }).ไม่ไป, true)
   assert.equal((r.rows[1] as { เวลาถูกตัด?: boolean }).เวลาถูกตัด, true)
 })
@@ -169,7 +185,7 @@ test('calendar · ให้ลิงก์เฉพาะกิจกรรม �
   ])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.equal((r.rows[0] as { ลิงก์?: string }).ลิงก์, undefined)
   assert.equal((r.rows[1] as { ลิงก์?: string }).ลิงก์, '/project/p1/event/ev1')
 })
@@ -182,7 +198,7 @@ test('items scope=overdue คัดเฉพาะที่เลยเที่
   ])
   const r = await runTool('items', { scope: 'overdue' }, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.deepEqual(r.rows.map((x) => (x as { ชื่อ: string }).ชื่อ), ['เลยแล้ว', 'เมื่อคืนสี่ทุ่ม'])
 })
 
@@ -204,7 +220,7 @@ test('event · เรียงกำหนดการตามวันแล�
   }])
   const r = await runTool('event', { event_id: '11111111-2222-3333-4444-555555555555' }, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   const agenda = (r.rows[0] as { กำหนดการ: { ชื่อ: string }[] }).กำหนดการ
   assert.deepEqual(agenda.map((a) => a.ชื่อ), ['Registration', 'Briefing', 'Pitching'])
 })
@@ -224,7 +240,7 @@ test('hidden นับแถวที่ถูกกรองออก', async (
   ])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.equal(r.rows.length, 1)
   assert.equal(r.hidden, 2)
 })
@@ -232,7 +248,7 @@ test('hidden นับแถวที่ถูกกรองออก', async (
 test('hidden เป็น 0 เมื่อไม่มีอะไรถูกกรอง', async () => {
   const r = await runTool('calendar', {}, ctx(fakeDb([entry()])))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.equal(r.hidden, 0)
 })
 
@@ -241,7 +257,7 @@ test('hidden ไม่บอกว่าของที่ซ่อนคือ�
   const db = fakeDb([entry({ area_name: 'Money', title: 'จ่ายค่าหอ 12,000' })])
   const r = await runTool('calendar', {}, ctx(db))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   assert.equal(JSON.stringify(r).includes('จ่ายค่าหอ'), false)
   assert.equal(JSON.stringify(r).includes('Money'), false)
 })
@@ -253,7 +269,7 @@ test('items · ทุกแถวมีลิงก์ และเป็น pat
   // (ตอบ https://tasks.google.com/ ซึ่งไม่ใช่ของระบบนี้เลย)
   const r = await runTool('items', {}, ctx(fakeDb([item(), item({ id: 'i2' })])))
   assert.equal(r.ok, true)
-  if (!r.ok) return
+  if (!r.ok || !('rows' in r)) return
   for (const row of r.rows) {
     const link = (row as { ลิงก์?: string }).ลิงก์
     assert.ok(link, 'ทุกแถวต้องมีลิงก์')
@@ -270,7 +286,7 @@ test('ไม่มี tool ไหนคืนลิงก์ที่ออก�
   for (const [name, db] of dbs) {
     const r = await runTool(name, {}, ctx(db))
     assert.equal(r.ok, true, name)
-    if (!r.ok) continue
+    if (!r.ok || !('rows' in r)) continue
     const text = JSON.stringify(r.rows)
     assert.equal(/https?:\/\//.test(text), false, `${name} คืนลิงก์ภายนอกมา`)
   }

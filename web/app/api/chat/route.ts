@@ -20,6 +20,7 @@ import {
   type StoredMessage,
 } from '@/lib/chat/store'
 import { bangkokToday } from '@/lib/time'
+import type { Draft } from '@/lib/drafts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -76,6 +77,14 @@ export async function POST(request: NextRequest) {
 
   const db = await readOnlyDb()
   const tools = toolDeclarations()
+
+  /*
+   * ร่างที่ผู้ช่วยเสนอในรอบนี้ — ส่งกลับไปให้หน้าจอวาดเป็นการ์ด
+   *
+   * ⚠️ **ไม่ได้บันทึกลงประวัติ** ร่างมีอายุแค่หน้าจอนี้ · ถ้าเก็บลงบทสนทนา
+   *    ผู้ใช้จะเลื่อนขึ้นไปเจอการ์ดเก่าที่กดยืนยันได้ทั้งที่บริบทหมดอายุไปแล้ว
+   */
+  const drafts: Draft[] = []
   // ภาษาที่ผู้ใช้ตั้งไว้ · ค่าที่ไม่รู้จักถูกปัดกลับเป็นค่าตั้งต้น ไม่ใช่ส่งดิบเข้า prompt
   const system = systemPrompt('chat', today, readLang(body.lang))
 
@@ -97,24 +106,37 @@ export async function POST(request: NextRequest) {
       const responses = await Promise.all(
         out.calls.map(async (call) => {
           const result = await runTool(call.name, call.args, { db, today })
+          const proposed = result.ok && 'draft' in result
+          if (proposed) drafts.push(result.draft)
+
           void logToolCall(userId, conversationId, {
             name: call.name,
             input: call.args,
             ok: result.ok,
-            rowsOut: result.ok ? result.rows.length : 0,
-            rowsHidden: result.ok ? result.hidden : 0,
+            rowsOut: result.ok && 'rows' in result ? result.rows.length : 0,
+            rowsHidden: result.ok && 'rows' in result ? result.hidden : 0,
             error: result.ok ? undefined : result.error,
           })
           // ส่ง error กลับเป็นผลของ tool ไม่ใช่ล้มทั้งคำขอ — โมเดลจะได้บอกผู้ใช้
           // ว่าดึงข้อมูลไม่ได้ ซึ่งดีกว่าหน้าจอขึ้น error ลอย ๆ โดยไม่รู้ว่าถามอะไรไป
-          return {
-            functionResponse: {
-              name: call.name,
-              response: result.ok
-                ? { rows: result.rows, hidden: result.hidden }
-                : { error: result.error },
-            },
-          }
+          /*
+           * ผลของ `propose_*` ที่ส่งกลับเข้าโมเดล **ไม่ใช่ตัวร่างทั้งก้อน**
+           *
+           * ส่งแค่ว่าร่างขึ้นแล้วและชื่ออะไร · ถ้าส่งทั้งก้อนกลับไป โมเดลจะเอา
+           * รายละเอียดไปพูดซ้ำทั้งหมดทั้งที่ผู้ใช้อ่านจากการ์ดอยู่แล้ว
+           * และมันอาจหลงคิดว่าบันทึกเสร็จแล้วเพราะเห็นข้อมูลครบ
+           */
+          const response = !result.ok
+            ? { error: result.error }
+            : 'draft' in result
+              ? {
+                  ok: true,
+                  note: 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                  title: result.draft.title,
+                }
+              : { rows: result.rows, hidden: result.hidden }
+
+          return { functionResponse: { name: call.name, response } }
         })
       )
 
@@ -150,9 +172,10 @@ export async function POST(request: NextRequest) {
       ok: true,
       conversationId,
       reply,
+      drafts,
       warning: `ตอบได้แต่บันทึกประวัติไม่สำเร็จ · ${e instanceof Error ? e.message : ''}`,
     })
   }
 
-  return Response.json({ ok: true, conversationId, reply })
+  return Response.json({ ok: true, conversationId, reply, drafts })
 }

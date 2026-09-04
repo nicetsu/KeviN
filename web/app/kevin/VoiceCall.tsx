@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useCall, mmss } from '@/components/CallProvider'
+import DraftCard from '@/components/DraftCard'
 import type { CallState } from '@/lib/voice/session'
 
 /** รูปคลื่น · แท่งกลางไวกว่าแท่งริม ทำให้ค่าเดียวดูเป็นคลื่นไม่ใช่แถบ */
@@ -147,10 +148,28 @@ export default function VoiceCall() {
         เพิ่งพูดวิ่งขึ้นจอไม่ได้ช่วยอะไร และผิดเวลาก็อ่านว่าระบบฟังผิด
         ทั้งที่มันฟังถูก · ที่ค้างคำตอบล่าสุดไว้ตอนเราพูด เพราะยังอยากอ่านมันอยู่
       */}
-      {call.live?.text && (
-        <div className="caption" aria-live="polite">
-          <b>KeviN</b>
-          {call.live.text}
+      {/*
+        **แบบ 07** — ร่างอยู่ในกล่องเดียวกับคำพูดที่ทำให้เกิดมัน (เจ้าของเคาะ 2 ก.ย. 2026)
+        อ่านแล้วรู้ทันทีว่าการ์ดนี้มาจากประโยคไหน โดยไม่ต้องเดา
+
+        ⚠️ **กล่องนี้สูงที่สุดในฉาก** — คำบรรยายบวกร่างบวกปุ่มสามใบ
+           `max-height` ของทั้งกล่องกับของ `.dcard` ข้างในคือสิ่งเดียวที่กัน
+           ไม่ให้ปุ่มวางสายถูกดันตกจอบนเครื่องเตี้ย · วัดบนจอ 360×640 ก่อนแตะความสูง
+      */}
+      {(call.live?.text || call.drafts.length > 0) && (
+        <div className="caption caption--live" aria-live="polite">
+          {call.live?.text && (
+            <>
+              <b>KeviN</b>
+              {call.live.text}
+            </>
+          )}
+
+          {call.drafts.map((d) => (
+            <div key={d.id} className="caption__draft">
+              <DraftCard draft={d} onSettled={call.dropDraft} />
+            </div>
+          ))}
         </div>
       )}
 
