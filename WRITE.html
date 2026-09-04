@@ -1,0 +1,211 @@
+<title>ให้ KeviN แก้ข้อมูลได้</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap">
+<style>
+  :root{
+    --bg:#120E22; --surface:#1B1630; --raised:#241E3C; --line:#2E2748;
+    --ink:#EFECFA; --muted:#B6B1CC; --faint:#8E8BA4;
+    --brand:#A594FF; --brand-deep:#8878F0; --brand-pale:#C3B6FF; --on-brand:#14121F;
+    --sched:#79C2D0; --task:#74C6A4; --due:#E0897E; --event:#D5BB6D;
+    --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk','Noto Sans Thai',system-ui,sans-serif;
+    --body:'Noto Sans Thai','Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+    line-height:1.7;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(58% 20% at 22% 1%, rgba(165,148,255,.20), transparent 70%),
+      radial-gradient(52% 18% at 84% 5%, rgba(121,194,208,.13), transparent 72%),
+      radial-gradient(96% 26% at 50% 102%, rgba(136,120,240,.22), transparent 74%);
+    background-attachment:fixed;
+  }
+  .page{max-width:900px;margin:0 auto;padding:clamp(1.6rem,4vw,3.5rem) clamp(1rem,3vw,2rem) 5rem}
+
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);margin:0 0 .9rem}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(2rem,5.5vw,3rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 1rem;text-wrap:balance}
+  .lede{font-size:1.05rem;color:var(--muted);font-weight:300;margin:0 0 .6rem;max-width:60ch}
+  .lede strong{color:var(--ink);font-weight:600}
+  .stamp{font-family:var(--mono);font-size:.72rem;color:var(--faint);margin-top:1.2rem}
+
+  h2{
+    font-family:var(--disp);font-size:1.35rem;font-weight:700;letter-spacing:-.02em;
+    margin:3.2rem 0 .3rem;display:flex;align-items:baseline;gap:.7rem;
+  }
+  h2 s{font-family:var(--mono);font-size:.8rem;color:var(--brand);text-decoration:none;font-weight:400}
+  .sub{color:var(--faint);font-size:.88rem;margin:0 0 1.2rem;font-weight:300}
+
+  .rule{
+    margin:1.6rem 0;padding:1.15rem 1.3rem;border-radius:16px;
+    border:1px solid rgba(165,148,255,.35);
+    background:linear-gradient(135deg,rgba(46,38,80,.7),rgba(31,25,55,.7));
+  }
+  .rule b{display:block;font-family:var(--disp);font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.4rem}
+  .rule p{margin:0;font-size:.92rem;color:var(--muted);font-weight:300}
+
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+  th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:400;padding:0 .7rem .5rem 0;border-bottom:1px solid var(--line)}
+  td{padding:.65rem .7rem .65rem 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--muted);font-weight:300}
+  td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  td b{color:var(--ink);font-weight:600}
+  .yes{color:var(--task);font-weight:600}
+  .no{color:var(--due);font-weight:600}
+  .wrapx{overflow-x:auto}
+
+  .flow{display:flex;flex-direction:column;gap:.4rem;margin:1.3rem 0;font-size:.88rem}
+  .step{
+    display:flex;align-items:flex-start;gap:.8rem;padding:.7rem .9rem;border-radius:12px;
+    border:1px solid var(--line);background:rgba(27,22,48,.5);
+  }
+  .step u{
+    font-family:var(--mono);font-size:.68rem;color:var(--brand);flex:none;
+    border:1px solid rgba(165,148,255,.3);border-radius:6px;padding:.05rem .35rem;text-decoration:none;margin-top:.15rem;
+  }
+  .step div{flex:1}
+  .step strong{display:block;font-size:.94rem;font-weight:600;color:var(--ink)}
+  .step small{display:block;color:var(--faint);font-size:.8rem;font-weight:300}
+  .step--write{border-color:rgba(224,137,126,.4);background:rgba(60,32,34,.35)}
+  .step--write u{color:var(--due);border-color:rgba(224,137,126,.4)}
+  .arrow{text-align:center;color:var(--faint);font-size:.8rem;line-height:1;margin:-.1rem 0}
+
+  .cards{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin:1.2rem 0}
+  .pick{border:1px solid var(--line);border-radius:14px;padding:.85rem .95rem;background:rgba(27,22,48,.5)}
+  .pick u{font-family:var(--mono);font-size:.68rem;color:var(--brand);text-decoration:none;display:block;margin-bottom:.15rem}
+  .pick strong{display:block;font-size:.95rem;font-weight:600;margin-bottom:.25rem}
+  .pick p{margin:0;font-size:.82rem;color:var(--faint);font-weight:300}
+
+  .warn{
+    margin:1.1rem 0;padding:.9rem 1.1rem;border-radius:13px;
+    border:1px solid rgba(224,137,126,.35);background:rgba(60,32,34,.28);
+  }
+  .warn b{color:#F0A99E;font-weight:700}
+  .warn p{margin:0;font-size:.88rem;color:var(--muted);font-weight:300}
+  .warn p+p{margin-top:.5rem}
+
+  ol.phases{list-style:none;padding:0;margin:1.2rem 0;counter-reset:p}
+  ol.phases li{
+    counter-increment:p;position:relative;padding:.9rem 1rem .9rem 3rem;margin-bottom:.6rem;
+    border:1px solid var(--line);border-radius:14px;background:rgba(27,22,48,.45);
+  }
+  ol.phases li::before{
+    content:counter(p);position:absolute;left:.9rem;top:.85rem;
+    font-family:var(--mono);font-size:.78rem;color:var(--on-brand);
+    background:var(--grad);width:1.5rem;height:1.5rem;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  }
+  ol.phases strong{display:block;font-size:.98rem;font-weight:600;margin-bottom:.2rem}
+  ol.phases p{margin:0;font-size:.85rem;color:var(--muted);font-weight:300}
+  ol.phases em{display:block;margin-top:.4rem;font-style:normal;font-family:var(--mono);font-size:.75rem;color:var(--task)}
+
+  .qs{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0}
+  .q{border:1px solid rgba(165,148,255,.3);border-radius:14px;padding:.9rem 1.05rem;background:rgba(36,30,60,.4)}
+  .q strong{display:block;font-size:.95rem;font-weight:600;margin-bottom:.2rem}
+  .q p{margin:0;font-size:.85rem;color:var(--muted);font-weight:300}
+  .q--done{border-color:var(--line);background:rgba(27,22,48,.35);opacity:.65}
+  .q--done strong{text-decoration:line-through;color:var(--faint)}
+  .q--done p{color:var(--task)}
+
+  code{font-family:var(--mono);font-size:.85em;color:var(--brand-pale);background:rgba(165,148,255,.1);padding:.05em .35em;border-radius:4px}
+  a{color:var(--brand)}
+  footer{margin-top:3.5rem;padding-top:1.5rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--faint);font-weight:300}
+</style>
+
+<div class="page">
+  <p class="eyebrow">KeviN · ข้อเสนอ</p>
+  <h1>ให้ผู้ช่วยแก้ข้อมูลได้ โดยไม่ยอมให้มันเขียนเอง</h1>
+  <p class="lede">วันนี้ผู้ช่วยในแอป<strong>อ่านอย่างเดียว</strong> ส่วนการเขียนอยู่ที่ MCP บน claude.ai — ซึ่งแปลว่าประตูที่เขียนได้อยู่ผิดที่มาตลอด เพราะวินาทีที่นึกออกว่าต้องเพิ่มงานคือตอนเดินออกจากห้องเรียน ไม่ใช่ตอนนั่งหน้าคอม</p>
+  <p class="stamp">ร่าง 2 ก.ย. 2026 · ยังไม่เริ่มทำ · ตำแหน่งการ์ดเคาะแล้ว</p>
+
+  <h2><s>01</s>หลักการเดียวที่ทุกอย่างตามมา</h2>
+  <div class="rule">
+    <b>โมเดลไม่เขียน โมเดลเสนอ</b>
+    <p>ชั้น tool ยังไม่มีทางเขียนลง DB เหมือนเดิม · tool ตัวใหม่แค่คืน “ร่างการกระทำ” กลับมาให้เว็บวาดเป็นการ์ด — การเขียนจริงเกิดที่ server action ที่คุณกดยืนยัน</p>
+  </div>
+  <p class="sub" style="margin-top:-.7rem">ผลพลอยได้ที่เป็นเครื่องวัดว่าเดินถูกทาง: <code>test/guard.test.ts</code> ไม่ต้องแก้เลย — ถ้าวันไหนต้องแก้เทสต์นั้นเพื่อให้ผ่าน แปลว่าเดินผิดแล้ว</p>
+
+  <h2><s>02</s>ทำไมต้องยืนยัน</h2>
+  <p class="sub">สี่เหตุผล ซึ่งข้อสุดท้ายเป็นข้อที่หนักที่สุด</p>
+  <div class="wrapx"><table>
+    <tr><th>เหตุ</th><th>รายละเอียด</th></tr>
+    <tr><td>ASR ไทยพลาดที่ตัวเลข</td><td>“ส่งวันที่ 4” กับ “วันที่ 14” ต่างกันหนึ่งพยางค์ · รหัสห้องอย่าง E11-S604 ยิ่งหนัก</td></tr>
+    <tr><td>Live ไม่มีจังหวะทาน</td><td>โมเดลตอบเร็วมาก กว่าจะรู้ว่าผิดก็เขียนไปแล้ว</td></tr>
+    <tr><td>ของจริงมีผลจริง</td><td>นี่คือตารางเรียนจริง ผิดแล้วไม่ใช่ข้อมูลเพี้ยน แต่<b>พลาดส่งงาน</b></td></tr>
+    <tr><td>ที่ที่จะใช้มากสุด</td><td>คือห้องเรียนและทางเดิน — จุดที่มีเสียงรบกวนมากที่สุด และ ASR แม่นน้อยที่สุด</td></tr>
+  </table></div>
+
+  <h2><s>03</s>ขอบเขต แบ่งตามความเสี่ยง</h2>
+  <p class="sub">เส้นแบ่งอยู่ที่ “ย้อนกลับได้ไหม” ไม่ใช่ “ยากไหม”</p>
+  <div class="wrapx"><table>
+    <tr><th>ระดับ</th><th>ทำอะไรได้</th><th>ให้ไหม</th><th>ชั้นกัน</th></tr>
+    <tr><td>ย้อนได้ทันที</td><td>ติ๊กเสร็จ · เลื่อนเวลา · เปลี่ยนชื่อ</td><td class="yes">ได้</td><td>ยืนยัน 1 ครั้ง + แถบเลิกทำ</td></tr>
+    <tr><td>สร้างของใหม่</td><td>เพิ่มงาน · เตือน · โน้ต · กิจกรรม</td><td class="yes">ได้</td><td>ยืนยัน 1 ครั้ง</td></tr>
+    <tr><td>ย้ายที่</td><td>ย้าย item ข้ามวิชา</td><td class="yes">ได้</td><td>ยืนยัน 1 ครั้ง</td></tr>
+    <tr><td>เก็บเข้าคลัง</td><td><code>archived_at</code></td><td class="yes">ได้</td><td>กู้คืนได้ 7 วัน</td></tr>
+    <tr><td>ทำลาย</td><td>ลบวิชา · ลบถาวร · ล้างประวัติ</td><td class="no">ไม่ให้เลย</td><td>ไม่มี tool ให้เรียก</td></tr>
+  </table></div>
+
+  <div class="warn">
+    <p><b>เส้นที่ไม่ข้าม</b> — <code>projects</code> มี <code>on delete cascade</code> ลบวิชาเดียวแล้วงานหายทั้งกอง คำสั่งเสียงที่ฟังผิดคำเดียวไม่ควรมีอำนาจนั้น แม้จะมี confirm ก็ตาม</p>
+    <p><b>ตารางเรียนซ้ำก็ไม่ให้แตะ</b> — <code>project_schedules</code> เป็นโครงที่ทุกอย่างอ้างอิง แก้ผิดหนึ่งแถวแล้วผิดทั้งเทอมโดยไม่มีอะไรฟ้อง</p>
+  </div>
+
+  <h2><s>04</s>เส้นทางของคำสั่งหนึ่งประโยค</h2>
+  <p class="sub">จุดสีแดงคือจุดเดียวในระบบที่เขียนข้อมูลได้ — และมันอยู่หลังปุ่มที่คุณกด</p>
+  <div class="flow">
+    <div class="step"><u>พูด</u><div><strong>“เพิ่มงานส่งรายงาน Network พฤหัสหน้า”</strong><small>Live API หรือช่องพิมพ์ ก็ทางเดียวกัน</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="step"><u>โมเดล</u><div><strong>เรียก tool ที่ขึ้นต้นด้วย <code>propose_</code></strong><small>ไม่มี tool ตัวไหนเขียนได้ ทุกตัวคืนร่างอย่างเดียว</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="step"><u>tool</u><div><strong>ตรวจรูปแบบ เติมค่าที่ขาด คืน “ร่าง”</strong><small>ไม่แตะ DB เลย — <code>guard.test.ts</code> ยังยืนอยู่ตรงนี้</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="step"><u>จอ</u><div><strong>วาดการ์ด · คุณอ่าน · กดยืนยันหรือพูดแก้</strong><small>แก้ด้วยเสียงได้โดยไม่ต้องวางสาย ร่างเดิมอัปเดตในที่</small></div></div>
+    <div class="arrow">↓</div>
+    <div class="step step--write"><u>เขียน</u><div><strong>server action ตรวจสิทธิ์แล้วเขียนจริง</strong><small>จุดเดียวที่แตะ DB · ผ่าน RLS ของผู้ใช้เอง</small></div></div>
+  </div>
+
+  <h2><s>05</s>การ์ดอยู่ตรงไหน — เคาะแล้ว</h2>
+  <p class="sub">เลือกจากสิบแบบใน <a href="https://claude.ai/code/artifact/44d1351c-8ab1-47f3-bab8-7d763d103f4d">CONFIRM-CARD</a></p>
+  <div class="cards">
+    <div class="pick"><u>แบบ 07</u><strong>ระหว่างสาย</strong><p>อยู่ในกล่องคำบรรยายเดียวกัน — คำพูดกับสิ่งที่เสนออยู่ด้วยกัน อ่านแล้วรู้ทันทีว่ามาจากประโยคไหน</p></div>
+    <div class="pick"><u>แบบ 10</u><strong>เมื่อกด “แก้”</strong><p>ครึ่งจอล่าง แยกทีละฟิลด์ให้แตะแก้ได้ · ตอนนั้นการทานสำคัญกว่าการเห็นปุ่มวางสาย</p></div>
+    <div class="pick"><u>แบบ 02</u><strong>ออกจากหน้าโทรทั้งที่ยังค้าง</strong><p>แผ่นเลื่อนขึ้นจากล่าง · หน้าอื่นไม่มีปุ่มวางสายให้บัง และเรียกความสนใจได้กว่าแถบบาง</p></div>
+    <div class="pick"><u>แบบ 07</u><strong>โหมดแชต</strong><p>ทรงเดียวกับระหว่างสาย เรียนรู้ครั้งเดียวใช้ได้ทั้งสองโหมด</p></div>
+  </div>
+
+  <div class="warn">
+    <p><b>07 สูงกว่าทุกแบบ</b> — กล่องคำบรรยาย บวกร่าง บวกปุ่มสามใบ · บนเครื่องเตี้ยมันจะดันปุ่มวางสายลงไปจนตกขอบจอ ต้องคุมด้วย <code>max-height</code> แล้วให้ตัวร่างเลื่อนในตัวเอง ไม่ใช่ปล่อยให้ฉากยืด — และวัดบนจอ 360×640 ก่อนถือว่าเสร็จ</p>
+    <p><b>02 บังแถบล่าง</b> — ในหน้าอื่นระหว่างสาย คุณอาจกำลังจะกดเปลี่ยนหน้าพอดี ต้องมีปุ่ม “ไว้ก่อน” ที่ยุบแผ่นลงเป็นแถบบาง ไม่ใช่บังค้างจนกว่าจะตัดสินใจ</p>
+  </div>
+
+  <h2><s>06</s>ลำดับการทำ</h2>
+  <p class="sub">ทำแชตก่อนเสียงเสมอ — ทานง่ายกว่า ผิดแล้วเห็นชัดกว่า และไม่กินโควตาเสียง</p>
+  <ol class="phases">
+    <li><strong>ฐาน ยังไม่มีหน้าจอ</strong><p>server action ชุดเขียน พร้อมตรวจสิทธิ์และนับแถวที่เขียนจริง · เทสต์รวมเคส “ไม่ใช่ของเรา” และ “ไม่มีแถวให้แก้” · ตัวประกอบร่างที่ไม่แตะ DB</p><em>เสร็จเมื่อ · เรียก action จากเทสต์แล้วข้อมูลเปลี่ยนถูก และ guard.test.ts ยังผ่าน</em></li>
+    <li><strong>การ์ดในโหมดแชต</strong><p>tool <code>propose_add_item</code> ตัวเดียวก่อน · การ์ดแบบ 07 ในสายข้อความ · แถบเลิกทำหลังเขียนสำเร็จ</p><em>เสร็จเมื่อ · พิมพ์ว่า “เพิ่มงานส่งรายงาน Network พฤหัสหน้า” แล้วกดยืนยัน งานโผล่ในหน้าวันนี้</em></li>
+    <li><strong>การ์ดระหว่างสาย</strong><p>แบบ 07 ใน VoiceCall พร้อม max-height ที่วัดแล้ว · พูดแก้ร่างได้ · ร่างค้างข้ามหน้าด้วยแบบ 02</p><em>เสร็จเมื่อ · พูดขณะเดินกลับหอแล้วงานลงถูก โดยไม่ต้องหยุดเดิน</em></li>
+    <li><strong>ที่เหลือ</strong><p>tool ครบชุด · การ์ดซ้อนเมื่อเสนอหลายใบ · ชั้นสองแบบ 10 · อัปเดตเอกสารทั้งชุด</p></li>
+  </ol>
+
+  <h2><s>07</s>ที่ต้องระวังตอนทำ</h2>
+  <div class="wrapx"><table>
+    <tr><th>เรื่อง</th><th>ต้องทำอะไร</th></tr>
+    <tr><td>Area ที่มองไม่เห็น</td><td><code>VISIBLE_AREAS</code> ผูกกับ<b>ชื่อ</b> Area — ร่างที่ชี้ไป Area นอกสายตาต้องถูกปฏิเสธที่ server action ด้วย ไม่ใช่เชื่อว่าโมเดลจะไม่เสนอ</td></tr>
+    <tr><td>ร่างมีอายุ</td><td>เก็บใน state ฝั่งเว็บอย่างเดียว <b>ไม่ลง DB</b> · หายไปพร้อมการรีเฟรชคือพฤติกรรมที่ถูก ไม่ใช่บั๊ก</td></tr>
+    <tr><td>สายหลุดกลางร่าง</td><td>Live ตัดที่ 15 นาทีแล้วต่อใหม่ · ร่างต้องรอด เพราะมันอยู่ฝั่งเว็บ ไม่ได้อยู่ในสาย</td></tr>
+    <tr><td>เขียนแล้วต้องเห็นผล</td><td><code>router.refresh()</code> ทันทีหลังยืนยัน ไม่งั้นคุณจะกดซ้ำเพราะคิดว่าไม่ติด</td></tr>
+    <tr><td>โควตา</td><td>เสนอ–แก้–ยืนยันหนึ่งรอบกิน 3–4 turn ซึ่งมากกว่าการถามเฉย ๆ</td></tr>
+  </table></div>
+
+  <h2><s>08</s>คำถามที่ยังค้าง</h2>
+  <p class="sub">ตอบสามข้อนี้แล้วเริ่มได้เลย</p>
+  <div class="qs">
+    <div class="q"><strong>ขอบเขตตามหัวข้อ 03 เอาไหม</strong><p>โดยเฉพาะสองข้อที่ปิดตาย — ห้ามลบวิชา และห้ามแตะตารางเรียนซ้ำ · ถ้าอยากให้ลบวิชาได้ ผมทำให้ได้แต่จะขอเป็นการยืนยันสองชั้นและพิมพ์ชื่อวิชายืนยัน</p></div>
+    <div class="q"><strong>ยืนยันชั้นเดียวพอไหม</strong><p>ตอนนี้ทุกอย่างที่อนุญาตใช้ยืนยันครั้งเดียวหมด · มีอะไรที่คุณอยากให้ถามซ้ำอีกชั้นไหม เช่นการเก็บของเข้าคลัง</p></div>
+    <div class="q"><strong>หยุดดูผลที่ขั้นไหน</strong><p>ผมเสนอหยุดที่ขั้น 2 (แชตอย่างเดียว) ให้คุณลองใช้จริงสักสองสามวันก่อนตัดสินใจว่าจะทำเสียงต่อไหม</p></div>
+    <div class="q q--done"><strong>การ์ดอยู่ตรงไหน</strong><p>เคาะแล้ว — 07 หลัก · 10 ชั้นสอง · 02 นอกหน้าโทร · 07 ในแชต</p></div>
+  </div>
+
+  <footer>
+    แผนฉบับข้อความอยู่ที่ <code>doc/WRITE.md</code> · การ์ดสิบแบบอยู่ที่ <code>CONFIRM-CARD.html</code> · ทั้งคู่อยู่ในรีโปแล้ว
+  </footer>
+</div>
