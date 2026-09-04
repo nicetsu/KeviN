@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { applyDraft, undoApply } from '@/app/actions/propose'
 import { confirmLabel, type Draft, type DraftAction } from '@/lib/drafts'
@@ -200,7 +201,15 @@ function DraftEditor({
     onSave(next, lines)
   }
 
-  return (
+  /*
+   * ⚠️ **ต้อง portal ไป `body`** — การ์ดอยู่ใน `.thread` ซึ่งมี `mask-image`
+   *    และ mask ทำให้กล่องนั้นกลายเป็น containing block ของลูกที่เป็น `position: fixed`
+   *    (กติกาเดียวกับ `filter` · จดไว้ใน doc/TRAPS.md)
+   *
+   *    ถ้าไม่ portal แผงนี้จะถูกขังอยู่ในสายข้อความแล้วโดนช่องพิมพ์กับแถบล่างทับ
+   *    เห็นเป็นแผงที่โผล่มาครึ่งเดียวกลางจอ (เจอตอนทดสอบจริง 2 ก.ย. 2026)
+   */
+  return createPortal(
     <div className="dsheet" role="dialog" aria-modal="true" aria-label="แก้ร่างก่อนยืนยัน">
       <div className="dsheet__panel">
         <div className="dsheet__grab" aria-hidden="true" />
@@ -238,7 +247,8 @@ function DraftEditor({
           <button className="dcard__alt" onClick={onClose}>ยกเลิก</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
