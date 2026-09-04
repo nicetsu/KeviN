@@ -1,0 +1,492 @@
+<title>การ์ดยืนยันในสาย</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap">
+<style>
+  :root{
+    --bg:#120E22; --surface:#1B1630; --raised:#241E3C; --line:#2E2748;
+    --ink:#EFECFA; --muted:#B6B1CC; --faint:#8E8BA4;
+    --brand:#A594FF; --brand-deep:#8878F0; --brand-pale:#C3B6FF; --on-brand:#14121F;
+    --sched:#79C2D0; --task:#74C6A4; --due:#E0897E; --event:#D5BB6D;
+    --grad:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%);
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --disp:'Space Grotesk','Noto Sans Thai',system-ui,sans-serif;
+    --body:'Noto Sans Thai','Space Grotesk',system-ui,sans-serif;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);
+    line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(58% 22% at 22% 2%, rgba(165,148,255,.20), transparent 70%),
+      radial-gradient(52% 20% at 84% 6%, rgba(121,194,208,.14), transparent 72%),
+      radial-gradient(96% 30% at 50% 102%, rgba(136,120,240,.24), transparent 74%);
+    background-attachment:fixed;
+  }
+  .page{max-width:1240px;margin:0 auto;padding:clamp(1.5rem,4vw,3.5rem) clamp(1rem,3vw,2rem) 5rem}
+
+  header{max-width:66ch;margin-bottom:2.4rem}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);margin:0 0 .9rem}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(1.9rem,5vw,2.8rem);line-height:1.12;letter-spacing:-.03em;margin:0 0 1rem;text-wrap:balance}
+  header p{margin:0 0 .7rem;color:var(--muted);font-size:.97rem;font-weight:300}
+  header strong{color:var(--ink);font-weight:600}
+  .brief{margin-top:1.5rem;padding:1rem 1.15rem;border:1px solid var(--line);border-radius:14px;background:rgba(27,22,48,.55)}
+  .brief p{margin:0;font-size:.88rem;color:var(--faint)}
+  .brief p+p{margin-top:.5rem}
+  .brief b{color:var(--ink);font-weight:600}
+
+  .grid{display:grid;gap:1.7rem;grid-template-columns:repeat(auto-fill,minmax(288px,1fr))}
+  .card{border:1px solid var(--line);border-radius:20px;background:rgba(27,22,48,.5);padding:1rem 1rem 1.15rem;display:flex;flex-direction:column;gap:.8rem}
+  .card__top{display:flex;align-items:baseline;gap:.6rem}
+  .num{font-family:var(--mono);font-size:.72rem;color:var(--brand);border:1px solid rgba(165,148,255,.35);border-radius:6px;padding:.05rem .35rem;flex:none}
+  .card h2{font-family:var(--disp);font-size:1rem;font-weight:600;letter-spacing:-.01em;margin:0;flex:1}
+  .note{margin:0;font-size:.83rem;color:var(--muted);font-weight:300}
+  .tags{display:flex;flex-wrap:wrap;gap:.35rem}
+  .tag{font-family:var(--mono);font-size:.62rem;color:var(--faint);border:1px solid var(--line);border-radius:99px;padding:.1rem .45rem}
+  .tag--good{color:#8FD4C4;border-color:rgba(143,212,196,.3)}
+  .tag--warn{color:#E8B4A0;border-color:rgba(232,180,160,.35)}
+
+  /* ---------- จอจำลองหน้าโทร ---------- */
+  .phone{
+    position:relative;aspect-ratio:9/18.5;border-radius:22px;overflow:hidden;
+    background:var(--bg);border:1px solid var(--line);
+    background-image:
+      radial-gradient(70% 14% at 24% 1%, rgba(165,148,255,.18), transparent 72%),
+      radial-gradient(96% 22% at 50% 101%, rgba(136,120,240,.26), transparent 76%);
+    display:flex;flex-direction:column;
+    font-size:11px;
+  }
+  .head{display:flex;align-items:center;justify-content:space-between;padding:.75rem .7rem 0;flex:none}
+  .head b{font-family:var(--disp);font-size:.85em;letter-spacing:-.02em;font-size:13px}
+  .head i{width:13px;height:13px;border-radius:50%;border:1px solid var(--line);display:block}
+  .seg{margin:.55rem .7rem 0;height:22px;border:1px solid rgba(165,148,255,.2);border-radius:99px;background:#161228;display:flex;padding:2px;flex:none}
+  .seg span{flex:1;display:grid;place-items:center;border-radius:99px;font-size:8.5px;color:var(--faint)}
+  .seg span.on{background:var(--grad);color:var(--on-brand);font-weight:600}
+
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;padding:.6rem .7rem;position:relative;min-height:0}
+  .timer{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;color:var(--sched);flex:none}
+  .timer u{width:5px;height:5px;border-radius:50%;background:var(--sched);display:block}
+  .orb{
+    width:96px;height:96px;border-radius:50%;flex:none;
+    background:radial-gradient(circle at 50% 45%,#2A2450 0%,#1D1838 70%);
+    box-shadow:0 0 30px -8px rgba(165,148,255,.5);
+    display:grid;place-items:center;position:relative;
+  }
+  .wave{display:flex;align-items:center;gap:3px;height:26px}
+  .wave u{display:block;width:3px;border-radius:2px;background:var(--brand)}
+  .state{text-align:center;flex:none}
+  .state b{display:block;font-size:12px;font-weight:700;color:var(--sched)}
+  .state small{display:block;font-size:8.5px;color:var(--faint);margin-top:1px}
+  .cap{
+    align-self:stretch;border:1px solid var(--line);border-radius:12px;
+    background:rgba(36,30,60,.5);padding:.5rem .6rem;font-size:9.5px;color:var(--ink);
+  }
+  .cap b{display:block;font-family:var(--mono);font-size:8px;color:var(--faint);margin-bottom:2px}
+  .btns{display:flex;gap:1.1rem;justify-content:center;align-items:flex-start;flex:none;padding-top:.2rem}
+  .cbtn{text-align:center;font-size:8px;color:var(--muted)}
+  .cbtn i{
+    width:38px;height:38px;border-radius:50%;display:grid;place-items:center;margin:0 auto 3px;
+    border:1px solid rgba(165,148,255,.35);color:var(--brand);
+  }
+  .cbtn--end i{background:#E0897E;border-color:#E0897E;color:#2A1512}
+  .navbar{flex:none;height:38px;background:var(--surface);border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;padding:0 .3rem}
+  .navbar u{width:9px;height:9px;border-radius:3px;background:var(--line);display:block}
+  .pill{width:40px;height:20px;border-radius:99px;background:var(--grad);display:grid;place-items:center;font-family:var(--disp);font-size:7px;font-weight:700;color:var(--on-brand)}
+
+  /* ---------- การ์ดยืนยัน · ชิ้นส่วนร่วม ---------- */
+  .cf{
+    border:1px solid rgba(165,148,255,.42);border-radius:14px;
+    background:linear-gradient(180deg,rgba(46,38,80,.96),rgba(31,25,55,.96));
+    box-shadow:0 10px 30px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(165,148,255,.08);
+    padding:.55rem .65rem;display:flex;flex-direction:column;gap:.4rem;
+  }
+  .cf__kind{
+    font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--brand);display:flex;align-items:center;gap:4px;
+  }
+  .cf__kind s{width:4px;height:4px;border-radius:50%;background:var(--task);display:block;text-decoration:none}
+  .cf__title{font-size:11.5px;font-weight:700;line-height:1.25}
+  .cf__meta{font-size:8.5px;color:var(--muted);font-family:var(--mono)}
+  .cf__meta em{color:var(--due);font-style:normal}
+  .cf__acts{display:flex;gap:5px;margin-top:1px}
+  .cf__go{flex:1;background:var(--grad);color:var(--on-brand);border:0;border-radius:99px;padding:5px 0;font:inherit;font-size:9.5px;font-weight:700;text-align:center}
+  .cf__alt{border:1px solid var(--line);border-radius:99px;padding:5px 9px;font-size:9.5px;color:var(--muted);background:none}
+
+  /* 01 แทนที่คำบรรยาย */
+  .p1 .cf{align-self:stretch}
+
+  /* 02 แผ่นเลื่อนขึ้นจากล่าง */
+  .p2 .sheetwrap{position:absolute;left:0;right:0;bottom:0;padding:.6rem;background:linear-gradient(to top,rgba(18,14,34,.98) 55%,transparent);}
+  .p2 .cf{border-radius:16px 16px 12px 12px}
+
+  /* 03 ลอยเหนือปุ่ม */
+  .p3 .float{position:absolute;left:.7rem;right:.7rem;bottom:64px}
+
+  /* 04 วงกลมกลายเป็นการ์ด */
+  .p4 .morph{
+    width:150px;border-radius:20px;
+    background:radial-gradient(circle at 50% 0%,#2A2450 0%,#1D1838 80%);
+    border:1px solid rgba(165,148,255,.45);
+    box-shadow:0 0 34px -10px rgba(165,148,255,.55);
+    padding:.6rem;display:flex;flex-direction:column;gap:.4rem;
+  }
+  .p4 .morph .cf__title{text-align:center}
+  .p4 .morph .cf__meta{text-align:center}
+
+  /* 05 แถบบางใต้แท็บ */
+  .p5 .slim{
+    margin:.5rem .7rem 0;border:1px solid rgba(165,148,255,.4);border-radius:99px;
+    background:rgba(46,38,80,.9);display:flex;align-items:center;gap:6px;padding:4px 5px 4px 10px;
+  }
+  .p5 .slim span{flex:1;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .p5 .slim b{background:var(--grad);color:var(--on-brand);border-radius:99px;padding:3px 9px;font-size:8.5px;font-weight:700}
+
+  /* 06 การ์ดซ้อน */
+  .p6 .stack{position:relative;align-self:stretch}
+  .p6 .stack .cf{position:relative}
+  .p6 .stack .ghost{
+    position:absolute;left:6px;right:6px;height:100%;border-radius:14px;
+    border:1px solid rgba(165,148,255,.22);background:rgba(36,30,60,.6);
+  }
+  .p6 .stack .ghost--a{top:-5px}
+  .p6 .stack .ghost--b{top:-10px;left:12px;right:12px;opacity:.6}
+  .p6 .count{font-family:var(--mono);font-size:7.5px;color:var(--faint);text-align:right;margin-top:2px}
+
+  /* 07 ในคำบรรยายเดียวกัน */
+  .p7 .capcard{align-self:stretch;border:1px solid var(--line);border-radius:12px;background:rgba(36,30,60,.5);padding:.5rem .6rem;font-size:9.5px}
+  .p7 .capcard>b{display:block;font-family:var(--mono);font-size:8px;color:var(--faint);margin-bottom:3px}
+  .p7 .inner{margin-top:.45rem;border-top:1px dashed var(--line);padding-top:.45rem}
+
+  /* 08 วงแหวนรอบการ์ด */
+  .p8 .ring{
+    width:150px;height:150px;border-radius:50%;display:grid;place-items:center;
+    border:1px solid rgba(165,148,255,.35);
+    box-shadow:0 0 40px -14px rgba(165,148,255,.6), inset 0 0 30px -18px rgba(165,148,255,.8);
+  }
+  .p8 .ring .cf{width:122px;border-radius:12px;padding:.5rem}
+
+  /* 09 แถบเหนือแถบล่าง */
+  .p9 .bar{
+    position:absolute;left:.6rem;right:.6rem;bottom:44px;
+    border:1px solid rgba(165,148,255,.4);border-radius:12px;background:rgba(31,25,55,.97);
+    display:flex;align-items:center;gap:7px;padding:6px 7px 6px 10px;
+    box-shadow:0 8px 24px -12px rgba(0,0,0,.8);
+  }
+  .p9 .bar div{flex:1;min-width:0}
+  .p9 .bar strong{display:block;font-size:9.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .p9 .bar small{display:block;font-family:var(--mono);font-size:7.5px;color:var(--faint)}
+  .p9 .bar b{background:var(--grad);color:var(--on-brand);border-radius:99px;padding:4px 10px;font-size:8.5px;font-weight:700;flex:none}
+
+  /* 10 ครึ่งจอล่าง */
+  .p10 .half{
+    position:absolute;left:0;right:0;bottom:38px;top:44%;
+    background:linear-gradient(180deg,rgba(31,25,55,.99),rgba(24,19,45,.99));
+    border-top:1px solid rgba(165,148,255,.35);border-radius:18px 18px 0 0;
+    padding:.7rem;display:flex;flex-direction:column;gap:.5rem;
+    box-shadow:0 -14px 34px -18px rgba(0,0,0,.9);
+  }
+  .p10 .grab{width:32px;height:3px;border-radius:2px;background:var(--line);margin:0 auto}
+  .p10 .field{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:4px 0;font-size:9.5px}
+  .p10 .field s{color:var(--faint);text-decoration:none;font-family:var(--mono);font-size:8px}
+  .p10 .field b{font-weight:600}
+  .p10 .acts{display:flex;gap:6px;margin-top:auto}
+  .p10 .acts .cf__go{padding:7px 0}
+
+  footer{margin-top:3.5rem;padding-top:1.6rem;border-top:1px solid var(--line);max-width:72ch}
+  footer h3{font-family:var(--disp);font-size:1rem;margin:0 0 .7rem}
+  footer p{margin:0 0 .7rem;font-size:.88rem;color:var(--faint);font-weight:300}
+  footer b{color:var(--ink);font-weight:600}
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow">KeviN · ให้ผู้ช่วยแก้ข้อมูลได้</p>
+    <h1>การ์ดยืนยัน จะอยู่ตรงไหนของหน้าโทร</h1>
+    <p>กติกาคือ <strong>โมเดลไม่เขียน โมเดลเสนอ</strong> — พูดว่า “เพิ่มงานส่งรายงาน Network วันพฤหัส” แล้วการ์ดขึ้นบนจอ กดยืนยันครั้งเดียวถึงจะเขียนลงจริง</p>
+    <p>สิบแบบข้างล่างต่างกันที่ <strong>ตำแหน่ง</strong> และ <strong>น้ำหนักที่มันไปบังของเดิม</strong> — ทุกแบบวาดบนหน้าโทรจริงขณะอยู่ในสาย</p>
+    <div class="brief">
+      <p><b>สามอย่างที่ห้ามโดนบัง</b> — ปุ่มวางสาย (ต้องกดได้ทันทีเสมอ) · ตัวจับเวลา (บอกว่าสายยังอยู่) · วงเสียง (บอกว่าไมค์ยังทำงาน)</p>
+      <p><b>ต้องอ่านจบใน 2 วินาที</b> เพราะคุณกำลังคุยอยู่ ไม่ได้ว่างอ่าน · และ <b>ต้องมีปุ่มแก้</b> เพราะเสียงไทยผ่าน ASR พลาดเรื่องตัวเลขกับชื่อวิชาบ่อยที่สุด</p>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 01 -->
+    <div class="card">
+      <div class="card__top"><span class="num">01</span><h2>แทนที่คำบรรยาย</h2></div>
+      <div class="phone p1">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="cf">
+            <div class="cf__kind"><s></s>เพิ่มงาน</div>
+            <div class="cf__title">ส่งรายงาน Network</div>
+            <div class="cf__meta">Class › สถาปัตยกรรมเครือข่าย · <em>พฤ 4 ก.ย. 23:59</em></div>
+            <div class="cf__acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">แก้</button><button class="cf__alt">ทิ้ง</button></div>
+          </div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">การ์ดนั่งตรงที่คำบรรยายเคยอยู่ ไม่มีอะไรใหม่โผล่มาจากที่ว่าง · แลกด้วยการที่อ่านคำที่ KeviN เพิ่งพูดไม่ได้ระหว่างนั้น</p>
+      <div class="tags"><span class="tag tag--good">ไม่บังอะไรเลย</span><span class="tag tag--good">แก้น้อยสุด</span><span class="tag tag--warn">คำบรรยายหายชั่วคราว</span></div>
+    </div>
+
+    <!-- 02 -->
+    <div class="card">
+      <div class="card__top"><span class="num">02</span><h2>แผ่นเลื่อนขึ้นจากล่าง</h2></div>
+      <div class="phone p2">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="sheetwrap">
+            <div class="cf">
+              <div class="cf__kind"><s></s>เพิ่มงาน</div>
+              <div class="cf__title">ส่งรายงาน Network</div>
+              <div class="cf__meta">Class › สถาปัตยกรรมเครือข่าย · <em>พฤ 4 ก.ย. 23:59</em></div>
+              <div class="cf__acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">แก้</button><button class="cf__alt">ทิ้ง</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">เลื่อนขึ้นมาทับปุ่มโทรทั้งแถว อยู่ในระยะนิ้วโป้งที่สุด · แต่ <b style="color:var(--ink)">ปุ่มวางสายหายไปชั่วขณะ</b> ซึ่งเป็นข้อที่ผมกังวลที่สุดในชุดนี้</p>
+      <div class="tags"><span class="tag tag--good">กดง่ายสุด</span><span class="tag tag--warn">บังปุ่มวางสาย</span></div>
+    </div>
+
+    <!-- 03 -->
+    <div class="card">
+      <div class="card__top"><span class="num">03</span><h2>ลอยเหนือปุ่ม</h2></div>
+      <div class="phone p3">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+          <div class="float">
+            <div class="cf">
+              <div class="cf__kind"><s></s>เพิ่มงาน</div>
+              <div class="cf__title">ส่งรายงาน Network</div>
+              <div class="cf__meta">Class › สถาปัตยกรรมเครือข่าย · <em>พฤ 4 ก.ย. 23:59</em></div>
+              <div class="cf__acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">แก้</button><button class="cf__alt">ทิ้ง</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">ลอยเหนือปุ่มโดยไม่แตะปุ่ม — ปุ่มวางสายยังอยู่ครบตลอดเวลา · ต้องคุมความสูงการ์ดไม่ให้เกินสองบรรทัด ไม่งั้นชนวงเสียง</p>
+      <div class="tags"><span class="tag tag--good">ปุ่มวางสายไม่หาย</span><span class="tag tag--good">อยู่ในระยะนิ้ว</span><span class="tag tag--warn">พื้นที่จำกัด</span></div>
+    </div>
+
+    <!-- 04 -->
+    <div class="card">
+      <div class="card__top"><span class="num">04</span><h2>วงกลมกลายเป็นการ์ด</h2></div>
+      <div class="phone p4">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="morph">
+            <div class="cf__kind" style="justify-content:center"><s></s>เพิ่มงาน</div>
+            <div class="cf__title">ส่งรายงาน Network</div>
+            <div class="cf__meta">พฤ 4 ก.ย. 23:59</div>
+            <div class="cf__acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">แก้</button></div>
+          </div>
+          <div class="state"><b>รอคุณยืนยัน</b><small>พูดแก้ได้เลย</small></div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">ตัว KeviN เองแปลงร่างเป็นสิ่งที่กำลังเสนอ — ไม่มีของใหม่บนจอเลย มีแต่ของเดิมที่เปลี่ยนรูป · <b style="color:var(--ink)">แต่วงเสียงหายไป</b> คนจึงอ่านไม่ออกว่าไมค์ยังทำงานอยู่ไหม</p>
+      <div class="tags"><span class="tag tag--good">สวยที่สุด</span><span class="tag tag--warn">วงเสียงหาย</span><span class="tag tag--warn">แก้เยอะสุด</span></div>
+    </div>
+
+    <!-- 05 -->
+    <div class="card">
+      <div class="card__top"><span class="num">05</span><h2>แถบบางใต้แท็บ</h2></div>
+      <div class="phone p5">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="slim"><span>เพิ่มงาน · ส่งรายงาน Network · พฤ 4 ก.ย.</span><b>ยืนยัน</b></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">บรรทัดเดียวจบ ไม่บังอะไรเลยสักชิ้น · แต่ย่อจนเหลือแค่ชื่อกับวัน — <b style="color:var(--ink)">รายละเอียดที่ ASR พลาดบ่อยที่สุดคือเวลากับวิชา ซึ่งอ่านไม่เจอในแถบนี้</b></p>
+      <div class="tags"><span class="tag tag--good">เบาที่สุด</span><span class="tag tag--warn">ทานรายละเอียดไม่ได้</span></div>
+    </div>
+
+    <!-- 06 -->
+    <div class="card">
+      <div class="card__top"><span class="num">06</span><h2>การ์ดซ้อนเมื่อมีหลายรายการ</h2></div>
+      <div class="phone p6">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="stack">
+            <div class="ghost ghost--b"></div>
+            <div class="ghost ghost--a"></div>
+            <div class="cf">
+              <div class="cf__kind"><s></s>เพิ่มงาน · 1 จาก 3</div>
+              <div class="cf__title">ส่งรายงาน Network</div>
+              <div class="cf__meta">Class › สถาปัตยกรรมเครือข่าย · <em>พฤ 4 ก.ย. 23:59</em></div>
+              <div class="cf__acts"><button class="cf__go">ยืนยันทั้งหมด</button><button class="cf__alt">ดูทีละใบ</button></div>
+            </div>
+            <div class="count">อีก 2 ใบรออยู่</div>
+          </div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">พูดรวดเดียวว่า “เพิ่มสามงาน” แล้วได้สามใบซ้อนกัน · จำเป็นจริงเพราะการคุยด้วยเสียงมักออกมาเป็นชุด ไม่ใช่ทีละอัน</p>
+      <div class="tags"><span class="tag tag--good">รับหลายรายการ</span><span class="tag tag--warn">ยืนยันรวดเดียวเสี่ยง</span></div>
+    </div>
+
+    <!-- 07 -->
+    <div class="card">
+      <div class="card__top"><span class="num">07</span><h2>อยู่ในคำบรรยายเดียวกัน</h2></div>
+      <div class="phone p7">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="capcard">
+            <b>KeviN</b>
+            รับทราบครับ เดี๋ยวเพิ่มให้ ลองทานดูก่อนนะครับ
+            <div class="inner">
+              <div class="cf__kind"><s></s>เพิ่มงาน</div>
+              <div class="cf__title" style="margin-top:2px">ส่งรายงาน Network</div>
+              <div class="cf__meta">Class › สถาปัตยกรรมเครือข่าย · <em>พฤ 4 ก.ย. 23:59</em></div>
+              <div class="cf__acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">แก้</button></div>
+            </div>
+          </div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">คำพูดกับสิ่งที่เสนออยู่ในกล่องเดียวกัน — อ่านแล้วรู้ทันทีว่าการ์ดนี้มาจากประโยคไหน · สูงกว่าเพื่อน ต้องระวังไม่ให้ดันปุ่มตกจอบนเครื่องเตี้ย</p>
+      <div class="tags"><span class="tag tag--good">บริบทครบ</span><span class="tag tag--warn">สูง</span></div>
+    </div>
+
+    <!-- 08 -->
+    <div class="card">
+      <div class="card__top"><span class="num">08</span><h2>วงแหวนล้อมการ์ด</h2></div>
+      <div class="phone p8">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="ring">
+            <div class="cf">
+              <div class="cf__kind"><s></s>เพิ่มงาน</div>
+              <div class="cf__title">ส่งรายงาน Network</div>
+              <div class="cf__meta"><em>พฤ 4 ก.ย. 23:59</em></div>
+              <div class="cf__acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">แก้</button></div>
+            </div>
+          </div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">วงกลมยังอยู่ในฐานะกรอบ การ์ดเกิดขึ้นข้างใน — รักษาสัญลักษณ์ “KeviN อยู่ตรงนี้” ไว้ได้โดยไม่ต้องกลืนมันทั้งวง</p>
+      <div class="tags"><span class="tag tag--good">คงตัวตนของวง</span><span class="tag tag--warn">พื้นที่ในวงแคบ</span></div>
+    </div>
+
+    <!-- 09 -->
+    <div class="card">
+      <div class="card__top"><span class="num">09</span><h2>แถบเหนือแถบล่าง</h2></div>
+      <div class="phone p9">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="state"><b>กำลังฟัง</b><small>พูดแทรกได้ตลอด</small></div>
+          <div class="btns">
+            <div class="cbtn"><i>◉</i>ปิดไมค์</div>
+            <div class="cbtn cbtn--end"><i>◠</i>วางสาย</div>
+          </div>
+          <div class="bar">
+            <div><strong>ส่งรายงาน Network</strong><small>เพิ่มงาน · พฤ 4 ก.ย. 23:59</small></div>
+            <b>ยืนยัน</b>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">ทรงเดียวกับแถบ “เลิกทำ” ที่แอปมีอยู่แล้ว — ผู้ใช้รู้จักภาษานี้อยู่แล้วโดยไม่ต้องเรียนใหม่ · <b style="color:var(--ink)">และมันตามไปได้ทุกหน้า</b> ถ้าสลับไปดูปฏิทินกลางสาย</p>
+      <div class="tags"><span class="tag tag--good">ภาษาเดิมของแอป</span><span class="tag tag--good">ข้ามหน้าได้</span><span class="tag tag--warn">ไม่มีปุ่มแก้</span></div>
+    </div>
+
+    <!-- 10 -->
+    <div class="card">
+      <div class="card__top"><span class="num">10</span><h2>ครึ่งจอล่าง เมื่อต้องแก้</h2></div>
+      <div class="phone p10">
+        <div class="head"><b>KeviN</b><i></i></div>
+        <div class="seg"><span>แชต</span><span class="on">โทร</span></div>
+        <div class="stage">
+          <div class="timer"><u></u>กำลังคุย 00:28</div>
+          <div class="orb"><div class="wave"><u style="height:8px"></u><u style="height:16px"></u><u style="height:24px"></u><u style="height:14px"></u><u style="height:20px"></u><u style="height:9px"></u></div></div>
+          <div class="half">
+            <div class="grab"></div>
+            <div class="cf__kind"><s></s>เพิ่มงาน — ทานก่อนบันทึก</div>
+            <div class="field"><s>ชื่อ</s><b>ส่งรายงาน Network</b></div>
+            <div class="field"><s>วิชา</s><b>สถาปัตยกรรมเครือข่าย</b></div>
+            <div class="field"><s>ส่ง</s><b style="color:var(--due)">พฤ 4 ก.ย. 23:59</b></div>
+            <div class="acts"><button class="cf__go">ยืนยัน</button><button class="cf__alt">ทิ้ง</button></div>
+          </div>
+        </div>
+        <div class="navbar"><u></u><u></u><div class="pill">KEVIN</div><u></u><u></u></div>
+      </div>
+      <p class="note">ใช้เฉพาะตอนกด “แก้” จากแบบอื่น — แยกทีละฟิลด์ให้แตะแก้ได้ · ไม่ใช่ตัวเริ่มต้น เพราะกินจอทั้งครึ่งและบังปุ่มวางสาย</p>
+      <div class="tags"><span class="tag tag--good">แก้ได้ละเอียด</span><span class="tag tag--warn">บังปุ่มวางสาย</span><span class="tag">ใช้เป็นชั้นสอง</span></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <h3>ที่ผมเสนอถ้าให้เลือกให้</h3>
+    <p><b>03 เป็นตัวหลัก</b> — ลอยเหนือปุ่ม ปุ่มวางสายไม่หาย วงเสียงไม่หาย ตัวจับเวลาไม่หาย ครบทั้งสามข้อที่ห้ามโดนบัง และยังอยู่ในระยะนิ้วโป้ง</p>
+    <p><b>10 เป็นชั้นสอง</b> — เปิดเมื่อกด “แก้” เท่านั้น ตอนนั้นการทานรายละเอียดสำคัญกว่าการเห็นปุ่มวางสาย</p>
+    <p><b>09 สำหรับตอนออกจากหน้าโทร</b> — ถ้าเสนอไว้แล้วสลับไปดูปฏิทิน แถบนี้ตามไปด้วยได้ เหมือนแถบ “กำลังคุย” ที่ตามไปทุกหน้าอยู่แล้ว</p>
+    <p><b>ในโหมดแชตใช้ 07</b> — ที่นั่นการ์ดคือฟองข้อความหนึ่งฟอง ไม่ต้องลอย ไม่ต้องบัง เพราะไม่มีปุ่มวางสายให้ต้องระวัง</p>
+  </footer>
+</div>
