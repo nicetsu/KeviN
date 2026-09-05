@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { clearChatHistory } from '@/app/actions/chat'
 import { LANG_LABEL, type Lang } from '@/lib/ai/lang'
 import { VOICES } from '@/lib/ai/voices'
@@ -114,6 +115,18 @@ export default function Settings({
           </div>
 
           <div className="set__label set__label--block">ประวัติการคุย</div>
+
+          {/*
+            ทางเข้าหน้าประวัติต้องอยู่**เหนือ**ปุ่มล้าง — ปุ่มล้างลบถาวรทันที
+            ไม่มีคลังให้กู้คืน · การเห็นว่ามีอะไรอยู่ต้องมาก่อนการตัดสินใจลบเสมอ
+          */}
+          <div className="set__row">
+            <span className="set__label">ย้อนดูบทสนทนาเก่า</span>
+            <Link className="set__go" href="/kevin/history" onClick={onClose}>
+              เปิดหน้าประวัติ ›
+            </Link>
+          </div>
+
           {/*
             ⚠️ ลบถาวร ไม่ใช่เก็บเข้าคลัง · ชั้นกันพลาดคือการแตะสองครั้ง
                ข้อความบนปุ่มจึงต้องบอกให้ชัดว่าครั้งที่สองคือจุดที่ย้อนไม่ได้แล้ว

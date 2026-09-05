@@ -10,7 +10,7 @@ import { readOnlyDb } from '@/lib/ai/supabaseDb'
 import { runTool, toolDeclarations } from '@/lib/ai/tools'
 import { systemPrompt } from '@/lib/ai/prompt'
 import { readLang } from '@/lib/ai/lang'
-import { generate, GeminiError, type Content } from '@/lib/chat/gemini'
+import { generateStream, GeminiError, type Content } from '@/lib/chat/gemini'
 import { sanitizeLinks } from '@/lib/chat/links'
 import {
   HISTORY_LIMIT,
@@ -100,98 +100,150 @@ export async function POST(request: NextRequest) {
   // ภาษาที่ผู้ใช้ตั้งไว้ · ค่าที่ไม่รู้จักถูกปัดกลับเป็นค่าตั้งต้น ไม่ใช่ส่งดิบเข้า prompt
   const system = systemPrompt('chat', today, readLang(body.lang))
 
-  let reply = ''
-  try {
-    for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-      const out = await generate({ system, contents, tools, signal: request.signal })
+  /*
+   * ตอบเป็น **สาย NDJSON** ไม่ใช่ก้อนเดียวตอนจบ — หนึ่งบรรทัดคือหนึ่งเหตุการณ์
+   *
+   *   {"t":"delta","v":"…"}  ข้อความที่โมเดลพิมพ์เพิ่ม
+   *   {"t":"reset"}          ทิ้งสิ่งที่พิมพ์ไปในรอบนี้ (โมเดลเปลี่ยนใจไปเรียก tool)
+   *   {"t":"draft","v":{…}}  ร่างขึ้นแล้ว · ส่งทันทีที่เสนอ ไม่รอจบคำตอบ
+   *   {"t":"done", …}        คำตอบสุดท้ายที่ผ่านด่านตรวจลิงก์แล้ว
+   *   {"t":"error", …}       ล้มกลางทาง
+   *
+   * ⚠️ **`delta` ยังไม่ผ่าน `sanitizeLinks`** — ลิงก์ถูกหั่นข้ามก้อนได้ ตรวจทีละ
+   *    ก้อนจึงไม่มีทางถูก · หน้าจอต้อง **เอาข้อความใน `done` ไปแทนของที่ไหลมา**
+   *    ทั้งหมด สิ่งที่ค้างอยู่บนจอจึงเป็นฉบับที่ผ่านด่านแล้วเสมอ (lib/chat/links.ts)
+   */
+  const enc = new TextEncoder()
 
-      if (out.calls.length === 0 || round === MAX_TOOL_ROUNDS) {
-        reply = out.text
-        break
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let closed = false
+      const send = (event: Record<string, unknown>) => {
+        if (closed) return
+        controller.enqueue(enc.encode(`${JSON.stringify(event)}
+`))
       }
 
-      // ส่ง parts ชุดเดิมกลับไปทั้งก้อน **ห้ามประกอบใหม่จาก out.calls**
-      // Gemini 3 แนบ thoughtSignature มากับ functionCall และบังคับให้ส่งกลับครบ
-      // ถ้าหล่นไปจะได้ 400 ในรอบถัดไป โดยรอบแรกดูเหมือนทำงานปกติทุกอย่าง
-      contents.push({ role: 'model', parts: out.parts })
-
-      const responses = await Promise.all(
-        out.calls.map(async (call) => {
-          const result = await runTool(call.name, call.args, { db, today, openDrafts })
-          const proposed = result.ok && 'draft' in result
-          if (proposed) drafts.push(result.draft)
-
-          void logToolCall(userId, conversationId, {
-            name: call.name,
-            input: call.args,
-            ok: result.ok,
-            rowsOut: result.ok && 'rows' in result ? result.rows.length : 0,
-            rowsHidden: result.ok && 'rows' in result ? result.hidden : 0,
-            error: result.ok ? undefined : result.error,
-          })
-          // ส่ง error กลับเป็นผลของ tool ไม่ใช่ล้มทั้งคำขอ — โมเดลจะได้บอกผู้ใช้
-          // ว่าดึงข้อมูลไม่ได้ ซึ่งดีกว่าหน้าจอขึ้น error ลอย ๆ โดยไม่รู้ว่าถามอะไรไป
+      let reply = ''
+      try {
+        for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
           /*
-           * ผลของ `propose_*` ที่ส่งกลับเข้าโมเดล **ไม่ใช่ตัวร่างทั้งก้อน**
-           *
-           * ส่งแค่ว่าร่างขึ้นแล้วและชื่ออะไร · ถ้าส่งทั้งก้อนกลับไป โมเดลจะเอา
-           * รายละเอียดไปพูดซ้ำทั้งหมดทั้งที่ผู้ใช้อ่านจากการ์ดอยู่แล้ว
-           * และมันอาจหลงคิดว่าบันทึกเสร็จแล้วเพราะเห็นข้อมูลครบ
+           * ข้อความที่ไหลออกไปแล้ว**ในรอบนี้** · ถ้ารอบนี้จบด้วยการเรียก tool
+           * สิ่งที่ไหลไปไม่ใช่คำตอบ ต้องสั่งให้จอทิ้ง · โมเดลมักไม่พิมพ์อะไรก่อน
+           * เรียก tool แต่ "มักไม่" ไม่ใช่ "ไม่เคย" และสิ่งที่ค้างบนจอผิด ๆ แพงกว่า
            */
-          const response = !result.ok
-            ? { error: result.error }
-            : 'draft' in result
-              ? {
-                  ok: true,
-                  note: openDrafts.some((d) => d.id === result.draft.id)
-                    ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
-                    : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
-                  // id เดินทางกลับเข้าโมเดล เพื่อให้อ้างถึงร่างใบนี้ตอนพูดแก้ต่อได้
-                  draft_id: result.draft.id,
-                  title: result.draft.title,
-                }
-              : { rows: result.rows, hidden: result.hidden }
+          let streamed = 0
+          const out = await generateStream({
+            system,
+            contents,
+            tools,
+            signal: request.signal,
+            onText: (delta) => {
+              streamed += delta.length
+              send({ t: 'delta', v: delta })
+            },
+          })
 
-          return { functionResponse: { name: call.name, response } }
-        })
-      )
+          if (out.calls.length === 0 || round === MAX_TOOL_ROUNDS) {
+            reply = out.text
+            break
+          }
 
-      contents.push({ role: 'user', parts: responses })
-    }
-  } catch (e) {
-    const quota = e instanceof GeminiError && e.status === 429
-    return Response.json(
-      { ok: false, error: e instanceof Error ? e.message : 'ตอบไม่สำเร็จ', quota },
-      { status: quota ? 429 : 502 }
-    )
-  }
+          if (streamed > 0) send({ t: 'reset' })
 
-  if (!reply) reply = 'ผมยังตอบคำถามนี้ไม่ได้ครับ ลองถามใหม่อีกแบบได้ไหม'
+          // ส่ง parts ชุดเดิมกลับไปทั้งก้อน **ห้ามประกอบใหม่จาก out.calls**
+          // Gemini 3 แนบ thoughtSignature มากับ functionCall และบังคับให้ส่งกลับครบ
+          // ถ้าหล่นไปจะได้ 400 ในรอบถัดไป โดยรอบแรกดูเหมือนทำงานปกติทุกอย่าง
+          contents.push({ role: 'model', parts: out.parts })
 
-  // ตัดลิงก์ที่ไม่ใช่เส้นทางจริงของแอปทิ้งก่อนส่งออก
-  // prompt ห้ามได้แค่สิ่งที่โมเดลตั้งใจ · ด่านนี้กันได้ทุกกรณี (lib/chat/links.ts)
-  const cleaned = sanitizeLinks(reply)
-  if (cleaned.removed > 0) {
-    console.warn(`[chat] ตัดลิงก์ปลอมทิ้ง ${cleaned.removed} จุด`)
-  }
-  reply = cleaned.text
+          const responses = await Promise.all(
+            out.calls.map(async (call) => {
+              const result = await runTool(call.name, call.args, { db, today, openDrafts })
+              if (result.ok && 'draft' in result) {
+                drafts.push(result.draft)
+                // การ์ดขึ้นทันทีที่เสนอ ไม่ต้องรอโมเดลพิมพ์คำตอบจบ
+                send({ t: 'draft', v: result.draft })
+              }
 
-  try {
-    await saveMessages(userId, conversationId, 'chat', [
-      { role: 'user', content: text },
-      { role: 'assistant', content: reply },
-    ])
-  } catch (e) {
-    // คำตอบถูกต้องแล้ว แค่บันทึกไม่ติด — ส่งคำตอบไปให้ผู้ใช้พร้อมบอกว่าไม่ได้บันทึก
-    // ดีกว่าทิ้งคำตอบทั้งอันเพราะเขียนประวัติไม่สำเร็จ
-    return Response.json({
-      ok: true,
-      conversationId,
-      reply,
-      drafts,
-      warning: `ตอบได้แต่บันทึกประวัติไม่สำเร็จ · ${e instanceof Error ? e.message : ''}`,
-    })
-  }
+              void logToolCall(userId, conversationId, {
+                name: call.name,
+                input: call.args,
+                ok: result.ok,
+                rowsOut: result.ok && 'rows' in result ? result.rows.length : 0,
+                rowsHidden: result.ok && 'rows' in result ? result.hidden : 0,
+                error: result.ok ? undefined : result.error,
+              })
+              // ส่ง error กลับเป็นผลของ tool ไม่ใช่ล้มทั้งคำขอ — โมเดลจะได้บอกผู้ใช้
+              // ว่าดึงข้อมูลไม่ได้ ซึ่งดีกว่าหน้าจอขึ้น error ลอย ๆ โดยไม่รู้ว่าถามอะไรไป
+              /*
+               * ผลของ `propose_*` ที่ส่งกลับเข้าโมเดล **ไม่ใช่ตัวร่างทั้งก้อน**
+               *
+               * ส่งแค่ว่าร่างขึ้นแล้วและชื่ออะไร · ถ้าส่งทั้งก้อนกลับไป โมเดลจะเอา
+               * รายละเอียดไปพูดซ้ำทั้งหมดทั้งที่ผู้ใช้อ่านจากการ์ดอยู่แล้ว
+               * และมันอาจหลงคิดว่าบันทึกเสร็จแล้วเพราะเห็นข้อมูลครบ
+               */
+              const response = !result.ok
+                ? { error: result.error }
+                : 'draft' in result
+                  ? {
+                      ok: true,
+                      note: openDrafts.some((d) => d.id === result.draft.id)
+                        ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
+                        : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                      // id เดินทางกลับเข้าโมเดล เพื่อให้อ้างถึงร่างใบนี้ตอนพูดแก้ต่อได้
+                      draft_id: result.draft.id,
+                      title: result.draft.title,
+                    }
+                  : { rows: result.rows, hidden: result.hidden }
 
-  return Response.json({ ok: true, conversationId, reply, drafts })
+              return { functionResponse: { name: call.name, response } }
+            })
+          )
+
+          contents.push({ role: 'user', parts: responses })
+        }
+      } catch (e) {
+        const quota = e instanceof GeminiError && e.status === 429
+        send({ t: 'error', error: e instanceof Error ? e.message : 'ตอบไม่สำเร็จ', quota })
+        closed = true
+        controller.close()
+        return
+      }
+
+      if (!reply) reply = 'ผมยังตอบคำถามนี้ไม่ได้ครับ ลองถามใหม่อีกแบบได้ไหม'
+
+      // ตัดลิงก์ที่ไม่ใช่เส้นทางจริงของแอปทิ้งก่อนส่งออก
+      // prompt ห้ามได้แค่สิ่งที่โมเดลตั้งใจ · ด่านนี้กันได้ทุกกรณี (lib/chat/links.ts)
+      const cleaned = sanitizeLinks(reply)
+      if (cleaned.removed > 0) {
+        console.warn(`[chat] ตัดลิงก์ปลอมทิ้ง ${cleaned.removed} จุด`)
+      }
+      reply = cleaned.text
+
+      let warning: string | undefined
+      try {
+        await saveMessages(userId, conversationId, 'chat', [
+          { role: 'user', content: text },
+          { role: 'assistant', content: reply },
+        ])
+      } catch (e) {
+        // คำตอบถูกต้องแล้ว แค่บันทึกไม่ติด — ส่งคำตอบไปให้ผู้ใช้พร้อมบอกว่าไม่ได้บันทึก
+        // ดีกว่าทิ้งคำตอบทั้งอันเพราะเขียนประวัติไม่สำเร็จ
+        warning = `ตอบได้แต่บันทึกประวัติไม่สำเร็จ · ${e instanceof Error ? e.message : ''}`
+      }
+
+      send({ t: 'done', conversationId, reply, drafts, warning })
+      closed = true
+      controller.close()
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'content-type': 'application/x-ndjson; charset=utf-8',
+      'cache-control': 'no-store',
+      // กัน proxy ที่ชอบกักไว้จนครบก้อน ซึ่งทำให้การไหลทีละคำหายไปเงียบ ๆ
+      'x-accel-buffering': 'no',
+    },
+  })
 }

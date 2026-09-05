@@ -17,13 +17,13 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (367 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (394 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
 `web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ชั้นเสนอ · ตัวกรอง Area · ภาษา · เสียง)
 `web/lib/drafts.ts` (ฟิลด์เวลาที่ร่างแต่ละใบแก้ได้จริง)
 `web/lib/applyDraft.ts` (**การเขียนจริงหลังปุ่มยืนยัน** · ตัวกรอง Area ขาเข้า · การย้อน)
-`web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/chat/markdown.ts` (แกะ markdown ของผู้ช่วย)
+`web/lib/chat/stream.ts` (ต่อชิ้นของสายคำตอบแชต) · `web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/chat/markdown.ts` (แกะ markdown ของผู้ช่วย)
 `web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด) · `web/lib/eventOrder.ts` (ลำดับกิจกรรม) · `web/lib/voice/mic.ts` (เลือกไมค์) · `web/lib/archive.ts` (ของที่รอถูกลบ)
 
 **ชุดวัดความแม่นกับโมเดลจริงอยู่ที่ `web/test/accuracy/`** — ยิง Gemini จริงทั้งแชตและ Live API
@@ -172,6 +172,9 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
 - **แผงแก้ในชั้นสอง (ปุ่ม "แก้") ยังแก้ได้แค่ชื่อกับเวลา** — การย้ายวิชาต้องพูดเอา
   ซึ่ง `propose_update_draft` รับได้แล้ว
+- **`next build` ล้มบนเครื่องนี้ตั้งแต่ก่อนแตะอะไร** — `InvariantError: Expected workStore
+  to be initialized` ตอน prerender หน้าที่เป็น static · เกิดทั้ง turbopack และ webpack
+  และเกิดบน master เปล่า ๆ ด้วย · **ยังไม่รู้ว่ากระทบ `vercel --prod` ไหม** (ดู ARCHITECTURE §11)
 
 > `npm run lint --prefix web` ตอนนี้สะอาด 0 error 0 warning — **ถ้าเพิ่มขึ้นมา ให้แก้ อย่าปล่อยสะสม**
 

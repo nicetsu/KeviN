@@ -8,7 +8,7 @@
  */
 import { runTool, toolDeclarations } from '../../lib/ai/tools'
 import { systemPrompt } from '../../lib/ai/prompt'
-import { generate, GeminiError, type Content } from '../../lib/chat/gemini'
+import { generateStream, GeminiError, type Content } from '../../lib/chat/gemini'
 import type { Draft } from '../../lib/drafts'
 import { stubDb, TODAY } from './fixtures'
 import type { Call, Turn } from './harness'
@@ -22,10 +22,10 @@ const MAX_TOOL_ROUNDS = 4
  * "ไม่ผ่าน" ให้เคสที่ยังไม่เคยถูกวัดเลย ซึ่งเป็นตัวเลขที่หลอกคนอ่าน
  * ข้อผิดพลาดอื่น (400 · 429 โควตาหมด) ต้องโผล่ขึ้นมาตามเดิม ห้ามกลบ
  */
-async function generateOrRetry(opts: Parameters<typeof generate>[0]) {
+async function generateOrRetry(opts: Parameters<typeof generateStream>[0]) {
   for (let attempt = 0; ; attempt++) {
     try {
-      return await generate(opts)
+      return await generateStream(opts)
     } catch (e) {
       const busy = e instanceof GeminiError && e.status !== undefined && e.status >= 500
       if (!busy || attempt >= 3) throw e

@@ -2162,6 +2162,52 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .btn--end { background: var(--due-soft); color: var(--due); border-color: rgba(224,137,126,0.4); }
 .btn--end:hover { background: var(--due-soft); box-shadow: 0 6px 24px -8px rgba(224,137,126,0.5); }
 
+/*
+ * หน้าประวัติการคุย
+ *
+ * แถวหนึ่งบรรทัดครึ่ง — ป้ายช่องทาง · ประโยคแรกที่ผู้ใช้พิมพ์ · เวลาและจำนวน
+ * ประโยคแรกเป็นตัวเดียวที่บอกได้ว่าคุยเรื่องอะไร จึงเป็นตัวหนาและตัดท้ายด้วย …
+ */
+.hlist { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.6rem; }
+
+.hrow {
+  display: flex; gap: 0.6rem; align-items: flex-start;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--card); color: inherit; text-decoration: none;
+}
+.hrow:hover { border-color: rgba(165, 148, 255, 0.4); }
+
+.hrow__via {
+  flex: none; margin-top: 0.1rem;
+  font-family: var(--f-mono); font-size: var(--s--2);
+  border: 1px solid var(--line); border-radius: 99px;
+  padding: 0.1rem 0.5rem; color: var(--faint);
+}
+.hrow__via--voice { color: var(--brand); border-color: rgba(165, 148, 255, 0.4); }
+
+/* ⚠️ ต้อง `min-width: 0` ไม่งั้นข้อความยาวดันแถวจนล้นออกนอกจอ */
+.hrow__body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; flex: 1; }
+.hrow__title {
+  font-size: var(--s-0); font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hrow__meta { font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint); }
+
+.hnote { margin-top: 1rem; font-size: var(--s--2); line-height: 1.6; }
+
+/* บทสนทนาย้อนหลัง — ฟองทรงเดียวกับห้องคุย แต่ไม่มีช่องพิมพ์ให้เว้นที่ */
+.thread--past { padding-bottom: 1.5rem; }
+
+/*
+ * ที่ว่างแทนสิ่งที่ผู้ใช้พูด — **ไม่ใช่ข้อความ** จึงไม่ควรอ่านเหมือนข้อความ
+ * (lib/voice/transcript.ts · เจ้าของสั่งไม่ให้บันทึกเสียงที่พูด)
+ */
+.msg--voiceless {
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+  background: transparent; border: 1px dashed var(--line);
+}
+
 /* แถบ "กำลังคุย" ที่ตามไปทุกหน้า · ไมค์ที่เปิดค้างต้องมองเห็นตลอด */
 .callbar {
   position: fixed; z-index: 30;

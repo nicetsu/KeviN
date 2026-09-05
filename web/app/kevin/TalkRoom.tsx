@@ -10,6 +10,7 @@ import { useTalkPrefs } from '@/lib/talkPrefs'
 import Settings from './Settings'
 import DraftStack from '@/components/DraftStack'
 import type { Draft } from '@/lib/drafts'
+import { ndjsonParser, type ChatEvent } from '@/lib/chat/stream'
 
 type Mode = 'chat' | 'voice'
 
@@ -121,6 +122,18 @@ export default function TalkRoom({
      */
     const onScreen = [...lines.flatMap((l) => l.drafts ?? []), ...call.drafts]
 
+    /* ฟองที่ข้อความไหลลงไปทีละชิ้น · ถูกแทนที่ด้วยฉบับจริงตอนจบ */
+    const flowing = { role: 'assistant' as const, content: '', via: 'chat' as const, pending: true }
+    let streamed = ''
+    const incoming: Draft[] = []
+
+    /** ทับใบเดิมถ้า id ซ้ำ — ร่างที่ถูกแก้กลับมาพร้อม id เดิมเสมอ */
+    const collect = (d: Draft) => {
+      const at = incoming.findIndex((x) => x.id === d.id)
+      if (at >= 0) incoming[at] = d
+      else incoming.push(d)
+    }
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -133,46 +146,101 @@ export default function TalkRoom({
           drafts: onScreen,
         }),
       })
-      const data = await res.json()
 
-      if (!data.ok) {
+      /*
+       * ด่านที่ตอบก่อนเริ่มสาย (ยังไม่ล็อกอิน · อินพุตไม่ผ่าน) ยังตอบเป็น JSON ก้อนเดียว
+       * เพราะตอนนั้นยังไม่มีอะไรให้ไหล · แยกด้วย content-type ไม่ใช่เดาจากสถานะ
+       */
+      const ct = res.headers.get('content-type') ?? ''
+      if (!res.body || !ct.includes('ndjson')) {
+        const data = await res.json().catch(() => ({ error: 'ตอบไม่สำเร็จ' }))
         setError(data.error ?? 'ตอบไม่สำเร็จ')
-      } else {
-        setConversationId(data.conversationId)
-        const incoming: Draft[] = Array.isArray(data.drafts) ? (data.drafts as Draft[]) : []
-
-        /*
-         * ร่างที่กลับมาพร้อม **id เดิม** คือใบเก่าที่ถูกแก้ ไม่ใช่ใบใหม่
-         *
-         * ต้องไปทับที่เดิม ไม่ใช่โผล่เป็นการ์ดใบที่สองใต้ฟองล่าสุด — ไม่งั้น
-         * "เปลี่ยนเป็นวันศุกร์" จะได้การ์ดสองใบสำหรับงานชิ้นเดียว ซึ่งกดยืนยัน
-         * ผิดใบได้ · ใบที่เกิดจากสายเสียงอยู่คนละที่ ต้องส่งกลับไปให้ provider ทับเอง
-         */
-        const voiceIds = new Set(call.drafts.map((d) => d.id))
-        for (const d of incoming) if (voiceIds.has(d.id)) call.putDraft(d)
-
-        setLines((prev) => {
-          const seen = new Set(prev.flatMap((l) => (l.drafts ?? []).map((d) => d.id)))
-          const revised = prev.map((l) =>
-            l.drafts?.some((d) => incoming.some((n) => n.id === d.id))
-              ? { ...l, drafts: l.drafts.map((d) => incoming.find((n) => n.id === d.id) ?? d) }
-              : l
-          )
-          const fresh = incoming.filter((d) => !seen.has(d.id) && !voiceIds.has(d.id))
-          return [
-            ...revised,
-            {
-              role: 'assistant' as const,
-              content: data.reply,
-              via: 'chat' as const,
-              drafts: fresh.length ? fresh : undefined,
-            },
-          ]
-        })
-        if (data.warning) setError(data.warning)
+        setBusy(false)
+        return
       }
+
+      setLines((prev) => [...prev, flowing])
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      const parser = ndjsonParser()
+      let failed: string | null = null
+      let finished: { reply: string; conversationId?: string; warning?: string } | null = null
+
+      const handle = (e: ChatEvent) => {
+        if (e.t === 'delta') streamed += e.v
+        // โมเดลเปลี่ยนใจไปเรียก tool — สิ่งที่ไหลไปแล้วไม่ใช่คำตอบ
+        else if (e.t === 'reset') streamed = ''
+        else if (e.t === 'draft') collect(e.v)
+        else if (e.t === 'error') failed = e.error
+        else if (e.t === 'done') {
+          finished = { reply: e.reply, conversationId: e.conversationId, warning: e.warning }
+          for (const d of e.drafts ?? []) collect(d)
+        }
+        if (e.t === 'delta' || e.t === 'reset') {
+          // หาฟองที่กำลังไหลจาก **ธง `pending`** ไม่ใช่จากตัวตนของวัตถุ —
+          // ทุกครั้งที่อัปเดต state ฟองถูกแทนด้วยสำเนาใหม่ ตัวตนเดิมจึงหายไปทันที
+          const now = streamed
+          setLines((prev) => prev.map((l) => (l.pending ? { ...l, content: now } : l)))
+        }
+      }
+
+      for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        for (const e of parser.push(decoder.decode(value, { stream: true }))) handle(e)
+      }
+      for (const e of parser.end()) handle(e)
+
+      if (failed) {
+        setError(failed)
+        setLines((prev) => prev.filter((l) => !l.pending))
+        setBusy(false)
+        return
+      }
+
+      /*
+       * ⚠️ **ข้อความสุดท้ายมาจาก `done` ไม่ใช่จากสิ่งที่ไหลมา** — `delta` ยังไม่ผ่าน
+       *    ด่านตรวจลิงก์ (ลิงก์ถูกหั่นข้ามก้อนได้ ตรวจทีละชิ้นจึงไม่มีทางถูก)
+       *    สิ่งที่ค้างบนจอจึงต้องเป็นฉบับที่ผ่านด่านแล้วเสมอ (lib/chat/links.ts)
+       */
+      const final: { reply: string; conversationId?: string; warning?: string } =
+        finished ?? { reply: streamed }
+      if (final.conversationId) setConversationId(final.conversationId)
+
+      /*
+       * ร่างที่กลับมาพร้อม **id เดิม** คือใบเก่าที่ถูกแก้ ไม่ใช่ใบใหม่
+       *
+       * ต้องไปทับที่เดิม ไม่ใช่โผล่เป็นการ์ดใบที่สองใต้ฟองล่าสุด — ไม่งั้น
+       * "เปลี่ยนเป็นวันศุกร์" จะได้การ์ดสองใบสำหรับงานชิ้นเดียว ซึ่งกดยืนยัน
+       * ผิดใบได้ · ใบที่เกิดจากสายเสียงอยู่คนละที่ ต้องส่งกลับไปให้ provider ทับเอง
+       */
+      const voiceIds = new Set(call.drafts.map((d) => d.id))
+      for (const d of incoming) if (voiceIds.has(d.id)) call.putDraft(d)
+
+      setLines((prev) => {
+        const kept = prev.filter((l) => !l.pending)
+        const seen = new Set(kept.flatMap((l) => (l.drafts ?? []).map((d) => d.id)))
+        const revised = kept.map((l) =>
+          l.drafts?.some((d) => incoming.some((n) => n.id === d.id))
+            ? { ...l, drafts: l.drafts.map((d) => incoming.find((n) => n.id === d.id) ?? d) }
+            : l
+        )
+        const fresh = incoming.filter((d) => !seen.has(d.id) && !voiceIds.has(d.id))
+        return [
+          ...revised,
+          {
+            role: 'assistant' as const,
+            content: final.reply,
+            via: 'chat' as const,
+            drafts: fresh.length ? fresh : undefined,
+          },
+        ]
+      })
+      if (final.warning) setError(final.warning)
     } catch {
       setError('ต่อเน็ตไม่ได้ · ลองใหม่อีกครั้ง')
+      setLines((prev) => prev.filter((l) => !l.pending))
     }
     setBusy(false)
   }
@@ -275,7 +343,12 @@ export default function TalkRoom({
             */}
             <DraftStack drafts={call.drafts} onSettled={call.dropDraft} />
 
-            {busy && (
+            {/*
+              ตัวบอกว่ากำลังคิด **หายทันทีที่ตัวอักษรเริ่มไหล** — ข้อความที่ไหลอยู่
+              บอกเรื่องเดียวกันแต่บอกได้ดีกว่า · ปล่อยไว้ทั้งคู่จะกลายเป็นสองอย่าง
+              ที่พูดเรื่องเดียวกันพร้อมกัน
+            */}
+            {busy && !lines.some((l) => l.pending && l.content) && (
               <div className="talk__typing" aria-live="polite">
                 <span className="talk__dot" /> กำลังอ่านข้อมูล…
               </div>
