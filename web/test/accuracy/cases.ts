@@ -273,10 +273,47 @@ export const CASES: Case[] = [
       return out
     },
   },
+  {
+    id: '16',
+    title: 'พูดแก้ร่างใบเดิม — ต้องได้ใบเดิมที่เปลี่ยนไป ไม่ใช่ใบที่สอง',
+    say: 'เพิ่มงานส่งรายงานบทที่ 4 วิชาสถาปัตยกรรมเครือข่าย กำหนดส่งพฤหัสหน้า ห้าโมงเย็น',
+    then: 'เปลี่ยนเป็นวันศุกร์แทน',
+    want: 'propose_update_draft · ยังเป็นร่างใบเดียว · ส่ง 2026-09-11 17:00',
+    check: (t) => {
+      const out: string[] = []
+      if (!called(t, 'propose_update_draft')) {
+        out.push('ไม่ได้เรียก propose_update_draft — เสนอใหม่ทั้งใบแทน')
+      }
+      // ข้อสำคัญที่สุดของเคสนี้: การ์ดบนจอต้องยังมีใบเดียว
+      if (t.drafts.length !== 1) out.push(`บนจอมี ${t.drafts.length} ใบ ทั้งที่ควรเหลือใบเดียว`)
+
+      const a = acted(t)
+      if (a?.kind !== 'add_item') return [...out, `ร่างเป็น ${a?.kind} ไม่ใช่ add_item`]
+      if (a.projectId !== P.arch) out.push('ลงผิดวิชาหลังแก้')
+      if (a.type !== 'task') out.push(`ชนิดเปลี่ยนไปเป็น ${a.type}`)
+      out.push(...CHECK_TIME(a.dueAt, '2026-09-11 17:00', 'กำหนดส่งหลังแก้'))
+      return out
+    },
+  },
+  {
+    id: '17',
+    title: 'พูดย้ายวิชาในร่างที่ค้างอยู่',
+    say: 'เพิ่มงานส่งใบงานวิชาสถาปัตยกรรมเครือข่าย ส่งพรุ่งนี้เที่ยงคืน',
+    then: 'ขอเปลี่ยนไปลงวิชาปฏิบัติการเครือข่ายแทน',
+    want: 'propose_update_draft · ร่างใบเดียว · วิชาเป็นปฏิบัติการเครือข่าย',
+    check: (t) => {
+      const out: string[] = []
+      if (t.drafts.length !== 1) out.push(`บนจอมี ${t.drafts.length} ใบ ทั้งที่ควรเหลือใบเดียว`)
+      const a = acted(t)
+      if (a?.kind !== 'add_item') return [...out, `ร่างเป็น ${a?.kind} ไม่ใช่ add_item`]
+      if (a.projectId !== P.lab) out.push('ไม่ได้ย้ายไปวิชาปฏิบัติการเครือข่าย')
+      return out
+    },
+  },
 ]
 
 /** ชุดย่อยสำหรับโหมดโทร — ประหยัดโควตาสาย และเลือกข้อที่เสียงพลาดง่ายที่สุด */
-export const VOICE_IDS = ['01', '04', '05', '09', '11', '13']
+export const VOICE_IDS = ['01', '04', '05', '09', '11', '13', '16']
 
 /** ข้อบังคับที่ใช้กับ **ทุกข้อ** ไม่ว่าเคสนั้นจะตรวจอะไร */
 export function globalProblems(t: Turn): string[] {

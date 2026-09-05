@@ -38,6 +38,14 @@ export type CallHooks = {
    */
   onDraft?: (draft: Draft) => void
   /**
+   * ร่างที่ยังค้างบนจอตอนนี้ — ถามตอนจะเรียก tool **ไม่ใช่ค่าที่จำไว้ตอนเริ่มสาย**
+   *
+   * `propose_update_draft` แก้ร่างใบเดิมได้ก็ต่อเมื่อรู้ว่าใบเดิมหน้าตายังไง
+   * และร่างไม่ได้ลง DB · เป็นฟังก์ชันเพราะรายการเปลี่ยนระหว่างสายตลอด
+   * (ผู้ใช้กดทิ้ง กดยืนยัน หรือมีใบใหม่เพิ่ม)
+   */
+  openDrafts?: () => readonly Draft[]
+  /**
    * ความดังของเสียงที่พูดเข้าไป · 0–1 โดยประมาณ (RMS)
    *
    * ได้มาฟรีจาก worklet ที่วนลูปแปลง PCM อยู่แล้ว — ต้นทุนเพิ่มแทบเป็นศูนย์
@@ -324,7 +332,12 @@ export class VoiceCall {
         const res = await fetch(`/api/read/${encodeURIComponent(call.name)}`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(call.args ?? {}),
+          // `args` มาจากโมเดล · `drafts` มาจากจอ — คนละช่องกันโดยตั้งใจ
+          // ไม่งั้นโมเดลใส่คีย์ชื่อ drafts มาเองแล้วเขียนทับรายการร่างค้างได้
+          body: JSON.stringify({
+            args: call.args ?? {},
+            drafts: this.hooks.openDrafts?.() ?? [],
+          }),
         })
         response = await res.json()
       } catch {
@@ -340,10 +353,15 @@ export class VoiceCall {
        */
       const r = response as { ok?: boolean; draft?: Draft } | null
       if (r?.ok && r.draft) {
+        const revised = (r.draft.rev ?? 0) > 0
         this.hooks.onDraft?.(r.draft)
         response = {
           ok: true,
-          note: 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+          note: revised
+            ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
+            : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+          // id เดินทางกลับเข้าสาย เพื่อให้อ้างถึงร่างใบนี้ตอนพูดแก้ต่อได้
+          draft_id: r.draft.id,
           title: r.draft.title,
         }
       }

@@ -26,7 +26,7 @@ async function runChat(): Promise<{ pass: number; total: number }> {
   const chosen = CASES.filter((c) => pick(CASES.map((x) => x.id)).includes(c.id))
   for (const c of chosen) {
     process.stderr.write(`  แชต [${c.id}] …\n`)
-    const turn = await askChat(c.say)
+    const turn = await askChat(c.say, c.then)
     const problems = turn.error ? [`ล้ม: ${turn.error}`] : [...c.check(turn), ...globalProblems(turn)]
     results.push({ case: c, turn, problems })
   }
@@ -43,8 +43,17 @@ async function runVoice(): Promise<{ pass: number; total: number }> {
     for (const c of picked) {
       process.stderr.write(`  โทร [${c.id}] …\n`)
       // ประโยคเดียวกันแต่ถอดเครื่องหมายวรรคตอนออก — ให้เหมือนสิ่งที่ ASR ส่งเข้ามาจริง
-      const heard = c.say.replace(/[,·]/g, ' ').replace(/\s+/g, ' ').trim()
-      const turn = await probe.say(heard)
+      const asHeard = (s: string) => s.replace(/[,·]/g, ' ').replace(/\s+/g, ' ').trim()
+      const heard = asHeard(c.say)
+      let turn = await probe.say(heard)
+
+      // เคสสองเทิร์น: ร่างค้างเดินทางต่อ · `calls` รวมของทั้งสองเทิร์นไว้ให้ตรวจได้
+      if (c.then && !turn.error) {
+        const before = turn.calls
+        const next = await probe.say(asHeard(c.then), turn.drafts)
+        turn = { ...next, calls: [...before, ...next.calls] }
+      }
+
       const problems = turn.error ? [`ล้ม: ${turn.error}`] : [...c.check(turn), ...globalProblems(turn)]
       results.push({ case: { ...c, say: heard }, turn, problems })
     }

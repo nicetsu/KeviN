@@ -71,6 +71,15 @@ export type Draft = {
    * และให้ปุ่มยืนยันชี้ถูกใบตอนมีหลายใบซ้อนกัน
    */
   id: string
+  /**
+   * รอบการแก้ของร่างใบนี้ — เพิ่มทีละหนึ่งทุกครั้งที่ `propose_update_draft` แก้มัน
+   *
+   * ⚠️ **มีไว้ให้การ์ดบนจอรีเซ็ตตัวเอง** · `DraftCard` เก็บค่าที่กำลังแก้ไว้ใน state
+   *    ของตัวเอง ถ้าร่างใบเดิมถูกแก้แล้ว React ยัง mount การ์ดตัวเดิมอยู่ (เพราะ
+   *    `key` เป็น id ซึ่งไม่เปลี่ยน) ผู้ใช้จะเห็นของเก่าค้างทั้งที่ข้อมูลใหม่มาแล้ว
+   *    ทุกที่ที่วางการ์ดจึงต้องใช้ `key` ที่มี `rev` ประกอบด้วย — `draftKey()`
+   */
+  rev?: number
   action: DraftAction
   /** พาดหัวการ์ด เช่น "เพิ่มงาน" · "เลื่อนกำหนดส่ง" */
   heading: string
@@ -132,4 +141,46 @@ export function confirmLabel(kind: DraftKind): string {
     case 'add_event':
       return 'เพิ่มกิจกรรม'
   }
+}
+
+/**
+ * `key` ของการ์ดหนึ่งใบ — **ต้องใช้ตัวนี้ทุกที่ที่วาง `DraftCard`**
+ *
+ * ใช้ id เปล่า ๆ ไม่ได้ เพราะร่างที่ถูกแก้ยังเป็นใบเดิม id จึงไม่เปลี่ยน
+ * React จะไม่ mount ใหม่ แล้วค่าที่การ์ดถือไว้ใน state จะเป็นของรอบก่อน
+ */
+export function draftKey(draft: Draft): string {
+  return `${draft.id}#${draft.rev ?? 0}`
+}
+
+/**
+ * อ่านร่างค้างที่เบราว์เซอร์ส่งมากับคำขอ — **ขาเข้าที่เชื่อไม่ได้**
+ *
+ * ใช้ที่ `/api/chat` และ `/api/read/[tool]` ก่อนส่งเข้า `runTool` · กันแค่รูปทรง
+ * ไม่ได้กันความจริง เพราะความจริงของร่างถูกตรวจอีกทีตอน `propose_update_draft`
+ * เรียก `build` ใหม่ทั้งใบ และอีกทีตอนเขียนจริงที่ `lib/applyDraft.ts`
+ *
+ * ⚠️ **มีเพดานจำนวน** ร่างค้างบนจอจริง ๆ มีไม่กี่ใบ · ถ้าไม่จำกัด คำขอเดียว
+ *    ยัดร่างมาเป็นพันใบก็ได้ ซึ่งกลายเป็นภาระของเซิร์ฟเวอร์ฟรี ๆ
+ */
+export function readOpenDrafts(raw: unknown, max = 12): Draft[] {
+  if (!Array.isArray(raw)) return []
+  const out: Draft[] = []
+  for (const v of raw.slice(-max)) {
+    if (!v || typeof v !== 'object') continue
+    const d = v as Partial<Draft>
+    const action = d.action as { kind?: unknown } | undefined
+    if (typeof d.id !== 'string' || !action || !isDraftKind(action.kind)) continue
+    if (typeof d.heading !== 'string' || typeof d.title !== 'string') continue
+    out.push({
+      id: d.id,
+      rev: typeof d.rev === 'number' && Number.isFinite(d.rev) ? d.rev : 0,
+      heading: d.heading,
+      title: d.title,
+      lines: Array.isArray(d.lines) ? d.lines : [],
+      action: d.action as DraftAction,
+      source: typeof d.source === 'string' ? d.source : undefined,
+    })
+  }
+  return out
 }

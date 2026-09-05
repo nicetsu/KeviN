@@ -111,10 +111,15 @@ export class VoiceProbe {
     try { this.ws?.close() } catch { /* ปิดไปแล้วก็ไม่เป็นไร */ }
   }
 
-  /** พูดหนึ่งประโยคแล้วรอจนจบ turn (รวมรอบ tool ทั้งหมด) */
-  async say(text: string): Promise<Turn> {
+  /**
+   * พูดหนึ่งประโยคแล้วรอจนจบ turn (รวมรอบ tool ทั้งหมด)
+   *
+   * `carry` คือร่างที่ยังค้างบนจอจากประโยคก่อน — บนจอจริงมันไม่ได้หายไป
+   * ตอนผู้ใช้พูดต่อ · `propose_update_draft` จึงมีของให้แก้ในเทิร์นที่สอง
+   */
+  async say(text: string, carry: Draft[] = []): Promise<Turn> {
     const calls: Call[] = []
-    const drafts: Draft[] = []
+    const drafts: Draft[] = carry
     let reply = ''
     let sawTurnComplete = false
     let pendingTools = 0
@@ -167,18 +172,29 @@ export class VoiceProbe {
     const responses = await Promise.all(fns.map(async (call) => {
       const logged: Call = { name: call.name, args: call.args ?? {} }
       calls.push(logged)
-      const result = await runTool(call.name, call.args ?? {}, { db: this.db, today: TODAY })
+      // ร่างค้างเดินทางไปกับ tool เหมือนของจริง (lib/voice/session.ts · openDrafts)
+      const result = await runTool(call.name, call.args ?? {}, {
+        db: this.db,
+        today: TODAY,
+        openDrafts: drafts,
+      })
 
       let response: unknown
       if (!result.ok) {
         logged.outcome = `ปฏิเสธ: ${result.error}`
         response = { ok: false, error: result.error }
       } else if ('draft' in result) {
-        drafts.push(result.draft)
-        logged.outcome = `ร่าง “${result.draft.title}”`
+        const at = drafts.findIndex((d) => d.id === result.draft.id)
+        if (at >= 0) drafts[at] = result.draft
+        else drafts.push(result.draft)
+        const revised = (result.draft.rev ?? 0) > 0
+        logged.outcome = `${revised ? 'แก้ร่าง' : 'ร่าง'} “${result.draft.title}”`
         response = {
           ok: true,
-          note: 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+          note: revised
+            ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
+            : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+          draft_id: result.draft.id,
           title: result.draft.title,
         }
       } else {

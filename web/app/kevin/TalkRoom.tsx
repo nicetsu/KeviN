@@ -9,7 +9,7 @@ import { useCall } from '@/components/CallProvider'
 import { useTalkPrefs } from '@/lib/talkPrefs'
 import Settings from './Settings'
 import DraftCard from '@/components/DraftCard'
-import type { Draft } from '@/lib/drafts'
+import { draftKey, type Draft } from '@/lib/drafts'
 
 type Mode = 'chat' | 'voice'
 
@@ -114,6 +114,13 @@ export default function TalkRoom({
     const history = lines.filter((l) => !l.pending)
     setLines((prev) => [...prev, { role: 'user', content: trimmed, via: 'chat' }])
 
+    /*
+     * ร่างที่ค้างอยู่บนจอตอนนี้ — ส่งไปกับคำขอเพื่อให้ `propose_update_draft`
+     * แก้ **ใบเดิม** ได้ · ร่างไม่ได้ลง DB เซิร์ฟเวอร์จึงไม่รู้ถ้าไม่ส่งไปเอง
+     * · รวมร่างจากสายเสียงด้วย เพราะมันเป็นของค้างของทั้งห้อง ไม่ใช่ของโหมดใดโหมดหนึ่ง
+     */
+    const onScreen = [...lines.flatMap((l) => l.drafts ?? []), ...call.drafts]
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -123,6 +130,7 @@ export default function TalkRoom({
           conversationId,
           history: history.map((l) => ({ role: l.role, content: l.content })),
           lang: prefs.lang,
+          drafts: onScreen,
         }),
       })
       const data = await res.json()
@@ -131,8 +139,36 @@ export default function TalkRoom({
         setError(data.error ?? 'ตอบไม่สำเร็จ')
       } else {
         setConversationId(data.conversationId)
-        const drafts = Array.isArray(data.drafts) && data.drafts.length ? (data.drafts as Draft[]) : undefined
-        setLines((prev) => [...prev, { role: 'assistant', content: data.reply, via: 'chat', drafts }])
+        const incoming: Draft[] = Array.isArray(data.drafts) ? (data.drafts as Draft[]) : []
+
+        /*
+         * ร่างที่กลับมาพร้อม **id เดิม** คือใบเก่าที่ถูกแก้ ไม่ใช่ใบใหม่
+         *
+         * ต้องไปทับที่เดิม ไม่ใช่โผล่เป็นการ์ดใบที่สองใต้ฟองล่าสุด — ไม่งั้น
+         * "เปลี่ยนเป็นวันศุกร์" จะได้การ์ดสองใบสำหรับงานชิ้นเดียว ซึ่งกดยืนยัน
+         * ผิดใบได้ · ใบที่เกิดจากสายเสียงอยู่คนละที่ ต้องส่งกลับไปให้ provider ทับเอง
+         */
+        const voiceIds = new Set(call.drafts.map((d) => d.id))
+        for (const d of incoming) if (voiceIds.has(d.id)) call.putDraft(d)
+
+        setLines((prev) => {
+          const seen = new Set(prev.flatMap((l) => (l.drafts ?? []).map((d) => d.id)))
+          const revised = prev.map((l) =>
+            l.drafts?.some((d) => incoming.some((n) => n.id === d.id))
+              ? { ...l, drafts: l.drafts.map((d) => incoming.find((n) => n.id === d.id) ?? d) }
+              : l
+          )
+          const fresh = incoming.filter((d) => !seen.has(d.id) && !voiceIds.has(d.id))
+          return [
+            ...revised,
+            {
+              role: 'assistant' as const,
+              content: data.reply,
+              via: 'chat' as const,
+              drafts: fresh.length ? fresh : undefined,
+            },
+          ]
+        })
         if (data.warning) setError(data.warning)
       }
     } catch {
@@ -238,7 +274,7 @@ export default function TalkRoom({
               กลางสายแล้วร่างต้องไม่หายไป · มันเป็นของค้างของทั้งห้อง ไม่ใช่ของโหมดใดโหมดหนึ่ง
             */}
             {call.drafts.map((d) => (
-              <DraftCard key={d.id} draft={d} onSettled={call.dropDraft} />
+              <DraftCard key={draftKey(d)} draft={d} onSettled={call.dropDraft} />
             ))}
 
             {busy && (
@@ -307,7 +343,7 @@ function Bubble({ line, onDismiss }: { line: Line; onDismiss?: (id: string) => v
       ที่เจ้าของเลือก · อ่านแล้วรู้ทันทีว่าร่างนี้มาจากประโยคไหน
     */}
     {line.drafts?.map((d) => (
-      <DraftCard key={d.id} draft={d} onSettled={onDismiss} />
+      <DraftCard key={draftKey(d)} draft={d} onSettled={onDismiss} />
     ))}
     </>
   )

@@ -14,7 +14,7 @@
  *    ลบถาวรไม่ได้ · แตะ `project_schedules` ไม่ได้ (โครงที่ทุกอย่างอ้างอิง)
  *    ที่ทำได้มากสุดคือ **เก็บเข้าคลัง** ซึ่งกู้คืนได้ 7 วัน
  */
-import type { Draft, DraftLine } from '../drafts'
+import type { Draft, DraftAction, DraftLine } from '../drafts'
 import type { ReadOnlyDb } from './db'
 import { areaIsVisible } from './visibility'
 import { ToolFetchError } from './db'
@@ -23,6 +23,17 @@ export type ProposeCtx = {
   db: ReadOnlyDb
   /** วันนี้ตามเวลาไทย YYYY-MM-DD — ส่งเข้ามา ไม่ให้อ่านนาฬิกาเอง จะได้เทสต์ได้ */
   today: string
+  /**
+   * ร่างที่ยังค้างอยู่บนจอตอนนี้ — **เดินทางมาจากเบราว์เซอร์**
+   *
+   * ร่างไม่ได้ลง DB (doc/WRITE.md §8) เซิร์ฟเวอร์จึงไม่มีทางรู้ว่าจออะไรค้างอยู่
+   * ถ้าไม่ส่งมาให้ · `propose_update_draft` เป็นตัวเดียวที่ใช้ค่านี้
+   *
+   * ⚠️ **เชื่อไม่ได้** ทั้งก้อนมาจากฝั่งจอ ใครแก้ก็ได้ · ตัวแก้ร่างจึงไม่ก๊อป
+   *    ค่าจากที่นี่ไปใช้ตรง ๆ แต่ **เอาไปเรียก `build` ของ tool ตัวเดิมใหม่ทั้งใบ**
+   *    การตรวจทุกข้อรวมถึงตัวกรอง Area จึงเกิดซ้ำเหมือนร่างใบแรกทุกประการ
+   */
+  openDrafts?: readonly Draft[]
 }
 
 export class BadProposal extends Error {}
@@ -49,6 +60,22 @@ export function thaiToIso(raw: string): string {
   const t = new Date(iso)
   if (Number.isNaN(t.getTime())) throw new BadProposal(`เวลา "${raw}" ไม่มีอยู่จริง`)
   return t.toISOString()
+}
+
+/**
+ * ทางกลับของ `thaiToIso` — ISO → `YYYY-MM-DD HH:mm` **เวลาไทย**
+ *
+ * มีไว้ให้ `propose_update_draft` ประกอบอินพุตของร่างใบเดิมกลับขึ้นมาได้
+ * แล้วส่งเข้า `build` ตัวเดิมใหม่ทั้งใบ · ถ้าตัวแก้ร่างเขียนตรรกะการประกอบ
+ * ร่างเองอีกชุด มันจะเพี้ยนจากตัวจริงทันทีที่ใครแก้ตัวใดตัวหนึ่ง
+ */
+export function thaiInput(iso: string): string {
+  const t = new Date(new Date(iso).getTime() + 7 * 3600 * 1000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return (
+    `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}` +
+    ` ${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}`
+  )
 }
 
 /** "พฤ. 4 ก.ย. 23:59" — รูปที่ผู้ใช้ทานได้ ไม่ใช่ ISO ที่อ่านไม่ออก */
@@ -416,6 +443,170 @@ const addEvent: ProposeDef = {
 }
 
 // --------------------------------------------------------------------------
+// แก้ร่างใบเดิม
+// --------------------------------------------------------------------------
+
+/**
+ * tool ที่สร้างร่างแต่ละชนิด — ใช้ย้อนกลับไปเรียก `build` ตัวเดิม
+ *
+ * ⚠️ ตัวแก้ร่าง **ไม่ประกอบร่างเอง** มันแปลงร่างใบเดิมกลับเป็นอินพุต ทับด้วย
+ *    สิ่งที่ผู้ใช้พูดแก้ แล้วเรียก `build` ตัวเดิมใหม่ทั้งใบ · การตรวจทุกข้อ
+ *    (ตัวกรอง Area · CHECK ของ DB · เส้นแบ่ง task/reminder/โน้ต) จึงเกิดซ้ำครบ
+ *    ถ้าเขียนตรรกะประกอบร่างขึ้นมาอีกชุด มันจะเพี้ยนจากตัวจริงในวันที่ใครแก้ข้างเดียว
+ */
+const TOOL_OF_KIND: Record<DraftAction['kind'], string> = {
+  add_item: 'propose_add_item',
+  edit_item: 'propose_edit_item',
+  complete_item: 'propose_complete_item',
+  archive_item: 'propose_archive_item',
+  add_event: 'propose_add_event',
+}
+
+/** ฟิลด์ที่ร่างแต่ละชนิดแก้ได้จริง — ฟิลด์ที่ไม่มีที่ลง ต้องปฏิเสธ ไม่ใช่รับแล้วทิ้ง */
+const UPDATABLE: Record<DraftAction['kind'], readonly string[]> = {
+  add_item: ['type', 'project', 'title', 'body', 'due', 'remind'],
+  edit_item: ['title', 'body', 'due', 'remind', 'project'],
+  complete_item: ['done'],
+  archive_item: [],
+  add_event: ['project', 'title', 'body', 'starts', 'ends', 'location', 'label'],
+}
+
+const UPDATE_FIELDS = [
+  'type', 'project', 'title', 'body', 'due', 'remind', 'starts', 'ends', 'location', 'label', 'done',
+] as const
+
+/** ร่างใบเดิม → อินพุตชุดที่ทำให้เกิดร่างนั้น (ทางกลับของ `build`) */
+function rawOf(a: DraftAction): Record<string, unknown> {
+  switch (a.kind) {
+    case 'add_item':
+      return {
+        type: a.type,
+        project: a.projectId,
+        title: a.title,
+        body: a.body,
+        due: a.dueAt ? thaiInput(a.dueAt) : undefined,
+        remind: a.remindAt ? thaiInput(a.remindAt) : undefined,
+      }
+    case 'edit_item':
+      return {
+        item_id: a.itemId,
+        title: a.title,
+        body: a.body,
+        // `-` คือคำสั่งล้างค่า ซึ่งต่างจาก undefined ที่แปลว่าไม่แตะ — ต้องรักษาไว้
+        due: a.dueAt === null ? '-' : a.dueAt ? thaiInput(a.dueAt) : undefined,
+        remind: a.remindAt === null ? '-' : a.remindAt ? thaiInput(a.remindAt) : undefined,
+        project: a.projectId,
+      }
+    case 'complete_item':
+      return { item_id: a.itemId, done: a.done }
+    case 'archive_item':
+      return { item_id: a.itemId }
+    case 'add_event':
+      return {
+        project: a.projectId,
+        title: a.title,
+        body: a.body,
+        starts: thaiInput(a.startsAt),
+        ends: thaiInput(a.endsAt),
+        location: a.location,
+        label: a.label,
+      }
+  }
+}
+
+/** ตัดคีย์ที่เป็น undefined ทิ้ง — ตัวอ่านอินพุตแยก "ไม่มี" กับ "ว่าง" คนละความหมาย */
+function prune(raw: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(raw).filter(([, v]) => v !== undefined))
+}
+
+const updateDraft: ProposeDef = {
+  description:
+    'แก้ร่างที่ค้างอยู่บนจอ **ใบเดิม** เมื่อผู้ใช้บอกให้เปลี่ยนอะไรบางอย่าง ' +
+    'เช่น "เปลี่ยนเป็นวันศุกร์" "ลง Network แทน" "เอาเป็นบ่ายสอง" ' +
+    'ส่งมาเฉพาะสิ่งที่เปลี่ยน ที่เหลือระบบเก็บของเดิมให้เอง · **ยังไม่บันทึก** ต้องกดยืนยันก่อน ' +
+    'ใช้ตัวนี้แทนการเสนอใหม่ทั้งใบ ไม่งั้นผู้ใช้จะได้การ์ดสองใบสำหรับเรื่องเดียว',
+  parameters: {
+    type: 'object',
+    properties: {
+      draft_id: {
+        type: 'string',
+        description: 'id ของร่างที่จะแก้ · เว้นไว้ = ใบล่าสุดบนจอ ซึ่งถูกเกือบทุกครั้ง',
+      },
+      type: { type: 'string', description: 'ชนิดใหม่', enum: ['task', 'reminder', 'shortnote'] },
+      project: { type: 'string', description: 'ชื่อวิชาใหม่ ถ้าย้าย' },
+      title: { type: 'string', description: 'ชื่อใหม่' },
+      body: { type: 'string', description: 'รายละเอียดใหม่' },
+      due: { type: 'string', description: 'กำหนดส่งใหม่ เวลาไทย YYYY-MM-DD หรือ YYYY-MM-DD HH:mm' },
+      remind: { type: 'string', description: 'เวลาเตือนใหม่ รูปเดียวกัน' },
+      starts: { type: 'string', description: 'เวลาเริ่มใหม่ของกิจกรรม · เวลาจบเลื่อนตามให้ ยาวเท่าเดิม' },
+      ends: { type: 'string', description: 'เวลาจบใหม่ของกิจกรรม' },
+      location: { type: 'string', description: 'สถานที่ใหม่' },
+      label: { type: 'string', description: 'ป้ายใหม่' },
+      done: { type: 'boolean', description: 'true = ติ๊กเสร็จ · false = เอาติ๊กออก' },
+    },
+    required: [],
+  },
+  build: async (raw, ctx) => {
+    const open = ctx.openDrafts ?? []
+    if (open.length === 0) {
+      throw new BadProposal('ตอนนี้ไม่มีร่างค้างบนจอ · ถ้าจะเพิ่มของใหม่ให้เสนอเป็นร่างใบใหม่')
+    }
+
+    const wanted = text(raw, 'draft_id', 40, false)
+    // เว้น id ไว้ = ใบล่าสุด · เสียงอ่าน id ออกมาไม่ได้อยู่แล้ว ค่าตั้งต้นจึงต้องถูก
+    const base = wanted ? open.find((d) => d.id === wanted) : open[open.length - 1]
+    if (!base) throw new BadProposal('หาร่างใบนั้นไม่เจอบนจอ · อาจถูกกดทิ้งไปแล้ว')
+
+    const kind = base.action.kind
+    const allowed = UPDATABLE[kind]
+
+    const changes: Record<string, unknown> = {}
+    for (const key of UPDATE_FIELDS) {
+      const v = raw[key]
+      if (v === undefined || v === null || v === '') continue
+      if (!allowed.includes(key)) {
+        throw new BadProposal(
+          allowed.length === 0
+            ? `ร่าง "${base.heading}" ไม่มีอะไรให้แก้ · ถ้าผิดใบให้ผู้ใช้กดทิ้งแล้วบอกใหม่`
+            : `ร่าง "${base.heading}" แก้ ${key} ไม่ได้ · แก้ได้แค่ ${allowed.join(' · ')}`
+        )
+      }
+      changes[key] = v
+    }
+    if (Object.keys(changes).length === 0) throw new BadProposal('ยังไม่ได้บอกว่าจะแก้อะไรในร่างนี้')
+
+    const merged = prune(rawOf(base.action))
+
+    /*
+     * เปลี่ยนชนิดแล้ว **เวลาของชนิดเดิมต้องไม่ตามมา** — task มี due · reminder
+     * มี remind · โน้ตไม่มีทั้งคู่ · ถ้าปล่อยให้ตามมา `build` จะปฏิเสธด้วยเหตุผล
+     * ที่ผู้ใช้ไม่ได้ก่อ ("งานไม่ใช้เวลาเตือน") ทั้งที่เขาแค่บอกว่าเปลี่ยนชนิด
+     */
+    if (kind === 'add_item' && changes.type && changes.type !== base.action.type) {
+      delete merged.due
+      delete merged.remind
+    }
+
+    /*
+     * เลื่อนเวลาเริ่มของกิจกรรมโดยไม่บอกเวลาจบ = **เลื่อนทั้งงาน ยาวเท่าเดิม**
+     * ถ้าปล่อยเวลาจบไว้ที่เดิม การเลื่อนไปหลังเวลาจบจะกลายเป็นร่างที่ผิดเสมอ
+     */
+    if (kind === 'add_event' && changes.starts && !changes.ends) {
+      const a = base.action as Extract<DraftAction, { kind: 'add_event' }>
+      const span = new Date(a.endsAt).getTime() - new Date(a.startsAt).getTime()
+      merged.ends = thaiInput(new Date(new Date(thaiToIso(String(changes.starts))).getTime() + span).toISOString())
+    }
+
+    const def = REGISTRY[TOOL_OF_KIND[kind]]
+    const next = await def.build({ ...merged, ...changes }, ctx)
+
+    // **ใบเดิม ไม่ใช่ใบใหม่** — id เดิมทำให้การ์ดบนจอถูกแทนที่ ไม่ใช่มีเพิ่มอีกใบ
+    // `rev` ทำให้การ์ดตัวนั้น mount ใหม่ ค่าที่มันถือไว้ใน state จึงไม่ค้างของรอบก่อน
+    return { ...next, id: base.id, rev: (base.rev ?? 0) + 1 }
+  },
+}
+
+// --------------------------------------------------------------------------
 // ทะเบียน
 // --------------------------------------------------------------------------
 
@@ -425,6 +616,7 @@ const REGISTRY: Record<string, ProposeDef> = {
   propose_complete_item: completeItem,
   propose_archive_item: archiveItem,
   propose_add_event: addEvent,
+  propose_update_draft: updateDraft,
 }
 
 export const PROPOSE_NAMES = Object.keys(REGISTRY) as readonly string[]

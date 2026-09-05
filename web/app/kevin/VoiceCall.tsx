@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useCall, mmss } from '@/components/CallProvider'
 import DraftCard from '@/components/DraftCard'
+import { draftKey } from '@/lib/drafts'
 import type { CallState } from '@/lib/voice/session'
 
 /** รูปคลื่น · แท่งกลางไวกว่าแท่งริม ทำให้ค่าเดียวดูเป็นคลื่นไม่ใช่แถบ */
@@ -166,7 +167,7 @@ export default function VoiceCall() {
           )}
 
           {call.drafts.map((d) => (
-            <div key={d.id} className="caption__draft">
+            <div key={draftKey(d)} className="caption__draft">
               <DraftCard draft={d} onSettled={call.dropDraft} />
             </div>
           ))}

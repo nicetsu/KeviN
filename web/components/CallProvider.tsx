@@ -36,6 +36,13 @@ type CallApi = {
   drafts: Draft[]
   /** เอาร่างออกจากจอ — ใช้ทั้งตอนกดทิ้งและตอนยืนยันสำเร็จ */
   dropDraft: (id: string) => void
+  /**
+   * วางร่างลงจอ — **ทับใบเดิมถ้า id ซ้ำ** ไม่งั้นต่อท้าย
+   *
+   * โหมดแชตต้องเรียกตัวนี้ได้ด้วย เพราะร่างที่เกิดจากสายเสียงยังค้างอยู่ตอนสลับ
+   * ไปพิมพ์ · พิมพ์แก้ร่างที่เกิดจากการพูด ต้องแก้ใบเดิม ไม่ใช่ได้ใบที่สอง
+   */
+  putDraft: (draft: Draft) => void
   start: () => Promise<void>
   /** สลับไมค์ระหว่างสาย · ไม่มีสายอยู่ก็เรียกได้ ค่าจะไปมีผลตอนโทรครั้งถัดไป */
   switchMic: (deviceId: string) => Promise<void>
@@ -67,6 +74,14 @@ export default function CallProvider({ children }: { children: React.ReactNode }
   const mic = useMic()
 
   const [drafts, setDrafts] = useState<Draft[]>([])
+  /*
+   * เงาของ `drafts` ที่อ่านได้จากใน callback ของ session
+   *
+   * `start()` ประกอบ hooks ครั้งเดียวตอนเริ่มสาย · ถ้าปิดทับค่า state ตรง ๆ
+   * มันจะค้างอยู่ที่รายการ ณ วินาทีนั้นตลอดทั้งสาย แล้ว `propose_update_draft`
+   * จะมองไม่เห็นร่างที่เพิ่งเสนอไปเมื่อกี้
+   */
+  const draftsRef = useRef<Draft[]>([])
   const [state, setState] = useState<CallState | 'idle'>('idle')
   const [live, setLive] = useState<Caption | null>(null)
   const [turns, setTurns] = useState<VoiceTurn[]>([])
@@ -151,6 +166,7 @@ export default function CallProvider({ children }: { children: React.ReactNode }
      * เปลี่ยนใจ · แต่พอเริ่มสายใหม่แปลว่าเริ่มเรื่องใหม่ ของค้างจากรอบก่อนไม่ควรตามมา
      */
     setDrafts([])
+    draftsRef.current = []
 
     const s = new Session(prefs, {
       onState: setState,
@@ -165,8 +181,19 @@ export default function CallProvider({ children }: { children: React.ReactNode }
       },
       onTurnEnd: flush,
       onLevel: setLevel,
-      /* ใบใหม่ต่อท้าย ไม่ทับของเดิม — พูดรวดเดียวสามงานต้องได้สามใบ */
-      onDraft: (d) => setDrafts((prev) => [...prev, d]),
+      /*
+       * ใบใหม่ต่อท้าย · **ใบเดิมที่ถูกแก้ทับที่เดิม**
+       *
+       * พูดรวดเดียวสามงานต้องได้สามใบ — แต่ "เปลี่ยนเป็นวันศุกร์" ต้องได้ใบเดิม
+       * ที่เปลี่ยนไป ไม่ใช่ใบที่สองสำหรับเรื่องเดียวกัน · `propose_update_draft`
+       * คืนร่างที่ `id` เท่าเดิม การแทนที่จึงตัดสินจาก id ไม่ใช่จากชื่อ tool
+       */
+      onDraft: (d) =>
+        setDrafts((prev) =>
+          prev.some((x) => x.id === d.id) ? prev.map((x) => (x.id === d.id ? d : x)) : [...prev, d]
+        ),
+      // ร่างค้างต้องเป็นค่า ณ วินาทีที่เรียก tool ไม่ใช่ค่าตอนเริ่มสาย
+      openDrafts: () => draftsRef.current,
       onError: (m) => {
         setError(m)
         // โควตาเสียงหมด = คนละโควตากับแชต · หน้าจอจะดันไปโหมดแชตให้
@@ -229,16 +256,26 @@ export default function CallProvider({ children }: { children: React.ReactNode }
     return () => document.removeEventListener('visibilitychange', onHide)
   }, [running, hangUp])
 
+  useEffect(() => {
+    draftsRef.current = drafts
+  }, [drafts])
+
   const dropDraft = useCallback((id: string) => {
     setDrafts((prev) => prev.filter((d) => d.id !== id))
+  }, [])
+
+  const putDraft = useCallback((d: Draft) => {
+    setDrafts((prev) =>
+      prev.some((x) => x.id === d.id) ? prev.map((x) => (x.id === d.id ? d : x)) : [...prev, d]
+    )
   }, [])
 
   const api = useMemo<CallApi>(() => ({
     state, live, elapsed, muted, error, quotaOut, turns, level, drafts,
     start, hangUp, toggleMute, switchMic,
-    dropDraft,
+    dropDraft, putDraft,
     dismissError: () => setError(null),
-  }), [state, live, elapsed, muted, error, quotaOut, turns, level, drafts, start, hangUp, toggleMute, switchMic, dropDraft])
+  }), [state, live, elapsed, muted, error, quotaOut, turns, level, drafts, start, hangUp, toggleMute, switchMic, dropDraft, putDraft])
 
   return (
     <Ctx.Provider value={api}>

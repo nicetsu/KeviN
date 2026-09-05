@@ -20,7 +20,7 @@ import {
   type StoredMessage,
 } from '@/lib/chat/store'
 import { bangkokToday } from '@/lib/time'
-import type { Draft } from '@/lib/drafts'
+import { readOpenDrafts, type Draft } from '@/lib/drafts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -40,7 +40,13 @@ export async function POST(request: NextRequest) {
     return Response.json({ ok: false, error: 'ยังไม่ได้ล็อกอิน' }, { status: 401 })
   }
 
-  let body: { text?: unknown; conversationId?: unknown; history?: unknown; lang?: unknown }
+  let body: {
+    text?: unknown
+    conversationId?: unknown
+    history?: unknown
+    lang?: unknown
+    drafts?: unknown
+  }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -79,6 +85,12 @@ export async function POST(request: NextRequest) {
   const tools = toolDeclarations()
 
   /*
+   * ร่างที่ยังค้างบนจอตอนนี้ — `propose_update_draft` ต้องใช้เพื่อแก้ **ใบเดิม**
+   * ร่างไม่ได้ลง DB เซิร์ฟเวอร์จึงไม่มีทางรู้ถ้าเบราว์เซอร์ไม่ส่งมาเอง (doc/WRITE.md §8)
+   */
+  const openDrafts = readOpenDrafts(body.drafts)
+
+  /*
    * ร่างที่ผู้ช่วยเสนอในรอบนี้ — ส่งกลับไปให้หน้าจอวาดเป็นการ์ด
    *
    * ⚠️ **ไม่ได้บันทึกลงประวัติ** ร่างมีอายุแค่หน้าจอนี้ · ถ้าเก็บลงบทสนทนา
@@ -105,7 +117,7 @@ export async function POST(request: NextRequest) {
 
       const responses = await Promise.all(
         out.calls.map(async (call) => {
-          const result = await runTool(call.name, call.args, { db, today })
+          const result = await runTool(call.name, call.args, { db, today, openDrafts })
           const proposed = result.ok && 'draft' in result
           if (proposed) drafts.push(result.draft)
 
@@ -131,7 +143,11 @@ export async function POST(request: NextRequest) {
             : 'draft' in result
               ? {
                   ok: true,
-                  note: 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                  note: openDrafts.some((d) => d.id === result.draft.id)
+                    ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
+                    : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                  // id เดินทางกลับเข้าโมเดล เพื่อให้อ้างถึงร่างใบนี้ตอนพูดแก้ต่อได้
+                  draft_id: result.draft.id,
                   title: result.draft.title,
                 }
               : { rows: result.rows, hidden: result.hidden }

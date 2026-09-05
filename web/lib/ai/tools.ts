@@ -18,6 +18,13 @@ export type ToolCtx = {
   db: ReadOnlyDb
   /** วันนี้ตามเวลาไทย YYYY-MM-DD — ส่งเข้ามา ไม่ให้ tool อ่านนาฬิกาเอง จะได้เทสต์ได้ */
   today: string
+  /**
+   * ร่างที่ค้างอยู่บนจอตอนนี้ · ใช้เฉพาะ `propose_update_draft`
+   *
+   * ร่างไม่ได้ลง DB เซิร์ฟเวอร์จึงไม่รู้ว่าจออะไรค้างอยู่ถ้าเบราว์เซอร์ไม่ส่งมา
+   * · ฝั่งอ่านไม่แตะค่านี้เลย (`ProposeCtx` ใน `propose.ts` อธิบายไว้ว่าทำไมเชื่อไม่ได้)
+   */
+  openDrafts?: readonly Draft[]
 }
 
 /** JSON Schema แบบแคบ ๆ พอสำหรับส่งให้โมเดล ทั้ง Gemini และเจ้าอื่น */
@@ -401,7 +408,11 @@ export async function runTool(
    * แยกประตูเมื่อไหร่ จะมีที่ให้ลืมตรวจเพิ่มอีกที่หนึ่งทันที
    */
   if (isProposeName(name)) {
-    const out = await runPropose(name, rawInput, { db: ctx.db, today: ctx.today })
+    const out = await runPropose(name, rawInput, {
+      db: ctx.db,
+      today: ctx.today,
+      openDrafts: ctx.openDrafts,
+    })
     return out.ok ? { ok: true, draft: out.draft } : out
   }
 

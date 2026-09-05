@@ -11,6 +11,7 @@ import { createClient, currentUserId } from '@/lib/supabase/server'
 import { readOnlyDb } from '@/lib/ai/supabaseDb'
 import { isCallableTool, runTool } from '@/lib/ai/tools'
 import { bangkokToday } from '@/lib/time'
+import { readOpenDrafts } from '@/lib/drafts'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -39,19 +40,33 @@ export async function POST(
     return Response.json({ ok: false, error: 'ยังไม่ได้ล็อกอิน' }, { status: 401 })
   }
 
-  let body: Record<string, unknown> = {}
+  /*
+   * รูปของ body คือ `{ args, drafts }` — **แยกกันสองช่องโดยตั้งใจ**
+   *
+   * `args` คือสิ่งที่**โมเดล**ส่งมา · `drafts` คือร่างที่ค้างบนจอซึ่ง**เบราว์เซอร์**
+   * แนบมาให้ `propose_update_draft` ใช้ · ถ้ายัดรวมช่องเดียว โมเดลจะเขียนทับ
+   * รายการร่างค้างได้ด้วยการใส่คีย์ชื่อเดียวกันมาใน args
+   */
+  let args: Record<string, unknown> = {}
+  let drafts: unknown = []
   try {
     const raw: unknown = await request.json()
     if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
-      body = raw as Record<string, unknown>
+      const b = raw as Record<string, unknown>
+      const inner = b.args
+      if (inner !== null && typeof inner === 'object' && !Array.isArray(inner)) {
+        args = inner as Record<string, unknown>
+      }
+      drafts = b.drafts
     }
   } catch {
     // ไม่มี body ก็เรียกได้ · tool ส่วนใหญ่มีค่าตั้งต้นให้อยู่แล้ว
   }
 
-  const result = await runTool(tool, body, {
+  const result = await runTool(tool, args, {
     db: await readOnlyDb(),
     today: bangkokToday().dateKey,
+    openDrafts: readOpenDrafts(drafts),
   })
 
   // ดึงข้อมูลไม่สำเร็จต้องเป็น error จริง ๆ ห้ามคืนรายการว่างให้โมเดลไปสรุปว่า

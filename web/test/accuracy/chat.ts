@@ -34,17 +34,31 @@ async function generateOrRetry(opts: Parameters<typeof generate>[0]) {
   }
 }
 
-export async function askChat(text: string): Promise<Turn> {
+export async function askChat(text: string, then?: string): Promise<Turn> {
   const db = stubDb()
   const tools = toolDeclarations()
   const system = systemPrompt('chat', TODAY, 'th')
   const contents: Content[] = [{ role: 'user', parts: [{ text }] }]
 
   const calls: Call[] = []
+  /*
+   * ร่างค้าง **ข้ามเทิร์น** เหมือนของจริง — บนจอมันไม่ได้หายไปตอนผู้ใช้พิมพ์ต่อ
+   * `propose_update_draft` จึงมีของให้แก้ในเทิร์นที่สอง (app/kevin/TalkRoom.tsx)
+   */
   const drafts: Draft[] = []
   let reply = ''
 
+  const says = then ? [text, then] : [text]
+
   try {
+   for (const [nth, say] of says.entries()) {
+    if (nth > 0) {
+      // ต่อบทสนทนาเดิม: คำตอบของรอบก่อน แล้วจึงประโยคใหม่ของผู้ใช้
+      contents.push({ role: 'model', parts: [{ text: reply }] })
+      contents.push({ role: 'user', parts: [{ text: say }] })
+      reply = ''
+    }
+
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
       const out = await generateOrRetry({ system, contents, tools })
 
@@ -60,8 +74,14 @@ export async function askChat(text: string): Promise<Turn> {
         out.calls.map(async (call) => {
           const logged: Call = { name: call.name, args: call.args }
           calls.push(logged)
-          const result = await runTool(call.name, call.args, { db, today: TODAY })
-          if (result.ok && 'draft' in result) drafts.push(result.draft)
+          // ร่างที่ค้างอยู่เดินทางไปกับ tool เหมือนของจริง — `propose_update_draft`
+          // แก้ใบเดิมได้ก็ต่อเมื่อรู้ว่าใบเดิมหน้าตายังไง (app/api/chat/route.ts)
+          const result = await runTool(call.name, call.args, { db, today: TODAY, openDrafts: drafts })
+          if (result.ok && 'draft' in result) {
+            const at = drafts.findIndex((d) => d.id === result.draft.id)
+            if (at >= 0) drafts[at] = result.draft
+            else drafts.push(result.draft)
+          }
           logged.outcome = !result.ok
             ? `ปฏิเสธ: ${result.error}`
             : 'draft' in result
@@ -73,7 +93,10 @@ export async function askChat(text: string): Promise<Turn> {
             : 'draft' in result
               ? {
                   ok: true,
-                  note: 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                  note: (result.draft.rev ?? 0) > 0
+                    ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
+                    : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                  draft_id: result.draft.id,
                   title: result.draft.title,
                 }
               : { rows: result.rows, hidden: result.hidden }
@@ -84,6 +107,7 @@ export async function askChat(text: string): Promise<Turn> {
 
       contents.push({ role: 'user', parts: responses })
     }
+   }
   } catch (e) {
     return { calls, drafts, reply, error: e instanceof Error ? e.message : String(e) }
   }
