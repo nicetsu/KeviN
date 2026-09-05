@@ -9,7 +9,7 @@ const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 /**
  * ชื่อรุ่นย้ายมาอยู่ใน env เพราะรุ่นของ Gemini เปลี่ยนชื่อบ่อยกว่าโค้ดของเรา
- * และโหมดเสียงกับโหมดแชตต้องใช้คนละรุ่นเพื่อให้ **โควตาแยกกัน** (doc/CHAT.md §4)
+ * และโหมดเสียงกับโหมดแชตต้องใช้คนละรุ่นเพื่อให้ **โควตาแยกกัน** (ARCHITECTURE.md §6)
  */
 export const CHAT_MODEL = process.env.GEMINI_CHAT_MODEL ?? 'gemini-3.1-flash-lite'
 

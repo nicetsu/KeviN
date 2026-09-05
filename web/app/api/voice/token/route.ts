@@ -3,7 +3,7 @@
  *
  * ทำไมต้องให้เบราว์เซอร์ต่อตรงแทนที่จะแบกเสียงผ่านเซิร์ฟเวอร์เรา —
  * Vercel เป็น serverless ถือ WebSocket ยาว ๆ ไม่ได้ · แต่ API key ก็ลงเบราว์เซอร์ไม่ได้
- * ephemeral token แก้ทั้งสองข้อพร้อมกัน (doc/CHAT.md §3)
+ * ephemeral token แก้ทั้งสองข้อพร้อมกัน (ARCHITECTURE.md §6)
  *
  * ⚠️ **config ถูกล็อกตายไปกับ token ตอนสร้าง** (`bidiGenerateContentSetup`)
  *    คนที่ขโมย token ไปจึงสั่ง prompt อื่นหรือเปลี่ยนชุด tool ไม่ได้

@@ -2,7 +2,7 @@
  * ประตูแชต — โมเดลคิดฝั่งเซิร์ฟเวอร์ tool ก็รันฝั่งเซิร์ฟเวอร์
  *
  * ต่างจากโหมดโทรตรงนี้จุดเดียว: Live API รัน tool ที่ client จึงต้องเด้งกลับ
- * ไปที่เบราว์เซอร์ก่อน · ที่นี่ไม่ต้องออกไปไหนเลย (doc/CHAT.md §3)
+ * ไปที่เบราว์เซอร์ก่อน · ที่นี่ไม่ต้องออกไปไหนเลย (ARCHITECTURE.md §6)
  */
 import type { NextRequest } from 'next/server'
 import { createClient, currentUserId } from '@/lib/supabase/server'
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
   /*
    * ร่างที่ยังค้างบนจอตอนนี้ — `propose_update_draft` ต้องใช้เพื่อแก้ **ใบเดิม**
-   * ร่างไม่ได้ลง DB เซิร์ฟเวอร์จึงไม่มีทางรู้ถ้าเบราว์เซอร์ไม่ส่งมาเอง (doc/WRITE.md §8)
+   * ร่างไม่ได้ลง DB เซิร์ฟเวอร์จึงไม่มีทางรู้ถ้าเบราว์เซอร์ไม่ส่งมาเอง (ARCHITECTURE.md §7)
    */
   const openDrafts = readOpenDrafts(body.drafts)
 

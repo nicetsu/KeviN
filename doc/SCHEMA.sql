@@ -15,7 +15,7 @@ create table public.areas (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users(id) on delete cascade,
   name        text not null check (char_length(name) between 1 and 80),
-  color       text,                                  -- คีย์ gradient ใน DESIGN.md
+  color       text,                                  -- คีย์ gradient ใน ARCHITECTURE.md §9
   sort_order  int  not null default 0,
   archived_at timestamptz,
   created_at  timestamptz not null default now(),
@@ -523,7 +523,7 @@ grant execute on function public.claim_due_reminders() to service_role;
 --
 -- สามตารางสำหรับประตูที่อ่านอย่างเดียว — ไม่มีตารางไหนที่ผู้ช่วยเขียนเองได้
 -- ผู้ช่วยอ่านข้อมูลผ่าน lib/ai/tools.ts เท่านั้น · ส่วนสามตารางนี้เขียนโดย
--- เซิร์ฟเวอร์ของแอปเอง ไม่ใช่โดยโมเดล (doc/CHAT.md §9)
+-- เซิร์ฟเวอร์ของแอปเอง ไม่ใช่โดยโมเดล (ARCHITECTURE.md §6)
 -- =====================================================================
 
 create type public.talk_channel as enum ('chat', 'voice');

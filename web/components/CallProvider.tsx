@@ -65,7 +65,7 @@ export function useCall(): CallApi {
  *
  * ถ้าเก็บ session ไว้ในคอมโพเนนต์ของหน้า พอผู้ใช้กดไปดูปฏิทินกลางสาย
  * คอมโพเนนต์จะถูก unmount แล้วสายตายทันที · สลับไปดูอะไรแล้วสายตัด
- * คือสิ่งที่ทำให้คนเลิกใช้ (doc/CHAT.md §8)
+ * คือสิ่งที่ทำให้คนเลิกใช้ (ARCHITECTURE.md §6)
  */
 export default function CallProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()

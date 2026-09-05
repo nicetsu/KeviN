@@ -2,7 +2,7 @@
 -- เฟส 0 · ทดสอบว่า CHECK constraint ทำงานจริง
 -- รันในหน้า SQL Editor ของ Supabase หลัง 01-verify.sql ผ่านหมด
 --
--- ตอบข้อ "ทดสอบ CHECK constraint ว่าทำงานจริง" ใน PLAN.md แต่ทำครบทุกข้อ
+-- ตอบข้อ "ทดสอบ CHECK constraint ว่าทำงานจริง" ของเฟส 0 (doc/HISTORY.md) แต่ทำครบทุกข้อ
 -- ไม่ใช่เฉพาะ reminder ที่ไม่มี remind_at
 --
 -- ปลอดภัยกับข้อมูลจริง — สร้าง Area ชื่อ __smoke_test__ ขึ้นมาเอง

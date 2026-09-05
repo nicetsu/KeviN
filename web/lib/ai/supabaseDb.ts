@@ -3,7 +3,7 @@
  *
  * ไฟล์นี้เป็น**ที่เดียว**ที่ชั้น tool แตะ Supabase client ตัวจริง ซึ่งมี
  * `.insert()` / `.update()` / `.delete()` ติดมาด้วยเสมอ · ที่เหลือของชั้น tool
- * เห็นแค่ interface ที่ไม่มีเมธอดเขียนเลย (doc/CHAT.md §6)
+ * เห็นแค่ interface ที่ไม่มีเมธอดเขียนเลย (ARCHITECTURE.md §6)
  *
  * กติกาของไฟล์นี้: **ห้ามมีคำว่า insert/update/delete/upsert ปรากฏข้างล่างนี้**
  */

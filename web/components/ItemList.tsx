@@ -17,7 +17,7 @@ export type Row = {
   title: string
   meta: string
   done: boolean
-  /** ช่องติ๊กมีเฉพาะ task (doc/DESIGN.md) */
+  /** ช่องติ๊กมีเฉพาะ task (ARCHITECTURE.md §9) */
   checkable: boolean
   /** ป้ายขวาสุด · `event` ใช้บอกว่างานชิ้นนี้เป็นของกิจกรรมไหน */
   tag?: { text: string; kind: 'late' | 'soon' | 'sched' | 'event' | 'skip' } | null
@@ -142,7 +142,7 @@ export default function ItemList({ rows }: { rows: Row[] }) {
       }
     })
 
-    // แถบเลิกทำค้าง 8 วินาที ตาม PLAN.md เฟส 4
+    // แถบเลิกทำค้าง 8 วินาที ตามเฟส 4 (doc/HISTORY.md)
     window.setTimeout(() => {
       setUndo((u) => (u?.key === key ? null : u))
       router.refresh()

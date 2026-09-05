@@ -166,7 +166,7 @@ export default async function TodayPage() {
       sortAt: entryStartMs(e),
       color: ENTRY_COLOR[e.kind],
       title: e.title,
-      // ในหน้าวันนี้ บรรทัดข้อมูลขึ้นต้นด้วยชื่อ project เสมอ (doc/DESIGN.md)
+      // ในหน้าวันนี้ บรรทัดข้อมูลขึ้นต้นด้วยชื่อ project เสมอ (ARCHITECTURE.md §9)
       // คาบเรียนใช้ชื่อ project เป็นชื่อบล็อกอยู่แล้ว จึงไม่ต้องซ้ำ
       meta: (e.kind === 'event'
         ? [e.project_name, clock, e.location]

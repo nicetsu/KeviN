@@ -51,7 +51,7 @@ export default function DraftCard({ draft, onSettled, position }: Props) {
         return
       }
       setDone({ message: res.message, undo: res.undo })
-      // ต้องเห็นผลทันที ไม่งั้นผู้ใช้กดซ้ำเพราะคิดว่าไม่ติด (doc/WRITE.md §8)
+      // ต้องเห็นผลทันที ไม่งั้นผู้ใช้กดซ้ำเพราะคิดว่าไม่ติด (ARCHITECTURE.md §7)
       router.refresh()
     })
   }

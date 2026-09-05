@@ -4,7 +4,7 @@
  * โหมดโทรเรียกเข้ามาจาก**ฝั่งเบราว์เซอร์** เพราะ Live API รัน tool ที่ client
  * แล้วส่งผลกลับเข้าสายเอง · ที่ไม่ให้เบราว์เซอร์ถาม Supabase ตรง ๆ ทั้งที่ทำได้
  * ก็เพราะตัวกรอง Area อยู่ใน `runTool()` ฝั่งเซิร์ฟเวอร์ — ลัดเมื่อไหร่คือข้ามตัวกรอง
- * (doc/CHAT.md §3)
+ * (ARCHITECTURE.md §6)
  */
 import type { NextRequest } from 'next/server'
 import { createClient, currentUserId } from '@/lib/supabase/server'
@@ -27,7 +27,7 @@ export async function POST(
    *
    * รวมชื่อฝั่งเสนอ (`propose_*`) ด้วย — พวกนั้นยังไม่เขียนอะไร มันคืนร่าง
    * กลับไปให้เบราว์เซอร์วาดเป็นการ์ด · การเขียนจริงอยู่ที่ server action
-   * ซึ่งเป็นคนละทางกับ route นี้ทั้งหมด (doc/WRITE.md)
+   * ซึ่งเป็นคนละทางกับ route นี้ทั้งหมด (ARCHITECTURE.md §7)
    */
   if (!isCallableTool(tool)) {
     return Response.json({ ok: false, error: `ไม่รู้จัก tool ชื่อ ${tool}` }, { status: 404 })
@@ -70,6 +70,6 @@ export async function POST(
   })
 
   // ดึงข้อมูลไม่สำเร็จต้องเป็น error จริง ๆ ห้ามคืนรายการว่างให้โมเดลไปสรุปว่า
-  // "ไม่มีอะไร" — คำโกหกที่แพงที่สุดที่แอปนี้พูดได้ (doc/CHAT.md §10)
+  // "ไม่มีอะไร" — คำโกหกที่แพงที่สุดที่แอปนี้พูดได้ (ARCHITECTURE.md §6)
   return Response.json(result, { status: result.ok ? 200 : 422 })
 }

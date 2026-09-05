@@ -134,7 +134,7 @@ export default function ProjectTree({
 }
 
 /**
- * ปุ่มสร้างอยู่ในตัว Area นั้น ไม่ใช่ข้อความว่าง (doc/DESIGN.md)
+ * ปุ่มสร้างอยู่ในตัว Area นั้น ไม่ใช่ข้อความว่าง (ARCHITECTURE.md §9)
  * Area ที่ยังไม่มีอะไรจึงยังมีทางไปต่อ ไม่ใช่ทางตัน
  */
 function NewProject({ areaId, label }: { areaId: string; label: string }) {

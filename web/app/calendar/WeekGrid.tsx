@@ -7,7 +7,7 @@ import NowLine from './NowLine'
 const SLOT = 0.5 // คอลัมน์ละ 30 นาที — ตารางจริงมีคาบจบ 17:30 และ 19:30
 
 /**
- * วัน = แกนตั้ง · เวลา = แกนนอน (doc/DESIGN.md · doc/TRAPS.md)
+ * วัน = แกนตั้ง · เวลา = แกนนอน (ARCHITECTURE.md §9 · doc/TRAPS.md)
  *
  * แกนเวลาคำนวณจากข้อมูลจริง เร็วสุด −1 ชม. ถึงช้าสุด +1 ชม.
  * ห้าม fix 00:00–24:00 ให้ต้องเลื่อนหา
@@ -26,7 +26,7 @@ export default function WeekGrid({
 
   if (entries.length === 0) {
     // สัปดาห์ที่ไม่มีอะไร ยังวาดตารางเปล่าไว้ —
-    // เพราะตารางเปล่าคือคำตอบว่า "ว่างทั้งสัปดาห์" (doc/DESIGN.md)
+    // เพราะตารางเปล่าคือคำตอบว่า "ว่างทั้งสัปดาห์" (ARCHITECTURE.md §9)
     return <EmptyWeek days={days} today={now.dateKey} />
   }
 

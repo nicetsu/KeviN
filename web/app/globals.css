@@ -1,7 +1,7 @@
 /* =====================================================================
    KeviN · design tokens
    ยกไปวางใน app/globals.css ได้เลย หรือแปลงเป็น theme.extend ใน Tailwind
-   ที่มาและกฎการใช้: doc/DESIGN.md
+   ที่มาและกฎการใช้: ARCHITECTURE.md §9
    ===================================================================== */
 
 :root {
@@ -835,7 +835,7 @@ html, body { margin: 0; padding: 0; }
 .wrap--wide { max-width: 1040px; }
 @media (min-width: 768px) { .mo__day { min-height: 104px; } }
 
-/* มือถือ 2 รายการต่อวัน · เดสก์ท็อป 3 (doc/DESIGN.md) */
+/* มือถือ 2 รายการต่อวัน · เดสก์ท็อป 3 (ARCHITECTURE.md §9) */
 .mo__ev--d, .mo__more--d { display: none; }
 @media (min-width: 768px) {
   .mo__ev--d { display: block; }
@@ -860,7 +860,7 @@ html, body { margin: 0; padding: 0; }
         font-family: var(--f-mono); font-size: var(--s--2); }
 
 /* ปุ่มทรงเดียวกับป้าย .tag แต่กดได้
-   สีม่วงเพราะกฎ "ม่วงคือสิ่งที่กดได้ · สีที่เหลือคือข้อมูล" (doc/DESIGN.md)
+   สีม่วงเพราะกฎ "ม่วงคือสิ่งที่กดได้ · สีที่เหลือคือข้อมูล" (ARCHITECTURE.md §9)
    ป้ายอย่าง "เลยกำหนด" เป็นข้อมูลจึงใช้สีชนิดข้อมูล ส่วนอันนี้เป็นการกระทำ */
 .tagbtn {
   font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.06em;
@@ -1075,7 +1075,7 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 .steps strong { color: var(--ink); }
 
 /* =====================================================================
-   การ์ด Area · gradient แทนภาพประกอบ ความทึบ 11% (doc/DESIGN.md)
+   การ์ด Area · gradient แทนภาพประกอบ ความทึบ 11% (ARCHITECTURE.md §9)
    ===================================================================== */
 .areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1.6rem; }
 @media (min-width: 768px) { .areas { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -1286,7 +1286,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .pnode__body .row { padding: 0.5rem 0; }
 .pnode__body .back { margin-top: 0.35rem; }
 
-/* ปุ่มสร้างในตัว Area · Area ที่ว่างต้องมีทางไปต่อ ไม่ใช่ทางตัน (doc/DESIGN.md) */
+/* ปุ่มสร้างในตัว Area · Area ที่ว่างต้องมีทางไปต่อ ไม่ใช่ทางตัน (ARCHITECTURE.md §9) */
 .newproj {
   display: block; width: 100%; text-align: left;
   background: none; border: 1px dashed var(--line); border-radius: var(--r-tile);
@@ -1432,7 +1432,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 /*
  * markdown ในฟองแชต
  *
- * ผู้ช่วยเขียน `**ตัวหนา**` กับ `- รายการ` มาเองโดยไม่ต้องสั่ง (doc/CHAT.md)
+ * ผู้ช่วยเขียน `**ตัวหนา**` กับ `- รายการ` มาเองโดยไม่ต้องสั่ง (ARCHITECTURE.md §6)
  * เจ้าของเลือกให้เรนเดอร์แทนที่จะห้ามใน prompt
  *
  * ⚠️ ระยะห่างทั้งหมดคุมด้วย `gap` ของตัว `.md` ไม่ใช่ margin ของลูก —
@@ -1860,7 +1860,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  *
  * ⚠️ **ห้ามสูงจนดันปุ่มวางสายตกจอ** — ระหว่างสายมันซ้อนอยู่ในฉากเดียวกับ
  *    วงเสียงและปุ่ม · `max-height` กับการเลื่อนในตัวเองคือสิ่งที่กันไว้
- *    วัดบนจอ 360×640 ทุกครั้งที่แตะความสูงของการ์ด (doc/WRITE.md §6)
+ *    วัดบนจอ 360×640 ทุกครั้งที่แตะความสูงของการ์ด (ARCHITECTURE.md §7)
  */
 .dcard {
   border: 1px solid rgba(165, 148, 255, 0.42);
@@ -1903,7 +1903,7 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  *
  * เห็นใบเดียวเต็ม ๆ แล้วบอกด้วยเงาข้างหลังกับตัวเลขว่ายังมีอีกกี่ใบ
  * ที่ต้องซ้อนแทนการเรียงต่อกัน เพราะระหว่างสายมีสามอย่างที่ห้ามโดนบัง —
- * ปุ่มวางสาย · ตัวจับเวลา · วงเสียง (doc/WRITE.md §6)
+ * ปุ่มวางสาย · ตัวจับเวลา · วงเสียง (ARCHITECTURE.md §7)
  *
  * ⚠️ **เงาต้องเป็น `aria-hidden` และห้ามรับการกด** มันไม่ใช่ปุ่มและไม่ใช่ข้อมูล
  *    เป็นแค่คำใบ้ทางสายตา · ตัวเลขคือสิ่งที่เล่าเรื่องนี้ให้คนที่ไม่ได้ใช้ตา

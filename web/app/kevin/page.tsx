@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
  * ห้องคุยกับ KeviN — ประตูที่สาม
  *
  * โหลดบทสนทนาล่าสุดมาต่อ ไม่ได้เริ่มใหม่ทุกครั้ง · เพราะสองโหมดเขียนลง
- * บทสนทนาเดียวกัน วางสายแล้วเข้ามาพิมพ์ต่อจึงเห็นสิ่งที่เพิ่งคุยไป (doc/CHAT.md §9)
+ * บทสนทนาเดียวกัน วางสายแล้วเข้ามาพิมพ์ต่อจึงเห็นสิ่งที่เพิ่งคุยไป (ARCHITECTURE.md §6)
  */
 export default async function KevinPage() {
   let conversationId: string | null = null

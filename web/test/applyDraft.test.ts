@@ -447,7 +447,7 @@ test('undo · เขียนแล้วไม่โดนสักแถว �
 
 test('ไม่มีเส้นทางไหนในไฟล์นี้ที่ลบข้อมูลจริง หรือแตะ project_schedules', async () => {
   // ไล่ยิงร่างทุกชนิดที่มีอยู่ แล้วดูว่าคำสั่งที่ออกไปมีแต่ insert/update
-  // และไม่มีตารางต้องห้ามโผล่มาเลย (doc/WRITE.md §4)
+  // และไม่มีตารางต้องห้ามโผล่มาเลย (ARCHITECTURE.md §7)
   const drafts: DraftAction[] = [
     { kind: 'add_item', type: 'task', projectId: 'p1', title: 'ก' },
     { kind: 'add_event', projectId: 'p1', title: 'ข', startsAt: 'a', endsAt: 'b' },

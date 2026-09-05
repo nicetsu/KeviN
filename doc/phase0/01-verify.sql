@@ -18,7 +18,7 @@ t_tables as (
     and tablename in ('areas','projects','project_schedules','items','push_subscriptions')
 ),
 
--- 2 · เกณฑ์ตรงจาก PLAN.md — ต้องไม่มีตารางไหนที่ RLS ปิด
+-- 2 · เกณฑ์ตรงจากเฟส 0 (doc/HISTORY.md) — ต้องไม่มีตารางไหนที่ RLS ปิด
 t_rls as (
   select 'RLS เปิดครบทุกตาราง',
          coalesce(string_agg(tablename, ', '), 'ไม่มีตารางที่ปิด'),

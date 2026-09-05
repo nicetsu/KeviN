@@ -1,6 +1,6 @@
 # KeviN · เว็บแอป
 
-Next.js 16 + Supabase · เฟส 2 ของ [PLAN.md](../PLAN.md)
+Next.js 16 + Supabase · เฟส 2 ของ [doc/HISTORY.md](../doc/HISTORY.md)
 
 ## ตั้งค่าครั้งแรก
 
