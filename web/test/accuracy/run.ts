@@ -24,7 +24,13 @@ const pick = (ids: string[]) => (only.length ? ids.filter((i) => only.includes(i
 async function runChat(): Promise<{ pass: number; total: number }> {
   const results: Result[] = []
   const chosen = CASES.filter((c) => pick(CASES.map((x) => x.id)).includes(c.id))
-  for (const c of chosen) {
+  for (const [nth, c] of chosen.entries()) {
+    /*
+     * เว้นจังหวะระหว่างข้อ — เพดานของ free tier เป็น**ต่อนาที** ไม่ใช่ต่อวันอย่างเดียว
+     * ยิงรวดเดียวทั้งชุดแล้วครึ่งชุดล้มด้วย 429 ทั้งที่โควตารายวันยังเหลือ (5 ก.ย. 2026)
+     * หนึ่งเคสกินหลายรอบ (วน tool) จำนวนคำขอจริงจึงมากกว่าจำนวนเคสหลายเท่า
+     */
+    if (nth > 0) await new Promise((r) => setTimeout(r, 6_000))
     process.stderr.write(`  แชต [${c.id}] …\n`)
     const turn = await askChat(c.say, c.then)
     const problems = turn.error ? [`ล้ม: ${turn.error}`] : [...c.check(turn), ...globalProblems(turn)]

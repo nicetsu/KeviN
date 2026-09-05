@@ -16,20 +16,29 @@ import type { Call, Turn } from './harness'
 const MAX_TOOL_ROUNDS = 4
 
 /**
- * ลองใหม่เมื่อฝั่ง Google ล่ม (5xx) — **ไม่ใช่ตัวช่วยให้โมเดลตอบถูก**
+ * ลองใหม่เมื่อ**ยังไม่ได้คำตอบ** — ไม่ใช่ตัวช่วยให้โมเดลตอบถูก
  *
- * 503 คือเซิร์ฟเวอร์เขาแน่น ไม่ใช่คำตอบผิด · ถ้าไม่ลองใหม่ ชุดวัดจะรายงานว่า
- * "ไม่ผ่าน" ให้เคสที่ยังไม่เคยถูกวัดเลย ซึ่งเป็นตัวเลขที่หลอกคนอ่าน
- * ข้อผิดพลาดอื่น (400 · 429 โควตาหมด) ต้องโผล่ขึ้นมาตามเดิม ห้ามกลบ
+ * 503 คือเซิร์ฟเวอร์เขาแน่น · 429 ที่เกิดจากการยิงรัวคือเพดาน**ต่อนาที**
+ * ทั้งคู่ไม่ใช่คำตอบผิด ถ้าไม่ลองใหม่ ชุดวัดจะรายงานว่า "ไม่ผ่าน" ให้เคสที่
+ * ยังไม่เคยถูกวัดเลย ซึ่งเป็นตัวเลขที่หลอกคนอ่านหนักกว่าการไม่วัดเสียอีก
+ *
+ * ⚠️ **เจอจริง 5 ก.ย. 2026** — รันรวดเดียว 17 ข้อได้ 4/17 โดย 13 ข้อล้มด้วย 429
+ *    แล้วพอยิงข้อเดียวใหม่ทันทีกลับผ่าน · โควตารายวันยังไม่หมดเลย
+ *    (ข้อความ "โควตาของวันนี้หมดแล้ว" ใน `lib/chat/gemini.ts` เหมารวม 429 ทุกแบบ)
+ *
+ * 429 ถอยนานกว่า 5xx มาก เพราะเพดานต่อนาทีต้องรอให้หน้าต่างเลื่อนไปจริง ๆ
+ * ถ้ายังไม่ผ่านหลังถอยครบ ให้ error โผล่ตามเดิม ห้ามกลบ
  */
 async function generateOrRetry(opts: Parameters<typeof generateStream>[0]) {
   for (let attempt = 0; ; attempt++) {
     try {
       return await generateStream(opts)
     } catch (e) {
-      const busy = e instanceof GeminiError && e.status !== undefined && e.status >= 500
-      if (!busy || attempt >= 3) throw e
-      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)))
+      const status = e instanceof GeminiError ? e.status : undefined
+      const busy = status !== undefined && status >= 500
+      const capped = status === 429
+      if ((!busy && !capped) || attempt >= 3) throw e
+      await new Promise((r) => setTimeout(r, (capped ? 20_000 : 2_000) * (attempt + 1)))
     }
   }
 }
@@ -94,7 +103,7 @@ export async function askChat(text: string, then?: string): Promise<Turn> {
               ? {
                   ok: true,
                   note: (result.draft.rev ?? 0) > 0
-                    ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับในการ์ดให้แล้ว ให้เขาทานแล้วกดยืนยัน'
+                    ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับให้ในการ์ดแล้ว ห้ามใช้คำว่าเรียบร้อย บันทึก หรือแก้ให้แล้ว ให้เขาทานแล้วกดยืนยัน'
                     : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
                   draft_id: result.draft.id,
                   title: result.draft.title,
