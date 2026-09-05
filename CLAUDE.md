@@ -17,11 +17,12 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (339 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (367 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
 `web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ชั้นเสนอ · ตัวกรอง Area · ภาษา · เสียง)
 `web/lib/drafts.ts` (ฟิลด์เวลาที่ร่างแต่ละใบแก้ได้จริง)
+`web/lib/applyDraft.ts` (**การเขียนจริงหลังปุ่มยืนยัน** · ตัวกรอง Area ขาเข้า · การย้อน)
 `web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/chat/markdown.ts` (แกะ markdown ของผู้ช่วย)
 `web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด) · `web/lib/eventOrder.ts` (ลำดับกิจกรรม) · `web/lib/voice/mic.ts` (เลือกไมค์) · `web/lib/archive.ts` (ของที่รอถูกลบ)
 
@@ -170,8 +171,6 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
 - **พูดแก้ร่างใบเดิมไม่ได้** — `propose_update_draft` ยังไม่มีในทะเบียน ต้องกดปุ่ม "แก้" เอา
-- **`app/actions/propose.ts` ยังไม่มีเทสต์** ทั้งที่เป็นจุดเดียวที่เขียนข้อมูลได้จริง
-  (ต้องรื้อให้ฉีด client ของ Supabase เข้าไปได้ก่อนถึงจะเรียกจากชุดเทสต์ได้)
 
 > `npm run lint --prefix web` ตอนนี้สะอาด 0 error 0 warning — **ถ้าเพิ่มขึ้นมา ให้แก้ อย่าปล่อยสะสม**
 
