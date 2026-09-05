@@ -8,8 +8,8 @@ import VoiceCall from './VoiceCall'
 import { useCall } from '@/components/CallProvider'
 import { useTalkPrefs } from '@/lib/talkPrefs'
 import Settings from './Settings'
-import DraftCard from '@/components/DraftCard'
-import { draftKey, type Draft } from '@/lib/drafts'
+import DraftStack from '@/components/DraftStack'
+import type { Draft } from '@/lib/drafts'
 
 type Mode = 'chat' | 'voice'
 
@@ -273,9 +273,7 @@ export default function TalkRoom({
               ร่างจากสายเสียงที่ยังค้างอยู่ — ขึ้นในโหมดแชตด้วย เพราะสลับโหมด
               กลางสายแล้วร่างต้องไม่หายไป · มันเป็นของค้างของทั้งห้อง ไม่ใช่ของโหมดใดโหมดหนึ่ง
             */}
-            {call.drafts.map((d) => (
-              <DraftCard key={draftKey(d)} draft={d} onSettled={call.dropDraft} />
-            ))}
+            <DraftStack drafts={call.drafts} onSettled={call.dropDraft} />
 
             {busy && (
               <div className="talk__typing" aria-live="polite">
@@ -342,9 +340,7 @@ function Bubble({ line, onDismiss }: { line: Line; onDismiss?: (id: string) => v
       การ์ดอยู่ **ใต้ฟองที่ทำให้เกิดมัน** ไม่ใช่ลอยแยก — นี่คือหัวใจของแบบ 07
       ที่เจ้าของเลือก · อ่านแล้วรู้ทันทีว่าร่างนี้มาจากประโยคไหน
     */}
-    {line.drafts?.map((d) => (
-      <DraftCard key={draftKey(d)} draft={d} onSettled={onDismiss} />
-    ))}
+    {line.drafts && <DraftStack drafts={line.drafts} onSettled={onDismiss} />}
     </>
   )
 }

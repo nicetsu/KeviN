@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useCall, mmss } from '@/components/CallProvider'
-import DraftCard from '@/components/DraftCard'
-import { draftKey } from '@/lib/drafts'
+import DraftStack from '@/components/DraftStack'
 import type { CallState } from '@/lib/voice/session'
 
 /** รูปคลื่น · แท่งกลางไวกว่าแท่งริม ทำให้ค่าเดียวดูเป็นคลื่นไม่ใช่แถบ */
@@ -166,11 +165,11 @@ export default function VoiceCall() {
             </>
           )}
 
-          {call.drafts.map((d) => (
-            <div key={draftKey(d)} className="caption__draft">
-              <DraftCard draft={d} onSettled={call.dropDraft} />
-            </div>
-          ))}
+          {/*
+            หลายใบ = กองซ้อน (แบบ 06) ไม่ใช่เรียงต่อกัน — บนจอ 360×640 การเรียง
+            ต่อกันดันวงเสียงกับปุ่มวางสายจนแทบไม่เหลือ ซึ่งเป็นสามอย่างที่ห้ามโดนบัง
+          */}
+          <DraftStack drafts={call.drafts} onSettled={call.dropDraft} className="caption__draft" />
         </div>
       )}
 

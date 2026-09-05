@@ -22,9 +22,16 @@ type Props = {
   draft: Draft
   /** เรียกเมื่อการ์ดจบหน้าที่แล้ว (ยืนยันสำเร็จ หรือผู้ใช้ทิ้ง) — ใช้เอาการ์ดออกจากจอ */
   onSettled?: (id: string) => void
+  /**
+   * ใบที่เท่าไหร่จากทั้งหมด — มีเมื่ออยู่ในกองซ้อน (`DraftStack`)
+   *
+   * ต้องอยู่บนบรรทัดหัวการ์ด ไม่ใช่ใต้ปุ่ม เพราะคนอ่านหัวก่อนเสมอ และตัวเลขนี้
+   * คือสิ่งเดียวที่บอกว่ายังมีใบอื่นที่ยังไม่ได้ทาน
+   */
+  position?: { at: number; total: number }
 }
 
-export default function DraftCard({ draft, onSettled }: Props) {
+export default function DraftCard({ draft, onSettled, position }: Props) {
   const router = useRouter()
   const [pending, run] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -88,6 +95,7 @@ export default function DraftCard({ draft, onSettled }: Props) {
         <div className="dcard__kind">
           <span className="dcard__dot" aria-hidden="true" />
           {draft.heading}
+          {position && <span className="dcard__of">{position.at} จาก {position.total}</span>}
         </div>
         <div className="dcard__title">{draft.title}</div>
 

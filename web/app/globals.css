@@ -1898,6 +1898,51 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 
 .dcard__err { margin: 0.15rem 0 0; font-size: var(--s--2); color: var(--due); }
 
+/*
+ * กองการ์ดซ้อน — **แบบ 06** จาก CONFIRM-CARD.html
+ *
+ * เห็นใบเดียวเต็ม ๆ แล้วบอกด้วยเงาข้างหลังกับตัวเลขว่ายังมีอีกกี่ใบ
+ * ที่ต้องซ้อนแทนการเรียงต่อกัน เพราะระหว่างสายมีสามอย่างที่ห้ามโดนบัง —
+ * ปุ่มวางสาย · ตัวจับเวลา · วงเสียง (doc/WRITE.md §6)
+ *
+ * ⚠️ **เงาต้องเป็น `aria-hidden` และห้ามรับการกด** มันไม่ใช่ปุ่มและไม่ใช่ข้อมูล
+ *    เป็นแค่คำใบ้ทางสายตา · ตัวเลขคือสิ่งที่เล่าเรื่องนี้ให้คนที่ไม่ได้ใช้ตา
+ */
+.dstack { display: flex; flex-direction: column; }
+/* ชั้นที่เงาอิง — มีแค่เงากับการ์ด ไม่รวมแถวปุ่ม */
+.dstack__deck { position: relative; }
+
+.dstack__ghost {
+  position: absolute; left: 6px; right: 6px; height: 100%;
+  border-radius: 14px; pointer-events: none;
+  border: 1px solid rgba(165, 148, 255, 0.22);
+  background: rgba(36, 30, 60, 0.6);
+}
+/* ยกขึ้นไปข้างบนทีละนิด ให้เห็นขอบโผล่พ้นใบหน้าเหมือนกองกระดาษ */
+.dstack__ghost--a { top: -5px; }
+.dstack__ghost--b { top: -10px; left: 12px; right: 12px; opacity: 0.6; }
+
+.dstack__nav {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+.dstack__count {
+  flex: 1; text-align: center;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+}
+.dstack__step {
+  border: 1px solid var(--line); background: transparent; color: var(--ink);
+  border-radius: 99px; padding: 0.3rem 0.7rem;
+  font: inherit; font-size: var(--s--2); cursor: pointer;
+}
+.dstack__step:disabled { opacity: 0.35; cursor: default; }
+
+/* ใบที่เท่าไหร่จากทั้งหมด — อยู่ท้ายบรรทัดหัวการ์ด ไม่แย่งที่ชื่อร่าง */
+.dcard__of {
+  margin-left: auto; flex: none;
+  font-family: var(--f-mono); font-size: var(--s--2); color: var(--faint);
+}
+
 .dcard__acts { display: flex; gap: 0.35rem; margin-top: 0.15rem; }
 .dcard__go {
   flex: 1; border: 0; border-radius: var(--r-pill); padding: 0.4rem 0;
@@ -2103,9 +2148,14 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .stage > .orb,
 .stage > .stage__state,
 .stage > .callbtns { flex: none; }
-/* เส้นคั่นบาง ๆ ให้เห็นว่าร่างเป็นคนละก้อนกับคำพูด แต่ยังอยู่ในกล่องเดียวกัน */
+/*
+ * เส้นคั่นบาง ๆ ให้เห็นว่าร่างเป็นคนละก้อนกับคำพูด แต่ยังอยู่ในกล่องเดียวกัน
+ *
+ * เคยมีข้อยกเว้น `:first-child` ให้ใบแรกไม่มีเส้น เพราะร่างเรียงต่อกันหลายใบ
+ * ตอนนี้กองซ้อนแสดงทีละใบ (แบบ 06) เส้นนี้จึงคั่น **คำพูดกับร่าง** เสมอ
+ * ซึ่งตรงกับแบบ 07 ที่เจ้าของเลือกไว้ตั้งแต่แรก
+ */
 .caption__draft { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
-.caption__draft:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 
 .call__bar { display: flex; gap: 0.6rem; width: 100%; max-width: 22rem; margin-top: 0.3rem; }
 .call__bar > * { flex: 1; }

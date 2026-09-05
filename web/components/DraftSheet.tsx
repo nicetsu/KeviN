@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useCall } from '@/components/CallProvider'
-import DraftCard from '@/components/DraftCard'
-import { draftKey } from '@/lib/drafts'
+import DraftStack from '@/components/DraftStack'
 
 /**
  * ร่างที่ค้างอยู่ตอนผู้ใช้ **ออกไปหน้าอื่นระหว่างสาย** — รูปแบบ **02** จาก
@@ -35,9 +34,7 @@ export default function DraftSheet() {
     <div className="dpop" role="dialog" aria-label="ร่างที่รอการยืนยัน">
       <div className="dpop__panel">
         <div className="dsheet__grab" aria-hidden="true" />
-        {call.drafts.map((d) => (
-          <DraftCard key={draftKey(d)} draft={d} onSettled={call.dropDraft} />
-        ))}
+        <DraftStack drafts={call.drafts} onSettled={call.dropDraft} />
         <button className="dcard__alt dpop__later" onClick={() => setFolded(true)}>
           ไว้ก่อน
         </button>
