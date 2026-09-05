@@ -623,11 +623,15 @@ npx supabase db push
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
 - **ปุ่มล้างประวัติในตั้งค่า ลบถาวรทันที ไม่เก็บเข้าคลัง** — ตั้งใจ (เจ้าของเคาะ 1 ก.ย. 2026)
   · ตั้งแต่ 5 ก.ย. 2026 มีหน้า `/kevin/history` ให้เห็นก่อนว่ามีอะไรอยู่
-- **`next build` ล้มบนเครื่องนี้ตั้งแต่ก่อนแตะอะไร** (เจอ 5 ก.ย. 2026) —
+- **`next build` ล้มบนเครื่องนี้เครื่องเดียว — ไม่กระทบการ deploy** (5 ก.ย. 2026)
   `InvariantError: Expected workStore to be initialized` ตอน prerender หน้าที่เป็น static
-  (`/login` · `/_global-error` · `/_not-found`) · เกิดเหมือนกันทั้ง turbopack และ webpack
-  และเกิดบน master ที่ยังไม่มีของใหม่ · **ยังไม่รู้ว่ากระทบ `vercel --prod` ไหม**
-  ทุกหน้าที่เหลือเป็น `force-dynamic` จึงไม่โดน · `npx tsc --noEmit` ยังผ่านสะอาด
+  (`/login` · `/_global-error` · `/_not-found`) · Next พิมพ์เองว่า "This is a bug in Next.js"
+  · เกิดเหมือนกันทั้ง turbopack และ webpack · เกิดบน master ที่ยังไม่มีของใหม่ ·
+  ถอด `CallProvider` ออกก็ยังเกิด (แค่ย้ายไปล้มที่ `/login`)
+  · **ยืนยันแล้วว่า build บน Vercel ผ่าน** ด้วย preview deploy — ขั้น
+  "Generating static pages (4/4)" ที่ล้มบนเครื่องนี้ ผ่านที่นั่นใน 179ms
+  · แปลว่าเป็นเรื่องของ Windows/เครื่องนี้ **อย่าเสียเวลาไล่ถ้าไม่ได้จะใช้ `next build` จริง ๆ**
+  · เช็คของก่อน deploy ให้ใช้ `npx tsc --noEmit` + `npm test` + `npm run lint` ตามเดิม
 - **การแก้ข้อมูลผ่านผู้ช่วย** — ตัวแก้ในชั้นสองแก้ได้แค่ชื่อกับเวลา
   การย้ายวิชาต้องพูดเอา (`propose_update_draft` รับได้ · ปุ่ม "แก้" ยังไม่มีช่องนั้น)
 - **`doc/CLAUDE-PROJECT-PROMPT.md` กับ `doc/SCHEMA.sql` ต้องเอาไปวางใน Claude Project ด้วยมือ**

@@ -172,9 +172,9 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
 - **แผงแก้ในชั้นสอง (ปุ่ม "แก้") ยังแก้ได้แค่ชื่อกับเวลา** — การย้ายวิชาต้องพูดเอา
   ซึ่ง `propose_update_draft` รับได้แล้ว
-- **`next build` ล้มบนเครื่องนี้ตั้งแต่ก่อนแตะอะไร** — `InvariantError: Expected workStore
-  to be initialized` ตอน prerender หน้าที่เป็น static · เกิดทั้ง turbopack และ webpack
-  และเกิดบน master เปล่า ๆ ด้วย · **ยังไม่รู้ว่ากระทบ `vercel --prod` ไหม** (ดู ARCHITECTURE §11)
+- **`next build` ล้มบนเครื่องนี้เครื่องเดียว** — `InvariantError: Expected workStore to be
+  initialized` ตอน prerender หน้า static · **build บน Vercel ผ่าน** (ยืนยันด้วย preview deploy
+  5 ก.ย. 2026) จึง**ไม่กระทบการ deploy** และไม่ต้องไล่ · ดู ARCHITECTURE §11
 
 > `npm run lint --prefix web` ตอนนี้สะอาด 0 error 0 warning — **ถ้าเพิ่มขึ้นมา ให้แก้ อย่าปล่อยสะสม**
 
