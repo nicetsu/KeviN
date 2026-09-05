@@ -19,8 +19,20 @@ import { isDraftKind, type DraftAction } from '@/lib/drafts'
  *    ซึ่งสายพาน `housekeeping()` จะลบให้เองเมื่อครบ 7 วัน และกู้คืนได้ก่อนหน้านั้น
  */
 
+/**
+ * สิ่งที่ต้องรู้เพื่อย้อนการเขียนที่เพิ่งทำไป
+ *
+ * ⚠️ **การติ๊กต้องพก `prev` มาด้วย** — "เอาติ๊กออก" เขียน `done_at = null`
+ *    ถ้าการย้อนเขียน `null` เหมือนกันอีกที ผลคือไม่มีอะไรเปลี่ยนแต่จอบอกว่าเลิกทำแล้ว
+ *    (เจอ 4 ก.ย. 2026) · ส่วนการเก็บเข้าคลังย้อนเป็น `null` ได้เสมอ เพราะเก็บได้
+ *    เฉพาะของที่ `archived_at is null` อยู่ก่อนแล้ว
+ */
+export type UndoTarget =
+  | { itemId: string; field: 'done'; prev: string | null }
+  | { itemId: string; field: 'archived' }
+
 export type ApplyResult =
-  | { ok: true; message: string; undo?: { itemId: string; field: 'done' | 'archived' } }
+  | { ok: true; message: string; undo?: UndoTarget }
   | { ok: false; error: string }
 
 /** ใช้เมื่อเขียนแล้วไม่โดนสักแถว — RLS ทำให้ "ไม่ใช่ของเรา" กับ "หมด session" เหมือนกัน */
@@ -61,14 +73,19 @@ async function assertProjectAllowed(
   return null
 }
 
-/** ตรวจ item แบบเดียวกัน แล้วคืนวิชาที่มันสังกัดมาด้วยเผื่อใช้ต่อ */
+/**
+ * ตรวจ item แบบเดียวกัน แล้วคืนชนิดกับ **ค่าเดิมของ `done_at`** มาด้วย
+ *
+ * ค่าเดิมต้องอ่านตรงนี้เพราะเป็นจังหวะเดียวที่ยังอ่านทันก่อนเขียนทับ —
+ * ปุ่มเลิกทำต้องเอาไปคืนค่า ไม่ใช่เขียน `null` ทับซ้ำ (ดู `UndoTarget`)
+ */
 async function assertItemAllowed(
   supabase: Awaited<ReturnType<typeof createClient>>,
   itemId: string
-): Promise<{ ok: false; error: string } | { ok: true; type: string }> {
+): Promise<{ ok: false; error: string } | { ok: true; type: string; doneAt: string | null }> {
   const { data, error } = await supabase
     .from('items')
-    .select('id, type, projects(areas(name))')
+    .select('id, type, done_at, projects(areas(name))')
     .eq('id', itemId)
     .is('archived_at', null)
     .maybeSingle()
@@ -81,7 +98,8 @@ async function assertItemAllowed(
   const areas = p?.areas as { name?: string } | { name?: string }[] | null | undefined
   const areaName = Array.isArray(areas) ? areas[0]?.name : areas?.name
   if (!areaIsVisible(areaName)) return { ok: false, error: 'รายการนั้นอยู่นอกขอบเขตที่ผู้ช่วยแตะได้' }
-  return { ok: true, type: String(data.type) }
+  const doneAt = (data as { done_at?: string | null }).done_at ?? null
+  return { ok: true, type: String(data.type), doneAt }
 }
 
 /**
@@ -202,7 +220,8 @@ export async function applyDraft(action: DraftAction): Promise<ApplyResult> {
       return {
         ok: true,
         message: action.done ? 'ติ๊กว่าเสร็จแล้ว' : 'เอาติ๊กออกแล้ว',
-        undo: { itemId: action.itemId, field: 'done' },
+        // ค่าเดิมเดินทางไปกับปุ่มเลิกทำ — ไม่งั้นการย้อน "เอาติ๊กออก" จะเขียน null ซ้ำ
+        undo: { itemId: action.itemId, field: 'done', prev: check.doneAt },
       }
     }
 
@@ -234,18 +253,22 @@ export async function applyDraft(action: DraftAction): Promise<ApplyResult> {
  *
  * รองรับแค่สองอย่างที่ย้อนได้ตรง ๆ · การเพิ่มของใหม่ไม่มีปุ่มเลิกทำ
  * เพราะการย้อนมันคือการลบ ซึ่งเป็นสิ่งที่ทั้งระบบนี้ตั้งใจไม่ให้ผู้ช่วยทำ
+ *
+ * ⚠️ **การย้อนคือการคืนค่าเดิม ไม่ใช่การล้างค่า** — `target.prev` มาจากตอนที่
+ *    `applyDraft` อ่านไว้ก่อนเขียนทับ · ถ้าย้อนด้วย `null` ตายตัว การเลิกทำหลัง
+ *    "เอาติ๊กออก" จะไม่เปลี่ยนอะไรเลยแต่รายงานว่าสำเร็จ
  */
-export async function undoApply(itemId: string, field: 'done' | 'archived'): Promise<ApplyResult> {
+export async function undoApply(target: UndoTarget): Promise<ApplyResult> {
   const supabase = await createClient()
-  const check = await assertItemAllowed(supabase, itemId)
+  const check = await assertItemAllowed(supabase, target.itemId)
   // ของที่เพิ่งเก็บเข้าคลังจะหาไม่เจอด้วยเงื่อนไข archived_at is null — ข้ามการตรวจนั้น
-  if (!check.ok && field === 'done') return { ok: false, error: check.error }
+  if (!check.ok && target.field === 'done') return { ok: false, error: check.error }
 
-  const patch = field === 'done'
-    ? { done_at: null }
+  const patch = target.field === 'done'
+    ? { done_at: target.prev }
     : { archived_at: null, archived_auto: false }
 
-  const { data, error } = await supabase.from('items').update(patch).eq('id', itemId).select('id')
+  const { data, error } = await supabase.from('items').update(patch).eq('id', target.itemId).select('id')
   if (error) return { ok: false, error: error.message }
   if (!data?.length) return { ok: false, error: NOT_WRITTEN }
   refresh()

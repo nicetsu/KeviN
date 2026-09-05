@@ -82,10 +82,21 @@ const uuid = (raw: Record<string, unknown>, key: string): string => {
   return v
 }
 
+/**
+ * ⚠️ **ต้องรับสตริง `"true"`/`"false"` ด้วย** — โมเดลส่งบูลีนมาเป็นสตริงเป็นประจำ
+ *    ไม่ว่า schema จะประกาศชนิดอะไรไว้ก็ตาม
+ *
+ *    เคยรับเฉพาะบูลีนแท้ แล้วคู่กับ schema ที่ประกาศ `type: 'string'` ผลคือ
+ *    **ค่าที่ถูกต้องถูกปฏิเสธทุกครั้ง** · ฝั่งแชตรอดมาได้เพราะยิงซ้ำจนบังเอิญ
+ *    ส่งบูลีนแท้ (กิน 2–3 รอบจากเพดาน 4) · **ฝั่งเสียงยอมแพ้แล้วบอกผู้ใช้ว่า
+ *    "เกิดข้อผิดพลาดบนหน้าจอ" ทั้งที่ไม่มีการ์ดขึ้นเลย** (เจอ 4 ก.ย. 2026)
+ */
 const bool = (raw: Record<string, unknown>, key: string, fallback: boolean): boolean => {
   const v = raw[key]
-  if (v === undefined || v === null) return fallback
+  if (v === undefined || v === null || v === '') return fallback
   if (typeof v === 'boolean') return v
+  if (v === 'true') return true
+  if (v === 'false') return false
   throw new BadProposal(`${key} ต้องเป็น true หรือ false`)
 }
 
@@ -300,7 +311,9 @@ const completeItem: ProposeDef = {
     type: 'object',
     properties: {
       item_id: { type: 'string', description: 'id ของรายการที่ได้จาก tool items' },
-      done: { type: 'string', description: 'true = ติ๊กเสร็จ · false = เอาติ๊กออก' },
+      // ชนิดต้องตรงกับที่ `bool()` รับ — ประกาศ string ไว้ทั้งที่ตัวอ่านรับแต่บูลีน
+      // คือคำสั่งที่ถูกต้องถูกปฏิเสธทุกครั้งโดยไม่มีอะไรฟ้อง (เจอ 4 ก.ย. 2026)
+      done: { type: 'boolean', description: 'true = ติ๊กเสร็จ · false = เอาติ๊กออก · เว้นว่าง = ติ๊กเสร็จ' },
     },
     required: ['item_id'],
   },

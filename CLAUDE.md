@@ -1,7 +1,8 @@
 # KeviN — คำแนะนำสำหรับ Claude
 
 ผู้ช่วยส่วนตัวของเจ้าของโปรเจกต์ (นักศึกษา) เก็บข้อมูลบน Supabase
-สั่งงานได้สามทาง — คุยกับ Claude ผ่าน MCP · เว็บแอป PWA · และแท็บ **KeviN** ในเว็บที่คุยได้ทั้งพิมพ์และพูด (อ่านอย่างเดียว)
+สั่งงานได้สามทาง — คุยกับ Claude ผ่าน MCP · เว็บแอป PWA · และแท็บ **KeviN** ในเว็บที่คุยได้ทั้งพิมพ์และพูด
+(อ่านได้ · **เสนอการแก้ได้ · เขียนเองไม่ได้** — ผู้ใช้กดยืนยันบนการ์ดถึงเขียนจริง)
 
 **สถานะปัจจุบัน: ใช้งานได้จริงครบวงแล้ว** — https://kevin-rose.vercel.app
 
@@ -16,12 +17,19 @@
 
 โค้ดอยู่ใน `web/` (Next.js 16) · Edge Function อยู่ใน `supabase/functions/send-reminders/`
 
-**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (301 เคส · อยู่ใน `web/test/`)
+**ตรรกะที่มีเทสต์ล้วนกำกับ — แก้แล้วรันเทสต์ด้วย** `npm test --prefix web` (339 เคส · อยู่ใน `web/test/`)
 `web/lib/layout.ts` (คาบชนกัน) · `web/lib/weeks.ts` (การซ้ำ) · `web/lib/parse.ts` (ตีความภาษาไทย)
 `web/lib/libraryOpen.ts` (สถานะกางของหน้าคลัง) · `web/lib/calendar.ts` + `web/lib/agenda.ts` (กิจกรรม)
-`web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ตัวกรอง Area · ภาษา · เสียง)
+`web/lib/time.ts` (เวลาไทย) · `web/lib/ai/*` (tool · ชั้นเสนอ · ตัวกรอง Area · ภาษา · เสียง)
+`web/lib/drafts.ts` (ฟิลด์เวลาที่ร่างแต่ละใบแก้ได้จริง)
 `web/lib/chat/links.ts` (กันลิงก์ปลอม) · `web/lib/chat/markdown.ts` (แกะ markdown ของผู้ช่วย)
 `web/lib/voice/transcript.ts` (ไม่บันทึกเสียงที่พูด) · `web/lib/eventOrder.ts` (ลำดับกิจกรรม) · `web/lib/voice/mic.ts` (เลือกไมค์) · `web/lib/archive.ts` (ของที่รอถูกลบ)
+
+**ชุดวัดความแม่นกับโมเดลจริงอยู่ที่ `web/test/accuracy/`** — ยิง Gemini จริงทั้งแชตและ Live API
+**ไม่ได้อยู่ใน `npm test`** เพราะกินโควตา · `node --env-file=.env.local .test-build/test/accuracy/run.js`
+**แก้ `lib/ai/prompt.ts` หรือ `lib/ai/propose.ts` เมื่อไหร่ ให้รันชุดนี้ก่อนและหลัง** —
+เทสต์ตรรกะมองไม่เห็นบั๊กแบบ "ชนิดใน schema ไม่ตรงกับตัวอ่าน" และมองไม่เห็นการจูน
+prompt ที่แก้เคสหนึ่งแล้วทำอีกเคสพัง (เจอทั้งสองแบบ 4 ก.ย. 2026 · ดู ARCHITECTURE.md §5)
 
 **ความลับเก็บที่ไหน**
 VAPID private key → Supabase secrets · VAPID public key → Vercel env (`NEXT_PUBLIC_`)
@@ -50,6 +58,8 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 | `SYSTEM.html` | ระบบทำงานยังไง 10 หัวข้อ · รวมประตูที่สาม |
 | `UXUI.html` | ภาษาภาพ · หน้าจอ · แท็บ KeviN · หลักการห้าข้อ |
 | `UXUI-BOLD.html` | **ลงมือไปแล้วบางส่วน** — แถบล่างมีไอคอนกับพื้นอุ่นขึ้นทำแล้ว · ที่เหลือยังเป็นข้อเสนอ |
+| `WRITE.html` | ฉบับภาพของแผน "ให้ผู้ช่วยแก้ข้อมูลได้" · ตรงกับ `doc/WRITE.md` |
+| `CONFIRM-CARD.html` | การ์ดยืนยันสิบแบบ · เจ้าของเลือก **07 หลัก · 10 ชั้นสอง · 02 นอกหน้าโทร** |
 | `UXUI-LIGHT.html` | **ข้อเสนอ ยังไม่ได้ลงมือ** — ธีมสว่าง 11 จอ · **กลับมติ "ธีมมืดอย่างเดียว"** ต้องเคาะก่อนทำ |
 
 **ไฟล์เทียบแบบที่ใช้เลือกดีไซน์ไปแล้ว — เก็บไว้ดูว่าทำไมถึงเลือกอันนั้น**
@@ -159,6 +169,9 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 > รายการนี้ตรงกับ [ARCHITECTURE.md §11](ARCHITECTURE.md#11--สิ่งที่ยังไม่ได้ทำ) — แก้ที่ไหนต้องแก้อีกที่ด้วย
 
 - **เวลางาน UniHack 2026** ที่เป็น onsite ตั้ง 09:00 ไว้ชั่วคราว รอเวลาจริง
+- **พูดแก้ร่างใบเดิมไม่ได้** — `propose_update_draft` ยังไม่มีในทะเบียน ต้องกดปุ่ม "แก้" เอา
+- **`app/actions/propose.ts` ยังไม่มีเทสต์** ทั้งที่เป็นจุดเดียวที่เขียนข้อมูลได้จริง
+  (ต้องรื้อให้ฉีด client ของ Supabase เข้าไปได้ก่อนถึงจะเรียกจากชุดเทสต์ได้)
 
 > `npm run lint --prefix web` ตอนนี้สะอาด 0 error 0 warning — **ถ้าเพิ่มขึ้นมา ให้แก้ อย่าปล่อยสะสม**
 

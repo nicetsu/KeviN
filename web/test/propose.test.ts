@@ -9,7 +9,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { runPropose, thaiToIso, thaiLabel, PROPOSE_NAMES } from '../lib/ai/propose'
+import { runPropose, thaiToIso, thaiLabel, proposeDeclarations, PROPOSE_NAMES } from '../lib/ai/propose'
 import type { ReadOnlyDb } from '../lib/ai/db'
 
 const TODAY = '2026-09-02'
@@ -199,6 +199,41 @@ test('ติ๊กซ้ำสิ่งที่ติ๊กไปแล้ว�
     ctx(db({ items: [done] }))
   )
   assert.equal(r.ok, false)
+})
+
+/**
+ * ⚠️ เคสนี้มาจากการวัดกับโมเดลจริง 4 ก.ย. 2026 — โมเดลส่ง `done` มาเป็น
+ *    **สตริง** `"true"` แล้วโดนปฏิเสธทุกครั้ง · ฝั่งแชตยิงซ้ำจนหลุดรอด
+ *    ฝั่งเสียงยอมแพ้แล้วบอกผู้ใช้ว่า "เกิดข้อผิดพลาดบนหน้าจอ" ทั้งที่ไม่มีการ์ดขึ้นเลย
+ */
+test('done ที่มาเป็นสตริงต้องอ่านออก — โมเดลส่งบูลีนเป็นสตริงเป็นประจำ', async () => {
+  const doneItem = { ...ITEM, done_at: '2026-09-01T10:00:00Z' }
+  for (const [raw, want] of [['true', true], ['false', false]] as const) {
+    const rows = want ? [ITEM] : [doneItem]
+    const r = await runPropose(
+      'propose_complete_item',
+      { item_id: ITEM.id, done: raw },
+      ctx(db({ items: rows }))
+    )
+    assert.equal(r.ok, true, `done: "${raw}" ต้องผ่าน`)
+    if (!r.ok || r.draft.action.kind !== 'complete_item') return
+    assert.equal(r.draft.action.done, want)
+  }
+})
+
+test('done ที่ไม่ใช่ true/false ยังถูกปฏิเสธเหมือนเดิม', async () => {
+  const r = await runPropose(
+    'propose_complete_item',
+    { item_id: ITEM.id, done: 'บางที' },
+    ctx(db({ items: [ITEM] }))
+  )
+  assert.equal(r.ok, false)
+})
+
+test('ชนิดที่ประกาศใน schema ต้องตรงกับที่ตัวอ่านรับจริง', async () => {
+  // ประกาศ string ไว้ทั้งที่ `bool()` รับแต่บูลีน = คำสั่งที่ถูกต้องถูกปฏิเสธเงียบ ๆ
+  const decl = proposeDeclarations().find((d) => d.name === 'propose_complete_item')
+  assert.equal(decl?.parameters.properties.done.type, 'boolean')
 })
 
 test('โน้ตไม่มีสถานะเสร็จ', async () => {

@@ -95,6 +95,27 @@ export function isDraftKind(v: unknown): v is DraftKind {
 }
 
 /**
+ * ฟิลด์เวลาที่ร่างใบนี้ **แก้ได้จริง** · `null` = ไม่มี จึงไม่ต้องขึ้นช่องให้กรอก
+ *
+ * ⚠️ ช่องเวลาที่ขึ้นมาแล้วไม่มีที่ให้ค่าลง คือช่องที่กรอกแล้วหายเงียบ ๆ ตอนกด
+ *    "เอาตามนี้" · สองกรณีที่เคยเป็นแบบนั้น (เจอ 4 ก.ย. 2026) —
+ *    **โน้ต** ซึ่งไม่มีเวลาเลย (CHECK `shortnote_timeless`) และ **ร่างแก้ที่ไม่ได้แตะเวลา**
+ *    ซึ่งชั้นเสนอจงใจไม่ใส่ฟิลด์เวลามาให้ (`undefined` = ไม่แตะ ต่างจาก `null` = ล้าง)
+ */
+export function draftTimeField(action: DraftAction): 'due' | 'remind' | 'start' | null {
+  switch (action.kind) {
+    case 'add_item':
+      return action.type === 'task' ? 'due' : action.type === 'reminder' ? 'remind' : null
+    case 'edit_item':
+      return action.dueAt !== undefined ? 'due' : action.remindAt !== undefined ? 'remind' : null
+    case 'add_event':
+      return 'start'
+    default:
+      return null
+  }
+}
+
+/**
  * คำที่ใช้บนปุ่มยืนยัน — ต่างกันตามชนิดเพราะ "ยืนยัน" เฉย ๆ บอกไม่ได้ว่ากำลังจะทำอะไร
  * และการ์ดอาจถูกอ่านผ่าน ๆ ระหว่างคุยอยู่
  */

@@ -3,8 +3,8 @@
 import { useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { applyDraft, undoApply } from '@/app/actions/propose'
-import { confirmLabel, type Draft, type DraftAction } from '@/lib/drafts'
+import { applyDraft, undoApply, type UndoTarget } from '@/app/actions/propose'
+import { confirmLabel, draftTimeField, type Draft, type DraftAction } from '@/lib/drafts'
 
 /**
  * การ์ดยืนยัน — สิ่งที่ผู้ช่วยเสนอ ยังไม่ได้ทำ
@@ -30,7 +30,7 @@ export default function DraftCard({ draft, onSettled }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   /** เก็บผลไว้เพื่อขึ้นแถบเลิกทำ — การ์ดกลายเป็นคำยืนยันผลหลังกดสำเร็จ */
-  const [done, setDone] = useState<{ message: string; undo?: { itemId: string; field: 'done' | 'archived' } } | null>(null)
+  const [done, setDone] = useState<{ message: string; undo?: UndoTarget } | null>(null)
   /** ค่าที่แก้จากชั้นสอง — ยังไม่เขียนจนกว่าจะกดยืนยัน */
   const [action, setAction] = useState<DraftAction>(draft.action)
   const [lines, setLines] = useState(draft.lines)
@@ -51,9 +51,10 @@ export default function DraftCard({ draft, onSettled }: Props) {
 
   function undo() {
     if (!done?.undo) return
-    const { itemId, field } = done.undo
+    // ส่งทั้งก้อน — ค่าเดิมของ `done_at` เดินทางมากับมัน (app/actions/propose.ts)
+    const target = done.undo
     run(async () => {
-      const res = await undoApply(itemId, field)
+      const res = await undoApply(target)
       if (!res.ok) {
         setError(res.error)
         return
@@ -163,13 +164,14 @@ function DraftEditor({
   }
   const isoOf = (local: string) => (local ? new Date(`${local}:00+07:00`).toISOString() : null)
 
+  /** `null` = ร่างใบนี้ไม่มีเวลาให้แก้ · ไม่ขึ้นช่องเลยดีกว่าขึ้นแล้วค่าที่กรอกหาย */
+  const field = draftTimeField(a)
   const initialTime =
-    a.kind === 'add_item' ? (a.dueAt ?? a.remindAt ?? '')
-    : a.kind === 'edit_item' ? (a.dueAt ?? a.remindAt ?? '')
-    : a.kind === 'add_event' ? a.startsAt
-    : ''
-  const [when, setWhen] = useState(timeOf(typeof initialTime === 'string' ? initialTime : ''))
-  const hasTime = a.kind !== 'complete_item' && a.kind !== 'archive_item'
+    a.kind === 'add_event' ? a.startsAt
+    : a.kind === 'add_item' || a.kind === 'edit_item'
+      ? (field === 'due' ? a.dueAt : field === 'remind' ? a.remindAt : null)
+      : null
+  const [when, setWhen] = useState(timeOf(initialTime))
 
   function save() {
     const next = { ...a } as DraftAction
@@ -177,15 +179,15 @@ function DraftEditor({
       ;(next as { title?: string }).title = title.trim()
     }
 
-    if (hasTime) {
+    if (field) {
       const iso = isoOf(when)
       if (next.kind === 'add_item') {
-        if (next.type === 'task') next.dueAt = iso ?? undefined
-        if (next.type === 'reminder') next.remindAt = iso ?? undefined
+        if (field === 'due') next.dueAt = iso ?? undefined
+        else if (field === 'remind') next.remindAt = iso ?? undefined
       } else if (next.kind === 'edit_item') {
         // ในโหมดแก้ `null` มีความหมายว่าล้างค่า จึงส่งต่อไปตรง ๆ ไม่แปลงเป็น undefined
-        if (next.dueAt !== undefined) next.dueAt = iso
-        if (next.remindAt !== undefined) next.remindAt = iso
+        if (field === 'due') next.dueAt = iso
+        else if (field === 'remind') next.remindAt = iso
       } else if (next.kind === 'add_event' && iso) {
         const span = new Date(next.endsAt).getTime() - new Date(next.startsAt).getTime()
         next.startsAt = iso
@@ -225,9 +227,10 @@ function DraftEditor({
           </label>
         )}
 
-        {hasTime && (
+        {field && (
           <label className="dsheet__field">
-            <span>{a.kind === 'add_event' ? 'เริ่ม' : 'เวลา'}</span>
+            {/* ป้ายต้องตรงกับบรรทัดบนการ์ด ไม่ใช่ "เวลา" กลาง ๆ ที่ไม่บอกว่าเวลาอะไร */}
+            <span>{field === 'start' ? 'เริ่ม' : field === 'remind' ? 'เตือน' : 'กำหนดส่ง'}</span>
             <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
           </label>
         )}
