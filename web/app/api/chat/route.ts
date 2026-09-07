@@ -203,7 +203,12 @@ export async function POST(request: NextRequest) {
           contents.push({ role: 'user', parts: responses })
         }
       } catch (e) {
-        const quota = e instanceof GeminiError && e.status === 429
+        /*
+          `quota` แปลว่า "หมดแล้วสำหรับวันนี้" ไม่ใช่ "429" — สองอย่างนี้เคยถูก
+          เหมารวม แล้วผู้ใช้ที่แค่พิมพ์เร็วไปถูกบอกว่าโควตาหมดทั้งวัน
+          (lib/chat/quota.ts)
+        */
+        const quota = e instanceof GeminiError && e.limit?.kind === 'day'
         send({ t: 'error', error: e instanceof Error ? e.message : 'ตอบไม่สำเร็จ', quota })
         closed = true
         controller.close()

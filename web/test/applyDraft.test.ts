@@ -42,16 +42,14 @@ type Call = {
 const USER = 'user-1'
 const OK: Write = { data: [{ id: 'row-1' }], error: null }
 
-/** วิชาที่อยู่ใน Area ที่ผู้ช่วยมองเห็นได้ (`Class` อยู่ใน `VISIBLE_AREAS`) */
-const VISIBLE_PROJECT: Lookup = { data: { id: 'p1', areas: { name: 'Class' } }, error: null }
-/** Area ที่ไม่ได้อยู่ในรายการอนุญาต — allowlist จึงต้องปฏิเสธโดยไม่ต้องรู้จักชื่อนี้ */
-const HIDDEN_PROJECT: Lookup = { data: { id: 'p9', areas: { name: 'Secret' } }, error: null }
-
-/** join ของ Supabase คืน relation เป็น array ได้ด้วย — ตัวอ่านต้องรับทั้งสองรูป */
-const VISIBLE_PROJECT_ARRAY: Lookup = { data: { id: 'p1', areas: [{ name: 'Class' }] }, error: null }
+/**
+ * วิชาที่หาเจอ · **แถวที่ไม่ใช่ของผู้ใช้คนนี้จะคืน `data: null` เพราะ RLS**
+ * ไม่ใช่เพราะโค้ดตรวจเอง — ตัวกรอง Area ถูกถอดทั้งกลไกเมื่อ 8 ก.ย. 2026
+ */
+const PROJECT: Lookup = { data: { id: 'p1' }, error: null }
 
 const item = (over: Row = {}): Lookup => ({
-  data: { id: 'i1', type: 'task', done_at: null, projects: { areas: { name: 'Class' } }, ...over },
+  data: { id: 'i1', type: 'task', done_at: null, ...over },
   error: null,
 })
 
@@ -122,7 +120,7 @@ test('ร่างที่อ่านไม่ออกถูกปฏิเ�
 })
 
 test('ไม่มี session ก็ไม่เขียน — RLS กันอยู่แล้ว แต่ไม่ควรยิงไปให้มันปฏิเสธ', async () => {
-  const { db, calls } = fakeDb({ lookup: { projects: VISIBLE_PROJECT } })
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT } })
   const res = await applyDraftWith(db, null, {
     kind: 'add_item',
     type: 'task',
@@ -136,7 +134,7 @@ test('ไม่มี session ก็ไม่เขียน — RLS กัน�
 /* ------------------------------------------------------------------------ เพิ่มของ */
 
 test('add_item · task ลง due_at และ remind_at ต้องเป็น null', async () => {
-  const { db, calls } = fakeDb({ lookup: { projects: VISIBLE_PROJECT } })
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT } })
   const res = await applyDraftWith(db, USER, {
     kind: 'add_item',
     type: 'task',
@@ -155,7 +153,7 @@ test('add_item · task ลง due_at และ remind_at ต้องเป็�
 })
 
 test('add_item · reminder ลง remind_at และ due_at ต้องเป็น null', async () => {
-  const { db, calls } = fakeDb({ lookup: { projects: VISIBLE_PROJECT } })
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT } })
   await applyDraftWith(db, USER, {
     kind: 'add_item',
     type: 'reminder',
@@ -170,7 +168,7 @@ test('add_item · reminder ลง remind_at และ due_at ต้องเป�
 })
 
 test('add_item · โน้ตไม่มีเวลาเลย แม้ร่างจะแอบพก dueAt มา', async () => {
-  const { db, calls } = fakeDb({ lookup: { projects: VISIBLE_PROJECT } })
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT } })
   await applyDraftWith(db, USER, {
     kind: 'add_item',
     type: 'shortnote',
@@ -182,17 +180,6 @@ test('add_item · โน้ตไม่มีเวลาเลย แม้ร�
   const w = written(calls)!
   assert.equal(w.payload!.due_at, null, 'shortnote_timeless — ร่างที่ถูกแก้ระหว่างทางต้องไม่ผ่าน')
   assert.equal(w.payload!.remind_at, null)
-})
-
-test('add_item · relation ที่ join กลับมาเป็น array ก็ต้องอ่าน Area ออก', async () => {
-  const { db } = fakeDb({ lookup: { projects: VISIBLE_PROJECT_ARRAY } })
-  const res = await applyDraftWith(db, USER, {
-    kind: 'add_item',
-    type: 'task',
-    projectId: 'p1',
-    title: 'งาน',
-  })
-  assert.equal(res.ok, true)
 })
 
 test('add_item · วิชาที่หาไม่เจอ ไม่เขียนอะไรเลย', async () => {
@@ -208,23 +195,9 @@ test('add_item · วิชาที่หาไม่เจอ ไม่เข�
   assert.equal(written(calls), undefined)
 })
 
-test('add_item · วิชาใน Area ที่ผู้ช่วยมองไม่เห็น ถูกปฏิเสธที่ขาเข้า', async () => {
-  const { db, calls } = fakeDb({ lookup: { projects: HIDDEN_PROJECT } })
-  const res = await applyDraftWith(db, USER, {
-    kind: 'add_item',
-    type: 'task',
-    projectId: 'p9',
-    title: 'งาน',
-  })
-
-  assert.equal(res.ok, false)
-  assert.match(res.ok === false ? res.error : '', /นอกขอบเขต/)
-  assert.equal(written(calls), undefined, 'ตัวกรอง Area ต้องกันก่อนถึงคำสั่งเขียน')
-})
-
 test('add_item · insert ที่ไม่โดนสักแถว ต้องไม่รายงานว่าสำเร็จ', async () => {
   const { db } = fakeDb({
-    lookup: { projects: VISIBLE_PROJECT },
+    lookup: { projects: PROJECT },
     write: { 'items.insert': { data: [], error: null } },
   })
   const res = await applyDraftWith(db, USER, {
@@ -240,7 +213,7 @@ test('add_item · insert ที่ไม่โดนสักแถว ต้อ
 
 test('add_item · error จาก db เดินทางถึงผู้ใช้ ไม่ถูกกลบ', async () => {
   const { db } = fakeDb({
-    lookup: { projects: VISIBLE_PROJECT },
+    lookup: { projects: PROJECT },
     write: { 'items.insert': { data: null, error: { message: 'duplicate key' } } },
   })
   const res = await applyDraftWith(db, USER, {
@@ -254,7 +227,7 @@ test('add_item · error จาก db เดินทางถึงผู้ใ�
 })
 
 test('add_event · ลงตาราง events พร้อมช่วงเวลาครบ', async () => {
-  const { db, calls } = fakeDb({ lookup: { projects: VISIBLE_PROJECT } })
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT } })
   const res = await applyDraftWith(db, USER, {
     kind: 'add_event',
     projectId: 'p1',
@@ -305,21 +278,8 @@ test('edit_item · ร่างที่ไม่ได้เปลี่ยน�
   assert.equal(written(calls), undefined)
 })
 
-test('edit_item · ย้ายวิชาต้องตรวจวิชาปลายทางด้วย ไม่ใช่แค่ต้นทาง', async () => {
-  const { db, calls } = fakeDb({ lookup: { items: item(), projects: HIDDEN_PROJECT } })
-  const res = await applyDraftWith(db, USER, {
-    kind: 'edit_item',
-    itemId: 'i1',
-    projectId: 'p9',
-  })
-
-  assert.equal(res.ok, false)
-  assert.match(res.ok === false ? res.error : '', /นอกขอบเขต/)
-  assert.equal(written(calls), undefined)
-})
-
 test('edit_item · ย้ายไปวิชาที่มองเห็นได้ ลง project_id จริง', async () => {
-  const { db, calls } = fakeDb({ lookup: { items: item(), projects: VISIBLE_PROJECT } })
+  const { db, calls } = fakeDb({ lookup: { items: item(), projects: PROJECT } })
   const res = await applyDraftWith(db, USER, {
     kind: 'edit_item',
     itemId: 'i1',
@@ -337,16 +297,6 @@ test('edit_item · รายการที่หาไม่เจอ (หร�
     itemId: 'ของคนอื่น',
     title: 'x',
   })
-
-  assert.equal(res.ok, false)
-  assert.equal(written(calls), undefined)
-})
-
-test('edit_item · รายการใน Area ที่มองไม่เห็น ถูกปฏิเสธ', async () => {
-  const { db, calls } = fakeDb({
-    lookup: { items: item({ projects: { areas: { name: 'Secret' } } }) },
-  })
-  const res = await applyDraftWith(db, USER, { kind: 'edit_item', itemId: 'i1', title: 'x' })
 
   assert.equal(res.ok, false)
   assert.equal(written(calls), undefined)
@@ -457,7 +407,7 @@ test('ไม่มีเส้นทางไหนในไฟล์นี้�
   ]
 
   for (const action of drafts) {
-    const { db, calls } = fakeDb({ lookup: { projects: VISIBLE_PROJECT, items: item() } })
+    const { db, calls } = fakeDb({ lookup: { projects: PROJECT, items: item() } })
     await applyDraftWith(db, USER, action)
     for (const c of calls) {
       assert.notEqual(c.table, 'projects_schedules')

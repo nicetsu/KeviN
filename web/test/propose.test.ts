@@ -1,11 +1,12 @@
 /**
  * lib/ai/propose.ts — ชั้นเสนอ
  *
- * สามอย่างที่ต้องจริงเสมอ
+ * สองอย่างที่ต้องจริงเสมอ
  *   1. **ไม่มีร่างใบไหนแตะข้อมูล** — ทุกตัวคืนร่าง ไม่ได้เขียน
- *   2. ร่างที่ชี้ไป Area นอกสายตา **ต้องถูกปฏิเสธตั้งแต่ขาเข้า**
- *      (ตัวกรองใน `runTool` กันแค่ขาออก ซึ่งเป็นคนละทาง)
- *   3. เวลาที่โมเดลส่งมาเป็นเวลาไทย **ต้องไม่เหลื่อมไป 7 ชั่วโมง**
+ *   2. เวลาที่โมเดลส่งมาเป็นเวลาไทย **ต้องไม่เหลื่อมไป 7 ชั่วโมง**
+ *
+ * เคยมีข้อที่ว่าร่างซึ่งชี้ไป Area นอกสายตาต้องถูกปฏิเสธ · ตัวกรอง Area
+ * ถูกถอดทั้งกลไกเมื่อ 8 ก.ย. 2026 ตอนเปิดให้ใช้หลายคน (doc/DECISIONS.md)
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -26,7 +27,7 @@ const ctx = (d: ReadOnlyDb) => ({ db: d, today: TODAY })
 const PROJECTS = [
   { id: 'p1', name: 'สถาปัตยกรรมเครือข่าย', areas: { name: 'Class' } },
   { id: 'p2', name: 'ปฏิบัติการเครือข่าย', areas: { name: 'Class' } },
-  { id: 'p9', name: 'ค่าหอ', areas: { name: 'Money' } }, // Area นอกสายตา
+  { id: 'p9', name: 'ค่าหอ', areas: { name: 'Personal' } }, // คนละ Area กับที่เหลือ
 ]
 
 const ITEM = {
@@ -102,17 +103,6 @@ test('ชื่อวิชาที่ตรงหลายอันต้อ�
   assert.match(r.error, /หลายวิชา/)
 })
 
-test('วิชาใน Area นอกสายตาเหมือนไม่มีอยู่', async () => {
-  const r = await runPropose(
-    'propose_add_item',
-    { type: 'task', project: 'ค่าหอ', title: 'จ่ายค่าหอ' },
-    ctx(db({ projects: PROJECTS }))
-  )
-  assert.equal(r.ok, false)
-  if (r.ok) return
-  assert.match(r.error, /หาวิชา/)
-})
-
 test('ข้อบังคับของชนิดรายการถูกปฏิเสธเป็นภาษาคน ไม่ใช่รอ CHECK ใน DB', async () => {
   const d = ctx(db({ projects: PROJECTS }))
 
@@ -170,18 +160,6 @@ test('เครื่องหมายลบคือการล้างค�
 test('แก้โดยไม่บอกว่าจะแก้อะไรถูกปฏิเสธ', async () => {
   const r = await runPropose('propose_edit_item', { item_id: ITEM.id }, ctx(db({ items: [ITEM] })))
   assert.equal(r.ok, false)
-})
-
-test('รายการใน Area นอกสายตาเหมือนไม่มีอยู่', async () => {
-  const hidden = { ...ITEM, projects: { name: 'ค่าหอ', areas: { name: 'Money' } } }
-  const r = await runPropose(
-    'propose_edit_item',
-    { item_id: ITEM.id, title: 'เปลี่ยนชื่อ' },
-    ctx(db({ items: [hidden] }))
-  )
-  assert.equal(r.ok, false)
-  if (r.ok) return
-  assert.match(r.error, /ไม่เจอ/)
 })
 
 test('id ที่ไม่ใช่รูป uuid ถูกปฏิเสธก่อนถึง DB', async () => {

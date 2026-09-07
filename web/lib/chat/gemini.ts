@@ -5,6 +5,8 @@
  *    ตัวแปรที่ขึ้นต้นด้วย NEXT_PUBLIC_ ทุกตัวไปอยู่ใน bundle ที่ผู้ใช้เปิดดูได้ (doc/TRAPS.md)
  */
 
+import { classifyRateLimit, rateLimitMessage, type RateLimit } from './quota'
+
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 /**
@@ -36,8 +38,28 @@ export type FunctionDeclaration = {
   parameters: unknown
 }
 
+/**
+ * 429 ต้องแยกว่า "หมดโควตาวัน" กับ "เร็วเกินไป" — เหมารวมแล้วบอกผู้ใช้ผิด
+ * และในโหมดเสียงยังดันเขาออกจากโหมดนั้นทั้งรอบด้วย (lib/chat/quota.ts)
+ */
+function rateLimitOr(status: number, body: string): GeminiError {
+  if (status !== 429) {
+    return new GeminiError(`เรียกโมเดลไม่สำเร็จ (${status}) ${body.slice(0, 200)}`, status)
+  }
+  const limit = classifyRateLimit(body)
+  return new GeminiError(rateLimitMessage(limit, 'chat'), status, limit)
+}
+
 export class GeminiError extends Error {
-  constructor(message: string, readonly status?: number) {
+  constructor(
+    message: string,
+    readonly status?: number,
+    /**
+     * มีค่าเฉพาะตอน 429 · **`'day'` เท่านั้นที่แปลว่าให้ไปใช้อีกโหมด**
+     * อย่างอื่นคือรออีกไม่กี่วินาทีก็ได้ (lib/chat/quota.ts)
+     */
+    readonly limit?: RateLimit
+  ) {
     super(message)
     this.name = 'GeminiError'
   }
@@ -72,11 +94,7 @@ export async function generate(opts: {
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    // 429 คือโควตาหมด ซึ่งเป็นสถานะที่หน้าจอต้องรู้จักเพื่อดันผู้ใช้ไปอีกโหมด
-    throw new GeminiError(
-      res.status === 429 ? 'โควตาของวันนี้หมดแล้ว' : `เรียกโมเดลไม่สำเร็จ (${res.status}) ${body.slice(0, 200)}`,
-      res.status
-    )
+    throw rateLimitOr(res.status, body)
   }
 
   const json = (await res.json()) as {
@@ -132,12 +150,7 @@ export async function generateStream(opts: {
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new GeminiError(
-      res.status === 429
-        ? 'โควตาของวันนี้หมดแล้ว'
-        : `เรียกโมเดลไม่สำเร็จ (${res.status}) ${body.slice(0, 200)}`,
-      res.status
-    )
+    throw rateLimitOr(res.status, body)
   }
 
   const parts: Part[] = []

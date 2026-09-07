@@ -1,9 +1,11 @@
 /**
  * lib/ai/tools.ts — ชั้น tool อ่านอย่างเดียว
  *
- * สองอย่างที่ต้องจริงเสมอ ไม่ว่าจะเรียกจากโหมดไหน
- *   1. ข้อมูลของ Area ที่ไม่อนุญาต **ต้องไม่โผล่ในผลลัพธ์**
- *   2. ดึงข้อมูลไม่สำเร็จต้องเป็น error **ห้ามกลายเป็นรายการว่าง**
+ * ข้อที่ต้องจริงเสมอ ไม่ว่าจะเรียกจากโหมดไหน — **ดึงข้อมูลไม่สำเร็จต้องเป็น error
+ * ห้ามกลายเป็นรายการว่าง** เพราะโมเดลจะสรุปว่า "ไม่มีอะไร" อย่างมั่นใจ
+ *
+ * เคยมีข้อที่สองคือ "ข้อมูลของ Area ที่ไม่อนุญาตต้องไม่โผล่" · ตัวกรอง Area
+ * ถูกถอดทั้งกลไกเมื่อ 8 ก.ย. 2026 ตอนเปิดให้ใช้หลายคน (doc/DECISIONS.md)
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -109,44 +111,6 @@ test('parseCalendar ปฏิเสธช่วงที่ยาวเกิน
 
 // ---- ตัวกรอง Area ----
 
-test('calendar · แถวของ Area ที่ไม่อนุญาตถูกตัดทิ้ง', async () => {
-  const db = fakeDb([
-    entry({ area_name: 'Class', title: 'แคลคูลัส 1' }),
-    entry({ area_name: 'Health', title: 'นัดหมอ', source_id: 's2' }),   // Area ที่ยังไม่อยู่ในรายการ
-    entry({ area_name: 'Money', title: 'จ่ายค่าหอ', source_id: 's3' }),  // Area ที่ยังไม่อยู่ในรายการ
-    entry({ area_name: 'Competition', title: 'UniHack', source_id: 's4', kind: 'event' }),
-  ])
-  const r = await runTool('calendar', {}, ctx(db))
-  assert.equal(r.ok, true)
-  if (!r.ok || !('rows' in r)) return
-  assert.deepEqual(r.rows.map((x) => (x as { ชื่อ: string }).ชื่อ), ['แคลคูลัส 1', 'UniHack'])
-})
-
-test('items · กรองผ่าน projects.areas.name ที่ซ้อนสองชั้น', async () => {
-  const db = fakeDb([
-    item({ title: 'ส่งรายงาน' }),
-    item({ id: 'i2', title: 'โอนค่าเทอม', projects: { name: 'ทั่วไป', areas: { name: 'Money' } } }),
-    item({ id: 'i3', title: 'หา join ไม่เจอ', projects: null }),
-  ])
-  const r = await runTool('items', {}, ctx(db))
-  assert.equal(r.ok, true)
-  if (!r.ok || !('rows' in r)) return
-  assert.deepEqual(r.rows.map((x) => (x as { ชื่อ: string }).ชื่อ), ['ส่งรายงาน'])
-})
-
-test('event · กิจกรรมของ Area ที่ไม่อนุญาตไม่คืนอะไรเลย', async () => {
-  const db = fakeDb([{
-    id: 'e1', title: 'ตรวจสุขภาพ', body: null,
-    starts_at: '2026-09-01T02:00:00Z', ends_at: '2026-09-01T05:00:00Z',
-    location: null, projects: { name: 'ทั่วไป', areas: { name: 'Health' } },
-    event_agenda: [],
-  }])
-  const r = await runTool('event', { event_id: '11111111-2222-3333-4444-555555555555' }, ctx(db))
-  assert.equal(r.ok, true)
-  if (!r.ok || !('rows' in r)) return
-  assert.deepEqual(r.rows, [])
-})
-
 // ---- ความล้มเหลวต้องดังพอให้ได้ยิน ----
 
 test('db ล่มต้องได้ error ไม่ใช่รายการว่าง', async () => {
@@ -232,34 +196,11 @@ test('event · ปฏิเสธ id ที่ไม่ใช่รูป uuid',
 
 // ---- hidden · บอกว่ามีของที่มองไม่เห็น ไม่ใช่หายเงียบ ๆ ----
 
-test('hidden นับแถวที่ถูกกรองออก', async () => {
-  const db = fakeDb([
-    entry({ area_name: 'Class' }),
-    entry({ area_name: 'Health', source_id: 's2' }),
-    entry({ area_name: 'Money', source_id: 's3' }),
-  ])
-  const r = await runTool('calendar', {}, ctx(db))
-  assert.equal(r.ok, true)
-  if (!r.ok || !('rows' in r)) return
-  assert.equal(r.rows.length, 1)
-  assert.equal(r.hidden, 2)
-})
-
 test('hidden เป็น 0 เมื่อไม่มีอะไรถูกกรอง', async () => {
   const r = await runTool('calendar', {}, ctx(fakeDb([entry()])))
   assert.equal(r.ok, true)
   if (!r.ok || !('rows' in r)) return
   assert.equal(r.hidden, 0)
-})
-
-test('hidden ไม่บอกว่าของที่ซ่อนคืออะไร — บอกแค่จำนวน', async () => {
-  // ถ้าเผลอส่งชื่อหรือ Area ของแถวที่ซ่อนไปด้วย ตัวกรองก็เสียของทั้งอัน
-  const db = fakeDb([entry({ area_name: 'Money', title: 'จ่ายค่าหอ 12,000' })])
-  const r = await runTool('calendar', {}, ctx(db))
-  assert.equal(r.ok, true)
-  if (!r.ok || !('rows' in r)) return
-  assert.equal(JSON.stringify(r).includes('จ่ายค่าหอ'), false)
-  assert.equal(JSON.stringify(r).includes('Money'), false)
 })
 
 // ---- ลิงก์ต้องมาจาก tool เท่านั้น ----

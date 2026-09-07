@@ -29,7 +29,7 @@ const db = (by: { projects?: unknown[]; items?: unknown[] }): ReadOnlyDb => ({
 const PROJECTS = [
   { id: 'p1', name: 'สถาปัตยกรรมเครือข่าย', areas: { name: 'Class' } },
   { id: 'p2', name: 'ปฏิบัติการเครือข่าย', areas: { name: 'Class' } },
-  { id: 'p9', name: 'ค่าหอ', areas: { name: 'Money' } }, // Area นอกสายตา
+  { id: 'p9', name: 'ค่าหอ', areas: { name: 'Personal' } }, // คนละ Area กับที่เหลือ
 ]
 
 const ITEM = {
@@ -159,12 +159,6 @@ test('ย้ายวิชาในร่างผ่าน findProject ให�
   const out = await update({ project: 'เครือข่าย' }, [base])
   assert.equal(out.ok, false)
   assert.match(errorOf(out), /ตรงกับหลายวิชา/)
-})
-
-test('ย้ายไป Area นอกสายตา ถูกปฏิเสธตอนแก้ร่างด้วย ไม่ใช่แค่ตอนเสนอครั้งแรก', async () => {
-  const base = await draftOf('propose_add_item', TASK)
-  const out = await update({ project: 'ค่าหอ' }, [base])
-  assert.equal(out.ok, false, 'ตัวกรอง Area ต้องทำงานทุกครั้งที่ร่างถูกประกอบใหม่')
 })
 
 test('ย้ายไปวิชาที่ชี้ได้อันเดียว ทำได้และลง id ใหม่จริง', async () => {

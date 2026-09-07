@@ -6,9 +6,8 @@
  *
  * โหมดโทรเรียก tool จากฝั่งเบราว์เซอร์ (Live API รัน tool ที่ client)
  * โหมดแชตเรียกจากฝั่งเซิร์ฟเวอร์ · แต่ทั้งคู่ลงมาที่ `runTool()` ตัวเดียวกัน
- * ซึ่งเป็นที่อยู่ของตัวกรอง Area — ถ้าใครลัดไปถาม DB เอง ตัวกรองจะถูกข้าม
+ * ซึ่งเป็นที่เดียวที่ตรวจอินพุตและแปลงรูปก่อนส่งออกไปหาโมเดล
  */
-import { keepVisible } from './visibility'
 import type { ReadOnlyDb } from './db'
 import { ToolFetchError } from './db'
 import { isProposeName, proposeDeclarations, runPropose } from './propose'
@@ -34,18 +33,11 @@ type JsonSchema = {
   required: readonly string[]
 }
 
-/**
- * `areaOf` เป็นฟิลด์บังคับโดยตั้งใจ
- *
- * มันคือสิ่งที่ทำให้ตัวกรอง Area **ลืมไม่ได้** — tool ที่บอกไม่ได้ว่า Area
- * ของแถวตัวเองอยู่ตรงไหน จะคอมไพล์ไม่ผ่านตั้งแต่ตอนประกาศ ไม่ใช่หลุดไปตอนรัน
- */
 type ToolDef<I, R> = {
   description: string
   parameters: JsonSchema
   parse: (raw: Record<string, unknown>) => I
   fetch: (input: I, ctx: ToolCtx) => Promise<R[]>
-  areaOf: (row: R) => string | null | undefined
   shape: (row: R) => unknown
 }
 
@@ -185,7 +177,6 @@ const calendar: ToolDef<{ from: string; to: string }, EntryRow> = {
     })
     return rows
   },
-  areaOf: (row) => row.area_name,
   shape: (row) => ({
     ชนิด: row.kind === 'class' ? 'คาบเรียน' : 'กิจกรรม',
     ชื่อ: row.title,
@@ -261,7 +252,6 @@ const items: ToolDef<{ scope: 'overdue' | 'open' | 'done' | 'notes' }, ItemRow> 
       return when !== null && new Date(when).getTime() < cutoff
     })
   },
-  areaOf: (row) => row.projects?.areas?.name,
   shape: (row) => ({
     /*
      * ⚠️ **ต้องมี `id`** — ชั้นเสนอ (`propose_*`) อ้างถึงรายการด้วย id เท่านั้น
@@ -294,7 +284,6 @@ const projects: ToolDef<Record<string, never>, ProjectRow> = {
       order: { col: 'sort_order', ascending: true },
       limit: 60,
     }),
-  areaOf: (row) => row.areas?.name,
   shape: (row) => ({
     id: row.id,
     ชื่อ: row.name,
@@ -324,7 +313,6 @@ const event: ToolDef<{ event_id: string }, EventRow> = {
       ],
       limit: 1,
     }),
-  areaOf: (row) => row.projects?.areas?.name,
   shape: (row) => ({
     ชื่อ: row.title,
     วิชา: row.projects?.name,
@@ -428,15 +416,14 @@ export async function runTool(
 
   try {
     const raw = await tool.fetch(input, ctx)
-    const visible = keepVisible(raw, tool.areaOf)
 
-    // จำนวนแถวที่ถูกกรองออก — ต้องบอกโมเดลไปด้วย ไม่ใช่หายเงียบ ๆ
+    // `hidden` เคยเป็นจำนวนแถวที่ตัวกรอง Area ตัดออก · ตัวกรองถูกถอดทั้งกลไก
+    // เมื่อ 8 ก.ย. 2026 (doc/DECISIONS.md) มันจึงเป็น 0 เสมอตั้งแต่นั้น
     //
-    // ตัวกรองเป็น allowlist ที่พลาดไปทางไม่ปล่อย ซึ่งถูกแล้วสำหรับความเป็นส่วนตัว
-    // แต่ถ้าไม่บอกว่ากรองไปกี่แถว ผู้ช่วยจะตอบว่า "ไม่มีอะไร" ทั้งที่ความจริงคือ
-    // "มี แต่ผมดูไม่ได้" ซึ่งเป็นคนละเรื่องกัน · prompt สั่งให้พูดออกมาเมื่อ hidden > 0
-    // โดยไม่บอกว่าเป็นอะไร (ARCHITECTURE.md §6)
-    return { ok: true, rows: visible.map(tool.shape), hidden: raw.length - visible.length }
+    // ที่ยังคงฟิลด์ไว้เพราะกติกาข้อ 4 ใน `lib/ai/prompt.ts` ยังอ้างถึงมันอยู่
+    // และ **การแตะ prompt ต้องรันชุดวัดกับโมเดลจริงก่อนและหลัง** ซึ่งกินโควตา
+    // · ปล่อยไว้ไม่มีผลเสีย เพราะเงื่อนไข hidden > 0 ไม่มีทางเป็นจริงอีกแล้ว
+    return { ok: true, rows: raw.map(tool.shape), hidden: 0 }
   } catch (e) {
     // ต้องบอกว่าดึงข้อมูลไม่ได้ ห้ามคืนรายการว่างแล้วให้โมเดลไปสรุปว่า "ไม่มีอะไร"
     const why = e instanceof ToolFetchError || e instanceof Error ? e.message : 'ไม่ทราบสาเหตุ'

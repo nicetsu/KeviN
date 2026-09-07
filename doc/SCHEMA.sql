@@ -228,10 +228,12 @@ create table public.items (
 -- =====================================================================
 -- 7 · PUSH_SUBSCRIPTIONS  (หนึ่งแถวต่อหนึ่งเครื่องที่กดอนุญาต)
 -- =====================================================================
+-- ⚠️ unique เป็น (user_id, endpoint) **ไม่ใช่ endpoint เปล่า ๆ** — สองบัญชีเปิดจาก
+--    มือถือเครื่องเดียวกันได้ (ดู index ท้ายตาราง)
 create table public.push_subscriptions (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references auth.users(id) on delete cascade,
-  endpoint     text not null unique,
+  endpoint     text not null,
   p256dh       text not null,
   auth         text not null,
   device_label text,
@@ -239,6 +241,9 @@ create table public.push_subscriptions (
   last_seen_at timestamptz,
   created_at   timestamptz not null default now()
 );
+
+create unique index push_subscriptions_owner_endpoint
+  on public.push_subscriptions (user_id, endpoint);
 
 -- =====================================================================
 -- 8 · TIME_OFFSETS  ("วันนั้นวันเดียว ฉันอยู่ถึงกี่โมง หรือไม่ไปเลย")
@@ -482,16 +487,24 @@ $$;
 -- ลงไปในคำสั่งเดียวกับที่เลือกแถว (UPDATE ... RETURNING) ทำให้อ้างสิทธิ์
 -- ได้แค่รอบเดียว ห้ามแยกเป็น SELECT แล้วค่อย UPDATE
 -- =====================================================================
+-- ⚠️ อ้างสิทธิ์เฉพาะของเจ้าของที่ **มีเครื่องเปิดรับอยู่จริง** · ของคนที่ยังไม่ได้ลง
+--    เครื่องต้องค้างไว้เฉย ๆ ไม่ใช่ถูกทำเครื่องหมายว่าส่งแล้ว · เงื่อนไขนี้เคยอยู่ที่
+--    Edge Function ในรูป "นับเครื่องทั้งหมด" ซึ่งถูกตอนมีผู้ใช้คนเดียว แต่พอมีคนที่สอง
+--    มันนับรวมทุกคน แล้วการเตือนของคนที่ยังไม่ได้ลงเครื่องหายถาวรโดยไม่มี error
 create or replace function public.claim_due_reminders()
 returns setof public.items
 language sql volatile security definer set search_path = public as $$
-  update public.items
+  update public.items i
      set notified_at = now()
-   where type = 'reminder'
-     and notified_at is null
-     and archived_at is null
-     and remind_at <= now()
-  returning *;
+   where i.type = 'reminder'
+     and i.notified_at is null
+     and i.archived_at is null
+     and i.remind_at <= now()
+     and exists (
+       select 1 from public.push_subscriptions s
+        where s.user_id = i.user_id and s.enabled
+     )
+  returning i.*;
 $$;
 
 -- ⚠️ ฟังก์ชันนี้เป็น security definer จึงข้าม RLS ได้
@@ -506,7 +519,10 @@ grant execute on function public.claim_due_reminders() to service_role;
 
 -- =====================================================================
 -- SEED · Area ทั้งสี่
--- แทน <YOUR_USER_ID> ด้วย uuid ของบัญชีตัวเอง (จาก auth.users)
+--
+-- ⚠️ **ไม่ต้องรันด้วยมือแล้ว** ตั้งแต่ 8 ก.ย. 2026 — trigger `handle_new_user()`
+--    บน auth.users seed ให้ทุกบัญชีใหม่อัตโนมัติ (ดูท้ายไฟล์)
+--    เก็บบล็อกนี้ไว้เป็นเอกสารว่าค่าตั้งต้นคืออะไร
 -- =====================================================================
 -- ⚠️ `color` เป็นคีย์ gradient เก็บแยกจาก `name` โดยตั้งใจ
 --    เปลี่ยนชื่อ Area ได้โดยไม่กระทบสี · คีย์จึงไม่ตรงกับชื่อแล้วหลังเปลี่ยนชื่อ
@@ -832,3 +848,94 @@ $CRON$);
 --                  ))
 --   );
 -- $CRON$);
+
+
+-- =====================================================================
+-- KeviN · เปิดให้ใช้หลายคน (8 ก.ย. 2026)
+--
+-- ตารางข้อมูลไม่ต้องแตะเลยสักตาราง — ทุกตารางมี user_id + policy own_rows
+-- ตั้งแต่วันแรกแล้ว · ที่เพิ่มคือ **ด่านสมัคร** กับ **ค่าตั้งต้นของผู้ใช้ใหม่**
+-- =====================================================================
+
+create table public.invite_codes (
+  code       text primary key check (char_length(code) between 4 and 64),
+  note       text,                                    -- ไว้ให้เจ้าของจำได้ว่าให้ใคร
+  -- ⚠️ on delete set null โดยตั้งใจ — ลบบัญชีที่พิมพ์อีเมลผิดทิ้ง แล้วรหัสกลับมาว่างเอง
+  used_by    uuid references auth.users(id) on delete set null,
+  used_at    timestamptz,
+  expires_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+alter table public.invite_codes enable row level security;
+
+-- ⚠️ **ไม่มี policy สักข้อโดยตั้งใจ** = ปิดสนิทสำหรับ anon และ authenticated
+--    อ่านตารางนี้ได้เมื่อไหร่ คือได้รหัสที่ยังไม่ถูกใช้ไปทั้งกอง
+--    เจ้าของแจกรหัสผ่าน dashboard ซึ่งใช้ service_role ข้าม RLS อยู่แล้ว
+
+create index invite_codes_unused
+  on public.invite_codes (created_at) where used_by is null;
+
+-- ตรวจว่ารหัสยังใช้ได้ไหม — **เพื่อข้อความสวย ๆ ไม่ใช่เพื่อกัน**
+-- ตัวที่กันจริงคือ trigger ข้างล่าง · คืน boolean เปล่า ๆ ห้ามคืนแถวเด็ดขาด
+create or replace function public.invite_code_valid(p_code text)
+returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.invite_codes
+     where code = p_code
+       and used_by is null
+       and (expires_at is null or expires_at > now())
+  );
+$$;
+
+revoke all on function public.invite_code_valid(text) from public, anon, authenticated;
+-- ให้ anon เพราะ **คนที่ยังไม่มีบัญชีคือคนเดียวที่ต้องเรียกมัน**
+grant execute on function public.invite_code_valid(text) to anon, authenticated;
+
+-- =====================================================================
+-- ด่านรหัสเชิญ + seed สี่ Area · trigger เดียว ธุรกรรมเดียว
+--
+-- ⚠️ **ด่านต้องอยู่ที่นี่ ไม่ใช่ที่หน้าเว็บ** — supabase.auth.signUp() เรียกตรงด้วย
+--    anon key ได้จากที่ไหนก็ได้ และ anon key อยู่ใน bundle ที่เปิดดูได้อยู่แล้ว
+--
+-- เป็น AFTER INSERT เพราะ exception ที่โยนจาก after trigger ยัง roll back การสร้าง
+-- บัญชีทั้งใบอยู่ดี · ได้ทั้งการกันและการ seed พร้อมกัน จึงไม่มีทางเกิดบัญชีที่ไม่มี Area
+-- (projects.area_id เป็น not null — ผู้ใช้ที่ไม่มี Area สร้างอะไรไม่ได้เลย)
+-- =====================================================================
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  v_code text := nullif(trim(new.raw_user_meta_data->>'invite_code'), '');
+  v_hit  text;
+begin
+  -- อ้างสิทธิ์แบบ atomic เหมือน claim_due_reminders() — สองคนกดสมัครด้วยรหัสเดียวกัน
+  -- พร้อมกัน ถ้าแยกเป็น select แล้วค่อย update จะผ่านทั้งคู่
+  update public.invite_codes
+     set used_by = new.id, used_at = now()
+   where code = v_code
+     and used_by is null
+     and (expires_at is null or expires_at > now())
+  returning code into v_hit;
+
+  if v_hit is null then
+    raise exception 'invite_code_invalid' using errcode = '22023';
+  end if;
+
+  -- ⚠️ คีย์สีต้องตรงกับ AREA_CLASS ใน web/lib/areaColor.ts และ .acard--* ใน globals.css
+  --    คีย์ที่ไม่ตรงไม่เกิด error มันแค่ได้การ์ดไม่มีสีเงียบ ๆ
+  insert into public.areas (user_id, name, color, sort_order) values
+    (new.id, 'Class',       'class', 0),
+    (new.id, 'Competition', 'comp',  1),
+    (new.id, 'Personal',    'pers',  2),
+    (new.id, 'General',     'gen',   3);
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();

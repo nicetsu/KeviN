@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Content } from '@/components/Reveal'
+import { signOut } from '@/app/actions/auth'
 import { KEEP_DAYS } from '@/lib/archive'
 import { createClient } from '@/lib/supabase/server'
 import NotificationSetup from './NotificationSetup'
@@ -15,6 +16,10 @@ export default async function SettingsPage() {
     .order('created_at')
 
   const vapid = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''
+
+  // อ่านอีเมลจาก claim ในเครื่อง ไม่ยิงเน็ต — เหตุผลเดียวกับ `currentUserId()`
+  const { data: claimData } = await supabase.auth.getClaims()
+  const email = typeof claimData?.claims?.email === 'string' ? claimData.claims.email : null
 
   // นับของในคลังเพื่อบอกจำนวนที่ทางเข้า
   const { count } = await supabase
@@ -86,6 +91,26 @@ export default async function SettingsPage() {
           <span>ดูของที่เก็บไว้</span>
           <span className="archive-link__n">{archivedCount > 0 ? `${archivedCount} ›` : '›'}</span>
         </Link>
+
+        {/*
+          อยู่ล่างสุดโดยตั้งใจ — เป็นของที่กดปีละครั้ง และการวางไว้บนสุดจะทำให้
+          ปุ่มที่พาออกจากแอปอยู่ในสายตาตลอดเวลาที่มาหาเรื่องอื่น
+        */}
+        <div className="sec sec--gap"><span>บัญชี</span><span /></div>
+        {email && (
+          <div className="row">
+            <span className="row__stripe" style={{ background: 'var(--brand)' }} />
+            <div className="row__body">
+              <div className="row__title">{email}</div>
+              <div className="row__meta">ข้อมูลทั้งหมดในแอปผูกกับบัญชีนี้บัญชีเดียว</div>
+            </div>
+          </div>
+        )}
+        <form action={signOut}>
+          <button className="btn btn--quiet" type="submit" style={{ width: '100%', marginTop: '0.9rem' }}>
+            ออกจากระบบ
+          </button>
+        </form>
       </main>
     </Content>
   )

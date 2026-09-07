@@ -29,7 +29,12 @@ export type CallHooks = {
   onCaption: (c: Caption) => void
   /** จบหนึ่ง turn แล้ว — เอาไปปิดก้อนคำบรรยายและบันทึกลงประวัติ */
   onTurnEnd: () => void
-  onError: (message: string) => void
+  /**
+   * `quotaOut` = **โควตาเสียงของวันนี้หมดจริง** ซึ่งเป็นกรณีเดียวที่หน้าจอ
+   * ควรดันผู้ใช้ไปโหมดแชต · เคยตัดสินด้วยการ `test(/โควตา/)` กับข้อความ
+   * ซึ่งพังทันทีที่มีคนแก้คำ และจับ "ชนเพดานต่อนาที" ไปด้วยทั้งที่รอแป๊บเดียวก็โทรได้
+   */
+  onError: (message: string, quotaOut?: boolean) => void
   /**
    * ผู้ช่วยเสนอร่างการกระทำระหว่างสาย
    *
@@ -80,11 +85,21 @@ const fromBase64 = (b64: string) => {
   return bytes
 }
 
+/** ขอ token ไม่ผ่าน · พก `quotaOut` มาด้วยแทนที่จะให้ปลายทางไปเดาจากข้อความ */
+export class TokenError extends Error {
+  constructor(message: string, readonly quotaOut: boolean) {
+    super(message)
+    this.name = 'TokenError'
+  }
+}
+
 /**
  * แปลงสาเหตุที่เปิดไมค์ไม่ได้เป็นคำที่บอกทางออก
  *
  * "เริ่มสายไม่สำเร็จ" เฉย ๆ ไม่ช่วยอะไรเลยทั้งที่เรารู้สาเหตุจริง —
  * แนวเดียวกับหน้า /settings ที่แยก "ยังไม่ได้ขอสิทธิ์" ออกจาก "ถูกปฏิเสธ"
+ *
+ * รับ `TokenError` ได้ด้วยเพราะมันมีข้อความของตัวเองอยู่แล้ว — บรรทัดสุดท้ายส่งต่อให้
  */
 export function micReason(e: unknown): string {
   const name = e instanceof DOMException ? e.name : ''
@@ -141,7 +156,7 @@ export class VoiceCall {
       await this.openMic()
       await this.connect()
     } catch (e) {
-      this.hooks.onError(micReason(e))
+      this.hooks.onError(micReason(e), e instanceof TokenError && e.quotaOut)
       await this.stop('')
     }
   }
@@ -234,7 +249,7 @@ export class VoiceCall {
       body: JSON.stringify(this.prefs),
     })
     const data = await res.json()
-    if (!data.ok) throw new Error(data.error ?? 'ขอ token ไม่สำเร็จ')
+    if (!data.ok) throw new TokenError(data.error ?? 'ขอ token ไม่สำเร็จ', data.quota === true)
     this.token = data.token
     this.model = data.model
   }

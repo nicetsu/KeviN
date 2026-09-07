@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import AreaAdd from './AreaAdd'
 import AreaCard from './AreaCard'
 import { Content } from '@/components/Reveal'
 import { createClient } from '@/lib/supabase/server'
@@ -112,9 +113,12 @@ export default async function LibraryPage() {
   return (
     <Content>
       <main className="wrap">
-        <div className="page-head">
-          <h1>คลัง</h1>
-          <div className="sub">แตะเพื่อเปิด Area</div>
+        <div className="page-head page-head--row">
+          <div>
+            <h1>คลัง</h1>
+            <div className="sub">แตะเพื่อเปิด Area</div>
+          </div>
+          <AreaAdd />
         </div>
 
         <div className="areas">

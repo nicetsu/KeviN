@@ -15,7 +15,11 @@ export async function saveSubscription(sub: {
   const userId = await currentUserId(supabase)   // upsert ต้องระบุเจ้าของ
   if (!userId) return { ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ' }
 
-  // endpoint เป็น unique — เครื่องเดิมกดซ้ำให้ทับของเดิม ไม่สร้างแถวใหม่
+  // unique คือ (user_id, endpoint) — เครื่องเดิม **ของคนเดิม** กดซ้ำให้ทับของเดิม
+  //
+  // ⚠️ เคยเป็น `endpoint` เปล่า ๆ ซึ่งถูกตอนมีผู้ใช้คนเดียว · พอสองบัญชีเปิด
+  //    จากมือถือเครื่องเดียวกัน หนึ่ง endpoint ถูกอ้างสิทธิ์โดยคนแรกไปแล้ว
+  //    คนที่สองจะ upsert ไปชนแถวที่ RLS มองไม่เห็น แล้วได้ error ที่อ่านไม่ออก
   const { error } = await supabase.from('push_subscriptions').upsert(
     {
       user_id: userId,
@@ -26,7 +30,7 @@ export async function saveSubscription(sub: {
       enabled: true,
       last_seen_at: new Date().toISOString(),
     },
-    { onConflict: 'endpoint' }
+    { onConflict: 'user_id,endpoint' }
   )
 
   if (error) return { ok: false, error: error.message }

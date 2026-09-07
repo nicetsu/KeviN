@@ -16,7 +16,6 @@
  */
 import type { Draft, DraftAction, DraftLine } from '../drafts'
 import type { ReadOnlyDb } from './db'
-import { areaIsVisible } from './visibility'
 import { ToolFetchError } from './db'
 
 export type ProposeCtx = {
@@ -158,14 +157,13 @@ async function findProject(ctx: ProposeCtx, ref: string): Promise<ProjectRow> {
     limit: 60,
   })
 
-  const visible = rows.filter((r) => areaIsVisible(r.areas?.name))
-  if (visible.length === 0) throw new BadProposal('ยังไม่มีวิชาให้เลือกเลย')
+  if (rows.length === 0) throw new BadProposal('ยังไม่มีวิชาให้เลือกเลย')
 
   const needle = ref.trim().toLowerCase()
-  const exact = visible.find((r) => r.id === ref || r.name.toLowerCase() === needle)
+  const exact = rows.find((r) => r.id === ref || r.name.toLowerCase() === needle)
   if (exact) return exact
 
-  const partial = visible.filter((r) => r.name.toLowerCase().includes(needle))
+  const partial = rows.filter((r) => r.name.toLowerCase().includes(needle))
   if (partial.length === 1) return partial[0]
   if (partial.length > 1) {
     throw new BadProposal(`"${ref}" ตรงกับหลายวิชา — ${partial.map((r) => r.name).join(' · ')}`)
@@ -183,7 +181,6 @@ async function findItem(ctx: ProposeCtx, id: string): Promise<ItemRow> {
   })
   const row = rows[0]
   if (!row) throw new BadProposal('หารายการนั้นไม่เจอ')
-  if (!areaIsVisible(row.projects?.areas?.name)) throw new BadProposal('หารายการนั้นไม่เจอ')
   return row
 }
 

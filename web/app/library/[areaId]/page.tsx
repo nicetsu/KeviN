@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { LIBRARY_OPEN_COOKIE, decodeOpen } from '@/lib/libraryOpen'
 import { bangkokToday, bangkokTime, thaiDateLabel } from '@/lib/time'
 import { summarize, type Slot } from '@/lib/schedule'
+import AreaEdit from './AreaEdit'
 import { AREA_CLASS } from '@/lib/areaColor'
 import AreaHead from './AreaHead'
 import ProjectTree, { type TreeProject, type TreeItem } from './ProjectTree'
@@ -133,8 +134,9 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
   return (
     <Content>
       <main className="wrap">
-        <div className="page-head">
+        <div className="page-head page-head--row">
           <Link href="/library" className="back" transitionTypes={['nav-back']}>‹ คลัง</Link>
+          <AreaEdit area={{ id: area.id, name: area.name, color: area.color }} />
         </div>
 
         {/*

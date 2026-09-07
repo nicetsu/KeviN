@@ -1143,6 +1143,59 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
 .acard__ct { font-family: var(--f-mono); font-size: var(--s--2); color: var(--muted); }
 
 /*
+ * หัวหน้าที่มีปุ่มลอยขวา — ชื่อหน้าซ้าย การกระทำขวา
+ *
+ * `baseline` ทำให้ตัวหนังสือบนปุ่มนั่งบนเส้นเดียวกับหัวข้อ แม้ฝั่งซ้ายจะเป็นก้อน
+ * สองบรรทัด (h1 + .sub) เพราะ baseline ของ block ในแฟลกซ์คือบรรทัดแรกของมัน
+ */
+.page-head--row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+
+/*
+ * ปุ่มการกระทำในหัวหน้า
+ *
+ * ใช้ **ภาษาเดียวกับปุ่มที่ถูกเลือกใน `.seg`** เป๊ะ ๆ — ไล่เฉดม่วง ตัวอักษรเข้ม
+ * และไฟฟุ้งรอบตัว (เจ้าของเลือกจากของจริงบนจอ 8 ก.ย. 2026)
+ *
+ * ⚠️ **นี่คือก้อนไล่เฉดก้อนที่สี่ในแอป** ต่อจากปุ่มเพิ่มเร็ว · ปุ่ม KEVIN · ฟองข้อความ
+ *    · บนบัญชีที่มีวิชาแล้ว ปุ่มเพิ่มเร็วจะอยู่มุมขวาล่างของหน้าเดียวกันนี้ด้วย
+ *    — คนละมุมและขนาดต่างกันมาก จึงไม่ชนกันแบบที่กฎ "ม่วงสองก้อนห่างกันไม่ถึงนิ้ว"
+ *    เขียนกันไว้ แต่ **ถ้าวันหนึ่งจะเพิ่มก้อนที่ห้า ให้กลับมาชั่งใหม่ทั้งหน้า**
+ *
+ * ⚠️ **ไฟฟุ้งอยู่ตลอดเวลา ไม่ใช่ตอน hover** — บนมือถือไม่มี hover อยู่จริง
+ *    บทเรียนเดียวกับที่ทำให้ปุ่มเพิ่มเร็วเลิกเรืองเฉพาะตอน hover (1 ก.ย. 2026)
+ */
+.headbtn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: var(--f-mono); font-size: var(--s--2); letter-spacing: 0.04em;
+  font-weight: 600; line-height: 1.5;
+  padding: 0.3rem 0.85rem; border-radius: var(--r-pill);
+  border: none; cursor: pointer; white-space: nowrap; flex: none;
+  background: var(--grad-brand); color: var(--on-brand);
+  box-shadow: 0 0 15px -3px rgba(165, 148, 255, 0.9);
+}
+/* เครื่องหมายบวกตัวใหญ่กว่าคำ เพื่อให้อ่านออกว่าเป็น "เพิ่ม" ตั้งแต่ยังไม่อ่านคำ */
+.headbtn__plus { font-size: var(--s-0); line-height: 1; margin-top: -1px; }
+
+/* ---- ตัวเลือกสีประจำ Area ---- */
+.swatches { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.swatch {
+  width: 2.4rem; height: 2.4rem; padding: 0; cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--r-tile);
+  position: relative; overflow: hidden;
+}
+/*
+ * ความทึบเต็มร้อย ต่างจาก 11% บนการ์ด — ตรงนี้สีคือ *ตัวมันเอง* ที่ต้องเลือก
+ * ไม่ใช่พื้นหลังที่ต้องไม่แย่งความสนใจจากตัวหนังสือ
+ */
+.swatch::before {
+  content: ''; position: absolute; inset: 0;
+}
+.swatch[data-on="true"] {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand) inset;
+}
+
+/*
  * หัวของหน้า Area — กล่องเดียวกับในหน้าคลัง แต่ยืดเต็มความกว้าง
  * ปลายทางของการเดินทาง เบราว์เซอร์คำนวณระยะและขนาดให้เองจากสองฝั่ง
  */

@@ -28,19 +28,16 @@ type Item = {
 Deno.serve(async () => {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE)
 
-  // ถ้ายังไม่มีเครื่องไหนสมัครรับเลย ห้ามอ้างสิทธิ์ —
-  // เพราะ claim_due_reminders() เขียน notified_at ทันทีที่หยิบ
-  // ถ้าหยิบมาแล้วไม่มีที่ส่ง การเตือนนั้นจะถูกทำเครื่องหมายว่าส่งแล้วและหายไปเงียบ ๆ
-  const { count: deviceCount } = await supabase
-    .from('push_subscriptions')
-    .select('*', { count: 'exact', head: true })
-    .eq('enabled', true)
-
-  if (!deviceCount) {
-    return Response.json({ ok: true, claimed: 0, sent: 0, skipped: 'ยังไม่มีเครื่องที่สมัครรับ' })
-  }
-
   // อ้างสิทธิ์แบบ atomic — แถวที่ได้มาแล้วจะไม่ถูกหยิบซ้ำโดยรอบถัดไป
+  //
+  // ⚠️ **ห้ามเอาด่าน "ยังไม่มีเครื่องสมัครรับ" กลับมาไว้ที่นี่** — เคยมีอยู่ตรงนี้
+  //    และมันนับเครื่อง **รวมทุกคน** ซึ่งถูกตอนมีผู้ใช้คนเดียว แต่พอมีคนที่สอง
+  //    มันกลายเป็นตัวทำลายข้อมูล: B ลงเครื่องไว้แต่ A ไม่ได้ลง ด่านผ่าน แล้ว
+  //    reminder ของ A ถูกเซ็ต notified_at ทิ้งทั้งที่ไม่มีที่ส่ง หายถาวรโดยไม่มี error
+  //
+  //    ตอนนี้เงื่อนไขย้ายไปอยู่ใน claim_due_reminders() แล้ว ซึ่งกรองราย user
+  //    **ในคำสั่ง UPDATE เดียวกับที่เลือกแถว** · เอามากรองที่นี่ไม่ได้เลย
+  //    เพราะนั่นเท่ากับ select แล้วค่อย update ซึ่งทำให้ cron รอบที่ทับกันส่งซ้ำ
   const { data: due, error } = await supabase.rpc('claim_due_reminders')
   if (error) {
     return Response.json({ ok: false, stage: 'claim', error: error.message }, { status: 500 })

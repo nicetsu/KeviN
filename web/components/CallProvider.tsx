@@ -194,10 +194,14 @@ export default function CallProvider({ children }: { children: React.ReactNode }
         ),
       // ร่างค้างต้องเป็นค่า ณ วินาทีที่เรียก tool ไม่ใช่ค่าตอนเริ่มสาย
       openDrafts: () => draftsRef.current,
-      onError: (m) => {
+      onError: (m, quotaOut) => {
         setError(m)
-        // โควตาเสียงหมด = คนละโควตากับแชต · หน้าจอจะดันไปโหมดแชตให้
-        if (/โควตา/.test(m)) setQuotaOut(true)
+        // โควตาเสียง **รายวัน** หมด = คนละโควตากับแชต · หน้าจอจะดันไปโหมดแชตให้
+        //
+        // ⚠️ เคยตัดสินด้วย `/โควตา/.test(m)` ซึ่งผิดสองทาง — พังถ้ามีคนแก้คำ
+        //    ในข้อความ และจับ "ชนเพดานต่อนาที" ไปด้วยทั้งที่รอไม่กี่วินาทีก็โทรได้
+        //    ตอนนี้ธงมาจากเซิร์ฟเวอร์ซึ่งเป็นที่เดียวที่อ่าน body ของ 429 ออก
+        if (quotaOut) setQuotaOut(true)
       },
       onEnded: (reason) => {
         flush()

@@ -15,6 +15,7 @@ import { systemPrompt } from '@/lib/ai/prompt'
 import { readLang } from '@/lib/ai/lang'
 import { resolveVoice } from '@/lib/ai/voices'
 import { bangkokToday } from '@/lib/time'
+import { classifyRateLimit, rateLimitMessage } from '@/lib/chat/quota'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -89,14 +90,28 @@ export async function POST(request: Request) {
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    const quota = res.status === 429
+
+    if (res.status !== 429) {
+      return Response.json(
+        { ok: false, quota: false, error: `ขอ token ไม่สำเร็จ (${res.status}) ${body.slice(0, 200)}` },
+        { status: 502 }
+      )
+    }
+
+    /*
+      ⚠️ **`quota` ต้องเป็นจริงเฉพาะตอนหมดโควตา *รายวัน*** เพราะหน้าจอใช้ธงนี้
+      ดันผู้ใช้ออกไปโหมดแชตทั้งรอบ · ชนเพดานต่อนาทีแล้วโดนดันออกไปทั้งที่รอ
+      ยี่สิบวินาทีก็โทรได้ คือการปิดฟีเจอร์ให้เขาโดยไม่จำเป็น (lib/chat/quota.ts)
+    */
+    const limit = classifyRateLimit(body)
     return Response.json(
       {
         ok: false,
-        quota,
-        error: quota ? 'โควตาเสียงของวันนี้หมดแล้ว' : `ขอ token ไม่สำเร็จ (${res.status}) ${body.slice(0, 200)}`,
+        quota: limit.kind === 'day',
+        retryAfterSec: limit.retryAfterSec,
+        error: rateLimitMessage(limit, 'voice'),
       },
-      { status: quota ? 429 : 502 }
+      { status: 429 }
     )
   }
 

@@ -19,7 +19,6 @@
 
 /* นำเข้าแบบ relative ไม่ใช่ `@/` — ชุดเทสต์คอมไพล์เป็น CommonJS แล้วรันด้วย node
    ตรง ๆ ซึ่งไม่รู้จัก path alias ของ bundler (ทุกไฟล์ที่เทสต์เอื้อมถึงเป็นแบบนี้) */
-import { areaIsVisible } from './ai/visibility'
 import { isDraftKind, type DraftAction } from './drafts'
 
 /* ------------------------------------------------------------------ ช่องต่อ DB */
@@ -74,36 +73,24 @@ export const NOT_WRITTEN =
 
 /* ----------------------------------------------------------------- ตัวช่วยตรวจ */
 
-/** Supabase คืน relation เป็น object หรือ array แล้วแต่รูป join — รับทั้งสองแบบ */
-function one(v: unknown): Row | undefined {
-  if (Array.isArray(v)) return v[0] as Row | undefined
-  return (v ?? undefined) as Row | undefined
-}
-
-function areaNameOf(row: Row, path: 'areas' | 'projects.areas'): string | undefined {
-  const holder = path === 'areas' ? row : one(row.projects)
-  const area = one(holder?.areas)
-  const name = area?.name
-  return typeof name === 'string' ? name : undefined
-}
-
 /**
- * ตรวจว่าวิชานี้เป็นของผู้ใช้ **และอยู่ใน Area ที่ผู้ช่วยมองเห็น**
+ * ตรวจว่าวิชานี้มีอยู่จริงและยังไม่ถูกเก็บเข้าคลัง
  *
- * ⚠️ ข้อหลังสำคัญกว่าที่คิด — ตัวกรอง Area ใน `runTool()` กันแค่ข้อมูล**ขาออก**
- *    ขาเข้าเป็นคนละทาง · ถ้าไม่ตรงนี้ ร่างที่ชี้ไปวิชาในกลุ่มที่ซ่อนไว้จะเขียนผ่านได้
+ * ⚠️ **ตัวที่กันว่าเป็นของผู้ใช้คนนี้จริงคือ RLS ไม่ใช่บรรทัดนี้** — query วิ่งด้วย
+ *    anon key ของ session ปัจจุบัน วิชาของคนอื่นจึงคืน `data = null` เหมือนวิชาที่
+ *    ไม่มีอยู่จริง · เคยมีด่านตรวจ Area ต่อจากนี้ด้วย ถอดออกแล้ว 8 ก.ย. 2026
+ *    ตอนถอด `VISIBLE_AREAS` ทั้งกลไก (doc/DECISIONS.md)
  */
 async function assertProjectAllowed(db: DraftDb, projectId: string): Promise<string | null> {
   const { data, error } = await db
     .from('projects')
-    .select('id, areas(name)')
+    .select('id')
     .eq('id', projectId)
     .is('archived_at', null)
     .maybeSingle()
 
   if (error) return error.message
   if (!data) return 'ไม่พบวิชานั้น'
-  if (!areaIsVisible(areaNameOf(data, 'areas'))) return 'วิชานั้นอยู่นอกขอบเขตที่ผู้ช่วยแตะได้'
   return null
 }
 
@@ -119,15 +106,13 @@ async function assertItemAllowed(
 ): Promise<{ ok: false; error: string } | { ok: true; type: string; doneAt: string | null }> {
   const { data, error } = await db
     .from('items')
-    .select('id, type, done_at, projects(areas(name))')
+    .select('id, type, done_at')
     .eq('id', itemId)
     .is('archived_at', null)
     .maybeSingle()
 
   if (error) return { ok: false, error: error.message }
   if (!data) return { ok: false, error: 'ไม่พบรายการนั้น' }
-  if (!areaIsVisible(areaNameOf(data, 'projects.areas')))
-    return { ok: false, error: 'รายการนั้นอยู่นอกขอบเขตที่ผู้ช่วยแตะได้' }
 
   const doneAt = data.done_at
   return {
