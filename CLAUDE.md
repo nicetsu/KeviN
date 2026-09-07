@@ -5,7 +5,11 @@
 สั่งงานได้สามทาง — Claude ผ่าน MCP · เว็บแอป PWA · และแท็บ **KeviN** ในเว็บที่คุยได้ทั้งพิมพ์และพูด
 (ประตูที่สาม: อ่านได้ · **เสนอการแก้ได้ · เขียนเองไม่ได้** — ผู้ใช้กดยืนยันบนการ์ดถึงเขียนจริง)
 
-**สถานะ: ใช้งานได้จริงครบวงแล้ว** — https://kevin-rose.vercel.app · โค้ดอยู่ใน `web/` (Next.js 16)
+**สถานะ: ใช้งานได้จริงครบวงแล้ว · เปิดให้ใช้หลายคนแล้ว 8 ก.ย. 2026**
+https://kevin-rose.vercel.app · โค้ดอยู่ใน `web/` (Next.js 16)
+
+**เพิ่มผู้ใช้ใหม่ พิมพ์ `/invite`** — ออกรหัสเชิญ · ดูว่าใครใช้ไปแล้ว · ไล่เหตุเวลาเมลไม่มา
+(`.claude/skills/invite/SKILL.md`)
 
 ---
 
@@ -131,6 +135,10 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 ## สภาพแวดล้อม
 
 - Windows · เชลล์หลักเป็น PowerShell
+- **Supabase MCP ต่ออยู่แล้ว** — รัน migration และ query ได้เลยผ่าน `apply_migration`
+  / `execute_sql` **ไม่ต้องให้เจ้าของไปเปิด SQL Editor เอง** · แต่ **`supabase` CLI
+  ไม่เคย `link`** (ไม่มี `config.toml`) ดังนั้น `db push` และ `functions deploy`
+  ใช้ไม่ได้จนกว่าจะ login · project ref คือ `minribikrogtptozszxv`
 - git remote `origin` → https://github.com/nicetsu/KeviN (private)
 - `gh.exe` อยู่ที่ `C:\Users\LENOVO\AppData\Local\gh\` และอยู่ใน PATH แล้ว
   git credential helper ชี้มาที่ไฟล์นี้ — **ถ้าไฟล์หาย `git push` จะพัง**
