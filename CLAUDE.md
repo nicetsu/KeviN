@@ -84,6 +84,9 @@ prompt ที่แก้เคสหนึ่งแล้วทำอีกเ�
   เรียกตรงด้วย anon key ได้จากที่ไหนก็ได้ · การเช็กในหน้าเว็บมีไว้ทำ**ข้อความ**เท่านั้น
   **ห้ามถอดชั้น DB ออกเพราะเห็นว่าหน้าเว็บเช็กแล้ว**
 - **`invite_codes` เปิด RLS แล้วไม่มี policy สักข้อ** = ปิดสนิท · อย่าเผลอเติม policy
+- **ผู้ช่วยสร้าง project กับ Area เองไม่ได้ (ตั้งใจ)** — `handle_new_user()` จึง seed
+  ทั้งสี่ Area **และโปรเจกต์ "ทั่วไป"** ให้ผู้ใช้ใหม่ · ถอดโปรเจกต์นั้นออกเมื่อไหร่
+  ผู้ใช้ใหม่จะชน "ยังไม่มีวิชาให้เลือกเลย" ตั้งแต่ประโยคแรกแล้วจบทางตัน
 - **`unique` ทุกตัวต้องมี `user_id` อยู่ในคีย์** — `push_subscriptions.endpoint` เคยพลาด
   ข้อนี้ แล้วสองบัญชีบนเครื่องเดียวกันเปิดแจ้งเตือนไม่ได้
 - **เงื่อนไข "มีเครื่องเปิดรับอยู่" ต้องอยู่ใน `UPDATE` ของ `claim_due_reminders()`**
@@ -145,7 +148,7 @@ service_role key → Supabase Vault ชื่อ `kevin_cron_token` (ห้า�
 - **Supabase MCP ต่ออยู่แล้ว** — รัน migration และ query ได้เลยผ่าน `apply_migration`
   / `execute_sql` **ไม่ต้องให้เจ้าของไปเปิด SQL Editor เอง** · แต่ **`supabase` CLI
   ไม่เคย `link`** (ไม่มี `config.toml`) ดังนั้น `db push` และ `functions deploy`
-  ใช้ไม่ได้จนกว่าจะ login · project ref คือ `minribikrogtptozszxv`
+  ใช้ไม่ได้จนกว่าจะ login · project ref คือ `minfibikrogtptozszxv`
 - git remote `origin` → https://github.com/nicetsu/KeviN (private)
 - `gh.exe` อยู่ที่ `C:\Users\LENOVO\AppData\Local\gh\` และอยู่ใน PATH แล้ว
   git credential helper ชี้มาที่ไฟล์นี้ — **ถ้าไฟล์หาย `git push` จะพัง**

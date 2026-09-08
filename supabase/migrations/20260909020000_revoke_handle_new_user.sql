@@ -1,0 +1,25 @@
+-- =====================================================================
+-- KeviN · ปิดช่องเรียก handle_new_user() ผ่าน REST
+--
+-- กฎของโปรเจกต์ (CLAUDE.md · ARCHITECTURE.md §10):
+--   "เพิ่มฟังก์ชัน `security definer` ใหม่ ต้อง revoke จาก
+--    public/anon/authenticated ทุกครั้ง"
+--
+-- `handle_new_user()` **หลุดกฎข้อนี้มาตั้งแต่ทำระบบหลายคน 8 ก.ย. 2026**
+-- ทุกฟังก์ชันอื่นถูก revoke ครบ (`claim_due_reminders` · `purge_archived` ·
+-- `housekeeping` · `archive_stale` · `bangkok_day_start`) ตัวนี้ตัวเดียวที่ลืม
+--
+-- ⚠️ **ไม่ได้เกิดจากการแก้ trigger รอบก่อนหน้านี้** — `create or replace function`
+--    **ไม่แตะ ACL เดิม** · ของเดิมเปิดอยู่แล้วตั้งแต่วันที่สร้าง
+--    เจอเพราะรัน advisor ของ Supabase หลังแก้ DDL (ควรทำทุกครั้ง)
+--
+-- ⚠️ **พิสูจน์ก่อนแตะแล้วว่า revoke ไม่ทำให้ trigger หยุดทำงาน**
+--    Postgres **ไม่เช็ก EXECUTE ตอน trigger ยิง** · ทดลองบน schema ทิ้ง
+--    (ตาราง + trigger + `set local role authenticated`) แล้ว trigger ยังทำงาน
+--    ทั้งที่ revoke ไปแล้ว · ต้องพิสูจน์เพราะถ้าเดาผิด = **สมัครไม่ได้ทั้งระบบ**
+--
+-- ตัวที่ยัง grant ให้ `anon` อยู่คือ `invite_code_valid()` ซึ่ง **ตั้งใจ**
+-- เพราะคนที่ยังไม่มีบัญชีคือคนเดียวที่ต้องเรียกมัน และมันคืน boolean เปล่า ๆ
+-- ห้ามคืนแถว (doc/DECISIONS.md · 8 ก.ย. 2026)
+-- =====================================================================
+revoke all on function public.handle_new_user() from public, anon, authenticated;

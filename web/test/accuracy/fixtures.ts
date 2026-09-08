@@ -19,6 +19,10 @@ export const P = {
   se: 'a4444444-4444-4444-8444-444444444444',
   hack: 'a5555555-5555-4555-8555-555555555555',
   life: 'a6666666-6666-4666-8666-666666666666',
+  /** โปรเจกต์ตั้งต้นที่ทุกบัญชีได้ตอนสมัคร (migration 20260908210000) */
+  gen: 'a7777777-7777-4777-8777-777777777777',
+  /** อยู่ใน Area ที่ **ผู้ใช้ตั้งชื่อเอง** — ชื่อโปรเจกต์ไม่มีคำว่า "ฝึกงาน" เลย */
+  intern: 'a8888888-8888-4888-8888-888888888888',
 } as const
 
 export const I = {
@@ -38,6 +42,20 @@ const PROJECTS: Row[] = [
   { id: P.se, name: 'วิศวกรรมซอฟต์แวร์', description: 'CPE341', status: 'active', sort_order: 4, archived_at: null, areas: { name: 'Class' } },
   { id: P.hack, name: 'UniHack 2026', description: null, status: 'active', sort_order: 5, archived_at: null, areas: { name: 'Competition' } },
   { id: P.life, name: 'เรื่องส่วนตัว', description: null, status: 'active', sort_order: 6, archived_at: null, areas: { name: 'Personal' } },
+  /*
+   * โปรเจกต์ตั้งต้นที่ `handle_new_user()` seed ให้ทุกบัญชี (8 ก.ย. 2026)
+   * — ชุดวัดต้องเหมือนบัญชีจริง ไม่งั้นเราวัดของที่ไม่มีใครใช้
+   */
+  { id: P.gen, name: 'ทั่วไป', description: null, status: 'active', sort_order: 0, archived_at: null, areas: { name: 'General' } },
+  /*
+   * ⚠️ **Area ชื่อไทยที่ผู้ใช้ตั้งเอง** — ของจริงตั้งแต่ 8 ก.ย. 2026 ผู้ใช้แก้ชื่อ
+   *    Area ได้ · สี่ชื่อที่ seed มาเป็นภาษาอังกฤษ (Class/Competition/…) ซึ่ง
+   *    **ไม่ใช่คำที่คนไทยพูด** · Area ที่ช่วยตัดสินได้จริงคือ Area ที่เจ้าของ
+   *    ตั้งชื่อเองด้วยคำที่ตัวเองใช้ — ชุดวัดจึงต้องมีของแบบนั้นอยู่ด้วยหนึ่งใบ
+   *
+   *    ชื่อโปรเจกต์ **จงใจไม่มีคำว่า "ฝึกงาน"** เพื่อให้ทางเดียวที่หาเจอคือดูที่ `กลุ่ม`
+   */
+  { id: P.intern, name: 'บริษัท ABC', description: null, status: 'active', sort_order: 7, archived_at: null, areas: { name: 'ฝึกงาน' } },
 ]
 
 const ITEMS: Row[] = [

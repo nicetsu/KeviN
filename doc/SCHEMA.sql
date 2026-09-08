@@ -894,7 +894,7 @@ revoke all on function public.invite_code_valid(text) from public, anon, authent
 grant execute on function public.invite_code_valid(text) to anon, authenticated;
 
 -- =====================================================================
--- ด่านรหัสเชิญ + seed สี่ Area · trigger เดียว ธุรกรรมเดียว
+-- ด่านรหัสเชิญ + seed สี่ Area + โปรเจกต์ตั้งต้น · trigger เดียว ธุรกรรมเดียว
 --
 -- ⚠️ **ด่านต้องอยู่ที่นี่ ไม่ใช่ที่หน้าเว็บ** — supabase.auth.signUp() เรียกตรงด้วย
 --    anon key ได้จากที่ไหนก็ได้ และ anon key อยู่ใน bundle ที่เปิดดูได้อยู่แล้ว
@@ -902,6 +902,10 @@ grant execute on function public.invite_code_valid(text) to anon, authenticated;
 -- เป็น AFTER INSERT เพราะ exception ที่โยนจาก after trigger ยัง roll back การสร้าง
 -- บัญชีทั้งใบอยู่ดี · ได้ทั้งการกันและการ seed พร้อมกัน จึงไม่มีทางเกิดบัญชีที่ไม่มี Area
 -- (projects.area_id เป็น not null — ผู้ใช้ที่ไม่มี Area สร้างอะไรไม่ได้เลย)
+--
+-- ⚠️ **seed โปรเจกต์ "ทั่วไป" ให้ด้วย** (8 ก.ย. 2026) — ผู้ช่วยใน /kevin สร้าง
+--    โปรเจกต์ไม่ได้โดยตั้งใจ · ผู้ใช้ใหม่ที่มีแต่ Area เปล่า ๆ จึงชน
+--    "ยังไม่มีวิชาให้เลือกเลย" ตั้งแต่ประโยคแรก แล้วจบทางตัน
 -- =====================================================================
 create or replace function public.handle_new_user()
 returns trigger
@@ -909,6 +913,7 @@ language plpgsql volatile security definer set search_path = public as $$
 declare
   v_code text := nullif(trim(new.raw_user_meta_data->>'invite_code'), '');
   v_hit  text;
+  v_general uuid;
 begin
   -- อ้างสิทธิ์แบบ atomic เหมือน claim_due_reminders() — สองคนกดสมัครด้วยรหัสเดียวกัน
   -- พร้อมกัน ถ้าแยกเป็น select แล้วค่อย update จะผ่านทั้งคู่
@@ -925,15 +930,60 @@ begin
 
   -- ⚠️ คีย์สีต้องตรงกับ AREA_CLASS ใน web/lib/areaColor.ts และ .acard--* ใน globals.css
   --    คีย์ที่ไม่ตรงไม่เกิด error มันแค่ได้การ์ดไม่มีสีเงียบ ๆ
+  --
+  -- สี่ Area ตั้งต้น · แยก General ออกมาเป็นคำสั่งที่สองเพื่อ `returning into`
+  -- **ทั้งสองคำสั่งคือชุดเดียวกัน** แก้ชุดนี้เมื่อไหร่ต้องดูทั้งสองที่
+  --
+  -- ⚠️ ห้ามแทรกครบสี่ใบแล้วค่อย `select ... where name = 'General'` ทีหลัง —
+  --    วันไหนแก้ชื่อ Area ตั้งต้น การค้นด้วยชื่อจะไม่เจอแบบเงียบ ๆ
   insert into public.areas (user_id, name, color, sort_order) values
     (new.id, 'Class',       'class', 0),
     (new.id, 'Competition', 'comp',  1),
-    (new.id, 'Personal',    'pers',  2),
-    (new.id, 'General',     'gen',   3);
+    (new.id, 'Personal',    'pers',  2);
+
+  insert into public.areas (user_id, name, color, sort_order)
+  values (new.id, 'General', 'gen', 3)
+  returning id into v_general;
+
+  /*
+   * โปรเจกต์ตั้งต้นหนึ่งใบ ใน General
+   *
+   * ผู้ช่วยเลือกโปรเจกต์ด้วยการเทียบ**ชื่อ** ล้วน ๆ (`findProject()`)
+   * ชื่อ "ทั่วไป" จึงเป็นคำที่ผู้ใช้พูดถึงได้ตรง ๆ และเป็นคำที่โมเดลเดาเอง
+   * อยู่แล้วเวลาไม่มีวิชาที่ตรง (เห็นจากชุดวัด 8 ก.ย. 2026)
+   *
+   * `description` เว้นว่างโดยตั้งใจ — ช่องนั้นแสดงเป็น "รหัสวิชา" ทั้งบนจอ
+   * และในผลของ tool `projects`
+   */
+  insert into public.projects (user_id, area_id, name, sort_order)
+  values (new.id, v_general, 'ทั่วไป', 0);
 
   return new;
 end;
 $$;
+
+-- ⚠️ **ต้อง revoke เหมือน security definer ตัวอื่นทุกตัว** — ของเดิมลืมข้อนี้
+--    ตั้งแต่ 8 ก.ย. 2026 แล้วมันเรียกได้ผ่าน /rest/v1/rpc/handle_new_user
+--    (advisor ของ Supabase จับได้ 9 ก.ย. 2026)
+--
+-- ⚠️ **revoke ไม่ทำให้ trigger หยุดทำงาน** — Postgres ไม่เช็ก EXECUTE ตอน
+--    trigger ยิง · พิสูจน์บน schema ทิ้งแล้วก่อนแตะของจริง
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
+-- =====================================================================
+-- ล็อก search_path ของฟังก์ชันที่เหลือ (9 ก.ย. 2026)
+--
+-- ฟังก์ชันที่ไม่ตั้ง search_path ใช้ค่าของ role ที่เรียก · สามตัวนี้เป็น
+-- security invoker จึงเสี่ยงน้อย แต่ตั้งให้ครบถูกกว่าปล่อยไว้
+-- ตรวจแล้วว่า body ไม่เรียกของนอก public เลย จึงล็อกได้โดยไม่พัง
+--
+-- ⚠️ **ไม่แตะ `pg_net` ที่อยู่ใน public โดยตั้งใจ** — cron ของการเตือนเรียก
+--    `net.http_post()` ทุกนาที · ย้ายสคีมาแล้วเสี่ยงให้การเตือนหยุดส่งเงียบ ๆ
+--    แลกกับ lint หายไปบรรทัดเดียว ไม่คุ้ม
+-- =====================================================================
+alter function public.touch_updated_at()               set search_path = public, pg_temp;
+alter function public.schedule_occurrences(date, date) set search_path = public, pg_temp;
+alter function public.calendar_entries(date, date)     set search_path = public, pg_temp;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
