@@ -1535,6 +1535,26 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
 .msg--me .msg__via { color: #1E1A3B; }
 
 /*
+ * ป้ายบอกว่าประโยคนี้เคยมีรูปแนบมา · ตัวรูปไม่ได้ถูกเก็บ (lib/chat/image.ts)
+ *
+ * ⚠️ อยู่บนฟองฝั่งเราซึ่ง**กลับด้านสีจากทั้งแอป** — สีตัวอักษรจึงเป็น `#1E1A3B`
+ *    เหมือน `.msg__via` ไม่ใช่ `--faint` · พื้นเป็นขาวโปร่งเพื่อให้ดูเป็นป้าย
+ *    โดยไม่ต้องเพิ่มสีใหม่เข้าระบบ
+ */
+/*
+ * ⚠️ **บรรทัดของตัวเอง ไม่ใช่ `inline-flex`** — ป้ายที่ไหลอยู่หน้าข้อความทำให้
+ *    อ่านต่อกันเป็นประโยคเดียว ("รูปที่ส่งไป · ไม่ได้เก็บไว้ ส่งวันศุกร์นะ")
+ *    และดันฟองให้กว้างเต็มจอทั้งที่ข้อความจริงสั้นนิดเดียว (วัดบนจอ 375px)
+ *    · `width: fit-content` ทำให้พื้นป้ายกว้างพอดีคำ ไม่ยาวเต็มฟอง
+ */
+.msg__shot {
+  display: flex; width: fit-content; align-items: center; gap: 0.3rem;
+  margin-bottom: 0.35rem; padding: 0.12rem 0.5rem;
+  border-radius: var(--r-pill); background: rgba(255, 255, 255, 0.42);
+  font-family: var(--f-mono); font-size: var(--s--2); color: #1E1A3B;
+}
+
+/*
  * ตัวเลือกไมค์ในหน้าโทร
  *
  * เป็นปุ่มเล็กโทนเงียบโดยตั้งใจ — ของที่แตะนาน ๆ ครั้ง ไม่ควรแย่งสายตา
@@ -1627,7 +1647,15 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   left: 50%; transform: translateX(-50%);
   width: min(640px, 100% - 2rem);
   bottom: calc(5.5rem + env(safe-area-inset-bottom));
-  display: flex; align-items: center; gap: 0.5rem;
+  /*
+   * ⚠️ **เรียงลง ไม่ใช่เรียงนอน** ตั้งแต่มีรูปแนบได้ — แถบรูปที่รอส่งอยู่เหนือ
+   *    แถวช่องพิมพ์ · ตัวช่องพิมพ์กับปุ่มย้ายไปอยู่ใน `.composer__row` แทน
+   *
+   *    `gap` ของแถวจึงต้องไปตั้งที่ `.composer__row` **ไม่ใช่ปล่อยไว้ที่นี่** —
+   *    ของที่ถูกย้ายเข้าไปห่อรวมกันจะหลุดจาก gap ของพ่อเดิมทันทีโดยไม่มีอะไรฟ้อง
+   *    (doc/TRAPS.md · เจอมาแล้วกับ `.talk__top`)
+   */
+  display: flex; flex-direction: column; gap: 0.5rem;
   /*
    * ⚠️ **ไม่มี padding แล้ว** — ค่าเดิม (1.15rem บน 0.95rem ล่าง) มีไว้ให้แถบพื้น
    *    ที่เคยรองอยู่ข้างหลังหนาพอ · พอเอาแถบออกไป padding ก็เหลือเป็นที่ว่างเปล่า
@@ -1673,7 +1701,55 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-pill); padding: 0.6rem 0.9rem; color: var(--ink);
 }
+.composer__row { display: flex; align-items: center; gap: 0.5rem; }
 .composer__field::placeholder { color: var(--faint); }
+
+/*
+ * ปุ่มแนบรูป — **วงเงียบ** ตรงข้ามกับปุ่มส่งที่เป็นไล่เฉดม่วง
+ *
+ * ม่วงในแอปมีสี่ก้อนแล้ว (ปุ่มเพิ่มเร็ว · ปุ่ม KEVIN · ฟองข้อความ · ปุ่ม + Area)
+ * และเพดานของกฎ "ม่วงคือสิ่งที่กดได้" ใกล้เต็ม (doc/DECISIONS.md 8 ก.ย. 2026)
+ * · การแนบรูปเป็นทางเลือก ส่วนการส่งคือการกระทำหลัก — ก้อนที่ห้าจึงไม่ควรอยู่ตรงนี้
+ */
+.composer__clip {
+  width: 2.5rem; height: 2.5rem; flex: none; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); color: var(--muted);
+  transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+}
+.composer__clip:active { transform: scale(0.92); }
+.composer__clip:disabled { opacity: 0.4; cursor: default; }
+.composer__clip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .composer__clip:active { transform: none; } }
+
+/* แถบรูปที่รอส่ง · อยู่เหนือแถวช่องพิมพ์ */
+.shot {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.45rem 0.5rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-card);
+}
+.shot__thumb {
+  width: 2.6rem; height: 2.6rem; flex: none;
+  object-fit: cover; border-radius: calc(var(--r-card) - 4px);
+}
+.shot__say { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+.shot__say strong { font-size: var(--s--1); font-weight: 600; }
+.shot__say .mono-hint { font-size: var(--s--2); }
+.shot__drop {
+  margin-left: auto; flex: none;
+  width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: transparent; border: 1px solid var(--line); color: var(--muted);
+}
+.shot__drop:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/*
+ * ⚠️ ระยะเผื่อของ `.talk` ผูกกับ**ความสูงจริง**ของช่องพิมพ์ · พอมีแถบรูปโผล่มา
+ *    ช่องพิมพ์สูงขึ้นราว 3.6rem แล้วไปบังท้ายบทสนทนา ถ้าไม่ขยับค่านี้ตาม
+ */
+.talk:has(.shot) { padding-bottom: 7.6rem; }
+@media (min-width: 768px) { .talk:has(.shot) { padding-bottom: 7.2rem; } }
 /* ปุ่มส่งเป็นวงกลมไล่เฉด · เด่นกว่าปุ่มคำว่า "ส่ง" เดิมโดยกินที่น้อยกว่า */
 .composer__send {
   width: 2.5rem; height: 2.5rem; flex: none; border-radius: 50%;

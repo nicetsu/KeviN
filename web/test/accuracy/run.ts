@@ -31,8 +31,9 @@ async function runChat(): Promise<{ pass: number; total: number }> {
      * หนึ่งเคสกินหลายรอบ (วน tool) จำนวนคำขอจริงจึงมากกว่าจำนวนเคสหลายเท่า
      */
     if (nth > 0) await new Promise((r) => setTimeout(r, 6_000))
-    process.stderr.write(`  แชต [${c.id}] …\n`)
-    const turn = await askChat(c.say, c.then)
+    process.stderr.write(`  แชต [${c.id}] …${c.image ? ' (มีรูป)' : ''}\n`)
+    // รูปถูกสร้างตอนนี้ ไม่ใช่ตอนประกาศเคส — ข้อที่ไม่ได้เลือกจะไม่เสียเวลาเรนเดอร์
+    const turn = await askChat(c.say, c.then, c.image ? await c.image() : undefined)
     const problems = turn.error ? [`ล้ม: ${turn.error}`] : [...c.check(turn), ...globalProblems(turn)]
     results.push({ case: c, turn, problems })
   }

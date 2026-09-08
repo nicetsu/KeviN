@@ -21,6 +21,7 @@ import {
 } from '@/lib/chat/store'
 import { bangkokToday } from '@/lib/time'
 import { readOpenDrafts, type Draft } from '@/lib/drafts'
+import { BadImage, imageHistoryLine, readInlineImage } from '@/lib/chat/image'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
     history?: unknown
     lang?: unknown
     drafts?: unknown
+    image?: unknown
   }
   try {
     body = (await request.json()) as typeof body
@@ -53,8 +55,26 @@ export async function POST(request: NextRequest) {
     return Response.json({ ok: false, error: 'อ่านคำขอไม่ได้' }, { status: 400 })
   }
 
+  /*
+   * รูปที่แนบมา — **ไม่ถูกเก็บที่ไหนเลย** มีชีวิตแค่คำขอนี้แล้วหายไปพร้อมมัน
+   *
+   * ⚠️ ด่านตรวจขนาดและชนิดอยู่ที่นี่ ไม่ใช่ที่หน้าจอ · การย่อขนาดฝั่งเบราว์เซอร์
+   *    เป็นเรื่องของความเร็ว ไม่ใช่เรื่องของการกัน — endpoint นี้ถูกยิงตรงได้
+   *    เหมือนทุก endpoint (doc/TRAPS.md · "ด่านที่อยู่ในหน้าเว็บอย่างเดียว")
+   */
+  let image
+  try {
+    image = readInlineImage(body.image)
+  } catch (e) {
+    const why = e instanceof BadImage ? e.message : 'รูปที่แนบมาอ่านไม่ออก'
+    return Response.json({ ok: false, error: why }, { status: 400 })
+  }
+
   const text = typeof body.text === 'string' ? body.text.trim() : ''
-  if (!text) return Response.json({ ok: false, error: 'ยังไม่ได้พิมพ์อะไร' }, { status: 400 })
+  // แนบรูปมาเฉย ๆ โดยไม่พิมพ์อะไรคือการใช้งานปกติ — ถ่ายกระดานแล้วส่ง
+  if (!text && !image) {
+    return Response.json({ ok: false, error: 'ยังไม่ได้พิมพ์อะไร' }, { status: 400 })
+  }
   if (text.length > 2000) {
     return Response.json({ ok: false, error: 'ข้อความยาวเกินไป' }, { status: 400 })
   }
@@ -73,12 +93,27 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  /*
+   * ⚠️ **ประวัติเป็นข้อความล้วนเสมอ** — รูปของเทิร์นก่อน ๆ ไม่เคยเดินทางกลับเข้ามา
+   *    มันลงประวัติเป็น `[รูป]` ซึ่งบอกโมเดลว่า *เคยมีรูป และตอนนี้มองไม่เห็นแล้ว*
+   *    (กติกาข้อ 12 ใน `lib/ai/prompt.ts` สั่งไม่ให้มันอ้างว่ายังเห็นอยู่)
+   *
+   *    นี่คือสิ่งที่ทำให้ "ไม่เก็บรูป" เป็นจริงตลอดสาย ไม่ใช่แค่ตอนไม่ลง DB —
+   *    ถ้าประวัติพารูปกลับเข้าไปทุกรอบ มันจะถูกส่งไป Google ซ้ำทุกครั้งที่พิมพ์ต่อ
+   *
+   * รูปมาก่อนข้อความในเทิร์นเดียวกัน · เป็นลำดับที่เอกสารของ Gemini แนะนำสำหรับ
+   * คำถามที่มีรูปใบเดียว — คำถามที่มาหลังรูปอ่านเป็นคำสั่งต่อสิ่งที่เพิ่งเห็น
+   */
   const contents: Content[] = [
     ...history.slice(-HISTORY_LIMIT).map((m) => ({
       role: (m.role === 'assistant' ? 'model' : 'user') as 'user' | 'model',
       parts: [{ text: m.content }],
     })),
-    { role: 'user' as const, parts: [{ text }] },
+    {
+      role: 'user' as const,
+      // part ที่ว่างเปล่าทำให้ Gemini ตอบ 400 · แนบรูปแล้วไม่พิมพ์อะไรจึงมีชิ้นเดียว
+      parts: [...(image ? [{ inlineData: image }] : []), ...(text ? [{ text }] : [])],
+    },
   ]
 
   const db = await readOnlyDb()
@@ -187,9 +222,16 @@ export async function POST(request: NextRequest) {
                 : 'draft' in result
                   ? {
                       ok: true,
+                      /*
+                       * ⚠️ **สองทางต้องกดดันเท่ากัน** — เดิมทางแก้ร่างห้ามคำว่า
+                       *    "เรียบร้อย" ไว้ ส่วนทางเสนอของใหม่ไม่ได้ห้ามเลย
+                       *    ผลคือฝั่งเสนอใหม่ตอบว่า "ร่างขึ้นบนจอให้เรียบร้อยแล้ว"
+                       *    (วัดเจอ 8 ก.ย. 2026) · ตรงนี้จึงยื่น**ประโยคที่ให้ใช้**
+                       *    ไปด้วยทั้งสองทาง ไม่ใช่บอกแต่ว่าห้ามอะไร
+                       */
                       note: openDrafts.some((d) => d.id === result.draft.id)
-                        ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึก — บอกสั้น ๆ ว่าปรับให้ในการ์ดแล้ว ห้ามใช้คำว่าเรียบร้อย บันทึก หรือแก้ให้แล้ว ให้เขาทานแล้วกดยืนยัน'
-                        : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึก — บอกผู้ใช้สั้น ๆ ให้ทานแล้วกดยืนยัน',
+                        ? 'ปรับร่างใบเดิมบนจอให้แล้ว ยังไม่ได้บันทึกอะไรลงระบบ — ตอบว่า "ปรับให้ในการ์ดแล้ว ทานแล้วกดยืนยันได้เลยครับ" ห้ามเติมคำว่าเรียบร้อย ให้แล้ว จัดการให้ หรือบันทึก'
+                        : 'ร่างขึ้นบนจอแล้ว ยังไม่ได้บันทึกอะไรลงระบบ — ตอบว่า "ร่างขึ้นบนจอแล้ว ทานแล้วกดยืนยันได้เลยครับ" ห้ามเติมคำว่าเรียบร้อย ให้แล้ว จัดการให้ หรือบันทึก',
                       // id เดินทางกลับเข้าโมเดล เพื่อให้อ้างถึงร่างใบนี้ตอนพูดแก้ต่อได้
                       draft_id: result.draft.id,
                       title: result.draft.title,
@@ -228,7 +270,9 @@ export async function POST(request: NextRequest) {
       let warning: string | undefined
       try {
         await saveMessages(userId, conversationId, 'chat', [
-          { role: 'user', content: text },
+          // รูปลงประวัติเป็นป้าย ไม่ใช่ตัวรูป — บังคับที่นี่ด้วย ไม่ใช่เชื่อฝั่งจอ
+          // (กติกาเดียวกับ `redactVoiceTurns` ของโหมดโทร)
+          { role: 'user', content: image ? imageHistoryLine(text) : text },
           { role: 'assistant', content: reply },
         ])
       } catch (e) {

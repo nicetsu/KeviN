@@ -11,6 +11,15 @@ import Settings from './Settings'
 import DraftStack from '@/components/DraftStack'
 import type { Draft } from '@/lib/drafts'
 import { ndjsonParser, type ChatEvent } from '@/lib/chat/stream'
+import {
+  ACCEPTED_TYPES,
+  BadImage,
+  hadImage,
+  imageHistoryLine,
+  prepareImage,
+  withoutImageMark,
+  type InlineImage,
+} from '@/lib/chat/image'
 
 type Mode = 'chat' | 'voice'
 
@@ -82,7 +91,43 @@ export default function TalkRoom({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  /*
+   * รูปที่รอส่ง — **ใบเดียวต่อหนึ่งข้อความ**
+   *
+   * `preview` เป็น object URL ที่ต้องคืนเองตอนทิ้งรูป ไม่งั้นรูปที่ย่อแล้วค้าง
+   * อยู่ในหน่วยความจำของแท็บไปจนกว่าจะปิด · ทุกทางที่ล้างรูปต้องผ่าน `clearShot()`
+   * ทางเดียว ไม่ใช่ `setShot(null)` ตรง ๆ กระจายอยู่หลายที่แล้วลืมคืนบางที่
+   */
+  const [shot, setShot] = useState<{ image: InlineImage; preview: string } | null>(null)
+  const [loadingShot, setLoadingShot] = useState(false)
+  const picker = useRef<HTMLInputElement>(null)
+
   const tail = useRef<HTMLDivElement>(null)
+
+  function clearShot() {
+    setShot((prev) => {
+      if (prev) URL.revokeObjectURL(prev.preview)
+      return null
+    })
+    // ล้างค่าในตัวเลือกไฟล์ด้วย ไม่งั้นเลือก**ไฟล์เดิมซ้ำ**แล้ว `change` ไม่ยิง
+    // — ผู้ใช้กดเลือกรูปเดิมอีกทีแล้วไม่มีอะไรเกิดขึ้น โดยไม่มีอะไรฟ้อง
+    if (picker.current) picker.current.value = ''
+  }
+
+  async function pickImage(file: File | undefined) {
+    if (!file) return
+    setError(null)
+    setLoadingShot(true)
+    try {
+      const image = await prepareImage(file)
+      clearShot()
+      setShot({ image, preview: URL.createObjectURL(file) })
+    } catch (e) {
+      setError(e instanceof BadImage ? e.message : 'เปิดรูปนี้ไม่ได้ · ลองรูปอื่น')
+      if (picker.current) picker.current.value = ''
+    }
+    setLoadingShot(false)
+  }
 
   /**
    * เอาการ์ดออกจากสายข้อความ — ใช้ทั้งตอนกดทิ้งและตอนยืนยันสำเร็จแล้วกดเลิกทำ
@@ -106,14 +151,27 @@ export default function TalkRoom({
 
   async function send(text: string) {
     const trimmed = text.trim()
-    if (!trimmed || busy) return
+    // แนบรูปมาเฉย ๆ โดยไม่พิมพ์อะไรคือการใช้งานปกติ — ถ่ายกระดานแล้วส่งเลย
+    const attached = shot
+    if ((!trimmed && !attached) || busy) return
 
     setError(null)
     setDraft('')
+    clearShot()
     setBusy(true)
 
     const history = lines.filter((l) => !l.pending)
-    setLines((prev) => [...prev, { role: 'user', content: trimmed, via: 'chat' }])
+    /*
+     * ฟองของผู้ใช้เก็บ **สิ่งเดียวกับที่ลง DB** คือป้าย `[รูป]` ไม่ใช่ตัวรูป
+     *
+     * ตั้งใจให้สิ่งที่เห็นบนจอตรงกับสิ่งที่ถูกเก็บ — กติกาเดียวกับ `- voice -`
+     * ของโหมดโทร · ถ้าโชว์รูปจริงในฟอง มันจะหายไปเฉย ๆ ตอนรีเฟรชแล้วเหลือ `[รูป]`
+     * ซึ่งอ่านเหมือนของหาย ทั้งที่ความจริงคือมันไม่เคยถูกเก็บตั้งแต่แรก
+     */
+    setLines((prev) => [
+      ...prev,
+      { role: 'user', content: attached ? imageHistoryLine(trimmed) : trimmed, via: 'chat' },
+    ])
 
     /*
      * ร่างที่ค้างอยู่บนจอตอนนี้ — ส่งไปกับคำขอเพื่อให้ `propose_update_draft`
@@ -144,6 +202,9 @@ export default function TalkRoom({
           history: history.map((l) => ({ role: l.role, content: l.content })),
           lang: prefs.lang,
           drafts: onScreen,
+          // รูปเดินทางไปกับคำขอนี้ใบเดียว · ประวัติที่ส่งกลับไปข้างบนเป็นข้อความล้วน
+          // เสมอ รูปเก่าจึงไม่ถูกส่งซ้ำทุกครั้งที่พิมพ์ต่อ (app/api/chat/route.ts)
+          image: attached?.image,
         }),
       })
 
@@ -365,27 +426,79 @@ export default function TalkRoom({
               send(draft)
             }}
           >
-            <input
-              className="composer__field"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="พิมพ์ข้อความ"
-              enterKeyHint="send"
-              disabled={busy}
-            />
-            {/* ⚠️ ปุ่มเป็นลูกศรอย่างเดียว — `aria-label` คือชื่อเดียวที่มันมี */}
-            <button
-              className="composer__send"
-              type="submit"
-              disabled={busy || !draft.trim()}
-              aria-label="ส่ง"
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2.1" strokeLinecap="round"
-                   strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
+            {/*
+              รูปที่รอส่ง อยู่ **เหนือแถวช่องพิมพ์** ไม่ใช่ในแถวเดียวกัน
+              เพราะคำเตือนเรื่องรูปถึง Google ต้องอ่านออกเต็มบรรทัดบนจอ 360px
+              ไม่ใช่บีบให้เหลือสามคำข้างช่องพิมพ์
+            */}
+            {shot && (
+              <div className="shot">
+                {/* eslint-disable-next-line @next/next/no-img-element -- object URL ชั่วคราว ไม่ใช่ของที่ optimize ได้ */}
+                <img className="shot__thumb" src={shot.preview} alt="รูปที่จะแนบไป" />
+                <div className="shot__say">
+                  <strong>แนบรูปนี้ไป</strong>
+                  {/*
+                    ⚠️ คำเตือนอยู่ **ตรงจุดที่แนบรูป ไม่ใช่ในหน้าตั้งค่า**
+                       (เจ้าของเคาะ 8 ก.ย. 2026) — ภาพถ่ายมักติดของที่ไม่ได้ตั้งใจส่ง
+                       และตอนนี้มีผู้ใช้หลายคน เจ้าของยืนยันแทนเขาไม่ได้
+                  */}
+                  <span className="mono-hint">รูปถูกส่งให้ AI อ่านครั้งเดียว ไม่ได้เก็บไว้</span>
+                </div>
+                <button type="button" className="shot__drop" onClick={clearShot} aria-label="เอารูปออก">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+                       aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            <div className="composer__row">
+              <input
+                ref={picker}
+                type="file"
+                accept={ACCEPTED_TYPES.join(',')}
+                hidden
+                onChange={(e) => pickImage(e.target.files?.[0])}
+              />
+              {/* ⚠️ ปุ่มเป็นไอคอนล้วนทั้งคู่ — `aria-label` คือชื่อเดียวที่มันมี */}
+              <button
+                type="button"
+                className="composer__clip"
+                onClick={() => picker.current?.click()}
+                disabled={busy || loadingShot}
+                aria-label="แนบรูป"
+                title="แนบรูป"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                     strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21.4 11.05 12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.2-9.19a3.67 3.67 0 1 1 5.18 5.18l-9.2 9.2a1.83 1.83 0 1 1-2.59-2.6l8.5-8.48" />
+                </svg>
+              </button>
+
+              <input
+                className="composer__field"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder={shot ? 'บอกเพิ่มได้ หรือส่งเลย' : 'พิมพ์ข้อความ'}
+                enterKeyHint="send"
+                disabled={busy}
+              />
+              <button
+                className="composer__send"
+                type="submit"
+                disabled={busy || loadingShot || (!draft.trim() && !shot)}
+                aria-label="ส่ง"
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="2.1" strokeLinecap="round"
+                     strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              </button>
+            </div>
           </form>
         </>
       ) : (
@@ -397,15 +510,24 @@ export default function TalkRoom({
 
 function Bubble({ line, onDismiss }: { line: Line; onDismiss?: (id: string) => void }) {
   const mine = line.role === 'user'
+  /*
+   * ประโยคที่เคยมีรูปแนบมา — ตัวรูปไม่ได้ถูกเก็บ เหลือแต่ป้าย
+   *
+   * แสดงเป็น**ป้าย** ไม่ใช่ปล่อยให้ `[รูป]` ปนอยู่ในเนื้อความ เพราะมันไม่ใช่
+   * คำที่ผู้ใช้พิมพ์ · และป้ายทำให้ประวัติอ่านออกว่าตรงนี้เคยมีอะไรที่ตอนนี้ไม่มีแล้ว
+   */
+  const shotted = mine && hadImage(line.content)
+  const said = shotted ? withoutImageMark(line.content) : line.content
   return (
     <>
     <div className={`msg${mine ? ' msg--me' : ' msg--ai'}`}>
+      {shotted && <span className="msg__shot">รูปที่ส่งไป · ไม่ได้เก็บไว้</span>}
       {/*
         ฝั่งผู้ช่วยแกะ markdown · ฝั่งผู้ใช้ไม่แกะ
         สิ่งที่ผู้ใช้พิมพ์ไม่ใช่ markdown และค่าที่โหมดโทรบันทึกคือ `- voice -`
         ซึ่งถ้าเอาไปแกะจะกลายเป็นรายการหัวข้อย่อยที่เขียนว่า "voice -"
       */}
-      {mine ? <Autolink text={line.content} /> : <MessageText text={line.content} />}
+      {said && (mine ? <Autolink text={said} /> : <MessageText text={said} />)}
       {line.via === 'voice' && <span className="msg__via">จากสาย</span>}
     </div>
 

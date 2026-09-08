@@ -27,6 +27,13 @@ export type Part = {
   text?: string
   functionCall?: { name: string; args?: Record<string, unknown> }
   functionResponse?: { name: string; response: Record<string, unknown> }
+  /**
+   * รูปที่แนบมากับข้อความ · `data` เป็น base64 เปล่า ๆ ไม่มี `data:` นำหน้า
+   *
+   * ⚠️ **ขาไปเท่านั้น** — เราไม่เคยส่ง part ชนิดนี้กลับเข้าไปในรอบถัดไป
+   *    รูปมีชีวิตแค่คำขอเดียวแล้วหายไป ประวัติเก็บเป็น `[รูป]` (lib/chat/image.ts)
+   */
+  inlineData?: { mimeType: string; data: string }
   [extra: string]: unknown
 }
 
