@@ -17,6 +17,7 @@ import {
   hadImage,
   imageHistoryLine,
   prepareImage,
+  shotsToRevoke,
   withoutImageMark,
   type InlineImage,
 } from '@/lib/chat/image'
@@ -60,6 +61,18 @@ type Line = {
   via: 'chat' | 'voice'
   pending?: boolean
   drafts?: Draft[]
+  /**
+   * รูปที่ส่งไปกับข้อความนี้ · **object URL ที่มีชีวิตแค่แท็บนี้**
+   *
+   * มีไว้ให้ผู้ใช้**ทานการ์ดเทียบกับรูป**ได้ — จังหวะที่ต้องดูรูปมากที่สุดคือ
+   * ตอนกำลังตัดสินใจว่าร่างอ่านมาถูกไหม ซึ่งเกิดหลังกดส่งไปแล้ว
+   *
+   * ⚠️ **ไม่ใช่การเก็บรูป** — รูปไม่เคยลง DB และไม่เคยขึ้น Storage
+   *    รีเฟรชแล้วหายเหลือแต่ป้าย `[รูป]` ซึ่งเป็นพฤติกรรมที่ถูก (มติ 8 ก.ย. 2026)
+   *    · ป้ายจึงยังอยู่คู่กับรูปเสมอ ไม่ได้ถูกแทนที่ — มันคือตัวที่บอกความจริงว่า
+   *    ของชิ้นนี้ไม่ได้ถูกเก็บ ผู้ใช้จะได้ไม่อ่านว่าของหายตอนกลับมาแล้วไม่เจอ
+   */
+  shot?: string
 }
 
 export default function TalkRoom({
@@ -75,6 +88,8 @@ export default function TalkRoom({
   const call = useCall()
   const prefs = useTalkPrefs()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  /** รูปที่กำลังเปิดดูเต็มจอ · null = ไม่ได้เปิดอยู่ */
+  const [zoomed, setZoomed] = useState<string | null>(null)
 
   /*
    * โควตาเสียงหมด = **ดันไปโหมดแชตให้เลย** ไม่ใช่แค่ขึ้นข้อความ
@@ -104,9 +119,15 @@ export default function TalkRoom({
 
   const tail = useRef<HTMLDivElement>(null)
 
-  function clearShot() {
+  /**
+   * เอารูปออกจากช่องพิมพ์
+   *
+   * `keepUrl` = true ใช้ตอน**ส่ง** เพราะ object URL ไม่ได้ถูกทิ้ง มันย้ายไปอยู่กับ
+   * ฟองข้อความแทน · คืนมันตรงนี้ด้วยจะได้รูปเสียบนฟองทันทีที่กดส่ง
+   */
+  function clearShot(keepUrl = false) {
     setShot((prev) => {
-      if (prev) URL.revokeObjectURL(prev.preview)
+      if (prev && !keepUrl) URL.revokeObjectURL(prev.preview)
       return null
     })
     // ล้างค่าในตัวเลือกไฟล์ด้วย ไม่งั้นเลือก**ไฟล์เดิมซ้ำ**แล้ว `change` ไม่ยิง
@@ -119,15 +140,34 @@ export default function TalkRoom({
     setError(null)
     setLoadingShot(true)
     try {
-      const image = await prepareImage(file)
+      const { image, blob } = await prepareImage(file)
       clearShot()
-      setShot({ image, preview: URL.createObjectURL(file) })
+      // ตัวอย่างมาจากก้อนที่**ย่อแล้ว** ไม่ใช่ไฟล์ต้นฉบับ — ผู้ใช้จะได้ทานเทียบ
+      // กับรูปเดียวกับที่โมเดลเห็นจริง ๆ (lib/chat/image.ts)
+      setShot({ image, preview: URL.createObjectURL(blob) })
     } catch (e) {
       setError(e instanceof BadImage ? e.message : 'เปิดรูปนี้ไม่ได้ · ลองรูปอื่น')
       if (picker.current) picker.current.value = ''
     }
     setLoadingShot(false)
   }
+
+  /*
+   * คืน object URL ทั้งหมดตอนออกจากหน้า
+   *
+   * ⚠️ ไม่มีอะไรฟ้องถ้าลืม — blob ค้างอยู่กับแท็บจนกว่าจะปิด · บนมือถือที่
+   *    หน่วยความจำน้อย นั่นคือแท็บที่โดนเบราว์เซอร์ฆ่าแล้วผู้ใช้อ่านว่า "แอปเด้ง"
+   *
+   *    `[]` โดยตั้งใจ — เก็บกวาดตอน unmount เท่านั้น ถ้าใส่ `lines` เป็น dep
+   *    มันจะคืน URL ที่ยังใช้อยู่ทุกครั้งที่มีข้อความใหม่ แล้วรูปกลายเป็นกรอบว่าง
+   */
+  const livingShots = useRef<string[]>([])
+  useEffect(() => {
+    const alive = livingShots.current
+    return () => {
+      for (const url of alive) URL.revokeObjectURL(url)
+    }
+  }, [])
 
   /**
    * เอาการ์ดออกจากสายข้อความ — ใช้ทั้งตอนกดทิ้งและตอนยืนยันสำเร็จแล้วกดเลิกทำ
@@ -157,20 +197,43 @@ export default function TalkRoom({
 
     setError(null)
     setDraft('')
-    clearShot()
+    // รูปไม่ได้ถูกทิ้ง มันย้ายจากช่องพิมพ์ไปอยู่บนฟองข้อความ เพื่อให้ทานเทียบกับการ์ดได้
+    clearShot(true)
     setBusy(true)
 
     const history = lines.filter((l) => !l.pending)
     /*
-     * ฟองของผู้ใช้เก็บ **สิ่งเดียวกับที่ลง DB** คือป้าย `[รูป]` ไม่ใช่ตัวรูป
+     * **สิ่งที่ลง DB คือป้าย `[รูป]` เท่านั้น** ส่วนตัวรูปอยู่แค่ในหน่วยความจำแท็บ
      *
-     * ตั้งใจให้สิ่งที่เห็นบนจอตรงกับสิ่งที่ถูกเก็บ — กติกาเดียวกับ `- voice -`
-     * ของโหมดโทร · ถ้าโชว์รูปจริงในฟอง มันจะหายไปเฉย ๆ ตอนรีเฟรชแล้วเหลือ `[รูป]`
-     * ซึ่งอ่านเหมือนของหาย ทั้งที่ความจริงคือมันไม่เคยถูกเก็บตั้งแต่แรก
+     * เจ้าของขอให้รูปอยู่ต่อหลังกดส่ง เพื่อ**ทานการ์ดเทียบกับรูปได้** (8 ก.ย. 2026)
+     * — จังหวะที่ต้องดูรูปมากที่สุดคือตอนตัดสินใจว่าร่างอ่านมาถูกไหม
+     *
+     * ⚠️ ข้อกังวลเดิมที่ทำให้เคยเลือกไม่โชว์รูปคือ "รีเฟรชแล้วเหลือแต่ป้าย
+     *    จะอ่านเหมือนของหาย" · แก้ด้วยการ**ให้ป้ายอยู่คู่กับรูปเสมอ** ไม่ใช่แทนที่กัน
+     *    ป้ายบอกตรง ๆ ว่าไม่ได้เก็บไว้ ตั้งแต่ตอนที่รูปยังอยู่ให้เห็น
      */
+    if (attached) {
+      /*
+       * เกินเพดานเมื่อไหร่ คืนใบที่เก่าที่สุดทิ้ง — ฟองเก่ายังอยู่พร้อมป้าย `[รูป]`
+       * แค่ไม่มีรูปให้ดูแล้ว ซึ่งตรงกับความจริงว่ารูปไม่เคยถูกเก็บตั้งแต่ต้น
+       */
+      const alive = [...livingShots.current, attached.preview]
+      const drop = new Set(shotsToRevoke(alive))
+      for (const url of drop) URL.revokeObjectURL(url)
+      livingShots.current = alive.filter((u) => !drop.has(u))
+      if (drop.size) {
+        setLines((prev) => prev.map((l) => (l.shot && drop.has(l.shot) ? { ...l, shot: undefined } : l)))
+      }
+    }
+
     setLines((prev) => [
       ...prev,
-      { role: 'user', content: attached ? imageHistoryLine(trimmed) : trimmed, via: 'chat' },
+      {
+        role: 'user',
+        content: attached ? imageHistoryLine(trimmed) : trimmed,
+        via: 'chat',
+        shot: attached?.preview,
+      },
     ])
 
     /*
@@ -308,6 +371,8 @@ export default function TalkRoom({
 
   return (
     <div className="talk">
+      {zoomed && <ShotViewer src={zoomed} onClose={() => setZoomed(null)} />}
+
       {settingsOpen && (
         <Settings
           prefs={prefs}
@@ -390,7 +455,7 @@ export default function TalkRoom({
             )}
 
             {lines.map((l, i) => (
-              <Bubble key={i} line={l} onDismiss={dismissDraft} />
+              <Bubble key={i} line={l} onDismiss={dismissDraft} onZoom={setZoomed} />
             ))}
 
             {/* ข้อความจากสายที่ยังคุยอยู่ · จะถูกบันทึกจริงตอนวางสาย */}
@@ -444,7 +509,7 @@ export default function TalkRoom({
                   */}
                   <span className="mono-hint">รูปถูกส่งให้ AI อ่านครั้งเดียว ไม่ได้เก็บไว้</span>
                 </div>
-                <button type="button" className="shot__drop" onClick={clearShot} aria-label="เอารูปออก">
+                <button type="button" className="shot__drop" onClick={() => clearShot()} aria-label="เอารูปออก">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
                        aria-hidden="true">
@@ -508,7 +573,47 @@ export default function TalkRoom({
   )
 }
 
-function Bubble({ line, onDismiss }: { line: Line; onDismiss?: (id: string) => void }) {
+/**
+ * รูปเต็มจอตอนกดที่รูปตัวอย่าง
+ *
+ * มีเพราะรูปย่อขนาดนิ้วหัวแม่มือ **ทานเทียบกับการ์ดไม่ได้จริง** — ลายมือบนกระดาน
+ * กับรหัสห้องคือของที่ต้องซูมดู ซึ่งเป็นเหตุผลทั้งหมดที่รูปยังอยู่บนจอหลังกดส่ง
+ *
+ * ⚠️ ปิดด้วยการแตะที่ไหนก็ได้ **และปุ่ม Esc** · แตะที่ไหนก็ได้อย่างเดียวไม่พอ
+ *    สำหรับคนที่ใช้คีย์บอร์ด และมันเป็นชั้นที่คลุมทั้งจอ ปิดไม่ได้คือทางตัน
+ */
+function ShotViewer({ src, onClose }: { src: string; onClose: () => void }) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', esc)
+    return () => window.removeEventListener('keydown', esc)
+  }, [onClose])
+
+  return (
+    <div className="shotview" role="dialog" aria-modal="true" aria-label="รูปที่ส่งไป" onClick={onClose}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- object URL ชั่วคราว ไม่ใช่ของที่ optimize ได้ */}
+      <img src={src} alt="รูปที่ส่งไป" />
+      <button type="button" className="shotview__close" onClick={onClose} aria-label="ปิด">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+function Bubble({
+  line,
+  onDismiss,
+  onZoom,
+}: {
+  line: Line
+  onDismiss?: (id: string) => void
+  onZoom?: (src: string) => void
+}) {
   const mine = line.role === 'user'
   /*
    * ประโยคที่เคยมีรูปแนบมา — ตัวรูปไม่ได้ถูกเก็บ เหลือแต่ป้าย
@@ -521,7 +626,27 @@ function Bubble({ line, onDismiss }: { line: Line; onDismiss?: (id: string) => v
   return (
     <>
     <div className={`msg${mine ? ' msg--me' : ' msg--ai'}`}>
-      {shotted && <span className="msg__shot">รูปที่ส่งไป · ไม่ได้เก็บไว้</span>}
+      {/*
+        รูปยังอยู่ให้ทานเทียบกับการ์ด · **ป้ายยังอยู่คู่กันเสมอ ไม่ได้ถูกแทนที่**
+        เพราะป้ายคือตัวที่บอกว่าของชิ้นนี้ไม่ได้ถูกเก็บ — ถ้าเหลือแต่รูป
+        ผู้ใช้จะกลับมาอีกทีแล้วอ่านว่ารูปหาย ทั้งที่มันไม่เคยถูกเก็บตั้งแต่ต้น
+      */}
+      {line.shot && (
+        <button
+          type="button"
+          className="msg__thumb"
+          onClick={() => onZoom?.(line.shot as string)}
+          aria-label="ดูรูปที่ส่งไปแบบเต็มจอ"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- object URL ชั่วคราว ไม่ใช่ของที่ optimize ได้ */}
+          <img src={line.shot} alt="" />
+        </button>
+      )}
+      {shotted && (
+        <span className="msg__shot">
+          {line.shot ? 'แตะรูปเพื่อดูเต็มจอ · ไม่ได้เก็บไว้' : 'รูปที่ส่งไป · ไม่ได้เก็บไว้'}
+        </span>
+      )}
       {/*
         ฝั่งผู้ช่วยแกะ markdown · ฝั่งผู้ใช้ไม่แกะ
         สิ่งที่ผู้ใช้พิมพ์ไม่ใช่ markdown และค่าที่โหมดโทรบันทึกคือ `- voice -`

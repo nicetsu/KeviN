@@ -161,7 +161,7 @@ export function fitWithin(
  *    รูปแนวตั้งจากกล้องเก็บเป็นแนวนอนพร้อมธงหมุน · ถ้าไม่สั่ง `imageOrientation`
  *    จะได้รูปตะแคงโดยไม่มี error แล้วโมเดลอ่านตัวหนังสือไม่ออกทั้งใบ
  */
-export async function prepareImage(file: File): Promise<InlineImage> {
+export async function prepareImage(file: File): Promise<{ image: InlineImage; blob: Blob }> {
   if (!(ACCEPTED_TYPES as readonly string[]).includes(file.type)) {
     throw new BadImage('รับเฉพาะรูป JPEG PNG และ WebP')
   }
@@ -186,7 +186,34 @@ export async function prepareImage(file: File): Promise<InlineImage> {
   if (!blob) throw new BadImage('ย่อรูปไม่สำเร็จ')
   if (blob.size > MAX_BYTES) throw new BadImage('รูปใหญ่เกินไป · ลองถ่ายใหม่')
 
-  return { mimeType: SEND_TYPE, data: await toBase64(blob) }
+  /*
+   * คืน `blob` ออกไปด้วยเพื่อให้ฝั่งจอเอาไปทำรูปตัวอย่างได้
+   *
+   * ⚠️ **ต้องเป็นก้อนที่ย่อแล้ว ไม่ใช่ `file` ต้นฉบับ** — รูปที่ผู้ใช้เอาไว้เทียบ
+   *    กับการ์ดต้องเป็น**รูปเดียวกับที่โมเดลเห็น** · ถ้าโชว์ต้นฉบับคมกริบแล้วโมเดล
+   *    อ่านจากฉบับย่อ เวลามันอ่านผิดผู้ใช้จะงงว่า "ก็เขียนชัดอยู่" ทั้งที่สิ่งที่
+   *    มันเห็นไม่ชัดจริง ๆ · ผลพลอยได้คือกินหน่วยความจำน้อยกว่าต้นฉบับหลายเท่า
+   */
+  return { image: { mimeType: SEND_TYPE, data: await toBase64(blob) }, blob }
+}
+
+/**
+ * รูปที่ยังต้องเห็นบนจอมีได้กี่ใบพร้อมกัน
+ *
+ * รูปที่ส่งไปแล้วยังอยู่ให้ทานเทียบกับการ์ด แต่มันคือ blob ที่กินหน่วยความจำ
+ * ของแท็บจริง ๆ · สามใบพอสำหรับ "เพิ่งถ่ายไปสองสามรูปแล้วไล่ทานการ์ด"
+ * และกันเคสส่งรัว ๆ ห้าสิบรูปจนแท็บบนมือถือโดนเบราว์เซอร์ฆ่าทิ้ง
+ */
+export const KEEP_SHOTS = 3
+
+/**
+ * รูปเก่าที่ควรคืนทิ้งเมื่อมีรูปใหม่เข้ามา — รับลำดับ **เก่าไปใหม่**
+ *
+ * แยกออกมาเป็นฟังก์ชันล้วนเพราะการลืมคืน object URL คือหน่วยความจำที่รั่ว
+ * แบบไม่มีอะไรฟ้อง · ตรรกะการเลือกว่าใบไหนต้องไปจึงควรมีเทสต์ ไม่ใช่อยู่ในคอมโพเนนต์
+ */
+export function shotsToRevoke(urls: readonly string[], keep = KEEP_SHOTS): string[] {
+  return keep <= 0 ? [...urls] : urls.slice(0, Math.max(0, urls.length - keep))
 }
 
 /**

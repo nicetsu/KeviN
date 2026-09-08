@@ -1547,6 +1547,64 @@ a.hero__afterBody:hover .hero__afterTop { color: var(--brand); }
  *    และดันฟองให้กว้างเต็มจอทั้งที่ข้อความจริงสั้นนิดเดียว (วัดบนจอ 375px)
  *    · `width: fit-content` ทำให้พื้นป้ายกว้างพอดีคำ ไม่ยาวเต็มฟอง
  */
+/*
+ * รูปที่ส่งไปแล้ว ยังอยู่ให้ทานเทียบกับการ์ด — **อยู่ในหน่วยความจำแท็บเท่านั้น**
+ * ไม่ได้ถูกเก็บที่ไหน · รีเฟรชแล้วหายเหลือแต่ป้าย ซึ่งเป็นพฤติกรรมที่ถูก
+ *
+ * เป็น `button` ไม่ใช่ `img` เปล่า ๆ เพราะมันกดได้จริง (เปิดเต็มจอ) —
+ * ของที่กดได้ต้องโฟกัสด้วยคีย์บอร์ดได้และต้องมีชื่อให้ screen reader
+ */
+/*
+ * ⚠️ **เพดานความกว้างต้องอยู่ที่ปุ่ม ไม่ใช่ที่ `img`** — วัดจริงบนจอ 375px แล้วเจอ
+ *    ปุ่มกว้าง 269px ทั้งที่รูปกว้าง 208px คือมีพื้นที่กดได้ที่**มองไม่เห็น**
+ *    เหลืออยู่ข้างรูป 61px · แตะตรงนั้นแล้วรูปเด้งเต็มจอทั้งที่ไม่ได้ตั้งใจกด
+ *
+ *    สาเหตุ: `max-width` ที่มี `100%` อยู่ด้วย **ไม่ได้ลดขนาด max-content ของรูป**
+ *    ตอนเบราว์เซอร์คำนวณ `fit-content` ของปุ่ม · มันจึงเอาความกว้างจริงของไฟล์
+ *    (600px) ไปคิด แล้วตกมาเท่ากับที่ว่างในฟองพอดี — ดูเหมือนกฎไม่ทำงาน
+ *    ทั้งที่มันทำงานอยู่ แค่คนละชั้นกับที่ตั้งใจ
+ */
+.msg__thumb {
+  display: block; width: fit-content; max-width: min(13rem, 100%);
+  margin-bottom: 0.4rem; padding: 0;
+  border: 0; background: none; cursor: pointer; line-height: 0;
+  border-radius: calc(var(--r-card) - 4px); overflow: hidden;
+  transition: opacity var(--t-fast) var(--ease);
+}
+.msg__thumb img { display: block; width: 100%; height: auto; }
+.msg__thumb:active { opacity: 0.6; }
+.msg__thumb:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .msg__thumb { transition: none; } }
+
+/*
+ * รูปเต็มจอ · **ต้องอยู่เหนือทุกอย่าง** รวมแถบล่าง (20) และแผงตั้งค่า (40)
+ *
+ * ⚠️ `position: fixed` ตัวนี้ทำงานได้เพราะ `.wrap` **ไม่สร้าง stacking context**
+ *    ถ้าวันไหนมีใครใส่ `transform` / `isolation` / `filter` ให้ `.wrap`
+ *    รูปจะไปติดอยู่ในกรอบเนื้อหาแทนที่จะคลุมเต็มจอ (doc/TRAPS.md)
+ */
+.shotview {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center; padding: 1.25rem;
+  background: rgba(10, 8, 18, 0.92); cursor: zoom-out;
+  /* ใช้ `reveal-fade` ที่มีอยู่แล้ว ไม่ตั้ง keyframes ใหม่ที่ทำเรื่องเดียวกัน
+     · `backwards` ไม่ใช่ `both` — `both` ทิ้ง transform ค้างไว้แล้วฆ่า
+     `position: fixed` ของลูก (doc/TRAPS.md) */
+  animation: reveal-fade var(--t-fast) var(--ease) backwards;
+}
+.shotview img {
+  max-width: 100%; max-height: 100%;
+  border-radius: var(--r-card); object-fit: contain;
+}
+.shotview__close {
+  position: absolute; top: calc(0.9rem + env(safe-area-inset-top)); right: 0.9rem;
+  width: 2.4rem; height: 2.4rem; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--raised); border: 1px solid var(--line); color: var(--ink);
+}
+.shotview__close:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .shotview { animation: none; } }
+
 .msg__shot {
   display: flex; width: fit-content; align-items: center; gap: 0.3rem;
   margin-bottom: 0.35rem; padding: 0.12rem 0.5rem;

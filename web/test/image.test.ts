@@ -22,6 +22,7 @@ import {
   hadImage,
   imageHistoryLine,
   readInlineImage,
+  shotsToRevoke,
   withoutImageMark,
 } from '../lib/chat/image'
 
@@ -134,6 +135,30 @@ test('อ่านย้อนได้ว่าประโยคไหนเ�
   assert.equal(hadImage('พรุ่งนี้ติดอะไร'), false)
   assert.equal(withoutImageMark('พรุ่งนี้ติดอะไร'), 'พรุ่งนี้ติดอะไร')
   assert.equal(withoutImageMark(IMAGE_PLACEHOLDER), '')
+})
+
+// ---- รูปที่ยังอยู่บนจอให้ทานเทียบกับการ์ด --------------------------------
+
+test('เก็บรูปล่าสุดไว้ตามเพดาน · ที่เกินต้องถูกคืนทิ้ง', () => {
+  /*
+   * รูปที่ส่งไปแล้วยังอยู่ให้ทานเทียบกับการ์ด (เจ้าของขอ 8 ก.ย. 2026)
+   * แต่มันคือ blob ในหน่วยความจำของแท็บจริง ๆ — **การลืมคืนคือหน่วยความจำที่รั่ว
+   * แบบไม่มีอะไรฟ้อง** จนแท็บบนมือถือโดนเบราว์เซอร์ฆ่าแล้วผู้ใช้อ่านว่า "แอปเด้ง"
+   */
+  assert.deepEqual(shotsToRevoke(['a', 'b', 'c'], 3), [])
+  assert.deepEqual(shotsToRevoke(['a', 'b', 'c', 'd'], 3), ['a'])
+  assert.deepEqual(shotsToRevoke(['a', 'b', 'c', 'd', 'e'], 3), ['a', 'b'])
+})
+
+test('ยังไม่ถึงเพดาน ไม่คืนอะไรเลย', () => {
+  assert.deepEqual(shotsToRevoke([], 3), [])
+  assert.deepEqual(shotsToRevoke(['a'], 3), [])
+})
+
+test('เพดานเป็นศูนย์ = ไม่เก็บรูปไว้เลยสักใบ', () => {
+  // ทางถอยถ้าวันหนึ่งเจอว่าเปลืองหน่วยความจำเกินไป — ตั้ง KEEP_SHOTS เป็น 0
+  // แล้วพฤติกรรมกลับไปเป็นแบบเดิมทั้งหมด โดยไม่ต้องรื้อโค้ดส่วนอื่น
+  assert.deepEqual(shotsToRevoke(['a', 'b'], 0), ['a', 'b'])
 })
 
 test('ป้ายต้องเป็นสิ่งที่ผู้ใช้พิมพ์เองได้ยาก', () => {
