@@ -5,7 +5,13 @@
  *    ตัวแปรที่ขึ้นต้นด้วย NEXT_PUBLIC_ ทุกตัวไปอยู่ใน bundle ที่ผู้ใช้เปิดดูได้ (doc/TRAPS.md)
  */
 
-import { classifyRateLimit, rateLimitMessage, type RateLimit } from './quota'
+import {
+  classifyRateLimit,
+  isTransient,
+  rateLimitMessage,
+  upstreamMessage,
+  type RateLimit,
+} from './quota'
 
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models'
 
@@ -51,10 +57,42 @@ export type FunctionDeclaration = {
  */
 function rateLimitOr(status: number, body: string): GeminiError {
   if (status !== 429) {
-    return new GeminiError(`เรียกโมเดลไม่สำเร็จ (${status}) ${body.slice(0, 200)}`, status)
+    /*
+     * ⚠️ **body ดิบห้ามขึ้นจอ** — ของเดิมต่อ `body.slice(0, 200)` เข้าไปในข้อความ
+     *    ผู้ใช้จึงเห็น JSON ก้อนหนึ่งกลางห้องแชต (เจ้าของเจอบนเครื่องจริง
+     *    9 ก.ย. 2026 ตอนแนบรูปโปสเตอร์แล้วเจอ 503) · มันอ่านเหมือนแอปพัง
+     *    ทั้งที่แค่ฝั่ง Google แน่นชั่วคราว และไม่ได้บอกว่าต้องทำอะไรต่อ
+     *
+     *    ของดิบไม่ได้หายไป — ลง log ฝั่งเซิร์ฟเวอร์ให้ตามได้ แค่ไม่ให้ผู้ใช้เห็น
+     */
+    console.error(`[gemini] ${status} ${body.slice(0, 500)}`)
+    return new GeminiError(upstreamMessage(status, 'chat'), status)
   }
   const limit = classifyRateLimit(body)
   return new GeminiError(rateLimitMessage(limit, 'chat'), status, limit)
+}
+
+/**
+ * ยิงซ้ำเมื่อฝั่ง Google แน่น — **ก่อนเริ่มอ่านสาย เท่านั้น**
+ *
+ * ⚠️ ปลอดภัยเพราะ 5xx เกิดที่ตัว response แรก **ก่อนมี `delta` สักตัวไหลออกไป**
+ *    ยิงซ้ำหลังจากข้อความเริ่มไหลแล้วจะได้คำตอบซ้อนกันสองชุด
+ *
+ * ⚠️ **ไม่ยิงซ้ำเมื่อ 429** ต่างจากชุดวัดใน `test/accuracy/chat.ts` ที่รอ 20 วินาที
+ *    ได้เพราะไม่มีคนนั่งรอ · ที่นี่มีคนถือมือถือรออยู่ · 429 มีข้อความบอกความจริง
+ *    อยู่แล้วว่าให้รอเท่าไร ปล่อยให้เขาตัดสินใจเองดีกว่าค้างจอไว้เฉย ๆ
+ *
+ * สองครั้งพอ · รวมเวลาที่เพิ่มมาแย่สุด ~2.6 วินาทีก่อนยอมแพ้
+ */
+async function fetchOrRetry(url: string, init: RequestInit): Promise<Response> {
+  const WAITS = [600, 2000]
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, init)
+    if (res.ok || !isTransient(res.status) || attempt >= WAITS.length) return res
+    // body ต้องถูกอ่านหรือยกเลิกทิ้ง ไม่งั้น connection ค้าง
+    await res.body?.cancel().catch(() => {})
+    await new Promise((r) => setTimeout(r, WAITS[attempt]))
+  }
 }
 
 export class GeminiError extends Error {
@@ -88,7 +126,7 @@ export async function generate(opts: {
   const key = process.env.GEMINI_API_KEY
   if (!key) throw new GeminiError('ยังไม่ได้ตั้ง GEMINI_API_KEY ฝั่งเซิร์ฟเวอร์')
 
-  const res = await fetch(`${ENDPOINT}/${CHAT_MODEL}:generateContent`, {
+  const res = await fetchOrRetry(`${ENDPOINT}/${CHAT_MODEL}:generateContent`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
@@ -144,7 +182,7 @@ export async function generateStream(opts: {
   const key = process.env.GEMINI_API_KEY
   if (!key) throw new GeminiError('ยังไม่ได้ตั้ง GEMINI_API_KEY ฝั่งเซิร์ฟเวอร์')
 
-  const res = await fetch(`${ENDPOINT}/${CHAT_MODEL}:streamGenerateContent?alt=sse`, {
+  const res = await fetchOrRetry(`${ENDPOINT}/${CHAT_MODEL}:streamGenerateContent?alt=sse`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({

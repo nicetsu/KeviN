@@ -235,7 +235,7 @@ Next.js 16 · App Router · ไม่ใช้ Tailwind (ใช้ CSS custom pr
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 411 เคส · ไม่ถึงวินาที
+npm test --prefix web        # 416 เคส · ไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เคส |
@@ -901,7 +901,7 @@ network call ไป Supabase **ทุกครั้ง** ไม่ใช่ก�
 
 ```bash
 npm run dev --prefix web              # รันเว็บในเครื่อง (พอร์ต 3000)
-npm test --prefix web                 # เทสต์ตรรกะแกน 411 เคส
+npm test --prefix web                 # เทสต์ตรรกะแกน 416 เคส
 npm run lint --prefix web             # ต้องสะอาด 0 error 0 warning
 npx tsc --noEmit --project web        # ตรวจ type
 
@@ -937,7 +937,7 @@ KeviN/
 └── web/                     Next.js app
     ├── vercel.json          ตรึง region ไว้ที่โตเกียว ห้ามลบ
     ├── tsconfig.test.json   คอมไพล์เทสต์เป็น CommonJS ลง .test-build/
-    ├── test/                เทสต์ตรรกะแกน 411 เคส · `npm test`
+    ├── test/                เทสต์ตรรกะแกน 416 เคส · `npm test`
     │   └── accuracy/          ชุดวัดกับโมเดลจริง · **รันด้วยมือ กินโควตา**
     ├── lib/
     │   ├── applyDraft.ts   **การเขียนจริง** · นับแถว · การย้อน

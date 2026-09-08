@@ -52,7 +52,7 @@ https://kevin-rose.vercel.app · โค้ดอยู่ใน `web/` (Next.js 
 ### แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 411 เคส · ไม่ถึงวินาที
+npm test --prefix web        # 416 เคส · ไม่ถึงวินาที
 ```
 
 ตรรกะแกนทั้งหมดมีเทสต์ล้วนกำกับ (รายชื่อไฟล์อยู่ใน ARCHITECTURE §5)

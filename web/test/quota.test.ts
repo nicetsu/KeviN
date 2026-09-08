@@ -7,7 +7,7 @@
  */
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyRateLimit, rateLimitMessage } from '../lib/chat/quota'
+import { classifyRateLimit, isTransient, rateLimitMessage, upstreamMessage } from '../lib/chat/quota'
 
 /** รูปจริงของ body ที่ Google ส่งมาตอนชนเพดานต่อนาที */
 const PER_MINUTE = JSON.stringify({
@@ -98,4 +98,60 @@ test('ไม่รู้ว่าชนอะไร ก็ยังห้าม�
 test('ไม่มีเวลาที่ให้รอ ก็ไม่แต่งตัวเลขขึ้นมาเอง', () => {
   const m = rateLimitMessage({ kind: 'minute' }, 'chat')
   assert.equal(/\d/.test(m), false, m)
+})
+
+// ---- ความล้มเหลวที่ไม่ใช่ 429 (9 ก.ย. 2026) --------------------------------
+
+test('503 ต้องไม่โผล่เป็น JSON ดิบ และต้องไม่อ่านว่าโควตาหมด', () => {
+  /*
+   * ของจริงบนเครื่องเจ้าของ: แนบรูปโปสเตอร์แล้วเจอ 503 · จอขึ้นทั้งก้อน
+   * `{ "error": { "code": 503, "message": "This model is currently
+   * experiencing high demand..." } }` ซึ่งอ่านเหมือนแอปพัง ทั้งที่แค่ฝั่งเขาแน่น
+   */
+  const msg = upstreamMessage(503, 'chat')
+  assert.doesNotMatch(msg, /[{}"]|error|code|status/i, 'ห้ามมีเศษ JSON หรือศัพท์เทคนิคหลุดมา')
+  assert.match(msg, /อีกครั้ง|ลองใหม่/, 'ต้องบอกว่าลองใหม่ได้ เพราะมันหายเองได้จริง')
+  assert.equal(claimsQuotaGone(msg), false, '503 ไม่ใช่โควตาหมด')
+})
+
+/**
+ * "อ้างว่าโควตาหมด" ไม่ใช่แค่ "มีคำว่าโควตาหมดอยู่ในประโยค"
+ *
+ * ⚠️ ฉบับแรกจับคำเปล่า ๆ แล้วตัดสินว่าข้อความ **"ไม่ใช่โควตาหมด"** ผิด
+ *    ทั้งที่มันบอกตรงข้ามเป๊ะ · เป็น false negative ของตัวตรวจแบบเดียวกับที่
+ *    เจอในชุดวัดเคส 19 (doc/TRAPS.md) — ตัดคำปฏิเสธออกก่อนแล้วค่อยหา
+ *
+ * ที่ยังอยากให้ข้อความพูดถึงโควตา เพราะสิ่งแรกที่ผู้ใช้แอปนี้กลัวเวลาเห็น error
+ * คือ "โควตาหมดแล้วเหรอ" · การตัดความกลัวนั้นทิ้งตรง ๆ มีค่ากว่าการเลี่ยงคำ
+ */
+const claimsQuotaGone = (msg: string) =>
+  /โควตา[^—]{0,20}หมด/.test(msg.replace(/ไม่ใช่โควตาหมด/g, ''))
+
+test('5xx ของโหมดโทร ชี้ทางต่อคนละแบบกับแชต', () => {
+  // แชตกดส่งซ้ำได้ทันที · โทรต้องวางสายก่อน คนละการกระทำกัน
+  assert.notEqual(upstreamMessage(503, 'chat'), upstreamMessage(503, 'voice'))
+  assert.match(upstreamMessage(503, 'voice'), /โทร|วางสาย/)
+})
+
+test('4xx ที่ไม่ใช่ 429 บอกรหัสไว้ให้ตามได้ แต่ไม่ยัด body มาด้วย', () => {
+  const msg = upstreamMessage(400, 'chat')
+  assert.match(msg, /400/)
+  assert.doesNotMatch(msg, /[{}"]/)
+})
+
+test('isTransient แยก 5xx ออกจากที่เหลือ — สองที่ต้องใช้ความหมายเดียวกัน', () => {
+  // ตัวเดียวกันนี้ตัดสินทั้งข้อความและการยิงซ้ำใน lib/chat/gemini.ts
+  // เขียนแยกกันสองที่เมื่อไหร่ วันหนึ่งมันจะไม่ตรงกัน
+  for (const s of [500, 502, 503, 504]) assert.equal(isTransient(s), true, String(s))
+  for (const s of [400, 401, 403, 404, 429]) assert.equal(isTransient(s), false, String(s))
+})
+
+test('ตัวตรวจ "อ้างว่าโควตาหมด" ยังจับของที่ผิดจริงได้ — ไม่ได้ผ่อนให้หลุด', () => {
+  /*
+   * กฎตอนขยายตัวตรวจ (doc/TRAPS.md): แก้ false negative ได้
+   * **แต่ต้องพิสูจน์ว่าของที่ผิดจริงยังตกอยู่**
+   */
+  assert.equal(claimsQuotaGone(rateLimitMessage({ kind: 'day' }, 'chat')), true)
+  assert.equal(claimsQuotaGone(rateLimitMessage({ kind: 'day' }, 'voice')), true)
+  assert.equal(claimsQuotaGone('โควตาของวันนี้หมดแล้ว'), true)
 })

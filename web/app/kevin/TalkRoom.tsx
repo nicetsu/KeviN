@@ -60,6 +60,14 @@ type Line = {
   content: string
   via: 'chat' | 'voice'
   pending?: boolean
+  /**
+   * ฟองของผู้ใช้ที่ยังส่งไม่สำเร็จ · **ถูกถอนคืนทั้งแถวถ้าคำขอล้ม**
+   *
+   * แยกจาก `pending` เพราะ `pending` คือฟองของ*ผู้ช่วย*ที่ข้อความกำลังไหลลง
+   * ตัวอัปเดต delta หาฟองนั้นจากธงนี้ — ถ้าใช้ธงเดียวกัน ข้อความที่ไหลมา
+   * จะไปทับสิ่งที่ผู้ใช้พิมพ์
+   */
+  sending?: boolean
   drafts?: Draft[]
   /**
    * รูปที่ส่งไปกับข้อความนี้ · **object URL ที่มีชีวิตแค่แท็บนี้**
@@ -170,6 +178,27 @@ export default function TalkRoom({
   }, [])
 
   /**
+   * คำขอล้ม — **คืนสิ่งที่ผู้ใช้พิมพ์และรูปที่แนบกลับเข้าช่องพิมพ์**
+   *
+   * หลัก UX ข้อ "บันทึกไม่สำเร็จ = ไม่ทิ้งสิ่งที่พิมพ์ เก็บไว้ในช่องเดิม"
+   * (ARCHITECTURE.md §9) ซึ่งเส้นทางส่งแชตไม่เคยทำตาม · ของเดิมทิ้งทั้งข้อความ
+   * และรูป แล้วผู้ใช้ต้องเลือกรูปใหม่ทั้งที่ความผิดอยู่ฝั่งเซิร์ฟเวอร์
+   * — แพงเป็นพิเศษบนมือถือ เพราะเพิ่งเล็งถ่ายโปสเตอร์มาหมาด ๆ
+   *
+   * ⚠️ ถอน **ทั้งฟองของผู้ใช้** ไม่ใช่แค่ฟองที่กำลังไหล · ไม่งั้น object URL
+   *    เดียวกันจะอยู่สองที่ (ฟองเก่ากับช่องพิมพ์) แล้วการคืน URL ครั้งเดียว
+   *    ทำให้รูปในฟองกลายเป็นกรอบว่าง
+   */
+  function putBack(text: string, attached: { image: InlineImage; preview: string } | null) {
+    setLines((prev) => prev.filter((l) => !l.pending && !l.sending))
+    setDraft((d) => d || text)
+    if (attached) {
+      livingShots.current = livingShots.current.filter((u) => u !== attached.preview)
+      setShot(attached)
+    }
+  }
+
+  /**
    * เอาการ์ดออกจากสายข้อความ — ใช้ทั้งตอนกดทิ้งและตอนยืนยันสำเร็จแล้วกดเลิกทำ
    *
    * ลบออกจาก `drafts` ของฟองนั้น ไม่ได้ลบทั้งฟอง — คำพูดของ KeviN ยังอยู่
@@ -233,6 +262,7 @@ export default function TalkRoom({
         content: attached ? imageHistoryLine(trimmed) : trimmed,
         via: 'chat',
         shot: attached?.preview,
+        sending: true,
       },
     ])
 
@@ -279,6 +309,7 @@ export default function TalkRoom({
       if (!res.body || !ct.includes('ndjson')) {
         const data = await res.json().catch(() => ({ error: 'ตอบไม่สำเร็จ' }))
         setError(data.error ?? 'ตอบไม่สำเร็จ')
+        putBack(trimmed, attached)
         setBusy(false)
         return
       }
@@ -318,7 +349,7 @@ export default function TalkRoom({
 
       if (failed) {
         setError(failed)
-        setLines((prev) => prev.filter((l) => !l.pending))
+        putBack(trimmed, attached)
         setBusy(false)
         return
       }
@@ -343,7 +374,8 @@ export default function TalkRoom({
       for (const d of incoming) if (voiceIds.has(d.id)) call.putDraft(d)
 
       setLines((prev) => {
-        const kept = prev.filter((l) => !l.pending)
+        // ส่งสำเร็จแล้ว ปลดธงถอนคืนทิ้ง — ฟองนี้อยู่ถาวรแล้ว
+        const kept = prev.filter((l) => !l.pending).map((l) => (l.sending ? { ...l, sending: undefined } : l))
         const seen = new Set(kept.flatMap((l) => (l.drafts ?? []).map((d) => d.id)))
         const revised = kept.map((l) =>
           l.drafts?.some((d) => incoming.some((n) => n.id === d.id))
@@ -364,7 +396,7 @@ export default function TalkRoom({
       if (final.warning) setError(final.warning)
     } catch {
       setError('ต่อเน็ตไม่ได้ · ลองใหม่อีกครั้ง')
-      setLines((prev) => prev.filter((l) => !l.pending))
+      putBack(trimmed, attached)
     }
     setBusy(false)
   }
