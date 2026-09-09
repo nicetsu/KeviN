@@ -23,6 +23,15 @@ export const P = {
   gen: 'a7777777-7777-4777-8777-777777777777',
   /** อยู่ใน Area ที่ **ผู้ใช้ตั้งชื่อเอง** — ชื่อโปรเจกต์ไม่มีคำว่า "ฝึกงาน" เลย */
   intern: 'a8888888-8888-4888-8888-888888888888',
+  /*
+   * สองใบนี้อยู่ **กลุ่มเดียวกัน** โดยตั้งใจ — ปิดหนี้ "กลุ่มเดียวมีหลายโปรเจกต์
+   * ต้องถามว่าอันไหน" ที่ค้างมาตั้งแต่ 8 ก.ย. 2026 (doc/HISTORY.md)
+   *
+   * ⚠️ **ต้องเป็นกลุ่มคนละใบกับของเคส 20** ไม่งั้นเคส 20 จะกลายเป็นเคสกำกวม
+   *    แล้วสองเคสจะพังพร้อมกันโดยที่อ่านไม่ออกว่าอันไหนเป็นเหตุ
+   */
+  band: 'a9999999-9999-4999-8999-999999999999',
+  photo: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
 } as const
 
 export const I = {
@@ -56,6 +65,26 @@ const PROJECTS: Row[] = [
    *    ชื่อโปรเจกต์ **จงใจไม่มีคำว่า "ฝึกงาน"** เพื่อให้ทางเดียวที่หาเจอคือดูที่ `กลุ่ม`
    */
   { id: P.intern, name: 'บริษัท ABC', description: null, status: 'active', sort_order: 7, archived_at: null, areas: { name: 'ฝึกงาน' } },
+  { id: P.band, name: 'วงดนตรีสากล', description: null, status: 'active', sort_order: 8, archived_at: null, areas: { name: 'ชมรม' } },
+  { id: P.photo, name: 'ถ่ายภาพ', description: null, status: 'active', sort_order: 9, archived_at: null, areas: { name: 'ชมรม' } },
+]
+
+/**
+ * กลุ่มพร้อมคำอธิบาย — ของจริงตั้งแต่ 9 ก.ย. 2026
+ *
+ * สี่ใบแรกคือค่าที่ `handle_new_user()` seed ให้ทุกบัญชี **คัดลอกมาตรง ๆ**
+ * ถ้าแก้ข้อความใน migration ต้องแก้ที่นี่ด้วย ไม่งั้นชุดวัดจะวัดของที่ไม่มีใครใช้
+ *
+ * อีกสองใบเป็นกลุ่มที่**ผู้ใช้ตั้งชื่อและเขียนคำอธิบายเอง** ซึ่งเป็นเคสที่
+ * คำอธิบายมีค่าที่สุด — ชื่อกลุ่มที่ seed มาเป็นภาษาอังกฤษ ไม่ใช่คำที่คนไทยพูด
+ */
+const AREAS: Row[] = [
+  { id: 'c1', name: 'Class', description: 'วิชาที่ลงทะเบียนเรียนเทอมนี้ · การบ้าน รายงาน สอบ คาบเรียน', sort_order: 0, archived_at: null },
+  { id: 'c2', name: 'Competition', description: 'การแข่งขัน แฮกกาธอน ประกวด และงานที่สมัครเข้าร่วมเอง', sort_order: 1, archived_at: null },
+  { id: 'c3', name: 'Personal', description: 'เรื่องส่วนตัว สุขภาพ การเงิน นัดหมาย', sort_order: 2, archived_at: null },
+  { id: 'c4', name: 'General', description: 'ของที่ยังไม่รู้ว่าจะจัดไว้ตรงไหน', sort_order: 3, archived_at: null },
+  { id: 'c5', name: 'ฝึกงาน', description: 'งานที่บริษัทที่ไปฝึกงาน รายงานและเอกสารของสหกิจ', sort_order: 4, archived_at: null },
+  { id: 'c6', name: 'ชมรม', description: 'กิจกรรมชมรมที่เข้าอยู่', sort_order: 5, archived_at: null },
 ]
 
 const ITEMS: Row[] = [
@@ -95,7 +124,7 @@ const ENTRIES: Row[] = [
   { kind: 'event', source_id: 'e1', project_id: P.hack, project_name: 'UniHack 2026', area_name: 'Competition', title: 'ปฐมนิเทศผู้เข้าแข่งขัน', occurs_on: '2026-09-09', start_time: '18:00:00', end_time: '20:00:00', location: 'ออนไลน์', label: 'ออนไลน์', skipped: false, trimmed: false },
 ]
 
-const SOURCE: Record<string, Row[]> = { projects: PROJECTS, items: ITEMS, events: [] }
+const SOURCE: Record<string, Row[]> = { projects: PROJECTS, items: ITEMS, events: [], areas: AREAS }
 
 function keep(row: Row, f: Filter): boolean {
   const v = row[f.col]

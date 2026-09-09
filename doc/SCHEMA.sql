@@ -16,10 +16,17 @@ create table public.areas (
   user_id     uuid not null references auth.users(id) on delete cascade,
   name        text not null check (char_length(name) between 1 and 80),
   color       text,                                  -- คีย์ gradient ใน ARCHITECTURE.md §9
+  -- ⚠️ ผู้ใช้เขียนเอง และ **ถูกส่งเข้าโมเดลทุกครั้งที่เรียก tool `areas`**
+  --    (ใช้เลือกว่าโปรเจกต์ใหม่ควรอยู่กลุ่มไหน · 9 ก.ย. 2026)
+  --    เพดาน 200 ตัวจึงไม่ใช่เรื่องหน้าจอ — ช่องที่ไม่มีเพดานคือช่องที่วันหนึ่ง
+  --    มีคนวางเรียงความลงไปแล้วจ่ายโทเคนทุกคำขอตลอดไป
+  --    · ค่านี้ต้องตรงกับ `MAX_DESC` ใน web/app/actions/areas.ts
+  description text,
   sort_order  int  not null default 0,
   archived_at timestamptz,
   created_at  timestamptz not null default now(),
-  unique (user_id, name)
+  unique (user_id, name),
+  constraint area_desc_len check (description is null or char_length(description) <= 200)
 );
 
 -- =====================================================================
@@ -936,13 +943,17 @@ begin
   --
   -- ⚠️ ห้ามแทรกครบสี่ใบแล้วค่อย `select ... where name = 'General'` ทีหลัง —
   --    วันไหนแก้ชื่อ Area ตั้งต้น การค้นด้วยชื่อจะไม่เจอแบบเงียบ ๆ
-  insert into public.areas (user_id, name, color, sort_order) values
-    (new.id, 'Class',       'class', 0),
-    (new.id, 'Competition', 'comp',  1),
-    (new.id, 'Personal',    'pers',  2);
+  --
+  -- ⚠️ `description` ที่ seed ที่นี่คือสิ่งที่โมเดลใช้เลือกกลุ่มตอนสร้างโปรเจกต์ใหม่
+  --    **แก้ข้อความพวกนี้ = เปลี่ยนพฤติกรรมโมเดล** ต้องรันชุดวัดใน
+  --    web/test/accuracy/ ก่อนและหลัง ไม่ต่างจากการแก้ prompt
+  insert into public.areas (user_id, name, color, sort_order, description) values
+    (new.id, 'Class',       'class', 0, 'วิชาที่ลงทะเบียนเรียนเทอมนี้ · การบ้าน รายงาน สอบ คาบเรียน'),
+    (new.id, 'Competition', 'comp',  1, 'การแข่งขัน แฮกกาธอน ประกวด และงานที่สมัครเข้าร่วมเอง'),
+    (new.id, 'Personal',    'pers',  2, 'เรื่องส่วนตัว สุขภาพ การเงิน นัดหมาย');
 
-  insert into public.areas (user_id, name, color, sort_order)
-  values (new.id, 'General', 'gen', 3)
+  insert into public.areas (user_id, name, color, sort_order, description)
+  values (new.id, 'General', 'gen', 3, 'ของที่ยังไม่รู้ว่าจะจัดไว้ตรงไหน')
   returning id into v_general;
 
   /*
