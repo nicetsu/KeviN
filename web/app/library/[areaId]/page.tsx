@@ -51,7 +51,7 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
   const initialOpen = decodeOpen(jar.get(LIBRARY_OPEN_COOKIE)?.value)
 
   const [areaRes, projRes, schedRes, itemRes] = await Promise.all([
-    supabase.from('areas').select('id, name, color').eq('id', areaId).maybeSingle(),
+    supabase.from('areas').select('id, name, color, description').eq('id', areaId).maybeSingle(),
     supabase
       .from('projects')
       .select('id, name, status, archived_at, sort_order')
@@ -75,14 +75,13 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
   }
   if (!areaRes.data) notFound()
 
-  const area = areaRes.data as { id: string; name: string; color: string | null }
+  const area = areaRes.data as { id: string; name: string; color: string | null; description: string | null }
   const projects = (projRes.data ?? []) as {
     id: string; name: string; status: string; archived_at: string | null; sort_order: number
   }[]
   const slots = (schedRes.data ?? []) as (Slot & { project_id: string })[]
   const items = (itemRes.data ?? []) as Item[]
 
-  const label = area.name === 'Class' ? 'วิชา' : 'โปรเจกต์'
   const cutoff = end.toISOString()
   const isArchived = (p: { archived_at: string | null; status: string }) =>
     p.archived_at !== null || p.status === 'archived'
@@ -136,7 +135,7 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
       <main className="wrap">
         <div className="page-head page-head--row">
           <Link href="/library" className="back" transitionTypes={['nav-back']}>‹ คลัง</Link>
-          <AreaEdit area={{ id: area.id, name: area.name, color: area.color }} />
+          <AreaEdit area={{ id: area.id, name: area.name, color: area.color, description: area.description }} />
         </div>
 
         {/*
@@ -147,13 +146,13 @@ export default async function AreaPage({ params }: { params: Promise<{ areaId: s
           areaId={area.id}
           colorClass={AREA_CLASS[area.color ?? ''] ?? ''}
           name={area.name}
-          count={openCount > 0 ? `${openCount} ${label}` : 'ว่าง'}
+          count={openCount > 0 ? `${openCount} โปรเจกต์` : 'ว่าง'}
           attention={attention}
+          description={area.description}
         />
 
         <ProjectTree
           areaId={area.id}
-          label={label}
           projects={tree}
           initialOpen={initialOpen}
         />

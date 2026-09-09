@@ -104,7 +104,6 @@ export default async function LibraryPage() {
     id: area.id,
     name: area.name,
     colorClass: AREA_CLASS[area.color ?? ''] ?? '',
-    label: area.name === 'Class' ? 'วิชา' : 'โปรเจกต์',
     openCount: own.filter((p) => !isArchived(p)).length,
     attention: items.filter((i) => ids.has(i.project_id) && needsAttention(i)).length,
     }
@@ -133,7 +132,7 @@ export default async function LibraryPage() {
               id={a.id}
               name={a.name}
               colorClass={a.colorClass}
-              count={a.openCount > 0 ? `${a.openCount} ${a.label}` : 'ว่าง'}
+              count={a.openCount > 0 ? `${a.openCount} โปรเจกต์` : 'ว่าง'}
               attention={a.attention}
             />
           ))}

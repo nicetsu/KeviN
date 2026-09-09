@@ -72,7 +72,7 @@ export default function QuickAdd({
   async function onSave() {
     setError(null)
     if (!guess.title.trim()) { setError('ยังไม่มีหัวเรื่อง'); return }
-    if (!projectId) { setError('เลือกวิชาหรือโปรเจกต์ก่อน'); return }
+    if (!projectId) { setError('เลือกโปรเจกต์ก่อน'); return }
     if (type === 'reminder' && !(date && time)) {
       setError('การเตือนต้องมีทั้งวันและเวลา'); return
     }
@@ -149,7 +149,7 @@ export default function QuickAdd({
                 </select>
               </label>
               <label className="field grow">
-                <span>วิชา / โปรเจกต์</span>
+                <span>โปรเจกต์</span>
                 <select className="input" value={projectId}
                   onChange={(e) => setOverride((o) => ({ ...o, projectId: e.target.value }))}>
                   <option value="">— เลือก —</option>

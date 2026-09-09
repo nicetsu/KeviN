@@ -78,7 +78,7 @@ export default async function EditEventPage({
       <main className="wrap">
         <EventEditor
           projectId={id}
-          projectName={ev.projects?.name ?? 'วิชา'}
+          projectName={ev.projects?.name ?? 'โปรเจกต์'}
           eventId={ev.id}
           archived={ev.archived_at !== null}
           initial={{

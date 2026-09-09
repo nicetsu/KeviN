@@ -118,7 +118,7 @@ export default async function EventPage({
     <Content>
       <main className="wrap">
         <div className="page-head">
-          <Link href={`/project/${id}`} className="back">‹ {ev.projects?.name ?? 'วิชา'}</Link>
+          <Link href={`/project/${id}`} className="back">‹ {ev.projects?.name ?? 'โปรเจกต์'}</Link>
           <h1>{ev.title}</h1>
           {ev.archived_at && <div className="sub">เก็บเข้าคลังแล้ว</div>}
         </div>

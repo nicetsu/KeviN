@@ -49,13 +49,10 @@ function saveOpen(ids: Iterable<string>) {
  */
 export default function ProjectTree({
   areaId,
-  label,
   projects,
   initialOpen,
 }: {
   areaId: string
-  /** "วิชา" สำหรับ Class · "โปรเจกต์" สำหรับที่เหลือ */
-  label: string
   projects: TreeProject[]
   /** `null` = ยังไม่เคยบันทึก → ปิดหมด */
   initialOpen: string[] | null
@@ -79,7 +76,7 @@ export default function ProjectTree({
     return (
       <>
         <p className="none">ยังไม่มีอะไรใน Area นี้</p>
-        <NewProject areaId={areaId} label={label} />
+        <NewProject areaId={areaId} />
       </>
     )
   }
@@ -110,7 +107,7 @@ export default function ProjectTree({
             {isOpen && (
               <div className="pnode__body">
                 {p.items.length === 0 ? (
-                  <p className="none">ยังไม่มีอะไรใน{label}นี้</p>
+                  <p className="none">ยังไม่มีอะไรในโปรเจกต์นี้</p>
                 ) : (
                   p.items.map((it) => (
                     <div className={`row${it.done ? ' row--done' : ''}`} key={it.id}>
@@ -128,7 +125,7 @@ export default function ProjectTree({
           </div>
         )
       })}
-      <NewProject areaId={areaId} label={label} />
+      <NewProject areaId={areaId} />
     </>
   )
 }
@@ -137,7 +134,7 @@ export default function ProjectTree({
  * ปุ่มสร้างอยู่ในตัว Area นั้น ไม่ใช่ข้อความว่าง (ARCHITECTURE.md §9)
  * Area ที่ยังไม่มีอะไรจึงยังมีทางไปต่อ ไม่ใช่ทางตัน
  */
-function NewProject({ areaId, label }: { areaId: string; label: string }) {
+function NewProject({ areaId }: { areaId: string }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -159,7 +156,7 @@ function NewProject({ areaId, label }: { areaId: string; label: string }) {
   if (!open) {
     return (
       <button type="button" className="newproj" onClick={() => setOpen(true)}>
-        + {label}ใหม่
+        + โปรเจกต์ใหม่
       </button>
     )
   }
@@ -169,7 +166,7 @@ function NewProject({ areaId, label }: { areaId: string; label: string }) {
       <input
         className="input"
         autoFocus
-        placeholder={`ชื่อ${label}`}
+        placeholder="ชื่อโปรเจกต์"
         value={name}
         maxLength={120}
         onChange={(e) => { setName(e.target.value); setError(null) }}

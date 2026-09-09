@@ -84,7 +84,7 @@ export default async function SchedulePage({
   return (
     <Content>
       <main className="wrap">
-        <Link href={`/project/${id}`} className="back">‹ กลับไปหน้าวิชา</Link>
+        <Link href={`/project/${id}`} className="back">‹ กลับไปหน้าโปรเจกต์</Link>
         <Editor
           projectId={id}
           projectName={projRes.data.name}

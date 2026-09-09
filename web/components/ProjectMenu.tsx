@@ -17,7 +17,7 @@ export default function ProjectMenu({
   const [error, setError] = useState<string | null>(null)
 
   async function run() {
-    if (!archived && !window.confirm('เก็บวิชานี้เข้าคลัง? งานข้างในยังอยู่ครบ และเอากลับมาได้')) return
+    if (!archived && !window.confirm('เก็บโปรเจกต์นี้เข้าคลัง? งานข้างในยังอยู่ครบ และเอากลับมาได้')) return
     setBusy(true)
     const res = await archiveProject(projectId, !archived)
     setBusy(false)
