@@ -78,7 +78,7 @@
 
 ```
 Area (Class / Competition / Personal / General · แก้ชื่อได้ · มีคำอธิบาย)
-└── Project (ใน Class เรียก "วิชา")
+└── Project (บนหน้าจอเรียก "โปรเจกต์" ทุกที่)
     ├── project_schedules   ช่วงเวลาที่ซ้ำรายสัปดาห์ · ไม่แจ้งเตือน
     │   └── time_offsets ↘  ตัดทอนรายวัน — ชี้ได้ทั้งคาบเรียนและกิจกรรม
     ├── events              กิจกรรมครั้งเดียว · มีชื่อของตัวเอง · ขึ้นปฏิทิน · ไม่แจ้งเตือน
@@ -235,29 +235,35 @@ Next.js 16 · App Router · ไม่ใช้ Tailwind (ใช้ CSS custom pr
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 445 เคส · ไม่ถึงวินาที
+npm test --prefix web        # 435 เคส · ไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เคส |
 |---|---|---|
 | `lib/time.ts` | เวลาไทยทั้งหมด · ป้ายบอกเวลา | 44 |
+| `lib/ai/propose.ts` | ชั้นเสนอ — ร่างที่ไม่แตะ DB · `findProject` · `findArea` | 31 |
+| `lib/applyDraft.ts` | **การเขียนจริง** — นับแถว · การย้อน | 30 |
 | `lib/weeks.ts` | ตรรกะการซ้ำ + คลี่เป็นวันที่ | 28 |
-| `lib/applyDraft.ts` | **การเขียนจริง** — นับแถว · การย้อน | 24 |
-| `lib/ai/tools.ts` | ชั้น tool อ่านอย่างเดียว | 26 |
-| `lib/ai/propose.ts` | ชั้นเสนอ — ร่างที่ไม่แตะ DB | 24 |
+| `lib/ai/tools.ts` | ชั้น tool อ่านอย่างเดียว | 24 |
+| `lib/ai/prompt.ts` | prompt ของประตูแอป | 23 |
 | `lib/parse.ts` | ตีความบรรทัดเดียวเป็น item (ภาษาไทย) | 21 |
 | `lib/chat/markdown.ts` | แกะ markdown ของผู้ช่วย | 19 |
-| `lib/libraryOpen.ts` · `lib/ai/propose.ts` (แก้ร่าง) | สถานะกางของคลัง · `propose_update_draft` | 18 · 18 |
-| `lib/ai/prompt.ts` | prompt ของประตูแอป | 16 |
+| `lib/libraryOpen.ts` · `lib/ai/propose.ts` (แก้ร่าง) | สถานะกางของคลัง · `propose_update_draft` | 18 · 17 |
+| `lib/chat/quota.ts` | แยก 429 เป็น "หมดโควตาวัน" กับ "เร็วเกินไป" | 16 |
 | `lib/agenda.ts` | เติมเวลาจบของกำหนดการที่เว้นว่าง | 15 |
-| `lib/archive.ts` | ของที่รอถูกลบ · วันที่เหลือก่อนหาย | 14 |
+| `lib/chat/image.ts` · `lib/archive.ts` | รูปที่แนบในแชต · ของที่รอถูกลบ | 14 · 14 |
 | `lib/ai/lang.ts` · `lib/voice/mic.ts` | ล็อกภาษา · เลือกไมค์ | 12 · 12 |
 | `lib/calendar.ts` · `lib/cardFlight.ts` | เวลาบล็อกปฏิทิน · การ์ดที่บินไป | 11 · 11 |
-| `lib/chat/image.ts` | รูปที่แนบในแชต — ด่านตรวจ · ย่อขนาด · ป้าย · เพดานรูปที่ค้างบนจอ | 14 |
-| `lib/layout.ts` · `lib/chat/quota.ts` | บล็อกที่เวลาชนกัน · แยก 429 เป็นวัน/นาที | 10 · 11 |
+| `lib/layout.ts` | บล็อกที่เวลาชนกัน | 10 |
 | `lib/ai/voices.ts` · `lib/chat/links.ts` · `lib/chat/stream.ts` | เสียง · กันลิงก์ปลอม · ต่อชิ้นสายคำตอบ | 9 · 9 · 9 |
 | `lib/eventOrder.ts` · `lib/voice/transcript.ts` · `lib/drafts.ts` | ลำดับกิจกรรม · ไม่บันทึกเสียง · ฟิลด์เวลาของร่าง | 8 · 8 · 8 |
 | *(ด่านกันเขียน)* | อ่านซอร์ส `lib/ai/**` หาทางเขียนที่หลุดเข้ามา | 6 |
+| *(ด่านคำโกหก)* | "ร่างขึ้นบนจอแล้ว" ที่พูดตอนไม่มีร่างเลย | 5 |
+| *(ด่านชื่อ Area)* | อ่านซอร์สหาโค้ดที่ตัดสินอะไรจากชื่อ Area | 3 |
+
+> ⚠️ **`npm test` ล้าง `.test-build/` ทิ้งก่อนคอมไพล์ทุกครั้ง** — `tsc` ไม่ลบ
+> ไฟล์ที่ซอร์สหายไปแล้ว และคำสั่งรันทั้งโฟลเดอร์ · ผลคือเทสต์ของไฟล์ที่ลบไปแล้ว
+> ยังถูกรันต่อและรายงานว่าผ่าน (เจอ 9 ก.ย. 2026 · doc/TRAPS.md)
 
 > ⚠️ `lib/applyDraft.ts` **นำเข้าแบบ relative ไม่ใช่ `@/`** เหมือนทุกไฟล์ที่เทสต์เอื้อมถึง
 > — ชุดเทสต์รันด้วย node ตรง ๆ ซึ่งไม่รู้จัก path alias ของ bundler
@@ -812,7 +818,7 @@ tool_calls    (name · input · ok · rows_out · rows_hidden · error)
 | ใน DB | บนหน้าจอ |
 |---|---|
 | `area` | **Area** (คำอังกฤษ · เจ้าของเคาะ 8 ก.ย. 2026 — "ด้าน" อ่านแล้วไม่รู้ว่าหมายถึงอะไร) |
-| `project` | โปรเจกต์ · ใน Class เรียก "วิชา" |
+| `project` | **โปรเจกต์** ทุกที่ · ~~ใน Class เรียก "วิชา"~~ เลิกใช้แล้ว 9 ก.ย. 2026 เพราะป้ายนั้นผูกกับ**ชื่อ Area** ซึ่งผู้ใช้แก้เองได้ (`test/areaName.test.ts` กันไว้) |
 | `task` / `reminder` / `shortnote` | งาน / เตือน / โน้ต |
 | `project_schedule` | ช่วงเวลาประจำ · ใน Class เรียก "คาบเรียน" |
 | `archived` | เก็บเข้าคลัง |
@@ -917,7 +923,7 @@ network call ไป Supabase **ทุกครั้ง** ไม่ใช่ก�
 
 ```bash
 npm run dev --prefix web              # รันเว็บในเครื่อง (พอร์ต 3000)
-npm test --prefix web                 # เทสต์ตรรกะแกน 445 เคส
+npm test --prefix web                 # เทสต์ตรรกะแกน 435 เคส
 npm run lint --prefix web             # ต้องสะอาด 0 error 0 warning
 npx tsc --noEmit --project web        # ตรวจ type
 
@@ -953,7 +959,7 @@ KeviN/
 └── web/                     Next.js app
     ├── vercel.json          ตรึง region ไว้ที่โตเกียว ห้ามลบ
     ├── tsconfig.test.json   คอมไพล์เทสต์เป็น CommonJS ลง .test-build/
-    ├── test/                เทสต์ตรรกะแกน 416 เคส · `npm test`
+    ├── test/                เทสต์ตรรกะแกน 435 เคส · `npm test`
     │   └── accuracy/          ชุดวัดกับโมเดลจริง · **รันด้วยมือ กินโควตา**
     ├── lib/
     │   ├── applyDraft.ts   **การเขียนจริง** · นับแถว · การย้อน
