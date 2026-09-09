@@ -954,6 +954,7 @@ KeviN/
 │   ├── phase0/              สคริปต์ตั้งค่า DB + คู่มือ
 │   └── phase6/              prompt ของ Cowork
 ├── archive/                 เอกสารและไฟล์เทียบแบบที่ทำหน้าที่เสร็จแล้ว
+├── TUTORIAL.html            คู่มือสำหรับ **ผู้ใช้** · ส่งให้คนที่เพิ่งได้รหัสเชิญ
 ├── SYSTEM.html · UXUI.html · WRITE.html · CONFIRM-CARD.html · UXUI-LIGHT.html
 ├── supabase/functions/send-reminders/
 └── web/                     Next.js app

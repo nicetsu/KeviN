@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KeviN · คู่มือผู้ใช้ใหม่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   token ชุดเดียวกับแอปจริง (web/app/globals.css · 9 ก.ย. 2026)
+   ⚠️ แก้พาเลตในแอปเมื่อไหร่ ให้ขยับที่นี่ด้วย — คนอ่านคู่มือจบแล้วเข้าแอป
+      ต้องจำสีได้ทันที ถ้าคนละชุดกันคู่มือจะสอนสีผิด
+   ===================================================================== */
+:root{
+  --bg:#120E22; --surface:#1B1630; --raised:#241E3C; --line:#2E2748; --line-soft:#251F3D;
+  --ink:#F1F0F7; --muted:#A5A2B8; --faint:#8E8BA4;
+  --brand:#A594FF; --brand-deep:#8878F0; --brand-soft:#1E1B33;
+  --grad-brand:linear-gradient(135deg,#C3B6FF 0%,#8878F0 100%); --on-brand:#14121F;
+  --sched:#79C2D0; --sched-soft:#16292E;
+  --event:#D5BB6D; --event-soft:#2D2716;
+  --due:#E0897E;   --due-soft:#2E1E1D;
+  --task:#74C6A4;  --task-soft:#172A24;
+  --note:#8E88A8;  --note-soft:#1B1A28;
+  --g-class:linear-gradient(135deg,#79C2D0,#8878F0);
+  --g-comp:linear-gradient(135deg,#E0897E,#A594FF);
+  --g-pers:linear-gradient(135deg,#74C6A4,#79C2D0);
+  --g-gen:linear-gradient(135deg,#A594FF,#D98BB4);
+  --r-card:14px; --r-tile:10px; --r-pill:999px;
+  --f:"Inter","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"Geist Mono","Cascadia Mono",Consolas,ui-monospace,monospace;
+  --s--2:.69rem; --s--1:.79rem; --s-0:.95rem; --s-1:1.08rem;
+  --s-2:clamp(1.35rem,1.1rem + .9vw,1.8rem); --s-3:clamp(2rem,1.5rem + 2.2vw,3rem);
+}
+*{box-sizing:border-box}
+html{color-scheme:dark;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);
+  font-size:var(--s-0);line-height:1.78;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 clamp(1.1rem,5vw,2.4rem)}
+
+header{padding:4rem 0 2.4rem;border-bottom:1px solid var(--line)}
+.kick{font-family:var(--f-mono);font-size:var(--s--1);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--brand);margin:0}
+h1{font-size:var(--s-3);font-weight:600;letter-spacing:-.04em;margin:.55rem 0 .6rem;line-height:1.05}
+.lead{font-size:var(--s-1);color:var(--muted);max-width:60ch;margin:0}
+
+h2{font-size:var(--s-2);font-weight:600;letter-spacing:-.03em;margin:3.6rem 0 .35rem;scroll-margin-top:1.5rem}
+h2 .n{color:var(--brand);font-family:var(--f-mono);font-size:.52em;margin-right:.65rem;letter-spacing:0}
+h3{font-size:var(--s-1);font-weight:600;letter-spacing:-.02em;margin:2.1rem 0 .5rem}
+p{max-width:72ch;margin:.7rem 0}
+.sub{color:var(--muted);margin:0 0 1.1rem;max-width:68ch}
+strong{font-weight:600}
+a{color:var(--brand)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--raised);
+  border:1px solid var(--line);border-radius:6px;padding:.08em .38em}
+
+/* สารบัญ */
+.toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:.5rem;
+  margin:2.2rem 0 .5rem;padding:0;list-style:none}
+.toc a{display:block;text-decoration:none;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-tile);padding:.6rem .8rem;font-size:var(--s--1)}
+.toc a:hover{background:var(--raised);border-color:var(--brand-deep)}
+.toc span{display:block;font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand)}
+
+/* การ์ด/กล่อง */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);
+  padding:1.1rem 1.25rem;margin:1.1rem 0}
+.grid{display:grid;gap:.9rem;margin:1.2rem 0}
+@media(min-width:720px){.grid--2{grid-template-columns:1fr 1fr}.grid--3{grid-template-columns:repeat(3,1fr)}}
+
+/* ตาราง */
+table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:var(--s--1)}
+th,td{text-align:left;vertical-align:top;padding:.62rem .7rem;border-bottom:1px solid var(--line-soft)}
+th{color:var(--faint);font-weight:500;font-size:var(--s--2);text-transform:uppercase;letter-spacing:.06em}
+tbody tr:hover{background:var(--surface)}
+.tw{width:32%}
+
+/* ป้ายชนิดข้อมูล */
+.tag{display:inline-block;font-family:var(--f-mono);font-size:var(--s--2);
+  border-radius:var(--r-pill);padding:.05em .6em;border:1px solid transparent;white-space:nowrap}
+.tag--sched{color:var(--sched);background:var(--sched-soft);border-color:#255A63}
+.tag--event{color:var(--event);background:var(--event-soft);border-color:#5C5228}
+.tag--due{color:var(--due);background:var(--due-soft);border-color:#5E3A35}
+.tag--task{color:var(--task);background:var(--task-soft);border-color:#2C5A48}
+.tag--note{color:var(--note);background:var(--note-soft);border-color:#3A3750}
+.tag--brand{color:var(--brand);background:var(--brand-soft);border-color:#39316B}
+
+/* ขั้นตอน */
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:1.2rem 0}
+ol.steps>li{counter-increment:s;position:relative;padding:.15rem 0 1rem 2.6rem;max-width:72ch}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:.28rem;
+  width:1.7rem;height:1.7rem;border-radius:var(--r-pill);background:var(--brand-soft);
+  color:var(--brand);font-family:var(--f-mono);font-size:var(--s--1);
+  display:grid;place-items:center;border:1px solid #39316B}
+
+/* คำเตือน / เคล็ดลับ */
+.note{border-left:2px solid var(--brand);background:var(--brand-soft);
+  border-radius:0 var(--r-tile) var(--r-tile) 0;padding:.85rem 1.05rem;margin:1.1rem 0;max-width:74ch}
+.note--warn{border-left-color:var(--due);background:var(--due-soft)}
+.note p{margin:.35rem 0}
+.note .lbl{font-family:var(--f-mono);font-size:var(--s--2);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--brand);display:block;margin-bottom:.2rem}
+.note--warn .lbl{color:var(--due)}
+
+/* ตัวอย่างบทสนทนา */
+.chat{display:flex;flex-direction:column;gap:.5rem;margin:1rem 0}
+.msg{max-width:min(38ch,90%);padding:.5rem .85rem;border-radius:16px;font-size:var(--s--1);line-height:1.6}
+.msg--me{align-self:flex-end;background:var(--grad-brand);color:var(--on-brand);border-bottom-right-radius:5px}
+.msg--k{align-self:flex-start;background:var(--raised);border:1px solid var(--line);border-bottom-left-radius:5px}
+.dcard{align-self:flex-start;max-width:min(42ch,95%);background:var(--surface);
+  border:1px solid var(--brand-deep);border-radius:var(--r-card);padding:.8rem .95rem;font-size:var(--s--1)}
+.dcard .h{font-family:var(--f-mono);font-size:var(--s--2);color:var(--brand);letter-spacing:.06em}
+.dcard .t{font-weight:600;margin:.15rem 0 .45rem}
+.dcard dl{display:grid;grid-template-columns:auto 1fr;gap:.15rem .8rem;margin:0 0 .7rem}
+.dcard dt{color:var(--faint);font-size:var(--s--2)}
+.dcard dd{margin:0;font-family:var(--f-mono);font-size:var(--s--2)}
+.dcard .acts{display:flex;gap:.4rem}
+.pill{font-size:var(--s--2);border-radius:var(--r-pill);padding:.22em .85em;border:1px solid var(--line)}
+.pill--go{background:var(--grad-brand);color:var(--on-brand);border:none;font-weight:600}
+.pill--alt{background:transparent;color:var(--muted)}
+
+/* แถบล่างจำลอง */
+.navdemo{display:flex;gap:.35rem;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-card);padding:.5rem;margin:1.2rem 0;max-width:430px}
+.navdemo div{flex:1;text-align:center;font-size:var(--s--2);color:var(--faint);padding:.45rem .2rem;
+  border-radius:var(--r-tile);line-height:1.35}
+.navdemo .kv{flex:1.6;background:var(--grad-brand);color:var(--on-brand);font-weight:600;
+  font-family:var(--f-mono);letter-spacing:.06em;display:grid;place-items:center}
+
+.mono{font-family:var(--f-mono);font-size:var(--s--1)}
+.faint{color:var(--faint)}
+.muted{color:var(--muted)}
+ul.plain{padding-left:1.15rem;margin:.7rem 0;max-width:72ch}
+ul.plain li{margin:.3rem 0}
+hr{border:0;border-top:1px solid var(--line);margin:3rem 0}
+footer{border-top:1px solid var(--line);margin-top:3.5rem;padding:2rem 0 4rem;color:var(--faint);font-size:var(--s--1)}
+@media (prefers-reduced-motion:no-preference){
+  .toc a{transition:background .14s cubic-bezier(.22,.61,.36,1),border-color .14s cubic-bezier(.22,.61,.36,1)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kick">คู่มือผู้ใช้ใหม่</p>
+  <h1>เริ่มใช้ KeviN</h1>
+  <p class="lead">
+    ที่เก็บตารางเรียน งาน การเตือน และโน้ต ไว้ที่เดียว — เปิดมาแล้วตอบได้ทันทีว่า
+    <strong>ตอนนี้ต้องทำอะไร</strong> · อ่านจบหน้านี้ครั้งเดียว ใช้ได้ทั้งแอป
+  </p>
+
+  <ul class="toc">
+    <li><a href="#start"><span>01</span>เริ่มใน 5 นาที</a></li>
+    <li><a href="#shape"><span>02</span>ข้อมูลถูกเก็บยังไง</a></li>
+    <li><a href="#where"><span>03</span>ของชิ้นนี้ลงตรงไหน</a></li>
+    <li><a href="#tabs"><span>04</span>ห้าหน้าในแถบล่าง</a></li>
+    <li><a href="#daily"><span>05</span>งานประจำวัน</a></li>
+    <li><a href="#calendar"><span>06</span>ปฏิทิน</a></li>
+    <li><a href="#library"><span>07</span>คลัง · โปรเจกต์ · คาบเรียน</a></li>
+    <li><a href="#kevin"><span>08</span>คุยกับ KeviN</a></li>
+    <li><a href="#notify"><span>09</span>การแจ้งเตือน</a></li>
+    <li><a href="#limits"><span>10</span>ข้อจำกัดและความเป็นส่วนตัว</a></li>
+  </ul>
+</header>
+
+<!-- ================================================================= -->
+<h2 id="start"><span class="n">01</span>เริ่มใน 5 นาที</h2>
+<p class="sub">สามอย่างนี้ทำครั้งเดียวตอนแรก แล้วไม่ต้องกลับมาทำอีก</p>
+
+<ol class="steps">
+  <li>
+    <strong>สมัครด้วยรหัสเชิญ</strong> — ที่หน้าเข้าสู่ระบบ กดแท็บ <em>สมัคร</em>
+    แล้วกรอกอีเมล รหัสผ่าน และ<strong>รหัสเชิญ</strong>ที่ได้รับมา
+    <br><span class="muted">รหัสหนึ่งใบใช้ได้ครั้งเดียว · ถ้าขึ้นว่ารหัสถูกใช้ไปแล้ว ให้ขอใบใหม่</span>
+  </li>
+  <li>
+    <strong>ยืนยันอีเมล</strong> — เปิดเมลที่ส่งไปแล้วกดลิงก์ ก่อนหน้านั้นเข้าใช้ยังไม่ได้
+    <br><span class="muted">ไม่เจอในกล่องเข้า ให้ดูในจดหมายขยะ</span>
+  </li>
+  <li>
+    <strong>ติดตั้งลงหน้าจอโฮม</strong> — เปิดเว็บบนมือถือแล้วเพิ่มลงหน้าจอโฮม
+    จะได้ไอคอนเหมือนแอปจริง เปิดเร็วกว่า และ<strong>บน iPhone จำเป็นต้องทำก่อน
+    ถึงจะเปิดการแจ้งเตือนได้</strong> (วิธีทำอยู่ในหน้า <em>ตั้งค่า</em>)
+  </li>
+</ol>
+
+<div class="card">
+  <strong>สิ่งที่มีให้ตั้งแต่วันแรก</strong>
+  <p class="muted" style="margin-top:.4rem">
+    บัญชีใหม่ทุกใบได้ <strong>กลุ่ม (Area) สี่กลุ่ม</strong> และ
+    <strong>โปรเจกต์ชื่อ “ทั่วไป”</strong> มาให้แล้วหนึ่งใบ — พิมพ์เพิ่มงานได้เลย
+    ตั้งแต่ประโยคแรกโดยไม่ต้องสร้างอะไรก่อน
+  </p>
+</div>
+
+<!-- ================================================================= -->
+<h2 id="shape"><span class="n">02</span>ข้อมูลถูกเก็บยังไง</h2>
+<p class="sub">สามชั้น จำแค่นี้พอ</p>
+
+<div class="card mono" style="line-height:2">
+  กลุ่ม (Area)<br>
+  <span class="faint">└─</span> โปรเจกต์ &nbsp;<span class="faint">— วิชาเรียน · งานแข่ง · เรื่องที่กำลังทำ</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="faint">├─</span> <span class="tag tag--task">งาน</span>
+  <span class="tag tag--due">เตือน</span> <span class="tag tag--note">โน้ต</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="faint">├─</span> <span class="tag tag--event">กิจกรรม</span>
+  <span class="faint">— เกิดครั้งเดียว มีวันเวลาแน่นอน</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="faint">└─</span> <span class="tag tag--sched">คาบเรียน</span>
+  <span class="faint">— ช่วงเวลาที่ซ้ำทุกสัปดาห์</span>
+</div>
+
+<p><strong>กลุ่มมีสี่อันมาให้ตั้งแต่แรก</strong> เปลี่ยนชื่อ เพิ่ม หรือลบเองได้ทั้งหมด
+ที่หน้า <em>คลัง</em></p>
+
+<table>
+  <thead><tr><th class="tw">กลุ่ม</th><th>เอาไว้เก็บอะไร</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Class</strong></td><td>วิชาที่ลงทะเบียนเรียนเทอมนี้ · การบ้าน รายงาน สอบ คาบเรียน</td></tr>
+    <tr><td><strong>Competition</strong></td><td>การแข่งขัน แฮกกาธอน ประกวด และงานที่สมัครเข้าร่วมเอง</td></tr>
+    <tr><td><strong>Personal</strong></td><td>โปรเจกต์ของตัวเอง งานอดิเรก และการพัฒนาตัวเอง</td></tr>
+    <tr><td><strong>General</strong></td><td>เรื่องส่วนตัว สุขภาพ การเงิน นัดหมาย · และของที่ยังไม่รู้ว่าจะจัดไว้ตรงไหน</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <span class="lbl">ทำไมต้องใส่คำอธิบายให้กลุ่ม</span>
+  <p>ในหน้าแก้ไขกลุ่มมีช่อง <strong>คำอธิบาย</strong> — <strong>KeviN อ่านช่องนี้
+  ตอนตัดสินใจว่าโปรเจกต์ใหม่ควรอยู่กลุ่มไหน</strong> · เปลี่ยนชื่อกลุ่มเป็นคำของตัวเอง
+  แล้วเขียนคำอธิบายด้วยคำที่ตัวเองพูดจริง มันจะเดาถูกขึ้นมาก</p>
+</div>
+
+<!-- ================================================================= -->
+<h2 id="where"><span class="n">03</span>ของชิ้นนี้ลงตรงไหน</h2>
+<p class="sub">ตารางเดียวที่ตัดสินได้ทุกกรณี — ใช้บ่อยที่สุดในคู่มือนี้</p>
+
+<table>
+  <thead><tr><th class="tw">ถ้าสิ่งนั้น…</th><th>ลงเป็น</th><th>ตัวอย่าง</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>ต้องทำให้เสร็จ · ติ๊กได้</td>
+      <td><span class="tag tag--task">งาน</span> ใส่วันกำหนดส่งหรือไม่ใส่ก็ได้</td>
+      <td>ส่งรายงานบทที่ 4</td>
+    </tr>
+    <tr>
+      <td>อยากให้<strong>เด้งเตือน</strong>ตอนถึงเวลา</td>
+      <td><span class="tag tag--due">เตือน</span> ต้องมีเวลาเสมอ</td>
+      <td>บ่ายสามอย่าลืมส่งใบลา</td>
+    </tr>
+    <tr>
+      <td>เป็นข้อมูลที่จริงตลอด ไม่มีเวลา</td>
+      <td><span class="tag tag--note">โน้ต</span></td>
+      <td>วิชานี้เช็กชื่อทุกคาบ</td>
+    </tr>
+    <tr>
+      <td>เกิดครั้งเดียว มีช่วงเวลา ต้องขึ้นปฏิทิน</td>
+      <td><span class="tag tag--event">กิจกรรม</span></td>
+      <td>ปฐมนิเทศ ศุกร์ 18:00–20:00</td>
+    </tr>
+    <tr>
+      <td><strong>ซ้ำทุกสัปดาห์</strong></td>
+      <td><span class="tag tag--sched">คาบเรียน</span> ตั้งในหน้าโปรเจกต์</td>
+      <td>อังคาร 09:00–12:00 ทั้งเทอม</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <span class="lbl">เส้นแบ่งที่พลาดบ่อยที่สุด</span>
+  <p><strong>“เตือน” กับ “งานที่มีวันกำหนดส่ง” ไม่เหมือนกัน</strong> —
+  งานมีไว้ติ๊กว่าทำเสร็จหรือยัง <strong>แต่ไม่เด้งเตือน</strong> ·
+  ส่วนการเตือนเด้งขึ้นมือถือตอนถึงเวลา แล้วจบหน้าที่ ไม่มีสถานะเสร็จ</p>
+  <p class="muted">อยากได้ทั้งสองอย่างสำหรับเรื่องเดียว ให้สร้างสองชิ้น —
+  งานไว้ติ๊ก และการเตือนไว้เด้ง</p>
+</div>
+
+<!-- ================================================================= -->
+<h2 id="tabs"><span class="n">04</span>ห้าหน้าในแถบล่าง</h2>
+
+<div class="navdemo">
+  <div>วันนี้</div><div>ปฏิทิน</div><div class="kv">KEVIN</div><div>คลัง</div><div>ตั้งค่า</div>
+</div>
+
+<table>
+  <thead><tr><th class="tw">หน้า</th><th>เปิดตอนไหน</th></tr></thead>
+  <tbody>
+    <tr><td><strong>วันนี้</strong></td><td>เปิดมาเป็นหน้าแรก · การ์ดใหญ่บนสุดบอก<strong>สิ่งที่จะถึงถัดไป</strong> (ข้ามไปวันพรุ่งนี้ให้เองถ้าวันนี้หมดแล้ว) ตามด้วยของที่ต้องทำวันนี้เรียงตามเวลา</td></tr>
+    <tr><td><strong>ปฏิทิน</strong></td><td>ดูภาพรวมเดือนหรือสัปดาห์ · <strong>ดูอย่างเดียว ไม่ลากย้าย</strong></td></tr>
+    <tr><td><strong>KEVIN</strong></td><td>พิมพ์หรือพูดสั่งงาน — เร็วที่สุดตอนกำลังเดิน</td></tr>
+    <tr><td><strong>คลัง</strong></td><td>ที่<strong>สร้างและแก้</strong>ของ — กลุ่ม โปรเจกต์ คาบเรียน และของที่เก็บไว้</td></tr>
+    <tr><td><strong>ตั้งค่า</strong></td><td>การแจ้งเตือน · ของที่เก็บไว้ · ออกจากระบบ</td></tr>
+  </tbody>
+</table>
+
+<p class="muted"><strong>ปฏิทินไว้ดู คลังไว้แก้</strong> — จำสองคำนี้แล้วจะไม่หลงว่าปุ่มอยู่หน้าไหน</p>
+
+<h3>สีบอกชนิด · ม่วงบอกว่ากดได้</h3>
+<p>
+  <span class="tag tag--sched">คาบเรียน</span>
+  <span class="tag tag--event">กิจกรรม</span>
+  <span class="tag tag--due">เตือน · เลยกำหนด</span>
+  <span class="tag tag--task">งาน</span>
+  <span class="tag tag--note">โน้ต</span>
+  <span class="tag tag--brand">ม่วง = ปุ่ม</span>
+</p>
+<p class="muted">แถบสีบาง ๆ ทางซ้ายของทุกแถวคือชนิดของมัน ·
+<strong>สิ่งที่สว่างที่สุดบนจอคือสิ่งที่กดได้เสมอ</strong></p>
+
+<!-- ================================================================= -->
+<h2 id="daily"><span class="n">05</span>งานประจำวัน</h2>
+
+<h3>เพิ่มเร็ว — ปุ่มม่วงมุมขวาล่าง</h3>
+<p>กดปุ่ม <strong>+</strong> ได้จากทุกหน้า (บนคอมกดปุ่ม <code>N</code>)
+แล้ว<strong>พิมพ์เป็นประโยคเดียว</strong> ระบบแยกให้เองว่าอันไหนคือวัน เวลา และวิชา</p>
+
+<div class="card mono">
+  พรุ่งนี้ 14:00 ประชุมกลุ่มซอฟต์แวร์
+  <div class="faint" style="font-size:var(--s--2);margin-top:.5rem">
+    ↳ ได้ชนิด วัน เวลา และโปรเจกต์มาให้ตรวจก่อนกดบันทึก แก้ช่องไหนก็ได้
+  </div>
+</div>
+
+<h3>ติ๊กเสร็จ · เลิกทำ</h3>
+<ul class="plain">
+  <li><strong>ช่องติ๊กมีเฉพาะ “งาน”</strong> — การเตือนกับโน้ตไม่มีสถานะเสร็จ</li>
+  <li>ติ๊กแล้วมันจะจางลง ขีดฆ่า แล้วร่วงไปท้ายกลุ่ม <strong>ไม่หายไปไหน</strong></li>
+  <li>ลบหรือเก็บของเข้าคลังแล้วจะมี<strong>แถบเลิกทำโผล่ประมาณ 8 วินาที</strong> — กดคืนได้ทันที</li>
+</ul>
+
+<h3>ลากจัดลำดับ</h3>
+<p>ที่จับสำหรับลากจะโผล่<strong>เฉพาะแถวที่ลากแล้วอยู่จริง</strong> —
+โน้ตลากได้ทั้งกลุ่ม · งานลากได้เฉพาะอันที่ยังไม่เสร็จและยังไม่มีวันกำหนดส่ง ·
+ส่วนการเตือนเรียงตามเวลาเสมอ จึงลากไม่ได้</p>
+
+<!-- ================================================================= -->
+<h2 id="calendar"><span class="n">06</span>ปฏิทิน</h2>
+<p class="sub">เปิดมาเป็นเดือน · สลับเป็น <em>สัปดาห์</em> ได้ที่ปุ่มด้านบน</p>
+
+<div class="note">
+  <span class="lbl">แกนของมุมมองสัปดาห์กลับด้าน</span>
+  <p><strong>วันเรียงลงมาเป็นแถว · เวลาไล่ไปทางขวา</strong> ไม่เหมือนปฏิทินทั่วไป</p>
+  <p class="muted">ทำแบบนี้เพราะ 7 วันเรียงเป็นคอลัมน์บนจอมือถืออ่านไม่ออก ·
+  พอกลับแกนแล้วบล็อกวางแนวนอน มีที่พอเขียนชื่อวิชาเต็ม ๆ กับเลขห้อง ·
+  <strong>ปัดซ้ายขวาเพื่อเลื่อนดูช่วงเวลาอื่น</strong></p>
+</div>
+
+<ul class="plain">
+  <li>เส้นม่วงแนวตั้งคือ<strong>เวลาตอนนี้</strong></li>
+  <li>แกนเวลาคำนวณจากของจริงในสัปดาห์นั้น ไม่ได้ตรึงไว้ที่เที่ยงคืนถึงเที่ยงคืน</li>
+  <li>สัปดาห์ที่ว่างยังวาดตารางเปล่าไว้ — เพราะตารางเปล่าคือคำตอบว่า “ว่างทั้งสัปดาห์”</li>
+</ul>
+
+<!-- ================================================================= -->
+<h2 id="library"><span class="n">07</span>คลัง · โปรเจกต์ · คาบเรียน</h2>
+
+<h3>เข้าไปทีละชั้น</h3>
+<p><strong>คลัง</strong> → แตะกล่องกลุ่ม → <strong>หน้ากลุ่ม</strong> (รายชื่อโปรเจกต์)
+→ แตะชื่อโปรเจกต์ → <strong>หน้าโปรเจกต์</strong> ซึ่งแยกเป็นสี่กลุ่ม:
+กิจกรรม · งาน · เตือน · โน้ต</p>
+
+<ul class="plain">
+  <li>ปุ่ม <strong>+ Area</strong> มุมขวาบนของหน้าคลัง — สร้างกลุ่มใหม่</li>
+  <li>ปุ่ม <strong>แก้ไข Area</strong> มุมขวาบนของหน้ากลุ่ม — เปลี่ยนชื่อ สี และคำอธิบาย</li>
+  <li>ปุ่ม <strong>+ โปรเจกต์ใหม่</strong> อยู่ท้ายรายการในหน้ากลุ่ม</li>
+</ul>
+
+<h3>ตั้งคาบเรียนที่ซ้ำทั้งเทอม</h3>
+<p>เข้าหน้าโปรเจกต์แล้วเปิดตัวจัดการช่วงเวลา — กรอกวัน เวลา ห้อง แล้วเลือกการซ้ำ
+ได้สองแบบ: <strong>ซ้ำอีก N สัปดาห์</strong> หรือ <strong>เลือกสัปดาห์เอง</strong>
+(ไว้ข้ามสัปดาห์สอบหรือสัปดาห์ที่มหาลัยหยุด)</p>
+<p class="muted">มี<strong>ตัวอย่างวันที่จริงอัปเดตสดขณะพิมพ์</strong> — ดูตรงนั้นก่อนกดบันทึกทุกครั้ง
+จะได้รู้ว่าตั้งถูกตั้งแต่ยังไม่บันทึก</p>
+
+<h3>“ลบ” ในแอปนี้แปลว่าเก็บเข้าคลัง</h3>
+<ul class="plain">
+  <li>ของที่เก็บเข้าคลังอยู่ต่ออีก <strong>7 วัน</strong> แล้วถูกลบจริง — กู้คืนได้ก่อนหน้านั้น</li>
+  <li>ดูของที่รอถูกลบได้ที่ <em>คลัง → ของที่เก็บไว้</em> หรือจากหน้า <em>ตั้งค่า</em>
+    · เรียงตาม<strong>เวลาที่เหลือก่อนหาย</strong> ไม่ใช่เวลาที่เก็บ</li>
+  <li>ระบบเก็บของให้เองตอนตีสาม — การเตือนที่ข้ามวันไปแล้ว และงานที่ติ๊กเสร็จ<strong>และ</strong>เลยวันส่งแล้ว</li>
+  <li><strong>ลบกลุ่มได้ก็ต่อเมื่อเคลียร์ของข้างในหมดแล้ว</strong> — กันไม่ให้ของทั้งกองหายด้วยการกดครั้งเดียว</li>
+</ul>
+
+<!-- ================================================================= -->
+<h2 id="kevin"><span class="n">08</span>คุยกับ KeviN</h2>
+<p class="sub">ส่วนที่ทำให้แอปนี้เร็วกว่าการกรอกฟอร์ม — อ่านหัวข้อนี้ให้จบ</p>
+
+<h3>สองโหมดในห้องเดียว</h3>
+<ul class="plain">
+  <li><strong>เปิดมาเป็นโหมดโทรเสมอ</strong> แต่<strong>ไมค์ยังไม่เปิด</strong>จนกว่าจะกดปุ่ม
+    <em>เริ่มโทร</em> — กดพลาดแล้วเสียงในห้องเรียนวิ่งออกไปไม่ได้</li>
+  <li>สลับไป<strong>โหมดแชต</strong>ได้ที่ปุ่มด้านบน · สลับกลางสายก็ได้ สายไม่ตัด</li>
+  <li>ทั้งสองโหมด<strong>คุยเรื่องเดียวกันต่อกันได้</strong> — วางสายแล้วพิมพ์ต่อ มันจำได้ว่าเมื่อกี้คุยอะไร</li>
+  <li>ระหว่างคุยจะมีแถบ <span class="mono">กำลังคุย 03:12 · แตะเพื่อกลับ</span> ตามไปทุกหน้า
+    เปิดปฏิทินดูระหว่างคุยได้เลย</li>
+</ul>
+
+<h3>มันเสนอ — คุณกดยืนยัน</h3>
+<p><strong>KeviN แก้ข้อมูลเองไม่ได้</strong> ทุกครั้งที่คุณสั่งให้เพิ่มหรือแก้ มันจะยื่น
+<strong>การ์ดร่าง</strong> ขึ้นมาบนจอ แล้วรอให้คุณกดปุ่ม</p>
+
+<div class="chat">
+  <div class="msg msg--me">เพิ่มงานส่งรายงานบทที่ 4 วิชาสถาปัตยกรรมเครือข่าย ส่งพฤหัสหน้า ห้าโมงเย็น</div>
+  <div class="dcard">
+    <div class="h">เพิ่มงาน</div>
+    <div class="t">ส่งรายงานบทที่ 4</div>
+    <dl>
+      <dt>วิชา</dt><dd>สถาปัตยกรรมและการออกแบบเครือข่าย</dd>
+      <dt>กำหนดส่ง</dt><dd>พฤ. 10 ก.ย. 17:00</dd>
+    </dl>
+    <div class="acts">
+      <span class="pill pill--go">เพิ่มเลย</span>
+      <span class="pill pill--alt">แก้</span>
+      <span class="pill pill--alt">ทิ้ง</span>
+    </div>
+  </div>
+  <div class="msg msg--k">ร่างขึ้นบนจอแล้ว ทานแล้วกดยืนยันได้เลยครับ</div>
+</div>
+
+<div class="note note--warn">
+  <span class="lbl">ข้อสำคัญที่สุดของทั้งหน้านี้</span>
+  <p><strong>ยังไม่กดปุ่ม = ยังไม่มีอะไรถูกบันทึก</strong> ·
+  การ์ดหายไปตอนรีเฟรชหน้าหรือปิดแอป ซึ่งเป็นพฤติกรรมที่ถูกต้อง —
+  ร่างที่ค้างข้ามวันไม่ควรกดยืนยันได้อีกเพราะบริบทหมดอายุไปแล้ว</p>
+</div>
+
+<p><strong>ปุ่ม “แก้”</strong> เปิดแผงให้แก้ชื่อกับเวลาก่อนยืนยัน ·
+หรือจะ<strong>พูด/พิมพ์แก้ต่อได้เลย</strong> แล้วมันจะปรับ<strong>การ์ดใบเดิม</strong>
+ไม่ใช่ขึ้นใบใหม่</p>
+
+<div class="chat">
+  <div class="msg msg--me">เปลี่ยนเป็นวันศุกร์แทน</div>
+  <div class="msg msg--k">ปรับให้ในการ์ดแล้ว ทานแล้วกดยืนยันได้เลยครับ</div>
+</div>
+
+<h3>ถ่ายรูปกระดานแล้วส่งไปเลย</h3>
+<p>ในโหมดแชตมีปุ่มแนบรูป — ถ่ายกระดานหรือใบประกาศแล้วส่ง <strong>ไม่ต้องพิมพ์อะไรเลยก็ได้</strong>
+มันจะอ่านสิ่งที่เขียนอยู่แล้วเสนอร่างมาให้ทีละใบครบทุกบรรทัด</p>
+<p class="muted">บรรทัดที่ไม่ได้เขียนวันไว้ มันจะ<strong>ไม่เดาวันให้</strong> — ได้เป็นร่างที่ยังไม่มีวัน
+ซึ่งคุณเติมเองในการ์ดได้ · <strong>รูปไม่ถูกเก็บไว้ที่ไหนเลย</strong> ส่งไปแล้วถามถึงรูปนั้นซ้ำไม่ได้</p>
+
+<h3>ประโยคที่ใช้ได้จริง</h3>
+<table>
+  <thead><tr><th class="tw">พูดแบบนี้</th><th>ได้อะไร</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">พรุ่งนี้ติดอะไรบ้าง</td><td>ไล่คาบเรียนกับกิจกรรมของวันพรุ่งนี้ให้ฟัง</td></tr>
+    <tr><td class="mono">เพิ่มงานส่งใบงานวิชาแคลคูลัส วันที่ 14 สี่ทุ่ม</td><td>ร่างงานพร้อมกำหนดส่ง</td></tr>
+    <tr><td class="mono">เตือนผมบ่ายสามพรุ่งนี้ว่าต้องส่งใบลา</td><td>ร่างการเตือน (เด้งขึ้นมือถือ)</td></tr>
+    <tr><td class="mono">จดไว้ว่าอาจารย์บอกให้อ่านบทที่ 5 ก่อนสอบ</td><td>ร่างโน้ต ไม่มีเวลา</td></tr>
+    <tr><td class="mono">งานส่งรายงานบทที่ 3 เสร็จแล้ว ติ๊กให้หน่อย</td><td>หางานนั้นให้แล้วเสนอติ๊กเสร็จ</td></tr>
+    <tr><td class="mono">ลบงานทำแลป 2 ทิ้ง</td><td>เสนอ<strong>เก็บเข้าคลัง</strong> (กู้คืนได้ 7 วัน) ไม่ใช่ลบถาวร</td></tr>
+    <tr><td class="mono">เพิ่มโปรเจกต์ทำคลิปส่งประกวด</td><td>เสนอสร้างโปรเจกต์ใหม่ พร้อมเลือกกลุ่มให้จากคำอธิบายของแต่ละกลุ่ม</td></tr>
+  </tbody>
+</table>
+
+<h3>สี่เคล็ดลับที่ทำให้มันแม่นขึ้นเยอะ</h3>
+<ol class="steps">
+  <li><strong>เรียกชื่อวิชาให้ชี้ได้อันเดียว</strong> — มีสองวิชาที่มีคำว่า “เครือข่าย”
+    ถ้าพูดแค่นั้นมันจะถามกลับ (ซึ่งถูกแล้ว) · พูดคำที่แยกได้ เช่น “สถาปัตยกรรม” จะได้ไม่ต้องตอบเพิ่ม</li>
+  <li><strong>บอกวันเป็นตัวเลขจะนิ่งที่สุด</strong> — “วันที่ 11 ห้าโมงเย็น” ชัดกว่า “ศุกร์หน้า”
+    ซึ่งตีความได้หลายแบบ</li>
+  <li><strong>เขียนคำอธิบายให้กลุ่มของตัวเอง</strong> — มันใช้ตรงนั้นเลือกว่าโปรเจกต์ใหม่ควรอยู่ไหน</li>
+  <li><strong>ทานการ์ดก่อนกด โดยเฉพาะตัวเลข</strong> — ตอนสั่งด้วยเสียง “วันที่ 4” กับ “วันที่ 14”
+    ต่างกันแค่พยางค์เดียว การ์ดมีไว้ให้จับตรงนี้</li>
+</ol>
+
+<h3>ตั้งค่าการคุย</h3>
+<p>ปุ่มฟันเฟืองมุมขวาบนของหน้า KeviN — <strong>ภาษา</strong> (ไทย/อังกฤษ ใช้ทั้งฟังและตอบ) ·
+<strong>ไมโครโฟน</strong> · <strong>เสียง</strong> (เลือกได้ 9 แบบ กดฟังตัวอย่างได้) ·
+และทางเข้า<strong>ประวัติการคุย</strong>ย้อนหลัง</p>
+<p class="muted">ภาษากับเสียงถูกล็อกระหว่างที่กำลังคุยอยู่ — เปลี่ยนแล้วมีผลกับสายถัดไป ·
+ส่วนไมโครโฟนเปลี่ยนได้ตลอด</p>
+
+<h3>สิ่งที่ KeviN ทำให้ไม่ได้</h3>
+<ul class="plain">
+  <li><strong>ลบโปรเจกต์ทั้งอัน</strong> — งานข้างในจะหายตามทั้งกอง คำสั่งเสียงที่ฟังผิดคำเดียวไม่ควรมีอำนาจนั้น</li>
+  <li><strong>ลบถาวร</strong> — ทำได้มากสุดคือเก็บเข้าคลัง ซึ่งกู้คืนได้ 7 วัน</li>
+  <li><strong>แก้คาบเรียนที่ซ้ำทุกสัปดาห์</strong> — แก้ผิดแถวเดียวผิดทั้งเทอม ต้องทำเองในคลัง</li>
+  <li><strong>กดยืนยันแทนคุณ</strong> — พูดว่า “เอาเลย” ก็ไม่นับ ปุ่มบนจอเป็นทางเดียว</li>
+</ul>
+
+<!-- ================================================================= -->
+<h2 id="notify"><span class="n">09</span>การแจ้งเตือน</h2>
+
+<ol class="steps">
+  <li>เข้าหน้า <strong>ตั้งค่า</strong> → กด <strong>เปิดการแจ้งเตือน</strong> แล้วอนุญาตสิทธิ์</li>
+  <li>กด <strong>ทดสอบ</strong> เพื่อดูว่ามันเด้งจริงบนเครื่องนี้</li>
+  <li>เปิดได้หลายเครื่อง — หน้าตั้งค่าบอกว่าตอนนี้เปิดรับอยู่กี่เครื่อง</li>
+</ol>
+
+<div class="note note--warn">
+  <span class="lbl">iPhone ต้องทำเพิ่มหนึ่งขั้น</span>
+  <p>Safari ไม่ให้เว็บทั่วไปส่งการแจ้งเตือน — ต้อง <strong>แชร์ → เพิ่มลงในหน้าจอโฮม</strong>
+  แล้ว<strong>เปิด KeviN จากไอคอน</strong>ก่อน ถึงจะกดเปิดการแจ้งเตือนได้
+  · หน้าตั้งค่าจะขึ้นขั้นตอนนี้ให้เองถ้าตรวจพบว่าเป็นเคสนี้</p>
+</div>
+
+<p><strong>มีชนิดเดียวที่เด้ง คือ “เตือน”</strong> — งานที่มีวันกำหนดส่ง กิจกรรม และคาบเรียน
+<strong>ไม่เด้ง</strong> · ถ้าอยากให้เตือนก่อนงานส่ง ให้สร้างการเตือนแยกไว้อีกชิ้น</p>
+
+<!-- ================================================================= -->
+<h2 id="limits"><span class="n">10</span>ข้อจำกัดและความเป็นส่วนตัว</h2>
+<p class="sub">สั้น ๆ แต่ควรอ่านก่อนใช้จริง</p>
+
+<div class="grid grid--2">
+  <div class="card">
+    <strong>สิ่งที่คุยกับ KeviN เดินทางออกไปข้างนอก</strong>
+    <p class="muted" style="margin-top:.4rem">
+      ข้อความที่พิมพ์ เสียงที่พูด รูปที่แนบ และข้อมูลตารางที่มันต้องใช้ตอบ
+      ถูกส่งไปให้โมเดลของ Google ประมวลผล และรุ่นที่ใช้อยู่เป็นรุ่นฟรี
+      ซึ่ง<strong>ผู้ให้บริการนำข้อมูลไปพัฒนาผลิตภัณฑ์ได้</strong>
+      · <strong>อย่าคุยเรื่องที่รับไม่ได้ถ้ามันออกไปข้างนอก</strong>
+      · รูปถ่ายระวังเป็นพิเศษ เพราะมักติดของที่ไม่ได้ตั้งใจส่งมาด้วย
+    </p>
+  </div>
+  <div class="card">
+    <strong>โควตา AI ใช้ร่วมกันทั้งระบบ</strong>
+    <p class="muted" style="margin-top:.4rem">
+      ไม่มีเพดานรายคน · ถ้าวันไหนคุยกันเยอะจนเต็มโควตา ทุกคนจะใช้ไม่ได้จนถึงวันถัดไป
+      · เจอข้อความว่าชนเพดาน<strong>ต่อนาที</strong> แปลว่ารออีกสักครู่แล้วลองใหม่ได้เลย
+      ไม่ต้องรอถึงพรุ่งนี้
+    </p>
+  </div>
+  <div class="card">
+    <strong>ข้อมูลของแต่ละคนแยกกันเด็ดขาด</strong>
+    <p class="muted" style="margin-top:.4rem">
+      บัญชีอื่นมองไม่เห็นของคุณสักแถว และยังไม่มีการแชร์ตารางกันระหว่างบัญชี
+      · KeviN เห็นเฉพาะข้อมูลของคนที่ล็อกอินอยู่เท่านั้น
+    </p>
+  </div>
+  <div class="card">
+    <strong>ยังไม่มีในตอนนี้</strong>
+    <p class="muted" style="margin-top:.4rem">
+      ลืมรหัสผ่าน (ทักเจ้าของให้รีเซ็ตให้) · ลากย้ายในปฏิทิน · ไฟล์แนบ ·
+      ซิงก์กับ Google Calendar · การเตือนซ้ำ (เตือนครั้งเดียวจบ) ·
+      ย้ายโปรเจกต์ข้ามกลุ่มหลังสร้างแล้ว
+    </p>
+  </div>
+</div>
+
+<div class="note">
+  <span class="lbl">หลักที่แอปนี้ยึด</span>
+  <p><strong>ไม่มีอะไรหายเงียบ ๆ</strong> — ลบต้องยืนยัน · ของที่เก็บเข้าคลังกู้คืนได้ ·
+  และทุกครั้งที่ KeviN จะแตะข้อมูล คุณต้องเห็นการ์ดและกดปุ่มเองก่อนเสมอ</p>
+</div>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    KeviN · คู่มือผู้ใช้ใหม่ — ปรับปรุง 9 ก.ย. 2026<br>
+    <span class="faint">ติดตรงไหนหรืออยากได้อะไรเพิ่ม บอกเจ้าของได้เลย</span>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>
