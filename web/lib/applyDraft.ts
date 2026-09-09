@@ -40,6 +40,10 @@ export type DraftDb = {
     select(columns: string): {
       eq(column: string, value: string): {
         is(column: string, value: null): { maybeSingle(): Res<Row | null> }
+        /* อ่านแถวท้ายสุดเพื่อหา sort_order ตัวถัดไป — **ไม่มีคำกริยาเขียนเพิ่มเข้ามาสักตัว** */
+        order(column: string, opts: { ascending: boolean }): {
+          limit(n: number): Res<Row[] | null>
+        }
       }
     }
     insert(row: Row): { select(columns: string): Res<{ id: string }[] | null> }
@@ -92,6 +96,46 @@ async function assertProjectAllowed(db: DraftDb, projectId: string): Promise<str
   if (error) return error.message
   if (!data) return 'ไม่พบวิชานั้น'
   return null
+}
+
+/**
+ * ตรวจว่ากลุ่ม (Area) นี้มีอยู่จริงและยังไม่ถูกเก็บเข้าคลัง
+ *
+ * ⚠️ **ตัวที่กันว่าเป็นของผู้ใช้คนนี้คือ RLS ไม่ใช่บรรทัดนี้** — เหมือน
+ *    `assertProjectAllowed()` ทุกประการ · กลุ่มของคนอื่นคืน `null` เหมือนกลุ่มที่ไม่มีจริง
+ */
+async function assertAreaAllowed(db: DraftDb, areaId: string): Promise<string | null> {
+  const { data, error } = await db
+    .from('areas')
+    .select('id')
+    .eq('id', areaId)
+    .is('archived_at', null)
+    .maybeSingle()
+
+  if (error) return error.message
+  if (!data) return 'ไม่พบกลุ่มนั้น'
+  return null
+}
+
+/**
+ * ลำดับถัดไปในกลุ่มนั้น — **ต่อท้ายเสมอ ไม่ใช่ปล่อยให้ตกไปใช้ default `0`**
+ *
+ * ⚠️ ปุ่มบนเว็บ (`createProject`) ต่อท้ายอยู่แล้ว · ถ้าทางนี้ปล่อยเป็น 0
+ *    โปรเจกต์ที่ผู้ช่วยสร้างจะไปโผล่**บนสุด**เสมอ แล้วสองทางจะให้ผลต่างกัน
+ *    โดยไม่มีอะไรฟ้อง — ของที่ผิดแบบเงียบตระกูลเดียวกับที่ทั้งโปรเจกต์นี้กลัว
+ *
+ * อ่านไม่ได้ก็ไม่ล้ม — ลำดับที่เพี้ยนหนึ่งใบเบากว่าการสร้างที่ล้มทั้งคำสั่ง
+ */
+async function nextSortOrder(db: DraftDb, areaId: string): Promise<number> {
+  const { data } = await db
+    .from('projects')
+    .select('sort_order')
+    .eq('area_id', areaId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+
+  const top = data?.[0]?.sort_order
+  return typeof top === 'number' ? top + 1 : 0
 }
 
 /**
@@ -164,6 +208,33 @@ export async function applyDraftWith(
       if (error) return { ok: false, error: error.message }
       if (!data?.length) return { ok: false, error: NOT_WRITTEN }
       return { ok: true, message: `เพิ่ม “${action.title}” แล้ว` }
+    }
+
+    /*
+     * สร้างโปรเจกต์ (9 ก.ย. 2026)
+     *
+     * ⚠️ **ไม่มีปุ่มเลิกทำ** โดยตั้งใจ — การย้อนการสร้างคือการลบ ซึ่งเป็นสิ่งที่
+     *    ทั้งระบบนี้ตั้งใจไม่ให้ผู้ช่วยทำ · ตรงกับ `add_item` และ `add_event`
+     *    ที่ไม่มีปุ่มนั้นอยู่แล้ว
+     */
+    case 'add_project': {
+      const blocked = await assertAreaAllowed(db, action.areaId)
+      if (blocked) return { ok: false, error: blocked }
+
+      const { data, error } = await db
+        .from('projects')
+        .insert({
+          user_id: userId,
+          area_id: action.areaId,
+          name: action.name,
+          description: action.description ?? null,
+          sort_order: await nextSortOrder(db, action.areaId),
+        })
+        .select('id')
+
+      if (error) return { ok: false, error: error.message }
+      if (!data?.length) return { ok: false, error: NOT_WRITTEN }
+      return { ok: true, message: `สร้าง “${action.name}” แล้ว` }
     }
 
     case 'add_event': {

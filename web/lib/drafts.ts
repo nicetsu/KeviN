@@ -41,6 +41,19 @@ export type DraftAction =
   | { kind: 'complete_item'; itemId: string; done: boolean }
   | { kind: 'archive_item'; itemId: string }
   | {
+      /**
+       * สร้างโปรเจกต์ใหม่ (9 ก.ย. 2026) — **กลับมติ "ผู้ช่วยสร้างโปรเจกต์ไม่ได้"**
+       *
+       * เส้นที่ยังไม่ข้าม: **ลบ** โปรเจกต์ยังทำไม่ได้เลย (`on delete cascade`
+       * พางานหายทั้งกอง) · การสร้างไม่ทำให้อะไรหายไป เส้นนั้นจึงไม่ได้ถูกข้าม
+       */
+      kind: 'add_project'
+      areaId: string
+      name: string
+      /** ช่องเดียวกับที่หน้าจอเรียกว่า "รหัสวิชา" */
+      description?: string
+    }
+  | {
       kind: 'add_event'
       projectId: string
       title: string
@@ -97,6 +110,7 @@ export const DRAFT_KINDS: readonly DraftKind[] = [
   'complete_item',
   'archive_item',
   'add_event',
+  'add_project',
 ]
 
 export function isDraftKind(v: unknown): v is DraftKind {
@@ -119,6 +133,7 @@ export function draftTimeField(action: DraftAction): 'due' | 'remind' | 'start' 
       return action.dueAt !== undefined ? 'due' : action.remindAt !== undefined ? 'remind' : null
     case 'add_event':
       return 'start'
+    // add_project ไม่มีเวลาเลย · ช่องที่ขึ้นมาแล้วไม่มีที่ให้ค่าลง คือข้อมูลที่หายเงียบ ๆ
     default:
       return null
   }
@@ -140,6 +155,8 @@ export function confirmLabel(kind: DraftKind): string {
       return 'เก็บเข้าคลัง'
     case 'add_event':
       return 'เพิ่มกิจกรรม'
+    case 'add_project':
+      return 'สร้างเลย'
   }
 }
 

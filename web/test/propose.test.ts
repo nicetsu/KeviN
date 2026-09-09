@@ -16,10 +16,10 @@ import type { ReadOnlyDb } from '../lib/ai/db'
 const TODAY = '2026-09-02'
 
 /** db ปลอมที่แยกคำตอบตามตาราง — ชั้นเสนอถาม projects กับ items คนละครั้ง */
-const db = (by: { projects?: unknown[]; items?: unknown[] }): ReadOnlyDb => ({
+const db = (by: { projects?: unknown[]; items?: unknown[]; areas?: unknown[] }): ReadOnlyDb => ({
   rpc: async <T>() => [] as T[],
   rows: async <T>(q: { table: string }) =>
-    ((q.table === 'projects' ? by.projects : by.items) ?? []) as T[],
+    ((q.table === 'projects' ? by.projects : q.table === 'areas' ? by.areas : by.items) ?? []) as T[],
 })
 
 const ctx = (d: ReadOnlyDb) => ({ db: d, today: TODAY })
@@ -283,4 +283,93 @@ test('db ล่มต้องได้ error ไม่ใช่ร่างท�
     ctx(broken)
   )
   assert.equal(r.ok, false)
+})
+
+// ---- สร้างโปรเจกต์ (9 ก.ย. 2026) ----
+
+const AREAS = [
+  { id: 'a1', name: 'Class', description: 'วิชาที่ลงทะเบียนเรียนเทอมนี้' },
+  { id: 'a2', name: 'Competition', description: 'การแข่งขัน แฮกกาธอน ประกวด' },
+  { id: 'a3', name: 'ฝึกงาน', description: 'งานที่บริษัท' },
+]
+
+test('propose_add_project · ร่างบอกชื่อกลุ่มเต็ม ไม่ใช่ id', async () => {
+  // การ์ดที่โชว์ id คือการ์ดที่ทานไม่ได้ — และการทานคือทั้งหมดที่กันโปรเจกต์
+  // ไม่ให้ลงผิดกลุ่ม เพราะย้ายกลุ่มทีหลังยังทำไม่ได้เลยทั้งบนเว็บและผ่านผู้ช่วย
+  const out = await runPropose(
+    'propose_add_project',
+    { area: 'Competition', name: 'ทำคลิปส่งประกวด' },
+    ctx(db({ areas: AREAS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  assert.equal(out.draft.action.kind, 'add_project')
+  assert.equal(out.draft.title, 'ทำคลิปส่งประกวด')
+  assert.deepEqual(out.draft.lines[0], { label: 'กลุ่ม', value: 'Competition' })
+})
+
+test('propose_add_project · ไม่แตะ DB เลย คืนแค่ร่าง', async () => {
+  const out = await runPropose(
+    'propose_add_project',
+    { area: 'a3', name: 'บริษัท ABC' },
+    ctx(db({ areas: AREAS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  const a = out.draft.action as { kind: string; areaId: string; name: string }
+  assert.equal(a.areaId, 'a3')
+  assert.equal(a.name, 'บริษัท ABC')
+})
+
+test('propose_add_project · ชื่อกลุ่มกำกวมต้องถาม ไม่ใช่เดา', async () => {
+  const out = await runPropose(
+    'propose_add_project',
+    { area: 'ก', name: 'x' },
+    ctx(db({ areas: [{ id: 'a1', name: 'การเงิน', description: null }, { id: 'a2', name: 'การเรียน', description: null }] })),
+  )
+  assert.equal(out.ok, false)
+  if (!out.ok) assert.match(out.error, /ตรงกับหลายกลุ่ม/)
+})
+
+test('propose_add_project · กลุ่มที่ไม่มีจริง บอกให้ไปเรียก areas ดูก่อน', async () => {
+  const out = await runPropose(
+    'propose_add_project',
+    { area: 'ไม่มีกลุ่มนี้', name: 'x' },
+    ctx(db({ areas: AREAS })),
+  )
+  assert.equal(out.ok, false)
+  if (!out.ok) assert.match(out.error, /areas/)
+})
+
+test('propose_add_project · ต้องมีชื่อ', async () => {
+  const out = await runPropose('propose_add_project', { area: 'Class' }, ctx(db({ areas: AREAS })))
+  assert.equal(out.ok, false)
+})
+
+test('propose_update_draft · แก้กลุ่มของร่างสร้างโปรเจกต์ได้ · แต่แก้ due ไม่ได้', async () => {
+  const first = await runPropose(
+    'propose_add_project',
+    { area: 'Class', name: 'วิชาใหม่' },
+    ctx(db({ areas: AREAS })),
+  )
+  assert.equal(first.ok, true)
+  if (!first.ok) return
+
+  const moved = await runPropose(
+    'propose_update_draft',
+    { area: 'ฝึกงาน' },
+    { ...ctx(db({ areas: AREAS })), openDrafts: [first.draft] },
+  )
+  assert.equal(moved.ok, true)
+  if (!moved.ok) return
+  assert.equal(moved.draft.id, first.draft.id, 'ต้องเป็นใบเดิม ไม่ใช่ใบที่สอง')
+  assert.deepEqual(moved.draft.lines[0], { label: 'กลุ่ม', value: 'ฝึกงาน' })
+
+  // ช่องที่ร่างนี้ไม่มีที่ให้ค่าลง ต้องปฏิเสธ ไม่ใช่รับแล้วทิ้งเงียบ ๆ
+  const bad = await runPropose(
+    'propose_update_draft',
+    { due: '2026-09-11 17:00' },
+    { ...ctx(db({ areas: AREAS })), openDrafts: [first.draft] },
+  )
+  assert.equal(bad.ok, false)
 })

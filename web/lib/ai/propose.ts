@@ -171,6 +171,41 @@ async function findProject(ctx: ProposeCtx, ref: string): Promise<ProjectRow> {
   throw new BadProposal(`หาวิชาชื่อ "${ref}" ไม่เจอ`)
 }
 
+type AreaRow = { id: string; name: string; description: string | null }
+
+/**
+ * หากลุ่ม (Area) จากชื่อที่โมเดลส่งมา — **กติกาเดียวกับ `findProject()` เป๊ะ**
+ *
+ * ตรงเป๊ะ → ตรงบางส่วนอันเดียว → ตรงหลายอัน = โยนให้ถามกลับ
+ *
+ * ⚠️ **ด่านนี้กันได้แค่ความกำกวมที่เดินทางมาถึงมัน** เหมือน `findProject()` —
+ *    ถ้าโมเดลเรียก `areas` มาดูเองแล้วส่งชื่อเต็มมา ด่านนี้ไม่ทำงานเลย
+ *    ตัวที่รอดจริงคือการ์ดยืนยันที่แสดง**ชื่อกลุ่มเต็ม** ให้ผู้ใช้ทานก่อนกด
+ *    (โปรเจกต์ที่ลงผิดกลุ่มย้ายไม่ได้ทั้งบนเว็บและผ่านผู้ช่วย · doc/HISTORY.md)
+ */
+async function findArea(ctx: ProposeCtx, ref: string): Promise<AreaRow> {
+  const rows = await ctx.db.rows<AreaRow>({
+    table: 'areas',
+    columns: 'id, name, description',
+    filters: [{ col: 'archived_at', op: 'is', value: null }],
+    order: { col: 'sort_order', ascending: true },
+    limit: 30,
+  })
+
+  if (rows.length === 0) throw new BadProposal('ยังไม่มีกลุ่มให้เลือกเลย')
+
+  const needle = ref.trim().toLowerCase()
+  const exact = rows.find((r) => r.id === ref || r.name.toLowerCase() === needle)
+  if (exact) return exact
+
+  const partial = rows.filter((r) => r.name.toLowerCase().includes(needle))
+  if (partial.length === 1) return partial[0]
+  if (partial.length > 1) {
+    throw new BadProposal(`"${ref}" ตรงกับหลายกลุ่ม — ${partial.map((r) => r.name).join(' · ')}`)
+  }
+  throw new BadProposal(`หากลุ่มชื่อ "${ref}" ไม่เจอ · เรียก tool areas ดูว่ามีกลุ่มอะไรบ้าง`)
+}
+
 /** หา item จาก id ที่โมเดลได้มาจาก tool `items` — ไม่ให้เดาจากชื่อ เพราะชื่อซ้ำกันได้ */
 async function findItem(ctx: ProposeCtx, id: string): Promise<ItemRow> {
   const rows = await ctx.db.rows<ItemRow>({
@@ -451,12 +486,45 @@ const addEvent: ProposeDef = {
  *    (ตัวกรอง Area · CHECK ของ DB · เส้นแบ่ง task/reminder/โน้ต) จึงเกิดซ้ำครบ
  *    ถ้าเขียนตรรกะประกอบร่างขึ้นมาอีกชุด มันจะเพี้ยนจากตัวจริงในวันที่ใครแก้ข้างเดียว
  */
+const addProject: ProposeDef = {
+  description:
+    'เสนอสร้างโปรเจกต์หรือวิชาใหม่ในกลุ่มหนึ่ง · **ยังไม่บันทึก** ผู้ใช้ต้องกดยืนยันบนจอก่อน · ' +
+    'ใช้เมื่อไม่มีโปรเจกต์เดิมที่ใช้ได้เลย — เรียก projects ดูก่อนเสมอ และเรียก areas ' +
+    'เพื่อดูคำอธิบายของแต่ละกลุ่มก่อนเลือกว่าจะลงกลุ่มไหน',
+  parameters: {
+    type: 'object',
+    properties: {
+      area: { type: 'string', description: 'ชื่อกลุ่ม หรือ id ที่ได้จาก tool areas' },
+      name: { type: 'string', description: 'ชื่อโปรเจกต์หรือวิชา' },
+      description: { type: 'string', description: 'รหัสวิชาหรือคำอธิบายสั้น ๆ ถ้ามี' },
+    },
+    required: ['area', 'name'],
+  },
+  build: async (raw, ctx) => {
+    const area = await findArea(ctx, text(raw, 'area', 80))
+    const name = text(raw, 'name', 120)
+    const description = text(raw, 'description', 200, false) || undefined
+
+    const lines: DraftLine[] = [{ label: 'กลุ่ม', value: area.name }]
+    if (description) lines.push({ label: 'รหัส/คำอธิบาย', value: description })
+
+    return {
+      id: draftId(),
+      heading: 'สร้างโปรเจกต์',
+      title: name,
+      lines,
+      action: { kind: 'add_project', areaId: area.id, name, description },
+    }
+  },
+}
+
 const TOOL_OF_KIND: Record<DraftAction['kind'], string> = {
   add_item: 'propose_add_item',
   edit_item: 'propose_edit_item',
   complete_item: 'propose_complete_item',
   archive_item: 'propose_archive_item',
   add_event: 'propose_add_event',
+  add_project: 'propose_add_project',
 }
 
 /** ฟิลด์ที่ร่างแต่ละชนิดแก้ได้จริง — ฟิลด์ที่ไม่มีที่ลง ต้องปฏิเสธ ไม่ใช่รับแล้วทิ้ง */
@@ -466,10 +534,14 @@ const UPDATABLE: Record<DraftAction['kind'], readonly string[]> = {
   complete_item: ['done'],
   archive_item: [],
   add_event: ['project', 'title', 'body', 'starts', 'ends', 'location', 'label'],
+  // ⚠️ `area` เป็นฟิลด์ของร่างนี้เท่านั้น — ร่างอื่นใช้ `project` · ปนกันเมื่อไหร่
+  //    การแก้จะเงียบ (รับค่าแล้วไม่มีที่ลง) ซึ่งเป็นสิ่งที่ UPDATABLE มีไว้กัน
+  add_project: ['area', 'name', 'description'],
 }
 
 const UPDATE_FIELDS = [
   'type', 'project', 'title', 'body', 'due', 'remind', 'starts', 'ends', 'location', 'label', 'done',
+  'area', 'name', 'description',
 ] as const
 
 /** ร่างใบเดิม → อินพุตชุดที่ทำให้เกิดร่างนั้น (ทางกลับของ `build`) */
@@ -508,6 +580,10 @@ function rawOf(a: DraftAction): Record<string, unknown> {
         location: a.location,
         label: a.label,
       }
+    case 'add_project':
+      // ส่ง `areaId` กลับไปเป็น `area` ได้เพราะ `findArea()` รับ id ตรง ๆ ด้วย
+      // (กติกาเดียวกับที่ `add_item` ส่ง `projectId` กลับไปเป็น `project`)
+      return { area: a.areaId, name: a.name, description: a.description }
   }
 }
 
@@ -613,6 +689,7 @@ const REGISTRY: Record<string, ProposeDef> = {
   propose_complete_item: completeItem,
   propose_archive_item: archiveItem,
   propose_add_event: addEvent,
+  propose_add_project: addProject,
   propose_update_draft: updateDraft,
 }
 

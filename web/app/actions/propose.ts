@@ -27,6 +27,8 @@ export type { ApplyResult, UndoTarget }
 function refresh() {
   revalidatePath('/')
   revalidatePath('/library')
+  // หน้า Area ต้องล้างด้วย — โปรเจกต์ที่ผู้ช่วยสร้างโผล่ในนั้น ไม่ใช่แค่หน้าคลัง
+  revalidatePath('/library/[areaId]', 'page')
   revalidatePath('/calendar')
   revalidatePath('/project/[id]', 'page')
   revalidatePath('/project/[id]/event/[eventId]', 'page')

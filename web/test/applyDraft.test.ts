@@ -59,7 +59,16 @@ const item = (over: Row = {}): Lookup => ({
  * `lookup` แยกตามตาราง (การตรวจสิทธิ์ถาม `projects` กับ `items` คนละครั้ง)
  * `write` แยกตาม `ตาราง.คำสั่ง` เพราะร่างใบเดียวอาจอ่าน `items` แล้วเขียน `items`
  */
-function fakeDb(cfg: { lookup?: Record<string, Lookup>; write?: Record<string, Write> } = {}) {
+type Tail = { data: Row[] | null; error: Fail | null }
+
+function fakeDb(
+  cfg: {
+    lookup?: Record<string, Lookup>
+    write?: Record<string, Write>
+    /** แถวท้ายสุดของ `.order().limit(1)` — ใช้ตรวจว่า sort_order ต่อท้ายจริง */
+    tail?: Record<string, Tail>
+  } = {},
+) {
   const calls: Call[] = []
 
   const db: DraftDb = {
@@ -74,6 +83,15 @@ function fakeDb(cfg: { lookup?: Record<string, Lookup>; write?: Record<string, W
                     maybeSingle() {
                       calls.push({ table, op: 'select', eq: [column, value] })
                       return Promise.resolve(cfg.lookup?.[table] ?? { data: null, error: null })
+                    },
+                  }
+                },
+                /* อ่านแถวท้ายเพื่อหา sort_order ตัวถัดไป (ใช้กับ add_project) */
+                order() {
+                  return {
+                    limit() {
+                      calls.push({ table, op: 'select', eq: [column, value] })
+                      return Promise.resolve(cfg.tail?.[table] ?? { data: null, error: null })
                     },
                   }
                 },
@@ -416,4 +434,73 @@ test('ไม่มีเส้นทางไหนในไฟล์นี้�
       assert.ok(['select', 'insert', 'update'].includes(c.op), `เจอคำสั่ง ${c.op}`)
     }
   }
+})
+
+/* ---------------------------------------------------------- สร้างโปรเจกต์ (9 ก.ย. 2026) */
+
+const AREA: Lookup = { data: { id: 'a1' }, error: null }
+
+test('add_project · เขียนลงกลุ่มที่ระบุ พร้อมคำอธิบาย', async () => {
+  const { db, calls } = fakeDb({ lookup: { areas: AREA } })
+  const res = await applyDraftWith(db, USER, {
+    kind: 'add_project',
+    areaId: 'a1',
+    name: 'ทำคลิปส่งประกวด',
+    description: 'รอบคัดเลือก',
+  })
+
+  assert.equal(res.ok, true)
+  const w = written(calls)
+  assert.equal(w?.table, 'projects')
+  assert.equal(w?.op, 'insert')
+  assert.equal(w?.payload?.area_id, 'a1')
+  assert.equal(w?.payload?.name, 'ทำคลิปส่งประกวด')
+  assert.equal(w?.payload?.description, 'รอบคัดเลือก')
+  assert.equal(w?.payload?.user_id, USER)
+})
+
+test('add_project · กลุ่มที่หาไม่เจอ ไม่เขียนอะไรเลย', async () => {
+  // RLS ทำให้กลุ่มของคนอื่นคืน null เหมือนกลุ่มที่ไม่มีอยู่จริง — เคสเดียวกัน
+  const { db, calls } = fakeDb({ lookup: { areas: { data: null, error: null } } })
+  const res = await applyDraftWith(db, USER, { kind: 'add_project', areaId: 'ของคนอื่น', name: 'x' })
+
+  assert.equal(res.ok, false)
+  assert.equal(written(calls), undefined)
+})
+
+test('add_project · sort_order ต่อท้าย ไม่ใช่ตกไปใช้ default 0', async () => {
+  // ⚠️ ปุ่มบนเว็บต่อท้ายอยู่แล้ว · ถ้าทางนี้เป็น 0 โปรเจกต์ที่ผู้ช่วยสร้างจะไป
+  //    โผล่บนสุดเสมอ แล้วสองทางให้ผลต่างกันโดยไม่มีอะไรฟ้อง
+  const { db, calls } = fakeDb({
+    lookup: { areas: AREA },
+    tail: { projects: { data: [{ sort_order: 4 }], error: null } },
+  })
+  const res = await applyDraftWith(db, USER, { kind: 'add_project', areaId: 'a1', name: 'ใหม่' })
+
+  assert.equal(res.ok, true)
+  assert.equal(written(calls)?.payload?.sort_order, 5)
+})
+
+test('add_project · กลุ่มที่ยังไม่มีโปรเจกต์เลย เริ่มที่ 0', async () => {
+  const { db, calls } = fakeDb({ lookup: { areas: AREA }, tail: { projects: { data: [], error: null } } })
+  await applyDraftWith(db, USER, { kind: 'add_project', areaId: 'a1', name: 'ใบแรก' })
+  assert.equal(written(calls)?.payload?.sort_order, 0)
+})
+
+test('add_project · insert ที่ไม่โดนสักแถว ต้องไม่รายงานว่าสำเร็จ', async () => {
+  const { db } = fakeDb({
+    lookup: { areas: AREA },
+    write: { 'projects.insert': { data: [], error: null } },
+  })
+  const res = await applyDraftWith(db, USER, { kind: 'add_project', areaId: 'a1', name: 'x' })
+
+  assert.equal(res.ok, false)
+  if (!res.ok) assert.equal(res.error, NOT_WRITTEN)
+})
+
+test('add_project · ไม่มีปุ่มเลิกทำ เพราะการย้อนการสร้างคือการลบ', async () => {
+  const { db } = fakeDb({ lookup: { areas: AREA } })
+  const res = await applyDraftWith(db, USER, { kind: 'add_project', areaId: 'a1', name: 'x' })
+  assert.equal(res.ok, true)
+  if (res.ok) assert.equal(res.undo, undefined)
 })
