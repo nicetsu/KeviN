@@ -19,12 +19,15 @@ export default function AreaHead({
   name,
   count,
   attention,
+  description,
 }: {
   areaId: string
   colorClass: string
   name: string
   count: string
   attention: number
+  /** คำอธิบายที่ผู้ใช้เขียนเอง — ตัวเดียวกับที่ KeviN อ่านตอนเลือกกลุ่ม */
+  description?: string | null
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
 
@@ -56,6 +59,7 @@ export default function AreaHead({
       <span className="acard__nm">{name}</span>
       <span className="acard__ct">{count}</span>
       {attention > 0 && <span className="acard__badge">{attention}</span>}
+      {description && <span className="acard__desc">{description}</span>}
     </div>
   )
 }

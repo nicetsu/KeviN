@@ -1201,6 +1201,20 @@ textarea.input { resize: vertical; line-height: 1.6; font-family: inherit; }
  */
 .acard--head { min-height: 76px; margin-bottom: 0.6rem; }
 .acard--head .acard__nm { font-size: var(--s-1); }
+/*
+ * คำอธิบายของ Area — ขึ้นเฉพาะหน้า Area ไม่ขึ้นบนการ์ดในหน้าคลัง
+ *
+ * หน้าคลังตอบคำถามว่า "มีกลุ่มอะไรบ้าง" ซึ่งชื่อตอบได้อยู่แล้ว · ส่วนคำอธิบาย
+ * เป็นของที่อ่านตอนเข้ามาในกลุ่มแล้ว และเป็นที่เดียวที่มีปุ่มแก้ไขอยู่ข้าง ๆ
+ *
+ * ⚠️ สองบรรทัดแล้วตัด — ยาวได้ถึง 200 ตัว ถ้าปล่อยไหลจะดันความสูงของหัวจน
+ *    รายการโปรเจกต์หลุดจอแรกไปทั้งหมด
+ */
+.acard__desc {
+  font-size: var(--s--1); color: var(--muted); line-height: 1.45;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
 .acard__badge {
   position: absolute; top: 0.7rem; right: 0.7rem;
   font-family: var(--f-mono); font-size: var(--s--2); color: var(--due);

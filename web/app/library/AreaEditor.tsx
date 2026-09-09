@@ -14,7 +14,7 @@ import { archiveArea, createArea, updateArea } from '@/app/actions/areas'
 
 const COLORS = Object.entries(AREA_CLASS)
 
-export type AreaDraft = { id: string; name: string; color: string | null }
+export type AreaDraft = { id: string; name: string; color: string | null; description: string | null }
 
 export default function AreaEditor({
   area,
@@ -27,6 +27,7 @@ export default function AreaEditor({
   const router = useRouter()
   const [name, setName] = useState(area?.name ?? '')
   const [color, setColor] = useState(area?.color ?? COLORS[0][0])
+  const [desc, setDesc] = useState(area?.description ?? '')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   /** ชั้นกันพลาดแบบเบาที่สุด — เปลี่ยนข้อความบนปุ่มเดิม ไม่มีกล่องโต้ตอบ
@@ -37,8 +38,8 @@ export default function AreaEditor({
     setBusy(true)
     setError(null)
     const res = area
-      ? await updateArea(area.id, name, color)
-      : await createArea(name, color)
+      ? await updateArea(area.id, name, color, desc)
+      : await createArea(name, color, desc)
     setBusy(false)
 
     if (!res.ok) {
@@ -99,6 +100,22 @@ export default function AreaEditor({
               setError(null)
             }}
           />
+        </label>
+
+        <label className="field">
+          <span>คำอธิบาย</span>
+          <input
+            className="input"
+            value={desc}
+            maxLength={200}
+            placeholder="เก็บอะไรไว้ในกลุ่มนี้"
+            onChange={(e) => {
+              setDesc(e.target.value)
+              setError(null)
+            }}
+          />
+          {/* ช่องที่ไม่บอกว่ามีผลกับอะไร คือช่องที่ไม่มีใครกรอก */}
+          <span className="hint">KeviN ใช้ตอนเลือกว่าโปรเจกต์ใหม่ควรอยู่กลุ่มไหน</span>
         </label>
 
         <div className="field">

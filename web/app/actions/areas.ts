@@ -25,6 +25,24 @@ const COLOR_KEYS = Object.keys(AREA_CLASS)
 /** ตรงกับ CHECK `char_length(name) between 1 and 80` ใน DB */
 const MAX_NAME = 80
 
+/**
+ * ตรงกับ CHECK `area_desc_len` ใน DB (9 ก.ย. 2026)
+ *
+ * ⚠️ เพดานนี้ไม่ใช่เรื่องหน้าจอ — คำอธิบายถูกส่งเข้าโมเดล**ทุกครั้งที่เรียก tool
+ *    `areas`** ช่องที่ไม่มีเพดานคือช่องที่วันหนึ่งมีคนวางเรียงความลงไปแล้วจ่าย
+ *    โทเคนทุกคำขอตลอดไป · แก้ค่าที่นี่ต้องแก้ CHECK ใน DB ด้วย ไม่งั้นฝั่งหนึ่ง
+ *    จะปฏิเสธเงียบ ๆ ในแบบที่อีกฝั่งไม่รู้
+ */
+const MAX_DESC = 200
+
+/** เว้นว่าง = `null` ไม่ใช่สตริงว่าง — คีย์ที่ว่างเปล่าอ่านเหมือน "มีแต่ไม่มีเนื้อ" */
+function cleanDesc(raw: string): string | null | undefined {
+  const desc = raw.trim().replace(/\s+/g, ' ')
+  if (desc.length === 0) return null
+  if (desc.length > MAX_DESC) return undefined
+  return desc
+}
+
 function cleanName(raw: string): string | null {
   const name = raw.trim().replace(/\s+/g, ' ')
   if (name.length === 0 || name.length > MAX_NAME) return null
@@ -39,10 +57,12 @@ function friendly(message: string): string {
   return message
 }
 
-export async function createArea(name: string, color: string): Promise<Result> {
+export async function createArea(name: string, color: string, description = ''): Promise<Result> {
   const clean = cleanName(name)
   if (!clean) return { ok: false, error: `ชื่อ Area ต้องยาว 1–${MAX_NAME} ตัว` }
   if (!COLOR_KEYS.includes(color)) return { ok: false, error: 'ไม่รู้จักสีนั้น' }
+  const desc = cleanDesc(description)
+  if (desc === undefined) return { ok: false, error: `คำอธิบายยาวได้ไม่เกิน ${MAX_DESC} ตัว` }
 
   const supabase = await createClient()
   const userId = await currentUserId(supabase)   // insert ต้องระบุเจ้าของ
@@ -58,7 +78,13 @@ export async function createArea(name: string, color: string): Promise<Result> {
 
   const { error } = await supabase
     .from('areas')
-    .insert({ user_id: userId, name: clean, color, sort_order: (last?.sort_order ?? -1) + 1 })
+    .insert({
+      user_id: userId,
+      name: clean,
+      color,
+      description: desc,
+      sort_order: (last?.sort_order ?? -1) + 1,
+    })
 
   if (error) return { ok: false, error: friendly(error.message) }
   refresh()
@@ -72,15 +98,22 @@ export async function createArea(name: string, color: string): Promise<Result> {
  * เพราะ `VISIBLE_AREAS` เป็น allowlist ที่ผูกกับ **ชื่อ** · ตัวกรองนั้นถูกถอด
  * ทั้งกลไกเมื่อ 8 ก.ย. 2026 การเปลี่ยนชื่อจึงไม่มีผลข้างเคียงแล้ว (doc/DECISIONS.md)
  */
-export async function updateArea(areaId: string, name: string, color: string): Promise<Result> {
+export async function updateArea(
+  areaId: string,
+  name: string,
+  color: string,
+  description = '',
+): Promise<Result> {
   const clean = cleanName(name)
   if (!clean) return { ok: false, error: `ชื่อ Area ต้องยาว 1–${MAX_NAME} ตัว` }
   if (!COLOR_KEYS.includes(color)) return { ok: false, error: 'ไม่รู้จักสีนั้น' }
+  const desc = cleanDesc(description)
+  if (desc === undefined) return { ok: false, error: `คำอธิบายยาวได้ไม่เกิน ${MAX_DESC} ตัว` }
 
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('areas')
-    .update({ name: clean, color })
+    .update({ name: clean, color, description: desc })
     .eq('id', areaId)
     .select('id')
 
