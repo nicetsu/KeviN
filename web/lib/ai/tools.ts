@@ -132,6 +132,12 @@ type ProjectRow = {
   areas: { name: string } | null
 }
 
+type AreaRow = {
+  id: string
+  name: string
+  description: string | null
+}
+
 type AgendaRow = {
   id: string
   day_offset: number
@@ -272,6 +278,38 @@ const items: ToolDef<{ scope: 'overdue' | 'open' | 'done' | 'notes' }, ItemRow> 
   }),
 }
 
+/*
+ * `areas` — กลุ่มบนสุด พร้อม **คำอธิบายที่ผู้ใช้เขียนเอง**
+ *
+ * ทำไมต้องเป็น tool แยก ไม่ยัดเข้าไปใน `projects`
+ *   · `projects` ดึงจากตาราง `projects` · **Area ที่ยังไม่มีโปรเจกต์สักใบจึงไม่โผล่**
+ *     ซึ่งเป็นเคสที่ต้องการมากที่สุดพอดี — ตอนสร้างโปรเจกต์**ใบแรก**ของกลุ่มนั้น
+ *   · คำอธิบายกินโทเคน · แยก tool แล้วโมเดลเรียกเฉพาะตอนต้องใช้จริง
+ */
+const areas: ToolDef<Record<string, never>, AreaRow> = {
+  description:
+    'กลุ่ม (Area) ทั้งหมดพร้อมคำอธิบายว่ากลุ่มนั้นเก็บอะไร · ' +
+    'ใช้ตอนต้องเลือกว่าโปรเจกต์ใหม่ควรอยู่กลุ่มไหน',
+  parameters: { type: 'object', properties: {}, required: [] },
+  parse: () => ({}),
+  fetch: (_input, ctx) =>
+    ctx.db.rows<AreaRow>({
+      table: 'areas',
+      columns: 'id, name, description',
+      filters: [{ col: 'archived_at', op: 'is', value: null }],
+      order: { col: 'sort_order', ascending: true },
+      limit: 30,
+    }),
+  shape: (row) => ({
+    id: row.id,
+    ชื่อ: row.name,
+    // null → undefined ไม่ใช่สตริงว่าง · แบบเดียวกับ `รหัสวิชา` ของ projects
+    คำอธิบาย: row.description ?? undefined,
+    // ต้องมีลิงก์เสมอ ไม่งั้นโมเดลแต่ง path เองเวลาต้องชี้ทาง (doc/TRAPS.md)
+    ลิงก์: `/library/${row.id}`,
+  }),
+}
+
 const projects: ToolDef<Record<string, never>, ProjectRow> = {
   description: 'รายชื่อวิชาและโปรเจกต์ที่มีอยู่ · ใช้ตอนผู้ใช้เรียกชื่อย่อแล้วต้องเดาว่าหมายถึงอันไหน',
   parameters: { type: 'object', properties: {}, required: [] },
@@ -335,12 +373,12 @@ const event: ToolDef<{ event_id: string }, EventRow> = {
 // --------------------------------------------------------------------------
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const REGISTRY = { calendar, items, projects, event } as unknown as Record<string, ToolDef<any, any>>
+const REGISTRY = { calendar, items, projects, areas, event } as unknown as Record<string, ToolDef<any, any>>
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export type ToolName = 'calendar' | 'items' | 'projects' | 'event'
+export type ToolName = 'calendar' | 'items' | 'projects' | 'areas' | 'event'
 
-export const TOOL_NAMES: readonly ToolName[] = ['calendar', 'items', 'projects', 'event']
+export const TOOL_NAMES: readonly ToolName[] = ['calendar', 'items', 'projects', 'areas', 'event']
 
 export function isToolName(name: string): name is ToolName {
   return (TOOL_NAMES as readonly string[]).includes(name)

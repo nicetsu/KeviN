@@ -222,7 +222,8 @@ test('ไม่มี tool ไหนคืนลิงก์ที่ออก�
   const dbs = [
     ['calendar', fakeDb([entry({ kind: 'event' })])],
     ['items', fakeDb([item()])],
-    ['projects', fakeDb([{ id: 'p1', name: 'แคล', description: null, status: 'active', areas: { name: 'Class' } }])],
+    ['projects', fakeDb([{ id: 'p1', name: 'แคล', description: null, status: 'active', areas: { name: 'เรียน' } }])],
+    ['areas', fakeDb([{ id: 'a1', name: 'เรียน', description: 'วิชาที่ลงทะเบียนเทอมนี้' }])],
   ] as const
   for (const [name, db] of dbs) {
     const r = await runTool(name, {}, ctx(db))
@@ -231,4 +232,51 @@ test('ไม่มี tool ไหนคืนลิงก์ที่ออก�
     const text = JSON.stringify(r.rows)
     assert.equal(/https?:\/\//.test(text), false, `${name} คืนลิงก์ภายนอกมา`)
   }
+})
+
+// ---- areas · กลุ่มพร้อมคำอธิบาย (9 ก.ย. 2026) ----
+
+test('areas · คืนคำอธิบายและลิงก์ของกลุ่ม', async () => {
+  const r = await runTool(
+    'areas',
+    {},
+    ctx(fakeDb([{ id: 'a1', name: 'ฝึกงาน', description: 'งานที่บริษัท' }])),
+  )
+  assert.equal(r.ok, true)
+  if (!r.ok || !('rows' in r)) return
+  assert.deepEqual(r.rows, [
+    { id: 'a1', ชื่อ: 'ฝึกงาน', คำอธิบาย: 'งานที่บริษัท', ลิงก์: '/library/a1' },
+  ])
+})
+
+test('areas · คำอธิบายที่ว่างต้องเป็น undefined ไม่ใช่สตริงว่าง', async () => {
+  // แบบเดียวกับ `รหัสวิชา` ของ projects — คีย์ที่มีค่าว่างอ่านเหมือน "มีแต่ไม่มีเนื้อ"
+  // ส่วน undefined หายไปจาก JSON ทั้งคีย์ ซึ่งตรงกับความจริงว่ายังไม่ได้กรอก
+  const r = await runTool('areas', {}, ctx(fakeDb([{ id: 'a1', name: 'ฝึกงาน', description: null }])))
+  assert.equal(r.ok, true)
+  if (!r.ok || !('rows' in r)) return
+  // สิ่งที่ตัดสินคือ **สิ่งที่เดินทางไปถึงโมเดล** ซึ่งคือ JSON — คีย์ที่ค่าเป็น
+  // undefined หายไปทั้งคีย์ตอน stringify ส่วนสตริงว่างจะเหลืออยู่และอ่านเหมือน
+  // "มีคำอธิบาย แต่ว่างเปล่า" ซึ่งไม่จริง
+  assert.equal(JSON.stringify(r.rows).includes('คำอธิบาย'), false)
+})
+
+test('areas · ดึงเฉพาะที่ยังไม่เก็บเข้าคลัง และเรียงตาม sort_order', async () => {
+  // Area ที่ยังไม่มีโปรเจกต์สักใบต้องติดมาด้วย — เป็นเหตุผลทั้งหมดที่ tool นี้แยกจาก projects
+  let seen: unknown = null
+  const db = {
+    rows: async <T,>(q: unknown) => {
+      seen = q
+      return [] as T[]
+    },
+    rpc: async <T,>() => [] as T[],
+  }
+  await runTool('areas', {}, ctx(db as never))
+  assert.deepEqual(seen, {
+    table: 'areas',
+    columns: 'id, name, description',
+    filters: [{ col: 'archived_at', op: 'is', value: null }],
+    order: { col: 'sort_order', ascending: true },
+    limit: 30,
+  })
 })
