@@ -328,7 +328,7 @@ export default async function TodayPage() {
         {nothing && (
           <div className="empty">
             <strong>วันนี้ว่าง</strong>
-            ไม่มีคาบเรียน กิจกรรม งาน หรือการเตือนในวันนี้
+            ไม่มีกิจวัตร กิจกรรม งาน หรือการเตือนในวันนี้
           </div>
         )}
 

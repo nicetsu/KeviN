@@ -119,7 +119,7 @@ export default function Editor({
   return (
     <>
       <div className="page-head">
-        <h1 style={{ fontSize: 'var(--s-1)' }}>ช่วงเวลาประจำ — {projectName}</h1>
+        <h1 style={{ fontSize: 'var(--s-1)' }}>กิจวัตร — {projectName}</h1>
       </div>
 
       <label className="field">
@@ -272,7 +272,7 @@ export default function Editor({
       <div className="sec sec--gap"><span>ตัวอย่างผลลัพธ์</span></div>
 
       {preview.total === 0 ? (
-        <p className="alert">ยังไม่มีคาบเลย — เลือกสัปดาห์อย่างน้อยหนึ่งช่อง</p>
+        <p className="alert">ยังไม่มีกิจวัตรเลย — เลือกสัปดาห์อย่างน้อยหนึ่งช่อง</p>
       ) : (
         <div className="sched-strip">
           <div>
@@ -282,7 +282,7 @@ export default function Editor({
             {preview.total > 6 ? ' · …' : ''}
           </div>
           <div className="strong">
-            รวม {preview.total} คาบ ถึง {preview.last ? thaiDateLabel(preview.last) : '—'}
+            รวม {preview.total} ครั้ง ถึง {preview.last ? thaiDateLabel(preview.last) : '—'}
           </div>
         </div>
       )}

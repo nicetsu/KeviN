@@ -74,7 +74,7 @@ export default function Hero({ info }: { info: HeroInfo }) {
   const end = new Date(main.endsAt).getTime()
   const isEvent = main.kind === 'event'
 
-  const NEXT = isEvent ? 'ถัดไป' : 'คาบถัดไป'
+  const NEXT = isEvent ? 'ถัดไป' : 'กิจวัตรถัดไป'
   const NOW = isEvent ? 'กำลังเกิดขึ้น' : 'กำลังเรียนอยู่'
 
   let kicker: React.ReactNode = NEXT
@@ -120,7 +120,7 @@ export default function Hero({ info }: { info: HeroInfo }) {
         <div
           className="hero__bar"
           role="progressbar"
-          aria-label="ความคืบหน้าของคาบนี้"
+          aria-label="ความคืบหน้าของกิจวัตรนี้"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(((now - start) / (end - start)) * 100)}

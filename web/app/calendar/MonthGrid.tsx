@@ -101,7 +101,7 @@ export default function MonthGrid({
       </div>
 
       <div className="legend">
-        <span><i style={{ background: COLOR.class }} />คาบ</span>
+        <span><i style={{ background: COLOR.class }} />กิจวัตร</span>
         <span><i style={{ background: COLOR.event }} />กิจกรรม</span>
         <span><i style={{ background: COLOR.due }} />กำหนดส่ง</span>
         <span><i style={{ background: COLOR.done }} />งานที่เสร็จแล้ว</span>

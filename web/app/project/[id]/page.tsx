@@ -163,10 +163,10 @@ export default async function ProjectPage({
           {sortedSlots.length > 0 ? (
             sortedSlots.map((s, i) => <div key={i}>{describe(s)}</div>)
           ) : (
-            <div>ยังไม่ได้ตั้งช่วงเวลาประจำ</div>
+            <div>ยังไม่ได้ตั้งกิจวัตร</div>
           )}
           <div style={{ marginTop: '0.5rem' }}>
-            <Link href={`/project/${id}/schedule`} className="back">แก้ช่วงเวลาประจำ ›</Link>
+            <Link href={`/project/${id}/schedule`} className="back">แก้กิจวัตร ›</Link>
           </div>
         </div>
 
