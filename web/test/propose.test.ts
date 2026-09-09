@@ -25,9 +25,9 @@ const db = (by: { projects?: unknown[]; items?: unknown[]; areas?: unknown[] }):
 const ctx = (d: ReadOnlyDb) => ({ db: d, today: TODAY })
 
 const PROJECTS = [
-  { id: 'p1', name: 'สถาปัตยกรรมเครือข่าย', areas: { name: 'Class' } },
-  { id: 'p2', name: 'ปฏิบัติการเครือข่าย', areas: { name: 'Class' } },
-  { id: 'p9', name: 'ค่าหอ', areas: { name: 'Personal' } }, // คนละ Area กับที่เหลือ
+  { id: 'p1', name: 'สถาปัตยกรรมเครือข่าย', description: 'CPE331', areas: { name: 'Class' } },
+  { id: 'p2', name: 'ปฏิบัติการเครือข่าย', description: 'CPE332', areas: { name: 'Class' } },
+  { id: 'p9', name: 'ค่าหอ', description: null, areas: { name: 'Personal' } }, // คนละ Area กับที่เหลือ
 ]
 
 const ITEM = {
@@ -372,4 +372,51 @@ test('propose_update_draft · แก้กลุ่มของร่างส�
     { ...ctx(db({ areas: AREAS })), openDrafts: [first.draft] },
   )
   assert.equal(bad.ok, false)
+})
+
+// ---- รหัสวิชา (9 ก.ย. 2026) ----
+
+test('findProject · รับ `รหัสวิชา` ที่ tool โชว์ให้โมเดลเห็นเอง', async () => {
+  /*
+   * ของจริงจากชุดวัดฝั่งโทร: โมเดลส่ง `project=MTH102` มา แล้วโดนปฏิเสธด้วย
+   * "หาวิชาชื่อ MTH102 ไม่เจอ" **ทั้งที่รหัสนั้นมาจาก tool ของเราเอง**
+   * — เราโชว์ฟิลด์หนึ่งออกไปแล้วไม่ยอมรับมันกลับ
+   */
+  const out = await runPropose(
+    'propose_add_item',
+    { type: 'task', project: 'CPE331', title: 'ส่งรายงาน' },
+    ctx(db({ projects: PROJECTS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  const a = out.draft.action as { projectId: string }
+  assert.equal(a.projectId, 'p1')
+})
+
+test('findProject · รหัสวิชาเทียบตรงเป๊ะเท่านั้น ไม่เทียบบางส่วน', async () => {
+  // รหัสใช้อักษรนำร่วมกันเป็นกอง (CPE331 · CPE332) — เทียบบางส่วนแล้ว "CPE"
+  // จะตรงสองวิชา กลายเป็นความกำกวมที่เราสร้างขึ้นเอง
+  const out = await runPropose(
+    'propose_add_item',
+    { type: 'task', project: 'CPE', title: 'x' },
+    ctx(db({ projects: PROJECTS })),
+  )
+  assert.equal(out.ok, false)
+  if (!out.ok) assert.match(out.error, /หาวิชาชื่อ/)
+})
+
+test('findProject · ชื่อยังชนะรหัสเมื่อทั้งคู่ตรงเป๊ะ', async () => {
+  // กันเคสประหลาดที่รหัสของวิชาหนึ่งดันไปตรงกับ**ชื่อ**ของอีกวิชา
+  const rows = [
+    { id: 'p1', name: 'CPE332', description: 'ZZZ', areas: { name: 'Class' } },
+    { id: 'p2', name: 'ปฏิบัติการ', description: 'CPE332', areas: { name: 'Class' } },
+  ]
+  const out = await runPropose(
+    'propose_add_item',
+    { type: 'task', project: 'CPE332', title: 'x' },
+    ctx(db({ projects: rows })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  assert.equal((out.draft.action as { projectId: string }).projectId, 'p1')
 })

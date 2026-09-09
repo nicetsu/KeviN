@@ -130,7 +130,7 @@ const bool = (raw: Record<string, unknown>, key: string, fallback: boolean): boo
 // หาของที่โมเดลอ้างถึง
 // --------------------------------------------------------------------------
 
-type ProjectRow = { id: string; name: string; areas: { name: string } | null }
+type ProjectRow = { id: string; name: string; description: string | null; areas: { name: string } | null }
 type ItemRow = {
   id: string
   type: 'task' | 'reminder' | 'shortnote'
@@ -151,7 +151,8 @@ type ItemRow = {
 async function findProject(ctx: ProposeCtx, ref: string): Promise<ProjectRow> {
   const rows = await ctx.db.rows<ProjectRow>({
     table: 'projects',
-    columns: 'id, name, areas(name)',
+    // `description` = สิ่งที่โมเดลเห็นในชื่อ `รหัสวิชา` — ต้องดึงมาด้วยเพราะเรารับมันกลับ
+    columns: 'id, name, description, areas(name)',
     filters: [{ col: 'archived_at', op: 'is', value: null }],
     order: { col: 'sort_order', ascending: true },
     limit: 60,
@@ -160,7 +161,26 @@ async function findProject(ctx: ProposeCtx, ref: string): Promise<ProjectRow> {
   if (rows.length === 0) throw new BadProposal('ยังไม่มีวิชาให้เลือกเลย')
 
   const needle = ref.trim().toLowerCase()
-  const exact = rows.find((r) => r.id === ref || r.name.toLowerCase() === needle)
+
+  /*
+   * ⚠️ **ต้องรับ `รหัสวิชา` ด้วย** (9 ก.ย. 2026) — tool `projects` โชว์ `รหัสวิชา`
+   *    ให้โมเดลเห็นอยู่แล้ว มันจึงส่งค่านั้นกลับมาเป็นชื่อวิชาเป็นเรื่องธรรมดา
+   *    ของจริงที่เจอในชุดวัดฝั่งโทร: ส่ง `project=MTH102` แล้วโดนปฏิเสธด้วย
+   *    "หาวิชาชื่อ MTH102 ไม่เจอ" **ทั้งที่รหัสนั้นถูกต้องและมาจากเราเอง**
+   *
+   *    เราโชว์ฟิลด์หนึ่งออกไปแล้วไม่ยอมรับมันกลับ = ตระกูลเดียวกับบั๊ก "ชนิดใน
+   *    schema ของ tool ไม่ตรงกับตัวอ่าน" (doc/TRAPS.md · 4 ก.ย. 2026)
+   *
+   * ⚠️ **รหัสเทียบแบบตรงเป๊ะเท่านั้น ห้ามเทียบบางส่วน** — รหัสวิชาใช้อักษรนำ
+   *    ร่วมกันเป็นกอง (CPE331 · CPE332 · CPE341) การเทียบบางส่วนจะทำให้
+   *    "CPE" ตรงสามวิชาแล้วกลายเป็นความกำกวมที่เราสร้างขึ้นเอง
+   */
+  const exact = rows.find(
+    (r) =>
+      r.id === ref ||
+      r.name.toLowerCase() === needle ||
+      (r.description ?? '').trim().toLowerCase() === needle,
+  )
   if (exact) return exact
 
   const partial = rows.filter((r) => r.name.toLowerCase().includes(needle))

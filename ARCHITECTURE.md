@@ -235,7 +235,7 @@ Next.js 16 · App Router · ไม่ใช้ Tailwind (ใช้ CSS custom pr
 ### ไฟล์ที่มีเทสต์ล้วนกำกับ — แก้แล้วต้องรันเทสต์
 
 ```bash
-npm test --prefix web        # 441 เคส · ไม่ถึงวินาที
+npm test --prefix web        # 445 เคส · ไม่ถึงวินาที
 ```
 
 | ไฟล์ | ทำอะไร | เคส |
@@ -917,7 +917,7 @@ network call ไป Supabase **ทุกครั้ง** ไม่ใช่ก�
 
 ```bash
 npm run dev --prefix web              # รันเว็บในเครื่อง (พอร์ต 3000)
-npm test --prefix web                 # เทสต์ตรรกะแกน 441 เคส
+npm test --prefix web                 # เทสต์ตรรกะแกน 445 เคส
 npm run lint --prefix web             # ต้องสะอาด 0 error 0 warning
 npx tsc --noEmit --project web        # ตรวจ type
 
