@@ -66,6 +66,14 @@ export type DraftDb = {
 export type UndoTarget =
   | { itemId: string; field: 'done'; prev: string | null }
   | { itemId: string; field: 'archived' }
+  /**
+   * ย้อนการแก้โปรเจกต์ (10 ก.ย. 2026) — **พกค่าเดิมไปทุกฟิลด์ที่แตะ**
+   *
+   * เหตุผลเดียวกับที่การติ๊กต้องพก `prev`: การย้อนคือ**การคืนค่าเดิม**
+   * ไม่ใช่การล้างค่า · ถ้าย้อนด้วยค่าตายตัว การย้ายจาก A→B แล้วกดเลิกทำ
+   * จะไปโผล่ที่กลุ่มที่สามโดยไม่มีใครสั่ง
+   */
+  | { projectId: string; prev: { name?: string; description?: string | null; areaId?: string } }
 
 export type ApplyResult =
   | { ok: true; message: string; undo?: UndoTarget }
@@ -237,6 +245,63 @@ export async function applyDraftWith(
       return { ok: true, message: `สร้าง “${action.name}” แล้ว` }
     }
 
+    case 'edit_project': {
+      const blocked = await assertProjectAllowed(db, action.projectId)
+      if (blocked) return { ok: false, error: blocked }
+
+      /*
+       * อ่านค่าเดิมก่อนเขียนทับ — **จังหวะเดียวที่ยังอ่านทัน** เหมือน
+       * `assertItemAllowed()` ทำกับ `done_at` · ปุ่มเลิกทำต้องพกค่านี้ไป
+       */
+      const { data: before, error: readError } = await db
+        .from('projects')
+        .select('name, description, area_id')
+        .eq('id', action.projectId)
+        .is('archived_at', null)
+        .maybeSingle()
+      if (readError) return { ok: false, error: readError.message }
+      if (!before) return { ok: false, error: 'ไม่พบโปรเจกต์นั้น' }
+
+      const patch: Row = {}
+      const prev: { name?: string; description?: string | null; areaId?: string } = {}
+
+      if (action.name !== undefined) {
+        patch.name = action.name
+        prev.name = String(before.name)
+      }
+      if (action.description !== undefined) {
+        patch.description = action.description
+        const d = before.description
+        prev.description = typeof d === 'string' ? d : null
+      }
+      if (action.areaId !== undefined) {
+        const blockedArea = await assertAreaAllowed(db, action.areaId)
+        if (blockedArea) return { ok: false, error: blockedArea }
+        patch.area_id = action.areaId
+        // ต่อท้ายในกลุ่มปลายทาง — กฎเดียวกับ `createProject` และ `add_project`
+        patch.sort_order = await nextSortOrder(db, action.areaId)
+        prev.areaId = String(before.area_id)
+      }
+
+      if (Object.keys(patch).length === 0) {
+        return { ok: false, error: 'ร่างนี้ไม่ได้เปลี่ยนอะไรเลย' }
+      }
+
+      const { data, error } = await db
+        .from('projects')
+        .update(patch)
+        .eq('id', action.projectId)
+        .select('id')
+
+      if (error) return { ok: false, error: error.message }
+      if (!data?.length) return { ok: false, error: NOT_WRITTEN }
+      return {
+        ok: true,
+        message: action.areaId !== undefined ? 'ย้ายกลุ่มให้แล้ว' : 'แก้ให้แล้ว',
+        undo: { projectId: action.projectId, prev },
+      }
+    }
+
     case 'add_event': {
       const blocked = await assertProjectAllowed(db, action.projectId)
       if (blocked) return { ok: false, error: blocked }
@@ -348,6 +413,26 @@ export async function applyDraftWith(
  *    "เอาติ๊กออก" จะไม่เปลี่ยนอะไรเลยแต่รายงานว่าสำเร็จ
  */
 export async function undoApplyWith(db: DraftDb, target: UndoTarget): Promise<ApplyResult> {
+  /*
+   * การย้อนของโปรเจกต์เขียนคืน**เฉพาะฟิลด์ที่เคยถูกแตะ** — ฟิลด์ที่ไม่ได้อยู่ใน
+   * `prev` แปลว่าตอนแก้ไม่ได้แตะมัน จึงต้องไม่ถูกเขียนทับตอนย้อนด้วย
+   */
+  if ('projectId' in target) {
+    const patch: Row = {}
+    if (target.prev.name !== undefined) patch.name = target.prev.name
+    if (target.prev.description !== undefined) patch.description = target.prev.description
+    if (target.prev.areaId !== undefined) {
+      patch.area_id = target.prev.areaId
+      patch.sort_order = await nextSortOrder(db, target.prev.areaId)
+    }
+    if (Object.keys(patch).length === 0) return { ok: false, error: 'ไม่มีอะไรให้ย้อน' }
+
+    const back = await db.from('projects').update(patch).eq('id', target.projectId).select('id')
+    if (back.error) return { ok: false, error: back.error.message }
+    if (!back.data?.length) return { ok: false, error: NOT_WRITTEN }
+    return { ok: true, message: 'เลิกทำแล้ว' }
+  }
+
   const check = await assertItemAllowed(db, target.itemId)
   // ของที่เพิ่งเก็บเข้าคลังจะหาไม่เจอด้วยเงื่อนไข archived_at is null — ข้ามการตรวจนั้น
   if (!check.ok && target.field === 'done') return { ok: false, error: check.error }

@@ -420,3 +420,85 @@ test('findProject · ชื่อยังชนะรหัสเมื่อ�
   if (!out.ok) return
   assert.equal((out.draft.action as { projectId: string }).projectId, 'p1')
 })
+
+// ---- แก้/ย้ายโปรเจกต์ (10 ก.ย. 2026) ----
+
+test('propose_edit_project · ย้ายกลุ่ม ต้องโชว์กลุ่มเดิมคู่กับกลุ่มใหม่', async () => {
+  /*
+   * การ์ดคือด่านจริงด่านเดียวที่กันการย้ายผิดกลุ่ม — ผู้ใช้เห็น "Class → ฝึกงาน"
+   * แล้วรู้ทันทีว่าถูกหรือผิด · โชว์แค่ปลายทางอย่างเดียวทานไม่ได้
+   */
+  const out = await runPropose(
+    'propose_edit_project',
+    { project: 'สถาปัตยกรรมเครือข่าย', area: 'ฝึกงาน' },
+    ctx(db({ projects: PROJECTS, areas: AREAS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  assert.equal(out.draft.action.kind, 'edit_project')
+  assert.deepEqual(out.draft.lines[0], { label: 'กลุ่ม', value: 'ฝึกงาน', was: 'Class' })
+})
+
+test('propose_edit_project · เปลี่ยนชื่อ ต้องโชว์ชื่อเดิมขีดฆ่าไว้', async () => {
+  const out = await runPropose(
+    'propose_edit_project',
+    { project: 'ค่าหอ', name: 'ค่าหอพัก' },
+    ctx(db({ projects: PROJECTS, areas: AREAS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  assert.deepEqual(out.draft.lines[0], { label: 'ชื่อ', value: 'ค่าหอพัก', was: 'ค่าหอ' })
+})
+
+test('propose_edit_project · "-" คือล้างรหัสวิชา ไม่ใช่ตั้งค่าเป็นขีด', async () => {
+  const out = await runPropose(
+    'propose_edit_project',
+    { project: 'สถาปัตยกรรมเครือข่าย', description: '-' },
+    ctx(db({ projects: PROJECTS, areas: AREAS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  const a = out.draft.action as { description?: string | null }
+  assert.equal(a.description, null)
+  assert.deepEqual(out.draft.lines[0], { label: 'รหัสวิชา', value: 'ไม่มี', was: 'CPE331' })
+})
+
+test('propose_edit_project · ไม่บอกว่าจะแก้อะไร ต้องปฏิเสธ ไม่ใช่สร้างร่างเปล่า', async () => {
+  const out = await runPropose(
+    'propose_edit_project',
+    { project: 'ค่าหอ' },
+    ctx(db({ projects: PROJECTS, areas: AREAS })),
+  )
+  assert.equal(out.ok, false)
+})
+
+test('propose_edit_project · หาโปรเจกต์ด้วยรหัสวิชาได้เหมือนที่อื่น', async () => {
+  const out = await runPropose(
+    'propose_edit_project',
+    { project: 'CPE332', name: 'แลปเครือข่าย' },
+    ctx(db({ projects: PROJECTS, areas: AREAS })),
+  )
+  assert.equal(out.ok, true)
+  if (!out.ok) return
+  assert.equal((out.draft.action as { projectId: string }).projectId, 'p2')
+})
+
+test('propose_update_draft · แก้ร่างย้ายกลุ่มใบเดิมได้ ไม่ใช่ขึ้นใบที่สอง', async () => {
+  const first = await runPropose(
+    'propose_edit_project',
+    { project: 'ค่าหอ', area: 'Class' },
+    ctx(db({ projects: PROJECTS, areas: AREAS })),
+  )
+  assert.equal(first.ok, true)
+  if (!first.ok) return
+
+  const next = await runPropose(
+    'propose_update_draft',
+    { area: 'Competition' },
+    { ...ctx(db({ projects: PROJECTS, areas: AREAS })), openDrafts: [first.draft] },
+  )
+  assert.equal(next.ok, true)
+  if (!next.ok) return
+  assert.equal(next.draft.id, first.draft.id)
+  assert.deepEqual(next.draft.lines[0], { label: 'กลุ่ม', value: 'Competition', was: 'Personal' })
+})

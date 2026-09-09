@@ -42,6 +42,21 @@ export type DraftAction =
   | { kind: 'archive_item'; itemId: string }
   | {
       /**
+       * แก้โปรเจกต์ที่มีอยู่ (10 ก.ย. 2026) — ชื่อ · รหัสวิชา · **และย้ายกลุ่ม**
+       *
+       * ย้อนได้ทั้งสามอย่าง จึงมีปุ่มเลิกทำ ต่างจาก `add_project` ที่การย้อน
+       * คือการลบ · ตรงกับตารางขอบเขตตามความเสี่ยงใน ARCHITECTURE §7
+       * ("เปลี่ยนชื่อ · ย้ายที่" อยู่ในกลุ่มย้อนได้ทันที)
+       */
+      kind: 'edit_project'
+      projectId: string
+      name?: string
+      /** `null` = ล้างรหัสวิชาทิ้ง · `undefined` = ไม่แตะ */
+      description?: string | null
+      areaId?: string
+    }
+  | {
+      /**
        * สร้างโปรเจกต์ใหม่ (9 ก.ย. 2026) — **กลับมติ "ผู้ช่วยสร้างโปรเจกต์ไม่ได้"**
        *
        * เส้นที่ยังไม่ข้าม: **ลบ** โปรเจกต์ยังทำไม่ได้เลย (`on delete cascade`
@@ -111,6 +126,7 @@ export const DRAFT_KINDS: readonly DraftKind[] = [
   'archive_item',
   'add_event',
   'add_project',
+  'edit_project',
 ]
 
 export function isDraftKind(v: unknown): v is DraftKind {
@@ -157,6 +173,8 @@ export function confirmLabel(kind: DraftKind): string {
       return 'เพิ่มกิจกรรม'
     case 'add_project':
       return 'สร้างเลย'
+    case 'edit_project':
+      return 'บันทึกการแก้'
   }
 }
 

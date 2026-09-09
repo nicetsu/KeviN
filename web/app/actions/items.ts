@@ -209,6 +209,80 @@ export async function createProject(areaId: string, name: string): Promise<Resul
 }
 
 /**
+ * แก้ชื่อ · รหัสวิชา · และ**ย้ายกลุ่ม** ของโปรเจกต์ (10 ก.ย. 2026)
+ *
+ * ก่อนหน้านี้โปรเจกต์ที่สร้างแล้ว **แก้อะไรไม่ได้เลย** — ทางเดียวคือเก็บเข้าคลัง
+ * แล้วสร้างใหม่ ซึ่งพางานข้างในไปด้วย · รูนี้โตขึ้นพอดีตอนเปิดให้ผู้ช่วยสร้าง
+ * โปรเจกต์เองได้ (9 ก.ย.) เพราะสร้างง่ายขึ้นแต่ลงผิดกลุ่มแล้วแก้ไม่ได้
+ *
+ * ⚠️ **ย้ายกลุ่มแล้ว items/events/schedules ตามไปเองทั้งหมด** เพราะทุกตัวผูกกับ
+ *    `project_id` ไม่ใช่ `area_id` · ไม่ต้องแตะอะไรเพิ่ม และไม่มีอะไรหลุดค้าง
+ *
+ * ⚠️ **ละคีย์ไว้ = ไม่แตะ** เหมือน `shape()` ของ item — ส่ง `description: null`
+ *    เข้ามาถึงจะล้างค่า · ถ้ารับเป็น "ใส่ทุกคีย์เสมอ" การกดแก้แค่ชื่อจะล้าง
+ *    รหัสวิชาทิ้งโดยไม่มีอะไรเตือน (doc/TRAPS.md · กับดักเดียวกับ `event_id`)
+ */
+export async function updateProject(
+  projectId: string,
+  patch: { name?: string; description?: string | null; areaId?: string },
+): Promise<Result> {
+  const supabase = await createClient()
+
+  const row: Record<string, unknown> = {}
+
+  if (patch.name !== undefined) {
+    const clean = patch.name.trim()
+    if (!clean) return { ok: false, error: 'ต้องมีชื่อ' }
+    if (clean.length > 120) return { ok: false, error: 'ชื่อยาวเกิน 120 ตัวอักษร' }
+    row.name = clean
+  }
+
+  if (patch.description !== undefined) {
+    const desc = patch.description?.trim() ?? ''
+    /*
+     * ⚠️ **ไม่มี CHECK ที่ DB คุมความยาวของช่องนี้** ต่างจาก `areas.description`
+     *    ที่คุมไว้ 200 — เพราะของจริงมีแถวยาว 285 ตัวอยู่ก่อนแล้ว (เก็บรหัสวิชา
+     *    พร้อมชื่ออังกฤษเต็ม) การใส่เพดาน 200 ย้อนหลังจะทำให้แถวเดิมเซฟไม่ผ่าน
+     *    ทั้งที่ผู้ใช้แค่กดเปิดแก้แล้วกดบันทึก · เพดานนี้จึงกว้างและอยู่ฝั่งแอปอย่างเดียว
+     */
+    if (desc.length > 500) return { ok: false, error: 'รหัส/คำอธิบายยาวเกิน 500 ตัวอักษร' }
+    row.description = desc === '' ? null : desc
+  }
+
+  if (patch.areaId !== undefined) {
+    row.area_id = patch.areaId
+    /*
+     * ต่อท้ายในกลุ่มปลายทางเสมอ — ถ้าคง `sort_order` เดิมไว้ มันจะไปแทรกกลาง
+     * ลำดับที่ผู้ใช้คุ้นตาแล้วในกลุ่มนั้น หรือชนกับตัวที่มีเลขเดียวกันพอดี
+     * (กฎเดียวกับ `createProject` และ `propose_add_project`)
+     */
+    const { data: last } = await supabase
+      .from('projects')
+      .select('sort_order')
+      .eq('area_id', patch.areaId)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    row.sort_order = (last?.sort_order ?? -1) + 1
+  }
+
+  if (Object.keys(row).length === 0) return { ok: false, error: 'ไม่ได้เปลี่ยนอะไรเลย' }
+
+  // นับแถวเสมอ — update ที่ไม่โดนสักแถวถือว่า "สำเร็จ" ในสายตา PostgREST
+  const { data, error } = await supabase
+    .from('projects')
+    .update(row)
+    .eq('id', projectId)
+    .select('id')
+
+  if (error) return { ok: false, error: error.message }
+  if (!data?.length) return { ok: false, error: NOT_WRITTEN }
+  refresh()
+  revalidatePath(`/project/${projectId}`)
+  return { ok: true }
+}
+
+/**
  * จัดลำดับใหม่ · `ids` เรียงตามลำดับที่ต้องการแล้ว เขียน sort_order = ตำแหน่ง
  *
  * เรียกได้เฉพาะกับชุดแถวที่ sort_order เป็นตัวตัดสินลำดับจริง

@@ -439,7 +439,7 @@ const archiveItem: ProposeDef = {
 const addEvent: ProposeDef = {
   description:
     'เสนอเพิ่มกิจกรรมที่เกิดครั้งเดียว เช่นแข่งขัน สัมมนา นัดประชุม · **ยังไม่บันทึก** ต้องกดยืนยันก่อน ' +
-    'ห้ามใช้กับคาบเรียนที่ซ้ำทุกสัปดาห์ — อันนั้นต้องไปตั้งในหน้าวิชาเอง',
+    'ห้ามใช้กับกิจวัตรที่ซ้ำทุกสัปดาห์ — อันนั้นต้องไปตั้งในหน้าโปรเจกต์เอง',
   parameters: {
     type: 'object',
     properties: {
@@ -538,6 +538,68 @@ const addProject: ProposeDef = {
   },
 }
 
+const editProject: ProposeDef = {
+  description:
+    'เสนอแก้โปรเจกต์ที่มีอยู่ — เปลี่ยนชื่อ แก้รหัสวิชา หรือ**ย้ายไปกลุ่มอื่น** · ' +
+    '**ยังไม่บันทึก** ผู้ใช้ต้องกดยืนยันบนจอก่อน · ใช้เมื่อโปรเจกต์อยู่ผิดกลุ่มหรือชื่อผิด ' +
+    'ไม่ใช่ตอนจะสร้างใหม่',
+  parameters: {
+    type: 'object',
+    properties: {
+      project: { type: 'string', description: 'ชื่อโปรเจกต์เดิม รหัสวิชา หรือ id ที่ได้จาก tool projects' },
+      name: { type: 'string', description: 'ชื่อใหม่ ถ้าจะเปลี่ยน' },
+      description: { type: 'string', description: 'รหัสวิชาหรือคำอธิบายใหม่ · ใส่ "-" เพื่อล้างทิ้ง' },
+      area: { type: 'string', description: 'ชื่อกลุ่มปลายทาง ถ้าจะย้าย' },
+    },
+    required: ['project'],
+  },
+  build: async (raw, ctx) => {
+    const project = await findProject(ctx, text(raw, 'project', 120))
+    const lines: DraftLine[] = []
+
+    const name = text(raw, 'name', 120, false) || undefined
+    if (name) lines.push({ label: 'ชื่อ', value: name, was: project.name })
+
+    /** `-` = ล้างค่าทิ้ง ซึ่งต่างจาก "ไม่แตะ" — กติกาเดียวกับเวลาใน `propose_edit_item` */
+    const rawDesc = raw.description
+    const description =
+      rawDesc === undefined || rawDesc === null || rawDesc === ''
+        ? undefined
+        : String(rawDesc).trim() === '-'
+          ? null
+          : text(raw, 'description', 500)
+    if (description !== undefined) {
+      lines.push({
+        label: 'รหัสวิชา',
+        value: description === null ? 'ไม่มี' : description,
+        was: project.description ?? 'ไม่มี',
+      })
+    }
+
+    let areaId: string | undefined
+    if (raw.area !== undefined && raw.area !== null && raw.area !== '') {
+      const area = await findArea(ctx, text(raw, 'area', 80))
+      /*
+       * ⚠️ **ชื่อกลุ่มเต็มต้องขึ้นการ์ดคู่กับกลุ่มเดิมเสมอ** — การย้ายกลุ่มเป็นสิ่งที่
+       *    ทานได้จากการ์ดอย่างเดียว · ผู้ใช้เห็น "จาก Class → Personal" แล้วรู้ทันที
+       *    ว่าถูกหรือผิด ซึ่งเป็นด่านจริงด่านเดียวที่กันการย้ายผิดกลุ่ม
+       */
+      areaId = area.id
+      lines.push({ label: 'กลุ่ม', value: area.name, was: project.areas?.name ?? 'ไม่ทราบ' })
+    }
+
+    if (lines.length === 0) throw new BadProposal('ยังไม่ได้บอกว่าจะแก้อะไรในโปรเจกต์นี้')
+
+    return {
+      id: draftId(),
+      heading: 'แก้โปรเจกต์',
+      title: name ?? project.name,
+      lines,
+      action: { kind: 'edit_project', projectId: project.id, name, description, areaId },
+    }
+  },
+}
+
 const TOOL_OF_KIND: Record<DraftAction['kind'], string> = {
   add_item: 'propose_add_item',
   edit_item: 'propose_edit_item',
@@ -545,6 +607,7 @@ const TOOL_OF_KIND: Record<DraftAction['kind'], string> = {
   archive_item: 'propose_archive_item',
   add_event: 'propose_add_event',
   add_project: 'propose_add_project',
+  edit_project: 'propose_edit_project',
 }
 
 /** ฟิลด์ที่ร่างแต่ละชนิดแก้ได้จริง — ฟิลด์ที่ไม่มีที่ลง ต้องปฏิเสธ ไม่ใช่รับแล้วทิ้ง */
@@ -557,6 +620,7 @@ const UPDATABLE: Record<DraftAction['kind'], readonly string[]> = {
   // ⚠️ `area` เป็นฟิลด์ของร่างนี้เท่านั้น — ร่างอื่นใช้ `project` · ปนกันเมื่อไหร่
   //    การแก้จะเงียบ (รับค่าแล้วไม่มีที่ลง) ซึ่งเป็นสิ่งที่ UPDATABLE มีไว้กัน
   add_project: ['area', 'name', 'description'],
+  edit_project: ['area', 'name', 'description'],
 }
 
 const UPDATE_FIELDS = [
@@ -604,6 +668,14 @@ function rawOf(a: DraftAction): Record<string, unknown> {
       // ส่ง `areaId` กลับไปเป็น `area` ได้เพราะ `findArea()` รับ id ตรง ๆ ด้วย
       // (กติกาเดียวกับที่ `add_item` ส่ง `projectId` กลับไปเป็น `project`)
       return { area: a.areaId, name: a.name, description: a.description }
+    case 'edit_project':
+      return {
+        project: a.projectId,
+        name: a.name,
+        // `-` คือคำสั่งล้างค่า ต้องรักษาไว้ให้ต่างจาก undefined ที่แปลว่าไม่แตะ
+        description: a.description === null ? '-' : a.description,
+        area: a.areaId,
+      }
   }
 }
 
@@ -710,6 +782,7 @@ const REGISTRY: Record<string, ProposeDef> = {
   propose_archive_item: archiveItem,
   propose_add_event: addEvent,
   propose_add_project: addProject,
+  propose_edit_project: editProject,
   propose_update_draft: updateDraft,
 }
 

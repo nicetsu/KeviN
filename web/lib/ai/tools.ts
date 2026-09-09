@@ -165,7 +165,7 @@ const clock = (t: string) => (t.startsWith('24') ? '24:00' : t.slice(0, 5))
 
 const calendar: ToolDef<{ from: string; to: string }, EntryRow> = {
   description:
-    'ดูว่าช่วงวันที่ที่ระบุติดอะไรบ้าง — รวมคาบเรียนและกิจกรรมไว้ให้แล้ว ' +
+    'ดูว่าช่วงวันที่ที่ระบุติดอะไรบ้าง — รวมกิจวัตรและกิจกรรมไว้ให้แล้ว ' +
     'และเอาการตัดทอนเวลามาคิดแล้ว · ใช้ตัวนี้เป็นค่าตั้งต้นสำหรับคำถามแนว "พรุ่งนี้ติดอะไร"',
   parameters: {
     type: 'object',
@@ -184,7 +184,8 @@ const calendar: ToolDef<{ from: string; to: string }, EntryRow> = {
     return rows
   },
   shape: (row) => ({
-    ชนิด: row.kind === 'class' ? 'คาบเรียน' : 'กิจกรรม',
+    // ⚠️ ต้องตรงกับคำบนหน้าจอ (เปลี่ยน 9 ก.ย. 2026) — ไม่งั้นผู้ช่วยพูดคนละคำกับที่เขาเห็น
+    ชนิด: row.kind === 'class' ? 'กิจวัตร' : 'กิจกรรม',
     ชื่อ: row.title,
     วิชา: row.project_name,
     วันที่: row.occurs_on,

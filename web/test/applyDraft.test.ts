@@ -504,3 +504,92 @@ test('add_project · ไม่มีปุ่มเลิกทำ เพรา�
   assert.equal(res.ok, true)
   if (res.ok) assert.equal(res.undo, undefined)
 })
+
+/* ------------------------------------------------- แก้/ย้ายโปรเจกต์ (10 ก.ย. 2026) */
+
+/** แถวเดิมของโปรเจกต์ · ใช้ทั้งตอนตรวจสิทธิ์และตอนอ่านค่าเดิมไว้ให้ปุ่มเลิกทำ */
+const PROJECT_ROW: Lookup = {
+  data: { id: 'p1', name: 'ชื่อเดิม', description: 'CPE331', area_id: 'a-old' },
+  error: null,
+}
+
+test('edit_project · ย้ายกลุ่มแล้วต่อท้ายลำดับในกลุ่มปลายทาง', async () => {
+  const { db, calls } = fakeDb({
+    lookup: { projects: PROJECT_ROW, areas: AREA },
+    tail: { projects: { data: [{ sort_order: 6 }], error: null } },
+  })
+  const res = await applyDraftWith(db, USER, { kind: 'edit_project', projectId: 'p1', areaId: 'a1' })
+
+  assert.equal(res.ok, true)
+  const w = written(calls)
+  assert.equal(w?.payload?.area_id, 'a1')
+  // ถ้าคง sort_order เดิมไว้ มันจะไปแทรกกลางลำดับที่ผู้ใช้คุ้นตาแล้วในกลุ่มนั้น
+  assert.equal(w?.payload?.sort_order, 7)
+})
+
+test('edit_project · ละคีย์ไว้ = ไม่แตะ', async () => {
+  // กดแก้แค่ชื่อ ต้องไม่เขียนทับรหัสวิชาด้วยค่าที่ฟอร์มบังเอิญถืออยู่
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT_ROW } })
+  await applyDraftWith(db, USER, { kind: 'edit_project', projectId: 'p1', name: 'ชื่อใหม่' })
+
+  const payload = written(calls)?.payload ?? {}
+  assert.equal(payload.name, 'ชื่อใหม่')
+  assert.equal('description' in payload, false)
+  assert.equal('area_id' in payload, false)
+})
+
+test('edit_project · ร่างที่ไม่ได้เปลี่ยนอะไร ไม่เขียนอะไรเลย', async () => {
+  const { db, calls } = fakeDb({ lookup: { projects: PROJECT_ROW } })
+  const res = await applyDraftWith(db, USER, { kind: 'edit_project', projectId: 'p1' })
+
+  assert.equal(res.ok, false)
+  assert.equal(written(calls), undefined)
+})
+
+test('edit_project · กลุ่มปลายทางที่หาไม่เจอ ไม่เขียนอะไรเลย', async () => {
+  const { db, calls } = fakeDb({
+    lookup: { projects: PROJECT_ROW, areas: { data: null, error: null } },
+  })
+  const res = await applyDraftWith(db, USER, { kind: 'edit_project', projectId: 'p1', areaId: 'ของคนอื่น' })
+
+  assert.equal(res.ok, false)
+  assert.equal(written(calls), undefined)
+})
+
+test('edit_project · ปุ่มเลิกทำพกค่าเดิมไปครบทุกฟิลด์ที่แตะ', async () => {
+  const { db } = fakeDb({ lookup: { projects: PROJECT_ROW, areas: AREA } })
+  const res = await applyDraftWith(db, USER, {
+    kind: 'edit_project', projectId: 'p1', name: 'ชื่อใหม่', areaId: 'a1',
+  })
+
+  assert.equal(res.ok, true)
+  if (!res.ok) return
+  assert.deepEqual(res.undo, { projectId: 'p1', prev: { name: 'ชื่อเดิม', areaId: 'a-old' } })
+  // ไม่ได้แตะ description จึงต้องไม่มีใน prev — ไม่งั้นการย้อนจะเขียนทับของที่ไม่ได้แก้
+  if (res.undo && 'projectId' in res.undo) {
+    assert.equal('description' in res.undo.prev, false)
+  }
+})
+
+test('undo · การย้อนคือการคืนค่าเดิม ไม่ใช่การล้างค่า', async () => {
+  const { db, calls } = fakeDb({ tail: { projects: { data: [{ sort_order: 2 }], error: null } } })
+  const res = await undoApplyWith(db, {
+    projectId: 'p1',
+    prev: { name: 'ชื่อเดิม', areaId: 'a-old' },
+  })
+
+  assert.equal(res.ok, true)
+  const payload = written(calls)?.payload ?? {}
+  assert.equal(payload.name, 'ชื่อเดิม')
+  assert.equal(payload.area_id, 'a-old')
+  assert.equal(payload.sort_order, 3)
+})
+
+test('undo · ฟิลด์ที่ไม่เคยถูกแตะต้องไม่ถูกเขียนตอนย้อน', async () => {
+  const { db, calls } = fakeDb()
+  await undoApplyWith(db, { projectId: 'p1', prev: { name: 'ชื่อเดิม' } })
+
+  const payload = written(calls)?.payload ?? {}
+  assert.equal('area_id' in payload, false)
+  assert.equal('description' in payload, false)
+})

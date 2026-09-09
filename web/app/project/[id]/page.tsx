@@ -8,6 +8,7 @@ import { ENTRY_COLOR } from '@/lib/calendar'
 import { orderEvents, isPastEvent } from '@/lib/eventOrder'
 import ItemList, { type Row } from '@/components/ItemList'
 import ProjectMenu from '@/components/ProjectMenu'
+import ProjectEdit from './ProjectEdit'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,7 +62,7 @@ export default async function ProjectPage({
   const [projRes, schedRes, itemRes, eventRes] = await Promise.all([
     supabase
       .from('projects')
-      .select('id, name, description, status, archived_at, areas(name)')
+      .select('id, name, description, status, archived_at, area_id, areas(name)')
       .eq('id', id)
       .maybeSingle(),
     supabase
@@ -95,8 +96,23 @@ export default async function ProjectPage({
     name: string
     description: string | null
     archived_at: string | null
+    area_id: string
     areas: { name: string } | null
   }
+
+  /*
+   * รายชื่อกลุ่มสำหรับตัวเลือก "ย้ายไปกลุ่มอื่น" ในแผงแก้ไข
+   *
+   * ⚠️ ดึงเฉพาะที่ยังไม่เก็บเข้าคลัง — ย้ายเข้ากลุ่มที่เก็บไปแล้วเท่ากับทำให้
+   *    โปรเจกต์หายจากสายตาโดยที่ตัวมันเองยังไม่ได้ถูกเก็บ
+   * ⚠️ RLS เป็นตัวกันว่าเห็นเฉพาะกลุ่มของตัวเอง ไม่ใช่บรรทัดนี้
+   */
+  const { data: areaRows } = await supabase
+    .from('areas')
+    .select('id, name')
+    .is('archived_at', null)
+    .order('sort_order', { ascending: true })
+  const areaChoices = (areaRows ?? []) as { id: string; name: string }[]
   const slots = (schedRes.data ?? []) as Slot[]
   const items = (itemRes.data ?? []) as Item[]
   const events = (eventRes.data ?? []) as EventRow[]
@@ -266,6 +282,13 @@ export default async function ProjectPage({
         </Group>
 
         <div className="actions actions--end">
+          <ProjectEdit
+            projectId={id}
+            name={project.name}
+            description={project.description}
+            areaId={project.area_id}
+            areas={areaChoices}
+          />
           <ProjectMenu projectId={id} archived={project.archived_at !== null} />
         </div>
       </main>
