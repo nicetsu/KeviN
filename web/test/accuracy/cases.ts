@@ -8,7 +8,7 @@
  */
 import { BOARD, boardImage } from './board'
 import { I, P } from './fixtures'
-import { acted, called, fakeSuccessWords, first, spoken, th, utcLeaks, type Case, type Turn } from './harness'
+import { acted, called, fakeDraftClaim, fakeSuccessWords, first, spoken, th, utcLeaks, type Case, type Turn } from './harness'
 
 /** ตรวจว่าร่างมีใบเดียวและเป็นชนิดที่ต้องการ · คืนข้อผิดถ้าไม่ใช่ */
 function one(t: Turn, kind: string): string[] {
@@ -545,6 +545,9 @@ export function globalProblems(t: Turn): string[] {
   const out: string[] = []
   const claimed = fakeSuccessWords(t.reply)
   if (claimed.length) out.push(`พูดเหมือนบันทึกแล้วทั้งที่ยังไม่ได้ยืนยัน: ${claimed.join(' · ')}`)
+  // อ้างว่ามีการ์ดบนจอทั้งที่ไม่มีร่างเลย — ราคาเท่ากับ "บันทึกให้แล้ว" ทุกประการ
+  const ghost = fakeDraftClaim(t)
+  if (ghost.length) out.push(`บอกว่าร่างขึ้นบนจอแล้วทั้งที่ไม่มีร่างสักใบ: ${ghost.join(' · ')}`)
   // กติกาข้อ 7 ของ prompt — แปลงเป็น UTC เองแล้วจะเหลื่อมไป 7 ชั่วโมงแบบเงียบ ๆ
   const leaked = utcLeaks(t)
   if (leaked.length) out.push(`ส่งเวลาที่ไม่ใช่รูปเวลาไทย: ${leaked.join(' · ')}`)

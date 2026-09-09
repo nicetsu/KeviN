@@ -81,8 +81,8 @@ const PROJECTS: Row[] = [
 const AREAS: Row[] = [
   { id: 'c1', name: 'Class', description: 'วิชาที่ลงทะเบียนเรียนเทอมนี้ · การบ้าน รายงาน สอบ คาบเรียน', sort_order: 0, archived_at: null },
   { id: 'c2', name: 'Competition', description: 'การแข่งขัน แฮกกาธอน ประกวด และงานที่สมัครเข้าร่วมเอง', sort_order: 1, archived_at: null },
-  { id: 'c3', name: 'Personal', description: 'เรื่องส่วนตัว สุขภาพ การเงิน นัดหมาย', sort_order: 2, archived_at: null },
-  { id: 'c4', name: 'General', description: 'ของที่ยังไม่รู้ว่าจะจัดไว้ตรงไหน', sort_order: 3, archived_at: null },
+  { id: 'c3', name: 'Personal', description: 'โปรเจกต์ของตัวเอง งานอดิเรก และการพัฒนาตัวเอง', sort_order: 2, archived_at: null },
+  { id: 'c4', name: 'General', description: 'เรื่องส่วนตัว สุขภาพ การเงิน นัดหมาย · และของที่ยังไม่รู้ว่าจะจัดไว้ตรงไหน', sort_order: 3, archived_at: null },
   { id: 'c5', name: 'ฝึกงาน', description: 'งานที่บริษัทที่ไปฝึกงาน รายงานและเอกสารของสหกิจ', sort_order: 4, archived_at: null },
   { id: 'c6', name: 'ชมรม', description: 'กิจกรรมชมรมที่เข้าอยู่', sort_order: 5, archived_at: null },
 ]
