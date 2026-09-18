@@ -294,7 +294,8 @@ export default function CallProvider({ children }: { children: React.ReactNode }
       {running && !path.startsWith('/kevin') && (
         <button className="callbar" onClick={() => router.push('/kevin')}>
           <span className="call__dot" />
-          กำลังคุย {mmss(elapsed)}
+          {/* ยังต่อไม่ติดก็ยังต้องมีแถบให้กดกลับ แต่ห้ามโกหกว่าคุยอยู่แล้ว */}
+          {state === 'connecting' ? 'กำลังต่อสาย…' : `กำลังคุย ${mmss(elapsed)}`}
           <span className="callbar__hint">แตะเพื่อกลับ</span>
         </button>
       )}

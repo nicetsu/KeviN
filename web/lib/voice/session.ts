@@ -64,6 +64,13 @@ const WS_BASE =
   'wss://generativelanguage.googleapis.com/ws/' +
   'google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained'
 
+/**
+ * นานสุดที่ยอมให้ค้างอยู่ที่ "กำลังต่อสาย…" ก่อนยอมแพ้แล้วบอกเหตุ
+ *
+ * เผื่อไว้ยาวพอให้คนหาปุ่มอนุญาตไมค์บนป๊อปอัปเจอ แต่ไม่ยาวจนอ่านว่าเครื่องแฮงก์
+ */
+const DIAL_TIMEOUT = 20_000
+
 /** Live API รับ 16 kHz · ตอบกลับ 24 kHz */
 const IN_RATE = 16_000
 const OUT_RATE = 24_000
@@ -129,8 +136,24 @@ export class VoiceCall {
   private model = ''
   private token = ''
 
-  /** เวลาที่เริ่มสายจริง ๆ · **ห้ามรีเซ็ตตอนต่อสายใหม่** */
-  readonly startedAt = Date.now()
+  /*
+   * เวลาที่เริ่มสายจริง ๆ · **ห้ามรีเซ็ตตอนต่อสายใหม่**
+   *
+   * ⚠️ นับตอน **สายติด** ไม่ใช่ตอนกดโทร (แก้ 18 ก.ย. 2026) — ของเดิมตั้งค่า
+   *    ตอน `new Session()` ซึ่งเกิดก่อนขอสิทธิ์ไมค์ · เวลาที่ผู้ใช้ค้างอยู่หน้า
+   *    ป๊อปอัปขอไมค์เลยถูกนับเป็นเวลาคุย และหน้าจอขึ้น "กำลังคุย 00:13"
+   *    ทั้งที่ยังต่อสายไม่ติด (เพื่อนเจอบนเครื่องจริง)
+   *
+   *    ตั้งครั้งเดียวตลอดอายุ session — `ws.onopen` รอบสองของการต่อสายใหม่
+   *    ที่ 15 นาทีจะไม่แตะมันอีก เลขจึงเดินต่อไม่เด้งกลับ 00:00
+   */
+  private started = 0
+  get startedAt(): number {
+    return this.started || Date.now()
+  }
+
+  /** ตัวนับถอยหลังของช่วงต่อสาย · ปลดตอนสายติดหรือตอนวาง */
+  private dialTimer: ReturnType<typeof setTimeout> | null = null
 
   /**
    * ไมค์ที่ใช้อยู่ · `MIC_AUTO` = ให้เบราว์เซอร์เลือกเอง
@@ -152,6 +175,38 @@ export class VoiceCall {
 
   async start(): Promise<void> {
     this.hooks.onState('connecting')
+
+    /*
+     * ⚠️ **เปิด AudioContext ขาออกเป็นบรรทัดแรก ห้ามย้ายลงไปหลัง `await`**
+     *    (แก้ 18 ก.ย. 2026)
+     *
+     *    iOS ให้สิทธิ์ `resume()` เฉพาะในจังหวะที่ยังนับว่าเป็นการกดของผู้ใช้อยู่
+     *    ถ้ารอ `getUserMedia` (ผู้ใช้ต้องกดอนุญาตในป๊อปอัป) จบก่อนค่อย resume
+     *    จังหวะนั้นหมดอายุไปแล้ว · บน iOS promise ของ `resume()` **ไม่ถูก
+     *    resolve และไม่ reject เลย** — `start()` ค้างอยู่ตรงนั้นเงียบ ๆ ไม่มี
+     *    error ไม่มีอะไรบนจอเปลี่ยน ค้างที่ "กำลังต่อสาย…" ตลอดกาล
+     *
+     *    และ **ห้าม `await`** ตัวนี้ด้วยเหตุผลเดียวกัน — เสียงขาออกยังไม่ต้องใช้
+     *    จนกว่า KeviN จะตอบ ซึ่งช้ากว่านี้หลายวินาที
+     */
+    this.outCtx = new AudioContext({ sampleRate: OUT_RATE })
+    void this.outCtx.resume().catch(() => {})
+
+    /*
+     * นาฬิกาจับเวลาต่อสาย — **สายที่ต่อไม่ติดต้องส่งเสียง ไม่ใช่ค้าง**
+     *
+     * ทุกขั้นในนี้ค้างได้โดยไม่ throw: ป๊อปอัปขอไมค์ที่ไม่มีใครกด · WebSocket
+     * ที่จับมือไม่จบ · `addModule` ที่โหลดไฟล์ไม่ลง · ไม่มีอันไหนมี timeout
+     * ในตัวเอง ตัวนี้จึงเป็นด่านสุดท้ายที่ทำให้ "เงียบ" กลายเป็น "บอกเหตุ"
+     */
+    this.dialTimer = setTimeout(() => {
+      if (this.closing || this.started) return
+      this.hooks.onError(
+        'ต่อสายไม่ติดใน 20 วินาที — ถ้าเครื่องถามขออนุญาตใช้ไมค์อยู่ ให้กดอนุญาตแล้วลองใหม่'
+      )
+      void this.stop('')
+    }, DIAL_TIMEOUT)
+
     try {
       await this.openMic()
       await this.connect()
@@ -163,6 +218,7 @@ export class VoiceCall {
 
   async stop(reason = 'วางสายแล้ว'): Promise<void> {
     this.closing = true
+    if (this.dialTimer) { clearTimeout(this.dialTimer); this.dialTimer = null }
     this.stopPlayback()
     try { this.ws?.close() } catch { /* ปิดไปแล้วก็ไม่เป็นไร */ }
     this.ws = null
@@ -205,9 +261,8 @@ export class VoiceCall {
     this.micSource = this.micCtx.createMediaStreamSource(this.stream)
     this.micSource.connect(this.node)
 
-    // AudioContext ต้องเริ่มจาก user gesture — อีกเหตุผลที่หน้าโทรต้องมีปุ่ม "เริ่มโทร"
-    this.outCtx = new AudioContext({ sampleRate: OUT_RATE })
-    await this.outCtx.resume()
+    // AudioContext ขาออกถูกเปิดไปแล้วใน `start()` ตั้งแต่ก่อน await ตัวแรก —
+    // ย้ายกลับมาที่นี่เมื่อไหร่ สายจะค้างที่ "กำลังต่อสาย…" บน iOS อีกรอบ
   }
 
   /**
@@ -269,6 +324,9 @@ export class VoiceCall {
           ...(this.handle ? { sessionResumption: { handle: this.handle } } : {}),
         },
       }))
+      // สายติดแล้ว — ปลดนาฬิกาต่อสาย และเริ่มนับเวลาคุยจากวินาทีนี้
+      if (this.dialTimer) { clearTimeout(this.dialTimer); this.dialTimer = null }
+      if (!this.started) this.started = Date.now()
       this.hooks.onState('listening')
     }
 

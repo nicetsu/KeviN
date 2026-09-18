@@ -107,9 +107,19 @@ export default function VoiceCall() {
 
   return (
     <div className="stage">
-      <div className="call__timer">
-        <span className="call__dot" /> กำลังคุย {mmss(call.elapsed)}
-      </div>
+      {/*
+        ⚠️ **แถบนี้ห้ามขึ้นตอน `connecting`** (แก้ 18 ก.ย. 2026)
+
+        ของเดิมขึ้นทันทีที่ `state !== 'idle'` ซึ่งรวมช่วงต่อสายด้วย · หน้าจอ
+        จึงเถียงกันเอง — ข้างบนบอก "กำลังคุย 00:13" ตรงกลางบอก "กำลังต่อสาย…
+        ขออนุญาตใช้ไมค์" · คนอ่านไม่มีทางรู้ว่าอันไหนจริง และถ้ามันค้าง
+        จะนึกว่าคุยอยู่จริงแล้วนั่งรอเปล่า ๆ
+      */}
+      {call.state !== 'connecting' && (
+        <div className="call__timer">
+          <span className="call__dot" /> กำลังคุย {mmss(call.elapsed)}
+        </div>
+      )}
 
       {/*
         วงเสียง — ตอนเราพูด แท่งขยับตาม **ความดังจริง** ที่ worklet วัดมาให้
