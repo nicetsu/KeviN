@@ -220,8 +220,24 @@ export default function CallProvider({ children }: { children: React.ReactNode }
     await s.start()
   }, [flush, persist, prefs, mic])
 
+  /*
+   * ⚠️ **ปุ่มวางสายต้องพาจอกลับได้เสมอ แม้ไม่มีสายให้วางแล้ว**
+   *
+   * `session.current` เป็น null ได้ทั้งที่จอยังเป็นหน้าโทร — เกิดตอนสายจบไปแล้ว
+   * แต่มี `onState` ตกค้างมาทีหลัง · ของเดิม `?.` กลืนทิ้งเงียบ ๆ แล้วปุ่มกลายเป็น
+   * ปุ่มที่กดแล้วไม่มีอะไรเกิดขึ้น ซึ่งแย่กว่าไม่มีปุ่ม (เจ้าของเจอ 18 ก.ย. 2026)
+   *
+   * ต้นเหตุจริงแก้ที่ `session.ts` แล้ว — ตัวนี้เป็นชั้นสอง เพื่อไม่ให้ทางไหนก็ตาม
+   * ที่เรายังไม่รู้จัก ขังผู้ใช้ไว้ในหน้าโทรได้อีก
+   */
   const hangUp = useCallback(async (reason?: string) => {
-    await session.current?.stop(reason)
+    const s = session.current
+    if (s) { await s.stop(reason); return }
+    setState('idle')
+    setLive(null)
+    setElapsed(0)
+    setLevel(0)
+    setMuted(false)
   }, [])
 
   /**

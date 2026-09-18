@@ -209,14 +209,44 @@ export class VoiceCall {
 
     try {
       await this.openMic()
+      /*
+       * ⚠️ **กดโทรแล้วกดวางสายทันที** — ต้องเช็กทุกครั้งหลัง `await`
+       *    (แก้ 18 ก.ย. 2026 · เจ้าของเจอเอง)
+       *
+       *    `stop()` ที่วิ่งระหว่างรอไมค์ไม่มีอะไรให้ปิดเลย เพราะ `stream`
+       *    กับ `micCtx` ยังไม่เกิด · จอกลับไปหน้าเริ่มต้นเรียบร้อยดี
+       *    แต่ `openMic()` ที่ค้างอยู่ยัง **เดินต่อจนจบ** แล้วไป `connect()`
+       *    ต่อสายจริงสำเร็จ → `onState('listening')` → จอเด้งกลับเข้าหน้าโทรเอง
+       *    ทั้งที่ `CallProvider` ทิ้ง session ตัวนี้ไปแล้ว **ปุ่มวางสายจึงไม่มีผล
+       *    อะไรเลย** กดเท่าไหร่ก็ค้าง — และไมค์เปิดค้างอยู่เบื้องหลังด้วย
+       *
+       *    เรียก `release()` ไม่ใช่ `stop()` — `stop()` ยิง `onEnded` ซ้ำใบที่สอง
+       *    ซึ่งจะพาไปบันทึกประวัติรอบสอง
+       */
+      if (this.closing) return this.release()
       await this.connect()
     } catch (e) {
+      if (this.closing) return this.release()
       this.hooks.onError(micReason(e), e instanceof TokenError && e.quotaOut)
       await this.stop('')
     }
   }
 
   async stop(reason = 'วางสายแล้ว'): Promise<void> {
+    this.closing = true
+    await this.release()
+    // เหตุผลว่าง = ล้มตั้งแต่ยังไม่ได้สาย · onError บอกไปแล้ว ไม่ต้องทับด้วยข้อความกว้าง ๆ
+    this.hooks.onEnded(reason)
+  }
+
+  /**
+   * คืนของทุกชิ้นที่จับไว้ **โดยไม่บอกใคร**
+   *
+   * แยกออกจาก `stop()` เพราะมีเส้นทางที่ต้องเก็บกวาดแต่ห้ามแจ้ง `onEnded`
+   * ซ้ำอีกใบ — คือตอนที่ผู้ใช้วางสายไปแล้วระหว่างที่ `start()` ยังค้างอยู่
+   * เรียกซ้ำได้ ไม่มีชิ้นไหนพังถ้าถูกปิดไปแล้ว
+   */
+  private async release(): Promise<void> {
     this.closing = true
     if (this.dialTimer) { clearTimeout(this.dialTimer); this.dialTimer = null }
     this.stopPlayback()
@@ -225,12 +255,12 @@ export class VoiceCall {
     this.micSource?.disconnect()
     this.micSource = null
     this.node?.disconnect()
+    this.node = null
     this.stream?.getTracks().forEach((t) => t.stop())
+    this.stream = null
     await this.micCtx?.close().catch(() => {})
     await this.outCtx?.close().catch(() => {})
     this.micCtx = this.outCtx = null
-    // เหตุผลว่าง = ล้มตั้งแต่ยังไม่ได้สาย · onError บอกไปแล้ว ไม่ต้องทับด้วยข้อความกว้าง ๆ
-    this.hooks.onEnded(reason)
   }
 
   setMuted(muted: boolean) {
@@ -311,6 +341,8 @@ export class VoiceCall {
 
   private async connect() {
     if (!this.token) await this.token_()
+    // วางสายไประหว่างรอ token — ห้ามเปิด WebSocket ต่อ ไม่งั้นได้สายผีที่ไม่มีใครถืออยู่
+    if (this.closing) return
 
     const ws = new WebSocket(`${WS_BASE}?access_token=${encodeURIComponent(this.token)}`)
     this.ws = ws
